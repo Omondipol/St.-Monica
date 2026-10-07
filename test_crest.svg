@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Top arc: KWAYA YA MTAKATIFU MONICA -->
+    <path id="arcTop" d="M 31.1,63.4 A 78,78 0 0,1 168.9,63.4" fill="none" />
+    <!-- Bottom arc: SEC 58 NAKURU (upright, left to right) -->
+    <path id="arcBot" d="M 33.9,141.3 A 78,78 0 0,0 166.1,141.3" fill="none" />
+  </defs>
+
+  <!-- Background Circle: pure white -->
+  <circle cx="100" cy="100" r="99" fill="#FFFFFF" />
+
+  <!-- Outer Ring -->
+  <circle cx="100" cy="100" r="95" stroke="#0C549F" stroke-width="3" fill="none" />
+
+  <!-- Inner Ring -->
+  <circle cx="100" cy="100" r="67" stroke="#0C549F" stroke-width="1.8" fill="none" />
+
+  <!-- Top Text: KWAYA YA MTAKATIFU MONICA -->
+  <text fill="#0C549F" font-size="12.6" font-weight="900" font-family="system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif" letter-spacing="1.2">
+    <textPath href="#arcTop" startOffset="50%" text-anchor="middle">KWAYA YA MTAKATIFU MONICA</textPath>
+  </text>
+
+  <!-- Left Star (Blue) at approx 9 o clock (178 deg) -->
+  <!-- 5-pointed star at (22, 102.7) -->
+  <polygon points="22,96.5 23.8,101 28.5,101.3 24.8,104.2 26.2,108.8 22,106 17.8,108.8 19.2,104.2 15.5,101.3 20.2,101" fill="#0C549F" />
+
+  <!-- Right Star (Blue) at approx 3 o clock (2 deg) -->
+  <!-- 5-pointed star at (178, 102.7) -->
+  <polygon points="178,96.5 179.8,101 184.5,101.3 180.8,104.2 182.2,108.8 178,106 173.8,108.8 175.2,104.2 171.5,101.3 176.2,101" fill="#0C549F" />
+
+  <!-- Bottom Text: SEC 58 NAKURU -->
+  <text fill="#0C549F" font-size="14.5" font-weight="900" font-family="system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif" letter-spacing="2.4">
+    <textPath href="#arcBot" startOffset="50%" text-anchor="middle">SEC 58 NAKURU</textPath>
+  </text>
+
+  <!-- ==================== CENTER EMBLEM ==================== -->
+  <g id="center-artwork">
+    <!-- St. Monica Profile Silhouette -->
+    <path d="M 104,44
+             C 96,52 86,63 80,70
+             C 75,75 73,78 72,82
+             C 72,84 69,85 68,88
+             C 67,90 70,92 70,95
+             C 70,97 68,99 68,102
+             C 69,105 73,109 76,114
+             C 78,118 80,123 79,127
+             C 75,123 72,118 70,113
+             C 67,106 66,99 67,93
+             C 67,86 71,81 72,77
+             C 75,71 80,63 86,56
+             C 94,47 100,44 104,44 Z"
+          fill="#0C549F" />
+    <!-- Solid mass fill of head profile -->
+    <path d="M 98,48
+             C 90,58 83,69 78,77
+             C 74,83 74,90 75,96
+             C 76,102 73,107 73,112
+             C 74,117 78,122 81,128
+             C 85,120 87,112 88,103
+             C 89,94 91,85 93,76
+             C 95,66 97,56 98,48 Z"
+          fill="#0C549F" />
+
+    <!-- Treble Clef -->
+    <!-- Clef loop -->
+    <path d="M 106,48
+             C 103,58 107,72 113,82
+             C 117,88 120,95 119,102
+             C 118,109 112,114 106,112
+             C 100,110 98,104 101,98
+             C 103,94 108,94 110,97
+             C 112,100 110,104 107,104
+             C 105,104 104,103 104,101"
+          stroke="#0C549F" stroke-width="3.2" stroke-linecap="round" fill="none" />
+    
+    <!-- Clef outer arc down to stem -->
+    <path d="M 106,48
+             C 109,44 113,48 115,54
+             C 119,64 116,78 112,89
+             C 107,100 100,110 101,122
+             C 102,132 108,140 103,147
+             C 99,152 92,150 91,144
+             C 90,138 96,135 99,139"
+          stroke="#0C549F" stroke-width="3.2" stroke-linecap="round" fill="none" />
+
+    <!-- Clef bottom dot -->
+    <circle cx="93" cy="144" r="4.5" fill="#0C549F" />
+
+    <!-- Piano Keyboard sweeping ribbon -->
+    <!-- Upper & lower boundary tracks of the keyboard -->
+    <path d="M 96,66 C 90,84 82,104 83,124 C 84,134 96,141 116,142"
+          stroke="#0C549F" stroke-width="1.8" fill="none" />
+    <path d="M 104,64 C 108,82 112,102 104,122 C 99,134 112,141 120,142"
+          stroke="#0C549F" stroke-width="1.8" fill="none" />
+
+    <!-- Piano Keys (Fine hatching bars) -->
+    <line x1="96" y1="68" x2="104" y2="66" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="93" y1="74" x2="106" y2="73" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="90" y1="80" x2="109" y2="80" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="88" y1="86" x2="112" y2="87" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="86" y1="92" x2="114" y2="94" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="84" y1="98" x2="112" y2="101" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="83" y1="104" x2="105" y2="107" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="83" y1="110" x2="103" y2="113" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="84" y1="116" x2="104" y2="119" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="86" y1="122" x2="105" y2="125" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="89" y1="128" x2="108" y2="130" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="93" y1="133" x2="111" y2="135" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="98" y1="138" x2="114" y2="139" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+    <line x1="104" y1="142" x2="117" y2="142" stroke="#0C549F" stroke-width="2.2" stroke-linecap="round" />
+  </g>
+</svg>
