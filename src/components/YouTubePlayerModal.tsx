@@ -1,6 +1,7 @@
 import React from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { X, ExternalLink, Youtube, Music } from 'lucide-react';
+import { X, ExternalLink, Music } from 'lucide-react';
+import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../data/choirContent';
 
 export const YouTubePlayerModal: React.FC = () => {
@@ -34,7 +35,7 @@ export const YouTubePlayerModal: React.FC = () => {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#14243B]">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center shrink-0 shadow-sm">
-              <Youtube className="w-5 h-5 text-white" />
+              <RealYouTubeIcon size={20} variant="badge" />
             </div>
             <div className="min-w-0">
               <h3 className="font-fraunces text-base sm:text-lg font-bold text-white truncate">
@@ -90,7 +91,7 @@ export const YouTubePlayerModal: React.FC = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-md"
               >
-                <Youtube className="w-4 h-4" />
+                <RealYouTubeIcon size={18} variant="badge" />
                 <span>{lang === 'sw' ? 'Tazama YouTube' : 'Watch on YouTube'}</span>
               </a>
             </div>

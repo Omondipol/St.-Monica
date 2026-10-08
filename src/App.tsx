@@ -29,8 +29,6 @@ import { EventsPage } from './pages/EventsPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 
-import { Youtube, ShieldCheck, ExternalLink, MapPin } from 'lucide-react';
-
 function ChoirApp() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
     if (typeof window !== 'undefined' && window.location.hash === '#admin') {
@@ -52,7 +50,7 @@ function ChoirApp() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#0C2340] flex flex-col font-source pb-14 selection:bg-[#7EC8F0]/40 selection:text-[#0C2340] w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#0C2340] flex flex-col font-source selection:bg-[#7EC8F0]/40 selection:text-[#0C2340] w-full max-w-full overflow-x-hidden">
       
       {/* Grouped Header with Top Utility Ribbon & Dark Bar */}
       <ChoirHeader
@@ -61,7 +59,7 @@ function ChoirApp() {
       />
 
       {/* Main Content Rendered by Route */}
-      <main className={`flex-1 w-full ${currentRoute === 'home' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
+      <main className={`flex-1 w-full pb-20 ${currentRoute === 'home' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
         {currentRoute === 'home' && (
           <HomePage onNavigate={(r) => setCurrentRoute(r)} />
         )}

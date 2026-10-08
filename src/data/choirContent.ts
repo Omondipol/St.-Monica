@@ -22,6 +22,9 @@ export interface Song {
   lyricsSwahili: string[];
   lyricsEnglish: string[];
   waveformPeaks: number[];
+  recordedAt?: string;
+  whyWeSingIt?: string;
+  whyWeSingItSw?: string;
 }
 
 export interface SheetMusicItem {
@@ -137,8 +140,8 @@ export const CHOIR_STATS = {
   feastDay: "27 August",
   feastDaySw: "27 Agosti",
   youtubeHandle: "@KwayayaMtakatifuMonicaSection5",
-  massTimesSunday: "7:00 AM (Dawn), 9:00 AM (Choir High Mass) & 11:00 AM (Youth)",
-  massTimesSundaySw: "Saa 1:00 Asubuhi, Saa 3:00 Asubuhi (Misa Kuu ya Kwaya) & Saa 5:00 Asubuhi",
+  massTimesSunday: "7:00 AM (Dawn), 9:00 AM (Sunday High Mass) & 11:00 AM (Youth)",
+  massTimesSundaySw: "Saa 1:00 Asubuhi, Saa 3:00 Asubuhi (Sunday High Mass) & Saa 5:00 Asubuhi",
   rehearsalSchedule: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
   rehearsalScheduleSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
 };
@@ -149,7 +152,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     id: "song-machozi",
     title: "Machozi ya Imani",
     titleSwahili: "Machozi ya Imani",
-    album: "Nyimbo za Kiliturujia za SEC 58",
+    album: "Nyimbo za Kiliturujia",
     composer: "Atebe Mark T. · Recorded at Khakstudio",
     year: 2024,
     season: "Ordinary Time",
@@ -180,14 +183,17 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "2. Even as Saint Monica wept unceasingly for her son Augustine with motherly tears,",
       "So we bring our supplications and tears before You, anchored in steadfast hope in Christ."
     ],
-    waveformPeaks: [45, 68, 82, 94, 98, 86, 92, 96, 78, 84, 88, 72, 91, 98, 74, 58, 83, 89, 93, 62, 74, 84, 52, 38]
+    waveformPeaks: [45, 68, 82, 94, 98, 86, 92, 96, 78, 84, 88, 72, 91, 98, 74, 58, 83, 89, 93, 62, 74, 84, 52, 38],
+    recordedAt: "Recorded at Khakstudio, Nakuru",
+    whyWeSingIt: "We sing Machozi ya Imani after Holy Communion when the sanctuary is hushed, lifting the hidden sorrows and quiet tears of our parishioners before God with the maternal intercession of Saint Monica.",
+    whyWeSingItSw: "Tunauimba Machozi ya Imani baada ya Komunyo Takatifu kanisa linaponyamaza, tukileta huzuni za siri na machozi ya waamini mbele ya Mungu kwa maombezi ya mama yetu Mtakatifu Monika."
   },
   {
     id: "song-maisha",
     title: "Maisha ya Mwanadamu",
     titleSwahili: "Maisha ya Mwanadamu",
-    album: "Nyimbo za Kiliturujia za SEC 58",
-    composer: "Fr. Jude Waweru · Arr. Polycarp Ochieng",
+    album: "Nyimbo za Kiliturujia",
+    composer: "Fr. Jude Waweru",
     year: 2024,
     season: "Ordinary Time",
     seasonSwahili: "Wakati wa Kawaida / Tafakari",
@@ -215,13 +221,16 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "Refrain: Trust in the Lord with all your heart, and do not lean upon your own understanding; He shall direct your paths.",
       "2. Place all your hope in our heavenly God; He is our fortress rock and saving shield."
     ],
-    waveformPeaks: [30, 55, 45, 75, 85, 65, 80, 90, 70, 50, 85, 65, 80, 90, 55, 40, 65, 80, 85, 45, 60, 75, 40, 25]
+    waveformPeaks: [30, 55, 45, 75, 85, 65, 80, 90, 70, 50, 85, 65, 80, 90, 55, 40, 65, 80, 85, 45, 60, 75, 40, 25],
+    recordedAt: "Recorded at Khakstudio, Nakuru",
+    whyWeSingIt: "This gentle hymn centers our hearts in profound humility, reminding us that earthly trials wither like grass while God's loving counsel remains steadfast.",
+    whyWeSingItSw: "Wimbo huu huleta unyenyekevu mioyoni mwetu, ukitukumbusha kwamba taabu za dunia hunyauka kama majani ilhali shauri na upendo wa Mungu hudumu daima."
   },
   {
     id: "song-nimzima",
     title: "Ni Mzima",
     titleSwahili: "Ni Mzima (Yesu Amefufuka)",
-    album: "Nyimbo za Kiliturujia za SEC 58",
+    album: "Nyimbo za Kiliturujia",
     composer: "Isaack Mwita",
     year: 2024,
     season: "Easter",
@@ -250,14 +259,17 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "2. Let us rejoice with joyful instruments and song; our Savior has risen with sovereign triumph.",
       "He broke the chains of sin and crowned us with eternal life."
     ],
-    waveformPeaks: [50, 75, 70, 95, 100, 90, 95, 100, 85, 75, 95, 85, 90, 95, 75, 55, 85, 90, 95, 65, 80, 90, 55, 35]
+    waveformPeaks: [50, 75, 70, 95, 100, 90, 95, 100, 85, 75, 95, 85, 90, 95, 75, 55, 85, 90, 95, 65, 80, 90, 55, 35],
+    recordedAt: "Recorded at Khakstudio, Nakuru",
+    whyWeSingIt: "We sing Ni Mzima to send the congregation forth into the week with the uncontainable joy of the Resurrection, celebrated with resonant SATB harmony and African percussion.",
+    whyWeSingItSw: "Tunauimba Ni Mzima mwishoni mwa Misa ili kuwapa waamini furaha kuu ya Ufufuko wanapoondoka, tukiambatana na sauti nne na kayamba za kiliturujia."
   },
   {
     id: "song-jumuiya",
     title: "Jumuiya Ndogondogo",
     titleSwahili: "Jumuiya Ndogondogo",
-    album: "Nyimbo za Kiliturujia za SEC 58",
-    composer: "Bernard Mukasa · Arr. Polycarp Ochieng (used with permission)",
+    album: "Nyimbo za Kiliturujia",
+    composer: "Bernard Mukasa",
     year: 2024,
     season: "Ordinary Time",
     seasonSwahili: "Wakati wa Kawaida / Utume",
@@ -287,7 +299,10 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "2. May the Holy Word of God guide our every step and our daily actions.",
       "Let us assist the needy, the sick, and the vulnerable as authentic witnesses of the Gospel."
     ],
-    waveformPeaks: [45, 70, 85, 95, 100, 85, 90, 95, 80, 85, 90, 70, 90, 100, 75, 60, 85, 90, 95, 65, 75, 85, 55, 40]
+    waveformPeaks: [45, 70, 85, 95, 100, 85, 90, 95, 80, 85, 90, 70, 90, 100, 75, 60, 85, 90, 95, 65, 75, 85, 55, 40],
+    recordedAt: "Recorded at Khakstudio, Nakuru",
+    whyWeSingIt: "A signature entrance hymn honoring our Small Christian Communities across Section 58, celebrating our shared fellowship in prayer, visitation, and neighborly charity.",
+    whyWeSingItSw: "Wimbo maalum wa kuingia unaoenzi Jumuiya Ndogondogo zote za Parokia ya Section 58, ukiadhimisha umoja wetu katika sala, huduma na upendo wa dhati."
   }
 ];
 
@@ -298,7 +313,6 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     title: "Machozi ya Imani",
     titleSw: "Machozi ya Imani",
     composer: "Atebe Mark T.",
-    arranger: "Atebe Mark T. (Used with permission)",
     notationType: "Tonic Sol-fa & Staff",
     voicing: "SATB Choral",
     voiceParts: "S, A, T, B",
@@ -307,8 +321,8 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     priceKes: 300,
     priceUsd: 2.50,
     previewBars: "m:s:l | s:f:m | r:d:r | m:-:- || [D Minor Liturgical Setting]",
-    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Atebe Mark T. · Recorded at Khakstudio. Used with permission for Catholic parish use. Instant PDF download with M-Pesa.",
-    descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Atebe Mark T., zimechapishwa kwa idhini ya mtunzi. Lipa kupitia M-Pesa.",
+    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Atebe Mark T. · Recorded at Khakstudio. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Atebe Mark T. Lipa kupitia M-Pesa.",
     downloadUrl: "#download-machozi"
   },
   {
@@ -316,7 +330,6 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     title: "Maisha ya Mwanadamu",
     titleSw: "Maisha ya Mwanadamu",
     composer: "Fr. Jude Waweru",
-    arranger: "Arranged for SATB by Polycarp Ochieng (used with permission)",
     notationType: "Tonic Sol-fa & Staff",
     voicing: "SATB Polyphony",
     voiceParts: "S, A, T, B",
@@ -325,8 +338,8 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     priceKes: 300,
     priceUsd: 2.50,
     previewBars: "l,:d:m | m:r:d | t,:l,:s, | l,:-:- || [E Minor Choral Setting]",
-    description: "Meditation vocal arrangement for Soprano, Alto, Tenor, and Bass (SATB). Composed by Fr. Jude Waweru, arranged by Choirmaster Polycarp Ochieng with dynamics and breath marks. Instant PDF download with M-Pesa.",
-    descriptionSw: "Noti za wimbo wa tafakari uliotungwa na Fr. Jude Waweru, ukapangiliwa kwa sauti nne (SATB) na Mwalimu Polycarp Ochieng. Lipa kupitia M-Pesa.",
+    description: "Meditation vocal arrangement for Soprano, Alto, Tenor, and Bass (SATB). Composed by Fr. Jude Waweru with dynamics and liturgical breath marks. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti za wimbo wa tafakari uliotungwa na Fr. Jude Waweru kwa sauti nne (SATB). Lipa kupitia M-Pesa.",
     downloadUrl: "#download-maisha"
   },
   {
@@ -334,7 +347,6 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     title: "Ni Mzima",
     titleSw: "Ni Mzima",
     composer: "Isaack Mwita",
-    arranger: "Arranged for SATB Choir, St. Monica",
     notationType: "Tonic Sol-fa & Staff",
     voicing: "SATB + Kayamba",
     voiceParts: "S, A, T, B",
@@ -352,7 +364,6 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     title: "Jumuiya Ndogondogo",
     titleSw: "Jumuiya Ndogondogo",
     composer: "Bernard Mukasa",
-    arranger: "Arranged for SATB by Polycarp Ochieng (used with permission)",
     notationType: "Tonic Sol-fa & Staff",
     voicing: "SATB Choral",
     voiceParts: "S, A, T, B",
@@ -361,8 +372,8 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     priceKes: 300,
     priceUsd: 2.50,
     previewBars: "d:m:s | s:s:s | f:m:r | d:-:- || [Tonic Sol-fa & Staff Notation]",
-    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Bernard Mukasa, arranged for SATB by Choirmaster Polycarp Ochieng, used with permission. Instant PDF download with M-Pesa.",
-    descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Bernard Mukasa, mpangilio wa sauti nne na Mwalimu Polycarp Ochieng. Lipa kupitia M-Pesa.",
+    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Bernard Mukasa for SATB choir. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Bernard Mukasa. Lipa kupitia M-Pesa.",
     downloadUrl: "#download-jumuiya"
   }
 ];
@@ -370,13 +381,13 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
 export const INITIAL_ALBUMS: Album[] = [
   {
     id: "album-sec58",
-    title: "Nyimbo za Kiliturujia za SEC 58, Nakuru",
+    title: "Nyimbo za Kiliturujia",
     releaseYear: 2024,
     trackCount: 4,
     coverImage: "choir_singing_moment",
     priceKes: 500,
-    description: "The official master recording collection from St. Monica Catholic Choir, Section 58 Parish Nakuru, recorded with Khakstudio Production and parish audio engineers.",
-    descriptionSw: "Mkusanyiko rasmi wa nyimbo za kiliturujia kutoka Kwaya ya Mtakatifu Monica, Parokia ya Section 58 Nakuru, zilizorekodiwa rasmi kwa ajili ya utukufu wa Mungu.",
+    description: "The official master recording collection from St. Monica Catholic Choir, recorded with Khakstudio Production and parish audio engineers.",
+    descriptionSw: "Mkusanyiko rasmi wa nyimbo za kiliturujia kutoka Kwaya ya Mtakatifu Monica, zilizorekodiwa rasmi kwa ajili ya utukufu wa Mungu.",
     youtubePlaylistUrl: YOUTUBE_CHANNEL_URL,
     songs: ["Machozi ya Imani", "Maisha ya Mwanadamu", "Ni Mzima", "Jumuiya Ndogondogo"]
   }
@@ -385,14 +396,14 @@ export const INITIAL_ALBUMS: Album[] = [
 export const INITIAL_LEADERS: ChoirLeader[] = [
   {
     id: "ldr-choirmaster",
-    name: "Polycarp Ochieng",
-    role: "Director of Music & Choirmaster",
-    roleSw: "Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya",
+    name: "The Choir Leadership",
+    role: "Music Leadership & Directorship",
+    roleSw: "Uongozi wa Muziki na Kwaya",
     category: "trainer",
     responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and prepares Sunday High Masses.",
     responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na maandalizi ya Misa Kuu ya Jumapili.",
-    tenure: "Serving since 2012",
-    tenureSw: "Anahudumu tangu 2012"
+    tenure: "Serving the Parish",
+    tenureSw: "Wanahudumu Parokiani"
   },
   {
     id: "ldr-asst-choirmaster",
@@ -454,8 +465,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
 export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
   {
     id: "grp-vestment",
-    title: "Kwaya Nzima ya Mtakatifu Monica (Section 58 Nakuru)",
-    titleSw: "Kwaya Nzima ya Mtakatifu Monica (Section 58 Nakuru)",
+    title: "Kwaya Nzima ya Mtakatifu Monica",
+    titleSw: "Kwaya Nzima ya Mtakatifu Monica",
     description: "The entire chorister ensemble of St. Monica Choir gathered at the altar of Section 58 Parish after Sunday High Mass.",
     descriptionSw: "Wanakwaya wote wa Mtakatifu Monica wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa Kuu ya Jumapili.",
     year: "2024",
@@ -490,13 +501,13 @@ export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
 export const INITIAL_PRODUCTS: ProductItem[] = [
   {
     id: "prod-album-master",
-    name: "Nyimbo za Kiliturujia za SEC 58 (Full Album MP3)",
-    nameSw: "Albamu Kamili ya Nyimbo za SEC 58 (MP3)",
+    name: "Nyimbo za Kiliturujia (Full Album MP3)",
+    nameSw: "Albamu ya Nyimbo za Kiliturujia (MP3)",
     type: "digital_album",
     priceKes: 500,
     priceUsd: 4.00,
     description: "High-definition master digital album containing all 4 authentic choral releases with full digital booklet and lyrics. Pay with M-Pesa.",
-    descriptionSw: "Albamu kamili ya dijitali yenye nyimbo zote nne za Kwaya ya Mtakatifu Monica Section 58 pamoja na kijitabu cha maneno. Lipa kupitia M-Pesa.",
+    descriptionSw: "Albamu kamili ya dijitali yenye nyimbo zote nne za Kwaya ya Mtakatifu Monica pamoja na kijitabu cha maneno. Lipa kupitia M-Pesa.",
     image: "choir_singing_moment",
     badge: "Official Album",
     downloadable: true
@@ -508,7 +519,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
     type: "sheet_music",
     priceKes: 1000,
     priceUsd: 8.00,
-    description: "Complete printable PDF booklet with Tonic Sol-fa and Staff Notation for all 4 hymns. Formatted for choir directors with permission for parish use. Pay with M-Pesa.",
+    description: "Complete printable PDF booklet with Tonic Sol-fa and Staff Notation for all 4 hymns. Formatted for choir directors for parish use. Pay with M-Pesa.",
     descriptionSw: "Kitini kamili cha noti za PDF chenye solfa na stafu kwa nyimbo zote 4 kwa ajili ya walimu wa kwaya. Lipa kupitia M-Pesa.",
     image: "sheet_music_hymnal",
     badge: "Save KES 200",
@@ -519,8 +530,8 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 export const INITIAL_EVENTS: EventItem[] = [
   {
     id: "evt-sunday-mass",
-    title: "Sunday Choir High Mass",
-    titleSw: "Misa Kuu ya Pili ya Jumapili",
+    title: "Sunday High Mass",
+    titleSw: "Misa Kuu ya Jumapili (Sunday High Mass)",
     dateDay: "Sun",
     dateMonth: "Every",
     fullDate: "Kila Jumapili / Every Sunday",

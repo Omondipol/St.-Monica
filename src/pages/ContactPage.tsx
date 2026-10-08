@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, Youtube, ExternalLink, MessageCircle, AlertCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, ExternalLink, MessageCircle, AlertCircle } from 'lucide-react';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, CHOIR_STATS } from '../data/choirContent';
 
 export const ContactPage: React.FC = () => {

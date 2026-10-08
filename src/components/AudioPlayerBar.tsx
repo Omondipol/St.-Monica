@@ -15,12 +15,12 @@ import {
   Minimize2, 
   Volume2, 
   VolumeX, 
-  Youtube, 
   Sparkles, 
   ChevronUp, 
   ChevronDown 
 } from 'lucide-react';
 import { ChoirLogo } from './ChoirLogo';
+import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 export const AudioPlayerBar: React.FC = () => {
@@ -94,17 +94,32 @@ export const AudioPlayerBar: React.FC = () => {
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
   }, []);
 
+  // Automatically minimize player when user scrolls down on any page
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY + 20 && currentScrollY > 70) {
+        setIsPlayerMinimized(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setIsPlayerMinimized]);
+
   const formattedCurrentTime = formatTime(currentTimeSeconds);
   const formattedTotalTime = formatTime(totalDurationSeconds);
 
   return (
     <aside 
       aria-label="Liturgical Audio Player"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#09121F]/98 backdrop-blur-2xl text-white border-t border-sky-400/20 shadow-none transition-all duration-300"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[#09121F]/98 backdrop-blur-2xl text-white border-t border-black/60 shadow-none transition-all duration-300"
     >
-      {/* Top Edge Slim Progress Line (visible across full width) */}
+      {/* Top Edge Slim Progress Line (seamless dark track without white line) */}
       <div 
-        className="w-full h-1 bg-white/10 relative cursor-pointer group"
+        className="w-full h-1 bg-[#09121F] relative cursor-pointer group"
         onClick={e => {
           const rect = e.currentTarget.getBoundingClientRect();
           const percent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -360,7 +375,7 @@ export const AudioPlayerBar: React.FC = () => {
                 }`}
                 title={showVideoScreen ? "Hide video screen" : "Show official recording video"}
               >
-                <Youtube className="w-3.5 h-3.5 text-red-400" />
+                <RealYouTubeIcon size={16} variant="badge" />
                 <span className="hidden md:inline">{showVideoScreen ? 'Hide Video' : 'Video'}</span>
               </button>
 

@@ -13,13 +13,13 @@ import {
   Volume2, 
   VolumeX, 
   ShoppingCart, 
-  Youtube, 
   Music, 
   Sparkles, 
   Share2, 
   Check, 
   ExternalLink 
 } from 'lucide-react';
+import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
@@ -164,7 +164,7 @@ export const NowPlayingModal: React.FC = () => {
                   onClick={() => setIsYoutubeModalOpen(true)}
                   className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-red-600/30 hover:bg-red-600/60 border border-red-500/40 flex items-center gap-2 transition-all cursor-pointer shadow-sm"
                 >
-                  <Youtube className="w-4 h-4 text-red-400" />
+                  <RealYouTubeIcon size={18} variant="badge" />
                   <span>{lang === 'sw' ? 'Tazama Video Rasmi' : 'Watch Official Video'}</span>
                 </button>
 

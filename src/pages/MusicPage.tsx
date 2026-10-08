@@ -8,11 +8,16 @@ import {
   ShoppingBag, 
   Search, 
   Music,
-  Youtube,
   ExternalLink,
   Download,
   Filter
 } from 'lucide-react';
+import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
+
+import scorePreviewMachozi from '../assets/images/score_preview_machozi_1791446357129.jpg';
+import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372899.jpg';
+import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
+import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
 
 export const MusicPage: React.FC = () => {
   const { 
@@ -51,6 +56,14 @@ export const MusicPage: React.FC = () => {
     return matchesSearch;
   });
 
+  const getScoreImage = (id: string) => {
+    if (id.includes('machozi')) return scorePreviewMachozi;
+    if (id.includes('maisha')) return scorePreviewMaisha;
+    if (id.includes('nimzima')) return scorePreviewNimzima;
+    if (id.includes('jumuiya')) return scorePreviewJumuiya;
+    return scorePreviewMachozi;
+  };
+
   return (
     <div className="space-y-12">
       
@@ -79,7 +92,7 @@ export const MusicPage: React.FC = () => {
             rel="noopener noreferrer"
             className="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors cursor-pointer shrink-0 shadow-xs flex items-center gap-2"
           >
-            <Youtube className="w-4 h-4 fill-current" />
+            <RealYouTubeIcon size={18} variant="badge" />
             <span>{lang === 'sw' ? 'Kituo cha YouTube' : 'Official YouTube'}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -243,9 +256,9 @@ export const MusicPage: React.FC = () => {
                     href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1.5 text-xs font-bold text-red-600 hover:text-white hover:bg-red-600 border border-red-200 rounded-lg cursor-pointer flex items-center gap-1 transition-colors"
+                    className="px-3 py-1.5 text-xs font-bold text-red-600 hover:text-white hover:bg-red-600 border border-red-200 rounded-lg cursor-pointer flex items-center gap-1.5 transition-colors group"
                   >
-                    <Youtube className="w-3.5 h-3.5 fill-current" />
+                    <RealYouTubeIcon size={16} variant="badge" />
                     <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube'}</span>
                   </a>
 
@@ -291,44 +304,58 @@ export const MusicPage: React.FC = () => {
 
       {/* TAB 2: SHEET MUSIC & NOTES ON SALE */}
       {activeTab === 'sheet_music' && (
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredSheetMusic.map((item) => (
             <div
               key={item.id}
-              className="p-6 bg-white border border-[#0C2340]/10 rounded-2xl hover:border-[#1058A8] transition-all shadow-xs flex flex-col justify-between space-y-4"
+              className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl hover:border-[#1058A8] transition-all shadow-xs flex flex-col justify-between space-y-3"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold font-source bg-[#EAF4FB] text-[#1058A8] px-2.5 py-0.5 rounded uppercase">
-                    {item.notationType}
-                  </span>
-                  <span className="font-fraunces font-bold text-lg text-[#1058A8]">
-                    KES {item.priceKes}
-                  </span>
+                {/* Score Preview Image: top half of page one with faint PREVIEW mark */}
+                <div className="w-full h-40 rounded-xl overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group">
+                  <img
+                    src={getScoreImage(item.id)}
+                    alt={`${item.title} Score Preview`}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
 
-                <h3 className="font-fraunces text-lg font-bold text-[#0C2340] leading-snug">
-                  {lang === 'sw' ? item.titleSw : item.title}
-                </h3>
+                {/* Song name ONLY as the title */}
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-fraunces text-base font-bold text-[#0C2340] leading-snug">
+                    {lang === 'sw' ? item.titleSw : item.title}
+                  </h3>
+                  <span className="text-[10px] font-bold bg-[#EAF4FB] text-[#1058A8] px-1.5 py-0.5 rounded shrink-0">
+                    SATB
+                  </span>
+                </div>
 
                 <p className="text-xs text-slate-700 font-source">
                   {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-slate-900">{item.composer}</strong>
                 </p>
 
                 <p className="text-[11px] text-slate-600 font-source">
-                  Soprano · Alto · Tenor · Bass (SATB)
+                  Soprano · Alto · Tenor · Bass
                 </p>
 
-                <p className="text-xs text-slate-700 font-source leading-relaxed">
+                <p className="text-xs text-slate-600 font-source leading-relaxed line-clamp-2">
                   {lang === 'sw' ? item.descriptionSw : item.description}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-between">
-                <span className="text-xs text-emerald-700 font-bold font-source flex items-center gap-1">
-                  <span>Lipa na M-Pesa</span>
-                </span>
+              <div className="pt-3 border-t border-[#0C2340]/10 space-y-2.5">
+                {/* Price with small M-Pesa logo beside it */}
+                <div className="flex items-center gap-1.5">
+                  <span className="font-fraunces font-bold text-base text-[#1058A8]">
+                    KES {item.priceKes}
+                  </span>
+                  <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded tracking-wider shadow-2xs">
+                    M-PESA
+                  </span>
+                </div>
 
+                {/* Clean Buy Score button */}
                 <button
                   onClick={() => addToCart({
                     id: `prod-${item.id}`,
@@ -342,10 +369,10 @@ export const MusicPage: React.FC = () => {
                     image: 'sheet_music_hymnal',
                     downloadable: true
                   })}
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  className="w-full py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>{lang === 'sw' ? `Nunua Noti (${formatPrice(item.priceKes)})` : `Buy Score (${formatPrice(item.priceKes)})`}</span>
+                  <span>{lang === 'sw' ? 'Nunua Noti' : 'Buy Score'}</span>
                 </button>
               </div>
             </div>

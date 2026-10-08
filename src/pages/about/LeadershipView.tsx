@@ -2,6 +2,8 @@ import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { Users, Mail, Award, Music, ShieldCheck } from 'lucide-react';
 import { ChoirLogo } from '../../components/ChoirLogo';
+import choirGroupImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
+import choirmasterImg from '../../assets/images/choirmaster_polycarp_ochieng_1791446339605.jpg';
 
 export const LeadershipView: React.FC = () => {
   const { lang, leadersList } = useChoir();
@@ -53,9 +55,17 @@ export const LeadershipView: React.FC = () => {
           {trainers.map((trainer) => (
             <div key={trainer.id} className="p-6 sm:p-8 bg-white border border-[#0C2340]/10 rounded-2xl space-y-4 shadow-xs hover:border-[#1058A8]/40 transition-colors">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#EAF4FB] border border-[#7EC8F0]/40 flex items-center justify-center text-[#1058A8] font-fraunces font-bold text-xl shrink-0">
-                  {trainer.name.split(' ').slice(-1)[0][0]}
-                </div>
+                {trainer.id === 'ldr-choirmaster' ? (
+                  <img
+                    src={choirmasterImg}
+                    alt={trainer.name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#1058A8] shadow-xs shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-[#EAF4FB] border border-[#7EC8F0]/40 flex items-center justify-center text-[#1058A8] font-fraunces font-bold text-xl shrink-0">
+                    {trainer.name.split(' ').slice(-1)[0][0]}
+                  </div>
+                )}
                 <div>
                   <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">{trainer.name}</h3>
                   <span className="text-xs font-bold text-[#1058A8] block mt-0.5">

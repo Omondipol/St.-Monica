@@ -3,7 +3,7 @@ import { useChoir } from '../../context/ChoirContext';
 import { CHOIR_STATS } from '../../data/choirContent';
 import { BookOpen, Calendar, MapPin, Award } from 'lucide-react';
 
-import churchImg from '../../assets/images/nakuru_parish_cathedral_1791356761479.jpg';
+import churchImg from '../../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
 import { ChoirLogo } from '../../components/ChoirLogo';
 
@@ -13,7 +13,7 @@ export const OurStoryView: React.FC = () => {
   const timeline = [
     {
       year: "2012",
-      title: lang === 'sw' ? "Kuanzishwa kwa Kwaya SEC 58" : "Founding of SEC 58 Choir",
+      title: lang === 'sw' ? "Kuanzishwa kwa Kwaya ya Mt. Monica" : "Founding of St. Monica Choir",
       desc: lang === 'sw' 
         ? "Kwaya ilianza na waimbaji 14 waanzilishi wakati Parokia ya Mtakatifu Monica ilipowekwa wakfu na Jimbo Katoliki la Nakuru."
         : "The choir began with fourteen pioneer choristers when St. Monica Parish was consecrated in the Catholic Diocese of Nakuru."
@@ -27,10 +27,10 @@ export const OurStoryView: React.FC = () => {
     },
     {
       year: "2021",
-      title: lang === 'sw' ? "Albamu ya Kwanza: Sauti za SEC 58" : "Debut Album: Voices of SEC 58",
+      title: lang === 'sw' ? "Albamu ya Kwanza: Nyimbo za Kiliturujia" : "Debut Album: Liturgical Hymns",
       desc: lang === 'sw'
-        ? "Kurekodiwa na kusambazwa kwa santuri ya kwanza ya kwaya yenye nyimbo 14 za kikatoliki za kiswahili."
-        : "Studio recording and distribution of the choir's first album featuring fourteen Kiswahili Catholic choral hymns."
+        ? "Kurekodiwa na kusambazwa kwa santuri ya kwanza ya kwaya yenye nyimbo za kikatoliki za kiswahili."
+        : "Studio recording and distribution of the choir's first album featuring Kiswahili Catholic choral hymns."
     },
     {
       year: "2024",
@@ -93,8 +93,8 @@ export const OurStoryView: React.FC = () => {
           </p>
           <p>
             {lang === 'sw'
-              ? 'Chini ya uongozi wa Mwalimu Polycarp Ochieng na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.'
-              : 'Under the guidance of Choirmaster Polycarp Ochieng and the pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.'}
+              ? 'Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.'
+              : 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.'}
           </p>
 
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#0C2340]/10 text-center">

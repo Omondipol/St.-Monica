@@ -51,8 +51,8 @@ export const EventsPage: React.FC = () => {
 
         <p className="text-base sm:text-lg text-slate-700 font-source leading-relaxed max-w-3xl">
           {lang === 'sw'
-            ? 'Ungana nasi katika Misa Kuu za Jumapili (Saa 3:00 Asubuhi), mazoezi ya kwaya (Jumatano na Ijumaa Saa 11:30 Jioni – Saa 1:30 Usiku), na Sikukuu ya Somo: Mtakatifu Monika (27 Agosti 2027).'
-            : 'Join our choir in prayerful worship during Sunday Choir High Mass (9:00 AM), weekly choir rehearsals (Wednesdays & Fridays, 5:30 PM – 7:30 PM), and the Feast of Saint Monica (27 August 2027).'}
+            ? 'Ungana nasi katika Sunday High Mass (Saa 3:00 Asubuhi), mazoezi ya kwaya (Jumatano na Ijumaa Saa 11:30 Jioni – Saa 1:30 Usiku), na Sikukuu ya Somo: Mtakatifu Monika (27 Agosti 2027).'
+            : 'Join our choir in prayerful worship during Sunday High Mass (9:00 AM), weekly choir rehearsals (Wednesdays & Fridays, 5:30 PM – 7:30 PM), and the Feast of Saint Monica (27 August 2027).'}
         </p>
       </section>
 

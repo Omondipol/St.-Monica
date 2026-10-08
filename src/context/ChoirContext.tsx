@@ -89,7 +89,7 @@ interface ChoirContextType {
   isYoutubeModalOpen: boolean;
   setIsYoutubeModalOpen: (open: boolean) => void;
   isIntroCutoffOpen: boolean;
-  dismissIntroCutoff: () => void;
+  dismissIntroCutoff: (andPlay?: boolean) => void;
 
   // Liturgical Season
   liturgicalSeason: 'ordinary' | 'lent_advent' | 'easter_christmas';
@@ -316,9 +316,30 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [showVideoScreen, setShowVideoScreen] = useState<boolean>(false);
   const [isIntroCutoffOpen, setIsIntroCutoffOpen] = useState<boolean>(false);
   const hasTriggeredCutoffRef = useRef<{ [songId: string]: boolean }>({});
+  const hasDismissedCutoffRef = useRef<{ [songId: string]: boolean }>({});
 
-  const dismissIntroCutoff = () => {
+  const dismissIntroCutoff = (andPlay: boolean = false) => {
     setIsIntroCutoffOpen(false);
+    // Mark as dismissed for this visit so the visitor is never interrupted again for this song
+    hasDismissedCutoffRef.current[currentSong.id] = true;
+    hasTriggeredCutoffRef.current[currentSong.id] = true;
+
+    // Reset position to start so pressing play or replaying begins at 0:00 without getting stuck
+    if (currentTimeSeconds >= 39) {
+      setCurrentTimeSeconds(0);
+      setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+      }
+    }
+
+    if (andPlay) {
+      setIsPlaying(true);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+    }
   };
 
   const syncFromYouTube = (curTime: number, dur: number, playingState: boolean) => {
@@ -327,12 +348,18 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setDurationFromAudio(dur);
     }
     
-    // 40-second intro limit: silently pause and show creative YouTube / 100 KES support modal
-    if (curTime >= 40 && playingState && !hasTriggeredCutoffRef.current[currentSong.id]) {
-      hasTriggeredCutoffRef.current[currentSong.id] = true;
-      setIsPlaying(false);
-      setIsIntroCutoffOpen(true);
-      return;
+    // 40-second intro limit: softly pause and show modal ONLY ONCE per visit for that song
+    if (curTime >= 40 && playingState) {
+      if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+        hasTriggeredCutoffRef.current[currentSong.id] = true;
+        setIsPlaying(false);
+        setIsIntroCutoffOpen(true);
+        return;
+      } else if (hasDismissedCutoffRef.current[currentSong.id]) {
+        // Visitor dismissed it earlier: quietly pause at preview end without popping up again
+        setIsPlaying(false);
+        return;
+      }
     }
 
     setIsPlaying(playingState);
@@ -354,11 +381,16 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const onTimeUpdate = () => {
       setCurrentTimeSeconds(audio.currentTime);
       // 40-second intro limit for HTML5 audio
-      if (audio.currentTime >= 40 && !audio.paused && !hasTriggeredCutoffRef.current[currentSong.id]) {
-        hasTriggeredCutoffRef.current[currentSong.id] = true;
-        audio.pause();
-        setIsPlaying(false);
-        setIsIntroCutoffOpen(true);
+      if (audio.currentTime >= 40 && !audio.paused) {
+        if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+          hasTriggeredCutoffRef.current[currentSong.id] = true;
+          audio.pause();
+          setIsPlaying(false);
+          setIsIntroCutoffOpen(true);
+        } else if (hasDismissedCutoffRef.current[currentSong.id]) {
+          audio.pause();
+          setIsPlaying(false);
+        }
       }
     };
 
@@ -406,19 +438,39 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Real Play Song (Drives authentic YouTube song audio)
   const playSong = (song: Song) => {
-    hasTriggeredCutoffRef.current[song.id] = false;
     setIsIntroCutoffOpen(false);
     setCurrentSong(song);
+    setCurrentTimeSeconds(0);
+    setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = song.audioPreviewUrl;
+      audioRef.current.play().catch(() => {});
+    }
     setIsPlaying(true);
     setIsPlayerMinimized(false);
   };
 
-  // Real Toggle Play/Pause
+  // Real Toggle Play/Pause (rewinds to 0 if at cutoff so clicking Play always plays)
   const togglePlay = () => {
     setIsPlaying(prev => {
       const next = !prev;
       if (next) {
         setIsPlayerMinimized(false);
+        if (currentTimeSeconds >= 39) {
+          setCurrentTimeSeconds(0);
+          setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+          }
+        }
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
+      } else {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
       }
       return next;
     });

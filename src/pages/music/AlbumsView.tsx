@@ -1,7 +1,8 @@
 import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { INITIAL_ALBUMS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../../data/choirContent';
-import { Music, Play, ShoppingBag, Youtube, ExternalLink } from 'lucide-react';
+import { Music, Play, ShoppingBag, ExternalLink } from 'lucide-react';
+import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
 import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
 import cathedralImg from '../../assets/images/nakuru_parish_cathedral_1791356761479.jpg';
 import hymnalImg from '../../assets/images/sheet_music_hymnal_1791356751097.jpg';
@@ -41,7 +42,7 @@ export const AlbumsView: React.FC = () => {
             rel="noopener noreferrer"
             className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl flex items-center gap-2 shadow-xs transition-colors self-start sm:self-center"
           >
-            <Youtube className="w-4 h-4 fill-current" />
+            <RealYouTubeIcon size={18} variant="badge" />
             <span>YouTube: {YOUTUBE_CHANNEL_HANDLE}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>

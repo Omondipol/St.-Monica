@@ -3,11 +3,43 @@ import { useChoir } from '../context/ChoirContext';
 import { ProductItem } from '../data/choirContent';
 import { ShoppingBag, Download, Truck, ShieldCheck, Music, FileText } from 'lucide-react';
 
+import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
+import scorePreviewMachozi from '../assets/images/score_preview_machozi_1791446357129.jpg';
+import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372899.jpg';
+import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
+import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
+
 export const ShopPage: React.FC = () => {
-  const { lang, currency, setCurrency, formatPrice, addToCart, productsList } = useChoir();
+  const { lang, currency, setCurrency, formatPrice, addToCart, productsList, sheetMusicList } = useChoir();
   const [filterType, setFilterType] = useState<string>('all');
 
-  const filteredProducts = productsList.filter((p) => {
+  const getScoreImage = (id: string) => {
+    if (id.includes('machozi')) return scorePreviewMachozi;
+    if (id.includes('maisha')) return scorePreviewMaisha;
+    if (id.includes('nimzima')) return scorePreviewNimzima;
+    if (id.includes('jumuiya')) return scorePreviewJumuiya;
+    return scorePreviewMachozi;
+  };
+
+  // Build shop items combining the 4 individual SATB scores and special packages
+  const sheetMusicProducts: ProductItem[] = sheetMusicList.map((item) => ({
+    id: `prod-${item.id}`,
+    name: item.title,
+    nameSw: item.titleSw,
+    type: 'sheet_music',
+    priceKes: item.priceKes,
+    priceUsd: item.priceUsd,
+    description: item.description,
+    descriptionSw: item.descriptionSw,
+    image: item.id,
+    badge: 'SATB Score',
+    downloadable: true
+  }));
+
+  const allDisplayItems = [...sheetMusicProducts, ...productsList];
+
+  const filteredProducts = allDisplayItems.filter((p) => {
     if (filterType === 'all') return true;
     if (filterType === 'sheet_music') return p.type === 'sheet_music';
     if (filterType === 'recordings') return p.type === 'digital_album' || p.type === 'usb' || p.type === 'physical_cd';
@@ -29,8 +61,8 @@ export const ShopPage: React.FC = () => {
 
         <p className="text-base sm:text-lg text-[#0C2340]/80 font-source leading-relaxed max-w-3xl">
           {lang === 'sw'
-            ? 'Nunua noti za sauti nne (SATB) zenye solfa na stafu kwa muundo wa PDF kwa ajili ya kufundisha kwaya yako, au kadi za USB zenye nyimbo za studio za SEC 58 Nakuru.'
-            : 'Purchase official SATB vocal sheet music scores with tonic sol-fa and staff notation for your choir, or collector USB cards with recorded master tracks from Section 58 Nakuru.'}
+            ? 'Nunua noti za sauti nne (SATB) zenye solfa na stafu kwa muundo wa PDF kwa ajili ya kufundisha kwaya yako, au kadi za USB zenye nyimbo za studio za Kwaya ya Mtakatifu Monica Nakuru.'
+            : 'Purchase official SATB vocal sheet music scores with tonic sol-fa and staff notation for your choir, or collector USB cards with recorded master tracks from St. Monica Choir Nakuru.'}
         </p>
 
         {/* 5-line music-stave divider */}
@@ -110,59 +142,90 @@ export const ShopPage: React.FC = () => {
 
       {/* Products Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((prod) => (
-          <div
-            key={prod.id}
-            className="p-6 bg-white border border-[#0C2340]/10 rounded-2xl hover:border-[#1058A8] transition-all flex flex-col justify-between space-y-4 shadow-xs group"
-          >
-            <div className="space-y-3">
-              <div className="aspect-square rounded-xl bg-[#EAF4FB] border border-[#7EC8F0]/30 flex items-center justify-center p-6 relative overflow-hidden">
-                {prod.type === 'sheet_music' ? (
-                  <FileText className="w-16 h-16 text-[#1058A8] group-hover:scale-105 transition-transform" />
-                ) : (
-                  <ShoppingBag className="w-16 h-16 text-[#1058A8] group-hover:scale-105 transition-transform" />
-                )}
-                {prod.badge && (
-                  <span className="absolute top-3 left-3 bg-[#1058A8] text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded shadow-2xs font-source">
-                    {prod.badge}
-                  </span>
-                )}
-                {prod.downloadable && (
-                  <span className="absolute bottom-3 right-3 bg-[#0C2340] text-white text-[11px] font-source px-2 py-0.5 rounded flex items-center gap-1">
-                    <Download className="w-3 h-3 text-[#7EC8F0]" />
-                    <span>Instant PDF/MP3</span>
-                  </span>
-                )}
+        {filteredProducts.map((prod) => {
+          const isScore = prod.type === 'sheet_music' && !prod.id.includes('bundle');
+          const previewImg = isScore 
+            ? getScoreImage(prod.id)
+            : prod.id.includes('bundle')
+              ? sheetMusicHymnalImg
+              : choirHeroImg;
+
+          return (
+            <div
+              key={prod.id}
+              className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl hover:border-[#1058A8] transition-all flex flex-col justify-between space-y-4 shadow-xs group"
+            >
+              <div className="space-y-3">
+                {/* Visual Preview Image */}
+                <div className="w-full h-44 rounded-xl overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group">
+                  <img
+                    src={previewImg}
+                    alt={prod.name}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                  {prod.badge && (
+                    <span className="absolute top-2.5 left-2.5 bg-[#1058A8] text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded shadow-2xs font-source">
+                      {prod.badge}
+                    </span>
+                  )}
+                  {prod.downloadable && (
+                    <span className="absolute bottom-2.5 right-2.5 bg-[#0C2340]/90 text-white text-[10px] font-source px-2 py-0.5 rounded flex items-center gap-1 backdrop-blur-xs">
+                      <Download className="w-3 h-3 text-[#7EC8F0]" />
+                      <span>Instant PDF</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Title and details */}
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-fraunces text-base sm:text-lg font-bold text-[#0C2340] leading-snug">
+                      {lang === 'sw' ? prod.nameSw : prod.name}
+                    </h3>
+                    {isScore && (
+                      <span className="text-[10px] font-bold bg-[#EAF4FB] text-[#1058A8] px-1.5 py-0.5 rounded shrink-0">
+                        SATB
+                      </span>
+                    )}
+                  </div>
+                  {isScore && (
+                    <p className="text-[11px] text-slate-600 font-source mt-0.5">
+                      Soprano · Alto · Tenor · Bass
+                    </p>
+                  )}
+                  <p className="text-xs text-[#0C2340]/75 font-source mt-1.5 leading-relaxed line-clamp-2">
+                    {lang === 'sw' ? prod.descriptionSw : prod.description}
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-fraunces text-lg sm:text-xl font-bold text-[#0C2340] leading-snug">
-                  {lang === 'sw' ? prod.nameSw : prod.name}
-                </h3>
-                <p className="text-xs text-[#0C2340]/75 font-source mt-1 leading-relaxed">
-                  {lang === 'sw' ? prod.descriptionSw : prod.description}
-                </p>
+              <div className="pt-3 border-t border-[#0C2340]/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-[#0C2340]/50 block">{lang === 'sw' ? 'Bei' : 'Price'}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="tabular-numbers text-lg font-bold font-fraunces text-[#1058A8]">
+                        {formatPrice(prod.priceKes)}
+                      </span>
+                      <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded tracking-wider shadow-2xs">
+                        M-PESA
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => addToCart(prod)}
+                  className="w-full py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>{isScore ? (lang === 'sw' ? 'Nunua Noti' : 'Buy Score') : (lang === 'sw' ? 'Nunua' : 'Add to Cart')}</span>
+                </button>
               </div>
             </div>
-
-            <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-[#0C2340]/50 block">{lang === 'sw' ? 'Bei ya Noti' : 'Price'}</span>
-                <span className="tabular-numbers text-xl font-bold font-fraunces text-[#1058A8]">
-                  {formatPrice(prod.priceKes)}
-                </span>
-              </div>
-
-              <button
-                onClick={() => addToCart(prod)}
-                className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
-              >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>{lang === 'sw' ? 'Nunua' : 'Add to Cart'}</span>
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       {/* Delivery & Security Assurance Banner */}
@@ -186,8 +249,8 @@ export const ShopPage: React.FC = () => {
           </div>
           <p className="text-[#0C2340]/70 leading-relaxed">
             {lang === 'sw'
-              ? 'Chukua kadi ya USB parokiani SEC 58 wakati wa mazoezi au Misa ya Jumapili, au usafirishaji wa haraka kote Nakuru na Kenya.'
-              : 'Pick up collector USB cards at St. Monica Parish SEC 58 during choir rehearsals, or convenient courier dispatch across Kenya.'}
+              ? 'Chukua kadi ya USB parokiani wakati wa mazoezi au Misa ya Jumapili, au usafirishaji wa haraka kote Nakuru na Kenya.'
+              : 'Pick up collector USB cards at St. Monica Parish during choir rehearsals, or convenient courier dispatch across Kenya.'}
           </p>
         </div>
 

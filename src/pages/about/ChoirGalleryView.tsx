@@ -1,7 +1,8 @@
 import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
-import { Users, Calendar, MapPin, Sparkles, Youtube, ExternalLink } from 'lucide-react';
+import { Users, Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { ChoirLogo } from '../../components/ChoirLogo';
+import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../../data/choirContent';
 import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
 import cathedralImg from '../../assets/images/nakuru_parish_cathedral_1791356761479.jpg';
@@ -47,7 +48,7 @@ export const ChoirGalleryView: React.FC = () => {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors shadow-2xs"
           >
-            <Youtube className="w-4 h-4 fill-current" />
+            <RealYouTubeIcon size={18} variant="badge" />
             <span>{lang === 'sw' ? 'Tazama Video zetu za YouTube' : 'Watch Choir on YouTube'} ({YOUTUBE_CHANNEL_HANDLE})</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -74,7 +75,7 @@ export const ChoirGalleryView: React.FC = () => {
           />
           <div className="absolute inset-0 bg-linear-to-t from-[#0C2340]/80 via-transparent to-transparent" />
           <span className="absolute bottom-4 left-4 bg-[#1058A8] text-white font-mono text-xs px-3 py-1 rounded-lg font-bold">
-            {lang === 'sw' ? 'Kwaya Nzima ya SEC 58' : 'Full Ensemble — 52 Choristers'}
+            {lang === 'sw' ? 'Kwaya Nzima ya Mtakatifu Monica' : 'Full Ensemble — 48 Choristers'}
           </span>
         </div>
 
@@ -89,14 +90,14 @@ export const ChoirGalleryView: React.FC = () => {
             <p className="text-xs sm:text-sm text-[#0C2340]/80 font-source leading-relaxed">
               {lang === 'sw'
                 ? 'Katika Kwaya ya Mtakatifu Monica, hatutazami uimbaji kama wa mtu binafsi au maonyesho ya soloists. Kila muumini na mwimbaji huvaa sare sawa za heshima, akisimama mbele ya Altare kwa unyenyekevu kutumikia sala ya kanisa zima.'
-                : 'At St. Monica Catholic Choir, liturgical singing is never an individual spectacle or solo showcase. Every singer stands unified in dignity before the Holy Altar, blending fifty-two voices into a single reverent prayer for the congregation.'}
+                : 'At St. Monica Catholic Choir, liturgical singing is never an individual spectacle or solo showcase. Every singer stands unified in dignity before the Holy Altar, blending forty-eight voices into a single reverent prayer for the congregation.'}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#0C2340]/10 text-xs font-source">
             <div className="p-3 bg-[#EAF4FB] rounded-xl">
               <span className="font-bold text-[#1058A8] block">{lang === 'sw' ? 'Misa za Jumapili:' : 'Sunday Liturgies:'}</span>
-              <span className="text-[#0C2340]/80 mt-0.5 block">{lang === 'sw' ? 'Misa Kuu ya Saa 3:00 Asubuhi' : '9:00 AM Parish High Mass'}</span>
+              <span className="text-[#0C2340]/80 mt-0.5 block">Sunday High Mass (9:00 AM)</span>
             </div>
             <div className="p-3 bg-[#EAF4FB] rounded-xl">
               <span className="font-bold text-[#1058A8] block">{lang === 'sw' ? 'Sikukuu ya Somo:' : 'Patronal Feast:'}</span>

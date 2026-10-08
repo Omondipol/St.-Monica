@@ -84,15 +84,15 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           </div>
         </section>
 
-        {/* STEP 3 & STEP 6: FOUR COLUMNS (Desktop: 4 columns with wide 1st column; Mobile: Accordion) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8 text-sm font-source pt-2">
+        {/* STEP 3: FOUR EVENLY SPACED COLUMNS (Desktop: 4 equal columns; Mobile: Accordion) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm font-source pt-2">
           
-          {/* COLUMN 1: The Choir Identity (Wider: 4 cols on lg so "St. Monica Catholic Choir" fits on one line) */}
-          <div className="lg:col-span-4 space-y-4">
+          {/* COLUMN 1: The Choir Identity */}
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <ChoirLogo size={48} interactive={true} className="shrink-0" />
+              <ChoirLogo size={46} interactive={true} className="shrink-0" />
               <div>
-                <h4 className="font-fraunces text-lg sm:text-xl font-bold text-white whitespace-nowrap leading-snug">
+                <h4 className="font-fraunces text-lg font-bold text-white leading-snug">
                   {lang === 'sw' ? 'Kwaya ya Mtakatifu Monica' : 'St. Monica Catholic Choir'}
                 </h4>
                 <span className="text-xs text-[#7EC8F0] block mt-0.5">
@@ -101,19 +101,19 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            <p className="text-slate-300 text-sm leading-relaxed max-w-sm">
+            <p className="text-slate-300 text-sm leading-relaxed">
               {lang === 'sw'
-                ? 'Catholic Diocese of Nakuru, Section 58 Parish. Utume wa uimbaji mtakatifu kwa ajili ya Misa Kuu ya Jumapili na sala ya taifa la Mungu.'
-                : 'Catholic Diocese of Nakuru, Section 58 Parish. Consecrated liturgical vocal ministry dedicated to Sunday High Mass and sacred praise.'}
+                ? 'Catholic Diocese of Nakuru, Parokia ya Mtakatifu Monica. Utume wa uimbaji mtakatifu kwa ajili ya Misa Kuu ya Jumapili na sala ya taifa la Mungu.'
+                : 'Catholic Diocese of Nakuru, St. Monica Parish. Consecrated liturgical vocal ministry dedicated to Sunday High Mass and sacred praise.'}
             </p>
           </div>
 
-          {/* COLUMN 2: Explore (lg:col-span-3) */}
-          <div className="lg:col-span-3 border-t border-white/10 md:border-t-0 pt-4 md:pt-0">
+          {/* COLUMN 2: Explore */}
+          <div className="border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
             {/* Mobile Header Accordion Trigger */}
             <button
               onClick={() => setMobileExploreOpen(!mobileExploreOpen)}
-              className="w-full min-h-[44px] flex md:hidden items-center justify-between text-left cursor-pointer"
+              className="w-full min-h-[44px] flex sm:hidden items-center justify-between text-left cursor-pointer"
             >
               <span className="text-xs font-bold uppercase tracking-wider text-[#7EC8F0] flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5" />
@@ -123,17 +123,17 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </button>
 
             {/* Desktop Section Heading */}
-            <span className="hidden md:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
+            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
               <Compass className="w-3.5 h-3.5" />
               <span>{lang === 'sw' ? 'Gundua Kurasa' : 'Explore'}</span>
             </span>
 
             {/* Links list: real destinations only */}
-            <ul className={`space-y-2.5 text-slate-300 text-sm ${mobileExploreOpen ? 'block pt-2' : 'hidden md:block'}`}>
+            <ul className={`space-y-2.5 text-slate-300 text-sm ${mobileExploreOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <li>
                 <button 
                   onClick={() => onNavigate('about-story')} 
-                  className="min-h-[44px] md:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Historia Yetu' : 'Our Story'}
                 </button>
@@ -141,7 +141,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <li>
                 <button 
                   onClick={() => onNavigate('music-repertoire')} 
-                  className="min-h-[44px] md:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Nyimbo Zetu' : 'Songs'}
                 </button>
@@ -149,7 +149,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <li>
                 <button 
                   onClick={() => onNavigate('music-albums')} 
-                  className="min-h-[44px] md:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Albamu Yetu' : 'Our Album'}
                 </button>
@@ -157,7 +157,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <li>
                 <button 
                   onClick={() => onNavigate('shop')} 
-                  className="min-h-[44px] md:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Duka la Noti' : 'Sheet Music'}
                 </button>
@@ -165,7 +165,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <li>
                 <button 
                   onClick={() => onNavigate('about-gallery')} 
-                  className="min-h-[44px] md:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Picha za Kwaya' : 'Gallery'}
                 </button>
@@ -173,7 +173,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <li>
                 <button 
                   onClick={() => onNavigate('events')} 
-                  className="min-h-[44px] md:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Matukio na Kalenda' : 'Events'}
                 </button>
@@ -181,12 +181,12 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* COLUMN 3: Service Times (lg:col-span-2) */}
-          <div className="lg:col-span-2 border-t border-white/10 md:border-t-0 pt-4 md:pt-0">
+          {/* COLUMN 3: Service Times */}
+          <div className="border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
             {/* Mobile Header Accordion Trigger */}
             <button
               onClick={() => setMobileServiceOpen(!mobileServiceOpen)}
-              className="w-full min-h-[44px] flex md:hidden items-center justify-between text-left cursor-pointer"
+              className="w-full min-h-[44px] flex sm:hidden items-center justify-between text-left cursor-pointer"
             >
               <span className="text-xs font-bold uppercase tracking-wider text-[#7EC8F0] flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
@@ -196,14 +196,14 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </button>
 
             {/* Desktop Section Heading */}
-            <span className="hidden md:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
+            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
               <Clock className="w-3.5 h-3.5" />
               <span>{lang === 'sw' ? 'Ratiba ya Ibada' : 'Service Times'}</span>
             </span>
 
-            <div className={`space-y-3 text-sm text-slate-300 ${mobileServiceOpen ? 'block pt-2' : 'hidden md:block'}`}>
+            <div className={`space-y-3 text-sm text-slate-300 ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
-                <strong className="text-white block font-medium">Sunday Choir Mass</strong>
+                <strong className="text-white block font-medium">Sunday High Mass</strong>
                 <span className="text-slate-300 text-xs">9:00 AM (Section 58 Sanctuary)</span>
               </div>
               <div>
@@ -217,12 +217,12 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* COLUMN 4: Contact & Location (lg:col-span-3) */}
-          <div className="lg:col-span-3 border-t border-white/10 md:border-t-0 pt-4 md:pt-0">
+          {/* COLUMN 4: Contact & Location */}
+          <div className="border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
             {/* Mobile Header Accordion Trigger */}
             <button
               onClick={() => setMobileContactOpen(!mobileContactOpen)}
-              className="w-full min-h-[44px] flex md:hidden items-center justify-between text-left cursor-pointer"
+              className="w-full min-h-[44px] flex sm:hidden items-center justify-between text-left cursor-pointer"
             >
               <span className="text-xs font-bold uppercase tracking-wider text-[#7EC8F0] flex items-center gap-1.5">
                 <span>{lang === 'sw' ? 'Mawasiliano' : 'Contact'}</span>
@@ -231,11 +231,11 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </button>
 
             {/* Desktop Section Heading */}
-            <span className="hidden md:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
+            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
               <span>{lang === 'sw' ? 'Mawasiliano' : 'Contact'}</span>
             </span>
 
-            <div className={`space-y-3 text-sm text-slate-300 ${mobileContactOpen ? 'block pt-2' : 'hidden md:block'}`}>
+            <div className={`space-y-3 text-sm text-slate-300 ${mobileContactOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
                 <span className="block text-white font-medium">St. Monica Catholic Church</span>
                 <span className="text-slate-300 text-xs block">{CHOIR_STATS.churchAddress}</span>

@@ -18,9 +18,9 @@ import {
   RotateCcw, 
   ExternalLink,
   Play,
-  Save,
-  Youtube
+  Save
 } from 'lucide-react';
+import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
 
 interface AdminPageProps {
@@ -548,7 +548,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             rel="noopener noreferrer"
             className="px-3.5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl flex items-center gap-1.5 shadow-xs transition-colors"
           >
-            <Youtube className="w-4 h-4 fill-current" />
+            <RealYouTubeIcon size={18} variant="badge" />
             <span>YouTube Channel</span>
             <ExternalLink className="w-3 h-3 ml-0.5" />
           </a>
@@ -699,9 +699,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                           href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-red-600 hover:text-red-700 font-bold flex items-center gap-1 text-[11px]"
+                          className="text-red-600 hover:text-red-700 font-bold flex items-center gap-1.5 text-[11px]"
                         >
-                          <Youtube className="w-3.5 h-3.5" />
+                          <RealYouTubeIcon size={16} variant="badge" />
                           <span>Watch</span>
                         </a>
                       </td>

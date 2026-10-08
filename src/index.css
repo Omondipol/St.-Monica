@@ -55,6 +55,15 @@ body {
   opacity: 0.3;
 }
 
+@keyframes slowZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+.animate-slow-zoom {
+  animation: slowZoom 20s ease-in-out infinite alternate;
+}
+
 .stave-line {
   height: 1px;
   width: 100%;
