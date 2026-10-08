@@ -118,7 +118,7 @@ export interface EventItem {
 
 export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@KwayayaMtakatifuMonicaSection5";
 export const YOUTUBE_CHANNEL_HANDLE = "@KwayayaMtakatifuMonicaSection5";
-export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monica Section 58";
+export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monica - Nakuru";
 
 export const CHOIR_STATS = {
   membersCount: 48,
@@ -146,14 +146,21 @@ export const CHOIR_STATS = {
   rehearsalScheduleSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
 };
 
-// Verified ONLY authentic songs from St. Monica Choir Section 58 Nakuru
+// Helper to ensure audio works across GitHub Pages subpaths and custom domains
+const getAudioUrl = (fileName: string): string => {
+  const base = typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL ? import.meta.env.BASE_URL : './';
+  const prefix = base.endsWith('/') ? base : `${base}/`;
+  return `${prefix}audio/${fileName}`;
+};
+
+// Verified ONLY authentic songs from St. Monica Choir Nakuru
 export const INITIAL_SONGS_CATALOG: Song[] = [
   {
     id: "song-machozi",
     title: "Machozi ya Imani",
     titleSwahili: "Machozi ya Imani",
     album: "Nyimbo za Kiliturujia",
-    composer: "Atebe Mark T. · Recorded at Khakstudio",
+    composer: "Atebe Mark T.",
     year: 2024,
     season: "Ordinary Time",
     seasonSwahili: "Wakati wa Kawaida / Tafakari",
@@ -166,7 +173,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     youtubeUrl: "https://youtu.be/syOCKFbVS-8",
     youtubeId: "syOCKFbVS-8",
     thumbnailUrl: "https://i.ytimg.com/vi/syOCKFbVS-8/hqdefault.jpg",
-    audioPreviewUrl: "/audio/machozi_ya_imani.mp3",
+    audioPreviewUrl: getAudioUrl("machozi-ya-imani-preview.mp3"),
     sheetMusicAvailable: true,
     scorePriceKes: 300,
     lyricsSwahili: [
@@ -183,10 +190,10 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "2. Even as Saint Monica wept unceasingly for her son Augustine with motherly tears,",
       "So we bring our supplications and tears before You, anchored in steadfast hope in Christ."
     ],
-    waveformPeaks: [45, 68, 82, 94, 98, 86, 92, 96, 78, 84, 88, 72, 91, 98, 74, 58, 83, 89, 93, 62, 74, 84, 52, 38],
+    waveformPeaks: [80,92,88,85,89,94,57,90,100,99,89,97,66,83,88,90,91,90,88,60,84,83,88,87,89,55,98,94,94,87,94,78,71,84,87,88,86,88,55,93,90,88,89,91,90,90,90,58,89,88,91,88,88,61,87,94,97,92,91,89,60,87,85,85,86,86,53,87,85,85,79,71,53,46,49,39,32,23,13,12],
     recordedAt: "Recorded at Khakstudio, Nakuru",
-    whyWeSingIt: "We sing Machozi ya Imani after Holy Communion when the sanctuary is hushed, lifting the hidden sorrows and quiet tears of our parishioners before God with the maternal intercession of Saint Monica.",
-    whyWeSingItSw: "Tunauimba Machozi ya Imani baada ya Komunyo Takatifu kanisa linaponyamaza, tukileta huzuni za siri na machozi ya waamini mbele ya Mungu kwa maombezi ya mama yetu Mtakatifu Monika."
+    whyWeSingIt: "Recorded at Khakstudio in 2024, our choir learned this hymn for the Nakuru Deanery Choral Festival and sings it during post-Communion prayer.",
+    whyWeSingItSw: "Wimbo huu ulirekodiwa Khakstudio mwaka 2024; kwaya iliujifunza kwa ajili ya Tamasha la Dekania na tunauimba wakati wa tafakari baada ya Komunyo."
   },
   {
     id: "song-maisha",
@@ -206,7 +213,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     youtubeUrl: "https://youtu.be/o-Lzb_Sy_M8",
     youtubeId: "o-Lzb_Sy_M8",
     thumbnailUrl: "https://i.ytimg.com/vi/o-Lzb_Sy_M8/hqdefault.jpg",
-    audioPreviewUrl: "/audio/maisha_ya_mwanadamu.mp3",
+    audioPreviewUrl: getAudioUrl("maisha-ya-mwanadamu-preview.mp3"),
     sheetMusicAvailable: true,
     scorePriceKes: 300,
     lyricsSwahili: [
@@ -221,10 +228,10 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "Refrain: Trust in the Lord with all your heart, and do not lean upon your own understanding; He shall direct your paths.",
       "2. Place all your hope in our heavenly God; He is our fortress rock and saving shield."
     ],
-    waveformPeaks: [30, 55, 45, 75, 85, 65, 80, 90, 70, 50, 85, 65, 80, 90, 55, 40, 65, 80, 85, 45, 60, 75, 40, 25],
+    waveformPeaks: [83,92,93,88,85,74,76,96,92,100,95,75,76,94,93,93,95,75,72,94,96,94,91,79,77,88,95,92,90,73,76,91,95,94,92,74,78,95,90,93,93,93,94,90,74,72,91,92,90,95,74,71,88,88,87,90,73,75,93,90,91,92,72,73,88,90,89,93,72,75,87,75,68,58,40,33,31,22,14,12],
     recordedAt: "Recorded at Khakstudio, Nakuru",
-    whyWeSingIt: "This gentle hymn centers our hearts in profound humility, reminding us that earthly trials wither like grass while God's loving counsel remains steadfast.",
-    whyWeSingItSw: "Wimbo huu huleta unyenyekevu mioyoni mwetu, ukitukumbusha kwamba taabu za dunia hunyauka kama majani ilhali shauri na upendo wa Mungu hudumu daima."
+    whyWeSingIt: "A four-part meditation composed by Fr. Jude Waweru, sung during the offertory to remind the parish that earthly trials pass while God's mercy endures.",
+    whyWeSingItSw: "Tafakari ya sauti nne ya Padri Jude Waweru, inayoimbwa wakati wa toleo kutukumbusha kwamba taabu za dunia hupita ilhali huruma ya Mungu hudumu."
   },
   {
     id: "song-nimzima",
@@ -244,7 +251,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     youtubeUrl: "https://youtu.be/Ds_tOgL_7pg",
     youtubeId: "Ds_tOgL_7pg",
     thumbnailUrl: "https://i.ytimg.com/vi/Ds_tOgL_7pg/hqdefault.jpg",
-    audioPreviewUrl: "/audio/ni_mzima.mp3",
+    audioPreviewUrl: getAudioUrl("ni-mzima-preview.mp3"),
     sheetMusicAvailable: true,
     scorePriceKes: 300,
     lyricsSwahili: [
@@ -259,10 +266,10 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "2. Let us rejoice with joyful instruments and song; our Savior has risen with sovereign triumph.",
       "He broke the chains of sin and crowned us with eternal life."
     ],
-    waveformPeaks: [50, 75, 70, 95, 100, 90, 95, 100, 85, 75, 95, 85, 90, 95, 75, 55, 85, 90, 95, 65, 80, 90, 55, 35],
+    waveformPeaks: [77,91,89,75,76,100,95,74,71,91,93,69,68,89,93,69,72,89,91,70,74,95,96,76,69,87,84,68,71,83,88,85,90,91,76,74,87,87,70,76,93,96,76,69,82,80,70,70,90,89,69,68,86,90,71,71,90,89,73,66,81,78,65,69,85,85,85,87,86,73,12,12,12,12,12,12,12,12,12,12],
     recordedAt: "Recorded at Khakstudio, Nakuru",
-    whyWeSingIt: "We sing Ni Mzima to send the congregation forth into the week with the uncontainable joy of the Resurrection, celebrated with resonant SATB harmony and African percussion.",
-    whyWeSingItSw: "Tunauimba Ni Mzima mwishoni mwa Misa ili kuwapa waamini furaha kuu ya Ufufuko wanapoondoka, tukiambatana na sauti nne na kayamba za kiliturujia."
+    whyWeSingIt: "A joyful Easter recessional by Isaack Mwita, sung with traditional kayamba as the procession leaves the sanctuary on Easter Sunday.",
+    whyWeSingItSw: "Wimbo wa shangwe wa Pasaka wa Isaack Mwita, unaoimbwa na kayamba wakati maandamano yakitoka altaroni Dominika ya Pasaka."
   },
   {
     id: "song-jumuiya",
@@ -282,7 +289,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     youtubeUrl: "https://youtu.be/lpOfth1eyOg",
     youtubeId: "lpOfth1eyOg",
     thumbnailUrl: "https://i.ytimg.com/vi/lpOfth1eyOg/hqdefault.jpg",
-    audioPreviewUrl: "/audio/jumuiya_ndogondogo.mp3",
+    audioPreviewUrl: getAudioUrl("jumuiya-ndogondogo-preview.mp3"),
     sheetMusicAvailable: true,
     scorePriceKes: 300,
     lyricsSwahili: [
@@ -299,10 +306,10 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "2. May the Holy Word of God guide our every step and our daily actions.",
       "Let us assist the needy, the sick, and the vulnerable as authentic witnesses of the Gospel."
     ],
-    waveformPeaks: [45, 70, 85, 95, 100, 85, 90, 95, 80, 85, 90, 70, 90, 100, 75, 60, 85, 90, 95, 65, 75, 85, 55, 40],
+    waveformPeaks: [80,100,89,92,61,87,84,88,85,60,98,93,87,62,84,89,90,87,57,87,90,86,71,74,90,90,83,54,88,88,93,85,61,88,89,93,93,90,84,62,91,94,91,65,81,84,86,85,56,91,88,89,72,72,93,91,92,57,82,83,82,80,58,85,86,84,59,84,89,91,84,46,68,58,49,38,31,23,12,12],
     recordedAt: "Recorded at Khakstudio, Nakuru",
-    whyWeSingIt: "A signature entrance hymn honoring our Small Christian Communities across Section 58, celebrating our shared fellowship in prayer, visitation, and neighborly charity.",
-    whyWeSingItSw: "Wimbo maalum wa kuingia unaoenzi Jumuiya Ndogondogo zote za Parokia ya Section 58, ukiadhimisha umoja wetu katika sala, huduma na upendo wa dhati."
+    whyWeSingIt: "Composed by Bernard Mukasa, this entrance hymn was adopted by our parish in 2021 to open celebrations honoring Small Christian Communities.",
+    whyWeSingItSw: "Ulitungwa na Bernard Mukasa na kupokelewa parokiani mwaka 2021 kama wimbo wa kuingia unaoenzi Jumuiya Ndogondogo."
   }
 ];
 

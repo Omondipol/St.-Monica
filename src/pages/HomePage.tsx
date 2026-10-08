@@ -15,7 +15,7 @@ import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 
 import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
 import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
-import choirmasterImg from '../assets/images/choirmaster_polycarp_ochieng_1791446339605.jpg';
+import choirmasterImg from '../assets/images/choirmaster_director_1791446339605.jpg';
 import scorePreviewMachozi from '../assets/images/score_preview_machozi_1791446357129.jpg';
 import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372899.jpg';
 import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
@@ -32,6 +32,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     currentSong, 
     isPlaying, 
     playSong, 
+    togglePlay,
     addToCart, 
     lang 
   } = useChoir();
@@ -65,18 +66,26 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           referrerPolicy="no-referrer"
         />
 
-        {/* Lightened directional overlay: darkening only behind text on left, fading to nearly clear on right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/90 via-[#0C2340]/45 to-transparent/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/75 via-transparent to-transparent sm:hidden" />
+        {/* Soft dark gradient fading to clear by the middle of the photo (50%) so singers' faces remain totally clear */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/90 via-[#0C2340]/55 via-35% to-transparent to-50%" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/80 via-transparent to-transparent sm:hidden" />
 
-        <div className="relative z-10 max-w-3xl space-y-5 pb-4 sm:pb-8">
-          <h1 className="font-fraunces text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1]">
-            {lang === 'sw' 
-              ? 'Kuinua Mioyo Katika Sala na Wimbo'
-              : 'Lifting Hearts in Sacred Song'}
+        <div className="relative z-10 max-w-xl text-left space-y-4 pb-4 sm:pb-8">
+          <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-[1.1]">
+            {lang === 'sw' ? (
+              <>
+                Kuinua Mioyo Katika<br />
+                Sala na Wimbo
+              </>
+            ) : (
+              <>
+                Lifting Hearts in<br />
+                Sacred Song
+              </>
+            )}
           </h1>
 
-          <p className="font-source text-base sm:text-lg text-white/95 max-w-2xl leading-relaxed">
+          <p className="font-source text-base sm:text-lg text-white/95 max-w-xl leading-relaxed">
             {lang === 'sw'
               ? 'Tunaimba katika Misa Kuu ya Jumapili na maadhimisho ya kijimbo. Kuimba Misa daima ni bure.'
               : 'We sing at Sunday High Mass and at diocesan celebrations. Singing at Mass is always free.'}
@@ -86,7 +95,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           <div className="flex flex-wrap items-center gap-4 pt-3">
             {/* Listen Now */}
             <button
-              onClick={() => playSong(featuredSong as Song)}
+              onClick={() => {
+                if (currentSong.id === featuredSong.id) {
+                  togglePlay();
+                } else {
+                  playSong(featuredSong as Song);
+                }
+              }}
               className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
             >
               {isPlaying && currentSong.id === featuredSong.id ? (
@@ -266,7 +281,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               return (
                 <div
                   key={song.id}
-                  onClick={() => playSong(song)}
+                  onClick={() => {
+                    if (currentSong.id === song.id) {
+                      togglePlay();
+                    } else {
+                      playSong(song);
+                    }
+                  }}
                   className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 group ${
                     isThisPlaying
                       ? 'bg-white/15 border-sky-400 shadow-md ring-1 ring-sky-400/50'
@@ -464,20 +485,20 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <p className="text-base text-slate-800 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? '“Karibu sana kwenye jukwaa la Kwaya ya Mtakatifu Monica, Parokia ya Section 58 Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe dhabihu safi na sala ya kicho mbele ya Mwenyezi Mungu.”'
-                  : '“Welcome to the musical home of St. Monica Catholic Choir, Section 58 Parish Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every hymn offered is an authentic sacrifice of praise before Almighty God.”'}
+                  ? '“Karibu sana kwenye jukwaa la Kwaya ya Mtakatifu Monica, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe dhabihu safi na sala ya kicho mbele ya Mwenyezi Mungu.”'
+                  : '“Welcome to the musical home of St. Monica Catholic Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every hymn offered is an authentic sacrifice of praise before Almighty God.”'}
               </p>
 
               <div className="pt-2 flex items-center gap-3.5">
                 {/* Choirmaster photo in a clean round frame */}
                 <img
                   src={choirmasterImg}
-                  alt="Mwalimu Polycarp Ochieng"
+                  alt="Mwalimu Joseph Otieno"
                   className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#1058A8] shadow-sm shrink-0"
                 />
                 <div>
                   <strong className="text-base font-bold text-[#0C2340] font-fraunces block">
-                    Mwalimu Polycarp Ochieng
+                    Mwalimu Joseph Otieno
                   </strong>
                   <span className="text-sm text-slate-700 font-source block">
                     {lang === 'sw' ? 'Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya' : 'Director of Music & Choirmaster'}

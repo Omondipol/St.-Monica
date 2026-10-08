@@ -3,7 +3,7 @@ import { useChoir } from '../../context/ChoirContext';
 import { Users, Mail, Award, Music, ShieldCheck } from 'lucide-react';
 import { ChoirLogo } from '../../components/ChoirLogo';
 import choirGroupImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
-import choirmasterImg from '../../assets/images/choirmaster_polycarp_ochieng_1791446339605.jpg';
+import choirmasterImg from '../../assets/images/choirmaster_director_1791446339605.jpg';
 
 export const LeadershipView: React.FC = () => {
   const { lang, leadersList } = useChoir();
@@ -27,8 +27,8 @@ export const LeadershipView: React.FC = () => {
             </h1>
             <p className="text-base text-[#0C2340]/80 font-source mt-2 max-w-2xl">
               {lang === 'sw'
-                ? 'Utambuzi rasmi wa walimu wa muziki mtakatifu, mpiga kinanda mkuu, na maafisa wa kamati kuu wanaosimamia Kwaya ya Mtakatifu Monica, Section 58 Nakuru.'
-                : 'Official recognition of the sacred music choirmasters, principal organist, and executive officers directing St. Monica Choir Section 58 Nakuru.'}
+                ? 'Utambuzi rasmi wa walimu wa muziki mtakatifu, mpiga kinanda mkuu, na maafisa wa kamati kuu wanaosimamia Kwaya ya Mtakatifu Monica.'
+                : 'Official recognition of the sacred music choirmasters, principal organist, and executive officers directing St. Monica Catholic Choir.'}
             </p>
           </div>
           <ChoirLogo size={60} interactive={true} className="shrink-0 self-start sm:self-center" />

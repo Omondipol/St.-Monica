@@ -26,8 +26,8 @@ export const ActionTracker: React.FC = () => {
 
   const teamRoles = [
     { role: 'Product Owner', person: 'Choir Chair or Delegate', responsibility: 'Decisions and sign-offs; resolves scope disputes.' },
-    { role: 'Web Developer', person: 'Polycarp Ochieng (Full-Stack)', responsibility: 'Architecture, frontend, backend, payments, CI/CD, deployment.' },
-    { role: 'UI Designer', person: 'Polycarp Ochieng / Dedicated Designer', responsibility: 'Brand tokens, responsive layouts, interactive Figma prototype.' },
+    { role: 'Web Developer', person: 'David Kiprop (Full-Stack Engineer)', responsibility: 'Architecture, frontend, backend, payments, CI/CD, deployment.' },
+    { role: 'UI Designer', person: 'Lead Product Designer', responsibility: 'Brand tokens, responsive layouts, interactive Figma prototype.' },
     { role: 'Photographer / Videographer', person: 'Parish Media Team / Volunteer', responsibility: 'Real documentary photos, section portraits, choir video reel.' },
     { role: 'Copywriter / Translator', person: 'Native Kiswahili & English Speaker', responsibility: 'Authentic Kiswahili copy, patron history, editorial lyrics.' },
     { role: 'Music Director', person: 'Choir Master / Section Leaders', responsibility: 'Repertoire catalog, master audio, clean sheet scores, composer rights.' },
@@ -79,7 +79,7 @@ export const ActionTracker: React.FC = () => {
           Section 12.3: Choir Prerequisites & Action Tracker
         </h2>
         <p className="mt-2 text-sm sm:text-base text-[#0C2340]/80 font-source max-w-3xl">
-          The 9 non-negotiable items required from St. Monica Choir leadership before Polycarp Ochieng begins 
+          The 9 non-negotiable items required from St. Monica Choir leadership before the development team begins 
           discovery and design. Without these real inputs, the website cannot proceed without compromising authenticity.
         </p>
 

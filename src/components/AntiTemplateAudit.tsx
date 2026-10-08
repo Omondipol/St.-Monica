@@ -81,7 +81,7 @@ export const AntiTemplateAudit: React.FC = () => {
           Section 13: Design Review Checklist (Anti-Template Test)
         </h2>
         <p className="mt-2 text-sm sm:text-base text-[#0C2340]/80 font-source max-w-3xl">
-          Polycarp Ochieng's binding rule: <span className="font-semibold text-[#0C2340]">"Before each design is approved, check every item. If more than two fail, redesign the section."</span> 
+          Binding quality rule: <span className="font-semibold text-[#0C2340]">"Before each design is approved, check every item. If more than two fail, redesign the section."</span> 
           Test any page mockup or proposal below using the 10-point rubric.
         </p>
 
@@ -196,7 +196,7 @@ export const AntiTemplateAudit: React.FC = () => {
             Why Choir Sites Feel Generic vs. How St. Monica Avoids It
           </h3>
           <p className="text-xs text-[#0C2340]/70 font-source mt-1">
-            Contrasting typical WordPress / Squarespace / AI template traps with Polycarp Ochieng's tailored design countermeasures.
+            Contrasting typical WordPress / Squarespace / AI template traps with tailored design countermeasures.
           </p>
         </div>
 

@@ -342,7 +342,7 @@ export const KeyDataPoints: React.FC = () => {
                 <div className="p-4 bg-amber-50/70 rounded-lg border border-amber-200/50">
                   <span className="font-bold text-amber-900 block mb-1">Lean Alternative Evaluated in PDF:</span>
                   <p className="text-amber-800 leading-relaxed text-[11px]">
-                    If development budget is severely constrained, Polycarp notes a lean fallback using 
+                    If development budget is severely constrained, the engineering plan notes a lean fallback using 
                     <strong> Strapi/Directus</strong> headless CMS or <strong>WordPress + WooCommerce</strong>. 
                     However, WordPress entails heavy visual compromise, security upkeep, and poor mobile audio persistence.
                   </p>

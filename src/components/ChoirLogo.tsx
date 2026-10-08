@@ -328,7 +328,7 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
             St. Monica Catholic Choir
           </span>
           <span className="text-[11px] font-semibold text-[#1058A8] tracking-wider uppercase font-source mt-0.5">
-            Section 58 Parish · Nakuru
+            Catholic Diocese of Nakuru
           </span>
         </div>
       </div>
@@ -362,7 +362,7 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden shadow-xl ring-4 ring-[#1058A8] bg-white p-1">
             <img 
               src={sealImg} 
-              alt="Official Seal of St. Monica Catholic Choir SEC 58" 
+              alt="Official Seal of St. Monica Catholic Choir" 
               className="w-full h-full object-cover rounded-full"
             />
           </div>
@@ -372,7 +372,7 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Kwaya ya Mtakatifu Monica
             </h3>
             <p className="text-xs font-bold uppercase tracking-widest text-[#1058A8] mt-1 font-source">
-              Section 58 Parish · Nakuru, Kenya
+              Catholic Diocese of Nakuru · Kenya
             </p>
           </div>
 

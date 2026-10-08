@@ -31,8 +31,8 @@ export const AlbumsView: React.FC = () => {
             </h1>
             <p className="text-base text-[#0C2340]/80 font-source mt-2 max-w-2xl">
               {lang === 'sw'
-                ? `Toleo za studio na rekodi za kwaya kutoka Parokia ya Section 58 Nakuru, zikiwemo nyimbo zinazopatikana kwenye kituo cha YouTube (${YOUTUBE_CHANNEL_HANDLE}).`
-                : `Studio releases and liturgical recordings from Section 58 Parish Nakuru, featured on the official YouTube channel (${YOUTUBE_CHANNEL_HANDLE}).`}
+                ? `Toleo za studio na rekodi za Kwaya ya Mtakatifu Monica, zikiwemo nyimbo zinazopatikana kwenye kituo cha YouTube (${YOUTUBE_CHANNEL_HANDLE}).`
+                : `Studio releases and liturgical recordings from St. Monica Catholic Choir, featured on the official YouTube channel (${YOUTUBE_CHANNEL_HANDLE}).`}
             </p>
           </div>
 

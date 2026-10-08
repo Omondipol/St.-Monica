@@ -32,17 +32,21 @@ body {
   color: #FFFFFF;
 }
 
-.font-fraunces {
-  font-family: 'Fraunces', Georgia, serif;
+.font-fraunces,
+.font-eb-garamond,
+.font-garamond {
+  font-family: 'EB Garamond', Georgia, serif;
+  letter-spacing: normal;
 }
 
 .font-source {
   font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.tabular-numbers {
+.tabular-numbers,
+.tabular-nums {
   font-variant-numeric: tabular-nums;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* 5-line music stave divider signature element */

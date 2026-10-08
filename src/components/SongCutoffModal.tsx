@@ -22,6 +22,7 @@ export const SongCutoffModal: React.FC = () => {
     dismissIntroCutoff,
     currentSong,
     formatPrice,
+    isNowPlayingExpanded,
     lang
   } = useChoir();
 
@@ -52,7 +53,7 @@ export const SongCutoffModal: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isIntroCutoffOpen, dismissIntroCutoff]);
 
-  if (!isIntroCutoffOpen) return null;
+  if (!isIntroCutoffOpen || isNowPlayingExpanded) return null;
 
   const fullYoutubeUrl = currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL;
 
@@ -122,23 +123,23 @@ export const SongCutoffModal: React.FC = () => {
         {/* STEP 1: PROMPT VIEW */}
         {step === 'prompt' && (
           <div className="space-y-5">
-            {/* 40-SEC PREVIEW COMPLETE pill with small music note */}
+            {/* 40-second preview complete tag */}
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-white/10 text-[#7EC8F0] border border-white/15 flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold text-[#7EC8F0] bg-white/10 border border-white/15 flex items-center gap-1.5 font-source">
                 <Music className="w-3.5 h-3.5 text-[#7EC8F0]" />
-                <span>{lang === 'sw' ? 'Mwisho wa Utangulizi (Sek 40)' : '40-Sec Preview Complete'}</span>
+                <span>{lang === 'sw' ? 'Mwisho wa utangulizi (Sek 40)' : '40-second preview complete'}</span>
               </span>
             </div>
 
-            {/* Heading & Paragraph (No word 'only', respectful tone) */}
+            {/* Heading & Paragraph in EB Garamond and Source Sans */}
             <div className="space-y-2">
-              <h3 id="cutoff-modal-title" className="font-fraunces text-2xl sm:text-3xl font-bold text-white leading-tight">
+              <h3 id="cutoff-modal-title" className="font-eb-garamond text-2xl sm:text-3xl font-semibold text-white leading-tight">
                 {lang === 'sw' ? 'Umeupenda wimbo huu?' : 'Enjoying the hymn?'}
               </h3>
               <p className="text-sm sm:text-base text-slate-200 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? `Umesikiliza sekunde 40 za mwanzo za ${currentSong.titleSwahili}. Sikiliza wimbo mzima bure kwenye YouTube, au unga mkono kwaya kwa kupakua MP3 kamili.`
-                  : `You just heard the first 40 seconds of ${currentSong.title}. Listen to the full hymn free on YouTube, or support the choir with a full MP3 download.`}
+                  ? `Umesikiliza sekunde 40 za mwanzo za ${currentSong.titleSwahili}. Sikiliza wimbo mzima bure kwenye YouTube, au unga mkono kwaya kwa mchango wa hiari.`
+                  : `You just heard the first 40 seconds of ${currentSong.title}. Listen to the full hymn free on YouTube, or support the choir.`}
               </p>
             </div>
 
@@ -178,7 +179,7 @@ export const SongCutoffModal: React.FC = () => {
                 <div className="flex items-center gap-2.5">
                   <RealYouTubeIcon size={20} variant="badge" />
                   <span>
-                    {lang === 'sw' ? 'Sikiliza Wimbo Mzima YouTube (Bure)' : 'Listen Full Song on YouTube (Free)'}
+                    {lang === 'sw' ? 'Sikiliza wimbo mzima YouTube (bure)' : 'Listen to the full hymn on YouTube (free)'}
                   </span>
                 </div>
                 <ExternalLink className="w-4 h-4 text-[#7EC8F0] group-hover:translate-x-0.5 transition-transform" />

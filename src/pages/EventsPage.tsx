@@ -15,7 +15,7 @@ export const EventsPage: React.FC = () => {
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//St. Monica Catholic Choir Section 58 Nakuru//Events//EN',
+      'PRODID:-//St. Monica Catholic Choir Nakuru//Events//EN',
       'BEGIN:VEVENT',
       `SUMMARY:${eventTitle}`,
       `DESCRIPTION:${eventTitle} at St. Monica Catholic Church, Section 58 Nakuru`,
@@ -63,7 +63,7 @@ export const EventsPage: React.FC = () => {
             {lang === 'sw' ? 'Matukio Yanayokuja na ya Kila Wiki' : 'Upcoming & Weekly Liturgies'}
           </h2>
           <span className="text-xs text-slate-500 font-source">
-            {lang === 'sw' ? 'Parokia ya Section 58 Nakuru' : 'Section 58 Parish Nakuru'}
+            {lang === 'sw' ? 'Parokia ya Mtakatifu Monica' : 'St. Monica Parish'}
           </span>
         </div>
 
@@ -147,7 +147,7 @@ export const EventsPage: React.FC = () => {
       <section className="bg-[#FAF8F5] border border-[#0C2340]/10 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
         <div className="flex items-center justify-between">
           <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
-            {lang === 'sw' ? 'Ratiba Kamili ya Misa za Jumapili (Parokiani)' : 'Full Sunday Mass Schedule (Section 58)'}
+            {lang === 'sw' ? 'Ratiba Kamili ya Misa za Jumapili (Parokiani)' : 'Full Sunday Mass Schedule'}
           </h3>
           <a
             href={CHOIR_STATS.mapsUrl}

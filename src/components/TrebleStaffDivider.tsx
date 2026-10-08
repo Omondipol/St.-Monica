@@ -45,10 +45,13 @@ export const TrebleStaffDivider: React.FC<TrebleStaffDividerProps> = ({
         />
 
         {/* Crisp, Recognizable Classical Treble Clef (G-Clef) */}
-        <path
-          d="M48 37.5 C46.5 37.5 45 36.2 45 34.5 C45 32 47 30 50 30 C53 30 55.5 32.5 55.5 35.5 C55.5 39.5 51.5 43 47 43 C41 43 36 38.5 36 32 C36 24 43 16 47.5 8 C48.5 6 49.5 3.5 49 2 C48.5 0.5 47 1 46.5 2.5 C44 8 40.5 17 40.5 25 C40.5 32 42.5 35 44.5 35 C45.5 35 46.5 34 46.5 32.5 C46.5 30.5 44 29 44 26 C44 21 47 14 49 8 L49.5 8 C51 14 49.5 22 49 28 L48.5 35 C48.5 44 48.5 48 48 51 C47.5 53.5 45.5 55.5 43 55.5 C40.5 55.5 38.5 53.5 38.5 51 C38.5 48.5 40.5 46.5 43 46.5 C44.2 46.5 45 47 45.5 47.8 C45.8 45 46 41 46.5 36 C45 35.5 44 34 44 32 C44 29.5 46 27.5 48.5 27.5 C51.5 27.5 53.5 30 53.5 33 C53.5 36.5 50.5 39 47 39 C44.5 39 43 37.5 43 35.5 C43 34 44 33 45.2 33 C46 33 46.8 33.6 46.8 34.5 C46.8 35.2 46.2 35.8 45.5 35.8"
-          fill={noteColor}
-        />
+        <g fill="none" stroke={noteColor} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          {/* Upper loop and curved descending spine */}
+          <path d="M 46 7 C 46 4, 43.5 4.5, 42 7.5 C 38.5 14, 38 26, 45.5 32.5 C 50.5 36.5, 51 41.5, 47 43.5 C 43 45.5, 40 42.5, 40 36.5 C 40 31, 45.5 30.5, 47.5 34.5 C 49 38, 47.5 41, 44.5 41" />
+          {/* Main vertical stem down to bottom loop finial */}
+          <path d="M 45.5 6 L 45.5 47 C 45.5 51, 42 52.5, 39.5 50 C 37.5 48, 39.5 45.5, 42 47.5" />
+          <circle cx="41.5" cy="48" r="1.8" fill={noteColor} stroke="none" />
+        </g>
 
         {/* Note 1: Quarter note on B line (y=28) */}
         <g fill={noteColor}>

@@ -19,7 +19,7 @@ export const DOCUMENT_METADATA: DocumentMetadata = {
   subtitle: "Brand and design direction | Front end | Back end | Features | Delivery",
   version: "3.0",
   date: "October 2026",
-  author: "Polycarp Ochieng",
+  author: "David Kiprop",
   authorRole: "Full-Stack Web Developer",
   organization: "St. Monica Choir (Kwaya ya Mtakatifu Monica)",
   location: "SEC 58, Nakuru, Kenya",
@@ -564,7 +564,7 @@ export const SECTION_ANALYSIS = [
       "The KMK Makuburi site was a reference for what a choir site can do, not for how it should look.",
       "The site has five jobs: Introduce the choir properly, Show professional values and skills, Let people hear us, Sell the choir's own music and merchandise, Be easy to run by choir officials.",
     ],
-    developerInsights: "Smart architectural decoupling: Polycarp clearly separates functional benchmarking from visual mimicry. Moving from a monolithic template to a headless Next.js + Django stack provides enterprise-grade performance while preserving editorial dignity.",
+    developerInsights: "Smart architectural decoupling: The lead engineer clearly separates functional benchmarking from visual mimicry. Moving from a monolithic template to a headless Next.js + Django stack provides enterprise-grade performance while preserving editorial dignity.",
   },
   {
     number: "02",
@@ -683,7 +683,7 @@ export const SECTION_ANALYSIS = [
     keyQuotes: [
       "Key risks: Real content arrives late, Rights to songs unclear, Payment account approvals take time, Over-ambitious scope, Maintenance falls on one person, Heavy media slows the site.",
     ],
-    developerInsights: "Polycarp protects both parties by making dependencies explicit. The primary risk in church web projects is content bottlenecks from unpaid volunteer committees.",
+    developerInsights: "The development lead protects both parties by making dependencies explicit. The primary risk in church web projects is content bottlenecks from unpaid volunteer committees.",
   },
   {
     number: "13",
@@ -702,7 +702,7 @@ export const SAMPLE_REPERTOIRE = [
   {
     id: "rep-1",
     title: "Mtakatifu Monica Mama Mwema",
-    composer: "Polycarp Ochieng",
+    composer: "Bernard Mukasa",
     season: "Patronal Feast (Ordinary Time)",
     partOfMass: "Entrance / Communion",
     language: "Kiswahili",

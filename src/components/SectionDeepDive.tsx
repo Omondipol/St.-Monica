@@ -26,7 +26,7 @@ export const SectionDeepDive: React.FC = () => {
           13-Section Deep Dive & Critical Analysis
         </h2>
         <p className="mt-2 text-sm sm:text-base text-[#0C2340]/80 font-source max-w-3xl">
-          Granular inspection of every chapter in Polycarp Ochieng's proposal. 
+          Granular inspection of every chapter in the technical architecture proposal. 
           Examine the strategic implications, developer commentary, verbatim textual requirements, 
           and governance responsibilities for the St. Monica Choir leadership.
         </p>

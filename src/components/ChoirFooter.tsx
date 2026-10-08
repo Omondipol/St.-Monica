@@ -342,13 +342,13 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* STEP 5: BOTTOM BAR WITH COPYRIGHT & BACK TO TOP ARROW */}
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-source pb-6">
+        {/* STEP 5: BOTTOM BAR WITH COPYRIGHT & BACK TO TOP ARROW (Padding prevents player overlap) */}
+        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-source pb-24 sm:pb-28">
           <div className="text-center sm:text-left">
             <span>
               {lang === 'sw'
-                ? '© 2026 Kwaya ya Mtakatifu Monica, Section 58 Nakuru. Utume wa bure wa kiliturujia.'
-                : '© 2026 St. Monica Catholic Choir, Section 58 Nakuru. Consecrated liturgical vocal ministry.'}
+                ? '© 2026 Kwaya ya Mtakatifu Monica, Nakuru. Utume wa bure wa kiliturujia.'
+                : '© 2026 St. Monica Catholic Choir, Nakuru. Consecrated liturgical vocal ministry.'}
             </span>
           </div>
 

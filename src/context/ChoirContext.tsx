@@ -62,12 +62,17 @@ interface ChoirContextType {
   toggleMute: () => void;
   playbackSpeed: number; // 0.75, 1.0, 1.25, 1.5
   setPlaybackSpeed: (speed: number) => void;
+  audioError: boolean;
 
   // View States
   isPlayerMinimized: boolean;
   setIsPlayerMinimized: (min: boolean) => void;
   isNowPlayingExpanded: boolean;
   setIsNowPlayingExpanded: (expanded: boolean) => void;
+
+  // Hymnal View & 4 Tabs (Listen, Lyrics, Voices, Score)
+  hymnalTab: 'listen' | 'lyrics' | 'voices' | 'score';
+  setHymnalTab: (tab: 'listen' | 'lyrics' | 'voices' | 'score') => void;
 
   // Synced Lyrics
   isLyricsOpen: boolean;
@@ -330,6 +335,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
+        audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
       }
     }
 
@@ -337,34 +343,29 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsPlaying(true);
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
+        audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
         audioRef.current.play().catch(() => {});
       }
     }
   };
 
-  const syncFromYouTube = (curTime: number, dur: number, playingState: boolean) => {
-    setCurrentTimeSeconds(curTime);
-    if (dur > 0 && !isNaN(dur)) {
-      setDurationFromAudio(dur);
-    }
-    
-    // 40-second intro limit: softly pause and show modal ONLY ONCE per visit for that song
-    if (curTime >= 40 && playingState) {
-      if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
-        hasTriggeredCutoffRef.current[currentSong.id] = true;
-        setIsPlaying(false);
-        setIsIntroCutoffOpen(true);
-        return;
-      } else if (hasDismissedCutoffRef.current[currentSong.id]) {
-        // Visitor dismissed it earlier: quietly pause at preview end without popping up again
-        setIsPlaying(false);
-        return;
-      }
-    }
+  // 40-Second Preview Duration Constant (Standard across public choir applet)
+  const PREVIEW_DURATION = 40;
+  const totalDurationSeconds = PREVIEW_DURATION;
 
-    setIsPlaying(playingState);
+  const calculateEffectiveVolume = (curSec: number, baseVol: number, muted: boolean): number => {
+    if (muted) return 0;
+    if (curSec < 35) return baseVol;
+    if (curSec >= 40) return 0;
+    const fadeFactor = Math.max(0, (40 - curSec) / 5);
+    return baseVol * fadeFactor;
   };
 
+  const syncFromYouTube = (_curTime: number, _dur: number, _playingState: boolean) => {
+    // No-op: Public playback is strictly driven by the choir's authentic 40-second preview clips
+  };
+
+  const [audioError, setAudioError] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize Audio element once
@@ -374,77 +375,82 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const audio = new Audio();
     audio.preload = 'auto';
     audio.src = currentSong.audioPreviewUrl;
-    audio.volume = isMuted ? 0 : volume;
+    audio.volume = calculateEffectiveVolume(0, volume, isMuted);
     audio.playbackRate = playbackSpeed;
     audioRef.current = audio;
 
     const onTimeUpdate = () => {
-      setCurrentTimeSeconds(audio.currentTime);
-      // 40-second intro limit for HTML5 audio
-      if (audio.currentTime >= 40 && !audio.paused) {
+      const cur = audio.currentTime;
+      
+      // Smooth fade-out in player from 35 to 40 seconds
+      if (cur >= 40) {
+        audio.pause();
+        audio.currentTime = 40;
+        audio.volume = 0;
+        setCurrentTimeSeconds(40);
+        setIsPlaying(false);
+
+        // Slide up gentle prompt only once per song per visit
         if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
           hasTriggeredCutoffRef.current[currentSong.id] = true;
-          audio.pause();
-          setIsPlaying(false);
           setIsIntroCutoffOpen(true);
-        } else if (hasDismissedCutoffRef.current[currentSong.id]) {
-          audio.pause();
-          setIsPlaying(false);
         }
+      } else {
+        setCurrentTimeSeconds(cur);
+        audio.volume = calculateEffectiveVolume(cur, volume, isMuted);
       }
     };
 
-    const onDurationChange = () => {
-      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
-        setDurationFromAudio(audio.duration);
-      }
+    const onPlay = () => {
+      setAudioError(false);
+      setIsPlaying(true);
     };
-
-    const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
 
     const onEnded = () => {
-      // Auto-advance to next song in choir list
-      const idx = songs.findIndex(s => s.id === currentSong.id);
-      const nextIdx = (idx + 1) % songs.length;
-      playSong(songs[nextIdx]);
+      setCurrentTimeSeconds(40);
+      setIsPlaying(false);
+      if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+        hasTriggeredCutoffRef.current[currentSong.id] = true;
+        setIsIntroCutoffOpen(true);
+      }
+    };
+
+    const onError = () => {
+      setAudioError(true);
+      setIsPlaying(false);
     };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('durationchange', onDurationChange);
-    audio.addEventListener('loadedmetadata', onDurationChange);
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
 
     return () => {
       audio.pause();
       audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('durationchange', onDurationChange);
-      audio.removeEventListener('loadedmetadata', onDurationChange);
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('error', onError);
     };
   }, []);
 
-  const totalDurationSeconds = durationFromAudio > 0 
-    ? durationFromAudio 
-    : parseDurationToSeconds(currentSong.duration);
+  const audioProgress = Math.min(100, Math.max(0, (currentTimeSeconds / PREVIEW_DURATION) * 100));
 
-  const audioProgress = totalDurationSeconds > 0 
-    ? Math.min(100, Math.max(0, (currentTimeSeconds / totalDurationSeconds) * 100))
-    : 0;
-
-  // Real Play Song (Drives authentic YouTube song audio)
+  // Real Play Song (Drives authentic 40-second preview audio)
   const playSong = (song: Song) => {
+    setAudioError(false);
     setIsIntroCutoffOpen(false);
     setCurrentSong(song);
     setCurrentTimeSeconds(0);
     setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
     if (audioRef.current) {
+      audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current.src = song.audioPreviewUrl;
+      audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
       audioRef.current.play().catch(() => {});
     }
     setIsPlaying(true);
@@ -457,11 +463,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const next = !prev;
       if (next) {
         setIsPlayerMinimized(false);
-        if (currentTimeSeconds >= 39) {
+        if (currentTimeSeconds >= 39.5) {
           setCurrentTimeSeconds(0);
           setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
           if (audioRef.current) {
             audioRef.current.currentTime = 0;
+            audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
           }
         }
         if (audioRef.current) {
@@ -492,21 +499,33 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Skip Ahead or Back
   const skipSeconds = (delta: number) => {
-    const target = Math.max(0, Math.min(totalDurationSeconds, currentTimeSeconds + delta));
+    const target = Math.max(0, Math.min(40, currentTimeSeconds + delta));
     seekAudioBySeconds(target);
   };
 
   // Scrubbing
   const seekAudioByPercent = (percent: number) => {
     const clamped = Math.max(0, Math.min(100, percent));
-    const targetSeconds = (clamped / 100) * totalDurationSeconds;
+    const targetSeconds = (clamped / 100) * 40;
     seekAudioBySeconds(targetSeconds);
   };
 
   const seekAudioBySeconds = (secs: number) => {
-    const clamped = Math.max(0, Math.min(totalDurationSeconds, secs));
+    const clamped = Math.max(0, Math.min(40, secs));
     setCurrentTimeSeconds(clamped);
     setSeekCommand({ targetSeconds: clamped, nonce: Date.now() });
+    if (audioRef.current) {
+      audioRef.current.currentTime = clamped;
+      audioRef.current.volume = calculateEffectiveVolume(clamped, volume, isMuted);
+      if (clamped >= 40) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+          hasTriggeredCutoffRef.current[currentSong.id] = true;
+          setIsIntroCutoffOpen(true);
+        }
+      }
+    }
   };
 
   // Volume & Mute
@@ -514,7 +533,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const clamped = Math.max(0, Math.min(1, val));
     setVolumeState(clamped);
     if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : clamped;
+      audioRef.current.volume = calculateEffectiveVolume(currentTimeSeconds, clamped, isMuted);
     }
   };
 
@@ -522,7 +541,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsMuted(prev => {
       const next = !prev;
       if (audioRef.current) {
-        audioRef.current.volume = next ? 0 : volume;
+        audioRef.current.volume = calculateEffectiveVolume(currentTimeSeconds, volume, next);
       }
       return next;
     });
@@ -542,7 +561,17 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     lyricsCount - 1,
     Math.floor((currentTimeSeconds / Math.max(1, totalDurationSeconds)) * lyricsCount)
   );
-  const [isLyricsOpen, setIsLyricsOpen] = useState<boolean>(false);
+  // Unified Hymnal View Tabs
+  const [hymnalTab, setHymnalTab] = useState<'listen' | 'lyrics' | 'voices' | 'score'>('listen');
+
+  const [isLyricsOpen, setIsLyricsOpenState] = useState<boolean>(false);
+  const setIsLyricsOpen = (open: boolean) => {
+    setIsLyricsOpenState(open);
+    if (open) {
+      setHymnalTab('lyrics');
+      setIsNowPlayingExpanded(true);
+    }
+  };
 
   // 9. Voice Mixer
   const [voiceMixer, setVoiceMixer] = useState<VoiceMixerState>({
@@ -555,7 +584,14 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     tenorVolume: 100,
     bassVolume: 100,
   });
-  const [isVoiceMixerOpen, setIsVoiceMixerOpen] = useState<boolean>(false);
+  const [isVoiceMixerOpen, setIsVoiceMixerOpenState] = useState<boolean>(false);
+  const setIsVoiceMixerOpen = (open: boolean) => {
+    setIsVoiceMixerOpenState(open);
+    if (open) {
+      setHymnalTab('voices');
+      setIsNowPlayingExpanded(true);
+    }
+  };
 
   const toggleVoice = (part: 'soprano' | 'alto' | 'tenor' | 'bass') => {
     setVoiceMixer(prev => ({
@@ -789,11 +825,15 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleMute,
         playbackSpeed,
         setPlaybackSpeed,
+        audioError,
 
         isPlayerMinimized,
         setIsPlayerMinimized,
         isNowPlayingExpanded,
         setIsNowPlayingExpanded,
+
+        hymnalTab,
+        setHymnalTab,
 
         isLyricsOpen,
         setIsLyricsOpen,

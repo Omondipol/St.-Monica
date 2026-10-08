@@ -84,10 +84,10 @@ export const PatronView: React.FC = () => {
                 For over seventeen years, Monica wept before the Holy Altars, interceding without tiring for her family. Bishop Saint Ambrose of Milan comforted her with the immortal words: <em>"It is impossible that the son of so many tears should perish."</em> Augustine was ultimately baptized, becoming one of the greatest Doctors of the Universal Church.
               </p>
               <p>
-                For our choir at Section 58 Nakuru, Saint Monica embodies our foundational belief that <strong>sacred singing is prayer transmuted into sound</strong>. As Saint Augustine famously wrote, <em>"Qui cantat, bis orat"</em> (He who sings, prays twice). Whenever we minister before the altar, we carry the petitions of our parish and diocese.
+                For our choir, Saint Monica embodies our foundational belief that <strong>sacred singing is prayer transmuted into sound</strong>. As Saint Augustine famously wrote, <em>"Qui cantat, bis orat"</em> (He who sings, prays twice). Whenever we minister before the altar, we carry the petitions of our parish and diocese.
               </p>
               <div className="p-4 bg-white rounded-xl border border-[#0C2340]/10 font-fraunces text-xs sm:text-sm italic text-[#1058A8]">
-                "O Saint Monica, merciful mother of steadfast intercession, pray for your choristers at Section 58 Nakuru, that every chord and cadence we offer may draw souls closer to Christ."
+                "O Saint Monica, merciful mother of steadfast intercession, pray for your choristers at St. Monica Parish, that every chord and cadence we offer may draw souls closer to Christ."
               </div>
             </>
           )}

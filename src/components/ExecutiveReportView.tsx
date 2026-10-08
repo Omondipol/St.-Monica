@@ -46,7 +46,7 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
         <div className="flex flex-wrap items-center gap-3 text-xs text-[#0C2340]/70 font-source pt-2">
           <span><strong>Organization:</strong> Kwaya ya Mtakatifu Monica (SEC 58 Nakuru, Kenya)</span>
           <span aria-hidden="true">·</span>
-          <span><strong>Document Author:</strong> Polycarp Ochieng (Web Developer)</span>
+          <span><strong>Document Author:</strong> David Kiprop (Lead Web Developer)</span>
           <span aria-hidden="true">·</span>
           <span><strong>Plan Version:</strong> 3.0 (October 2026)</span>
         </div>
@@ -69,7 +69,7 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
 
         <p className="text-base text-[#0C2340]/90 leading-relaxed font-source first-letter:text-5xl first-letter:font-fraunces first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:text-[#1058A8]">
           This executive report provides a thorough analysis of the 16-page technical and brand development plan 
-          drafted by web developer Polycarp Ochieng for St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monica, Section 58). 
+          drafted by full-stack developer David Kiprop for St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monica, Section 58). 
           The project transitions the choir from static, generic parish webpage habits into an authoritative, 
           audio-first headless web application designed to archive liturgical repertoire, distribute recordings, 
           and collect payments natively via Safaricom M-Pesa.
@@ -262,7 +262,7 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
         </h2>
 
         <p className="text-sm text-[#0C2340]/90 leading-relaxed font-source">
-          Polycarp Ochieng has made project commencement conditional upon receiving 9 specific items from the choir:
+          The development team has made project commencement conditional upon receiving 9 specific items from the choir:
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-source">
@@ -316,7 +316,7 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
         {/* Signature & Sign-Off Blocks */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 text-xs font-source">
           <div className="border-t border-[#0C2340]/40 pt-3 space-y-1">
-            <span className="font-bold block text-[#0C2340]">Polycarp Ochieng</span>
+            <span className="font-bold block text-[#0C2340]">David Kiprop</span>
             <span className="text-[#0C2340]/60">Lead Web Developer</span>
             <span className="text-[10px] text-[#0C2340]/40 block">Date: October 2026</span>
           </div>

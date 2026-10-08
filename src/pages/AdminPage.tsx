@@ -443,7 +443,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const handleResetDefaults = () => {
     if (window.confirm('Are you sure you want to restore original default songs, sheet music, and choir officials? Any custom edits will be reset.')) {
       resetToDefaults();
-      notify('All data restored to verified default St. Monica Section 58 choir catalog.');
+      notify('All data restored to verified default St. Monica Catholic Choir catalog.');
     }
   };
 
@@ -504,7 +504,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </form>
 
         <p className="text-[11px] text-slate-400 font-source border-t border-slate-100 pt-3">
-          St. Monica Catholic Choir · Section 58 Nakuru · CDDN
+          St. Monica Catholic Choir · Nakuru · CDDN
         </p>
       </div>
     );
@@ -1012,7 +1012,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               </div>
               <h3 className="font-fraunces font-bold text-red-900 text-base">Reset to Verified Catalog</h3>
               <p className="text-xs text-red-700/80">
-                Restore the default catalog of St. Monica Choir Section 58 Nakuru with real YouTube releases.
+                Restore the default catalog of St. Monica Catholic Choir Nakuru with real YouTube releases.
               </p>
               <button
                 onClick={handleResetDefaults}
@@ -1360,7 +1360,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     required
                     value={leaderForm.name}
                     onChange={e => setLeaderForm({ ...leaderForm, name: e.target.value })}
-                    placeholder="Mwalimu Polycarp Ochieng"
+                    placeholder="Mwalimu Joseph Otieno"
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
                 </div>

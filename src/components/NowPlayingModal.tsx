@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { 
   X, 
@@ -6,427 +6,655 @@ import {
   Pause, 
   SkipBack, 
   SkipForward, 
-  RotateCcw, 
-  RotateCw, 
-  Sliders, 
-  FileText, 
   Volume2, 
   VolumeX, 
-  ShoppingCart, 
-  Music, 
-  Sparkles, 
-  Share2, 
-  Check, 
-  ExternalLink 
+  ShoppingBag, 
+  BookOpen, 
+  Layers, 
+  Music2, 
+  ChevronLeft, 
+  ChevronRight,
+  RotateCcw
 } from 'lucide-react';
+import { SongCoverArt } from './SongCoverArt';
+import { RealAudioWaveform } from './RealAudioWaveform';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
-import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 export const NowPlayingModal: React.FC = () => {
   const {
-    songs,
     currentSong,
     isPlaying,
     togglePlay,
-    playSong,
+    currentTimeSeconds,
+    seekAudioBySeconds,
     playNext,
     playPrevious,
-    skipSeconds,
-    currentTimeSeconds,
-    totalDurationSeconds,
-    audioProgress,
-    seekAudioByPercent,
+    songs,
     volume,
     setVolume,
     isMuted,
     toggleMute,
-    playbackSpeed,
-    setPlaybackSpeed,
+    formatTime,
     isNowPlayingExpanded,
     setIsNowPlayingExpanded,
-    isLyricsOpen,
-    setIsLyricsOpen,
-    currentLyricLineIndex,
+    hymnalTab,
+    setHymnalTab,
     voiceMixer,
-    toggleVoice,
     setVoiceVolume,
-    setIsVoiceMixerOpen,
-    setIsYoutubeModalOpen,
+    toggleVoice,
     addToCart,
-    formatPrice,
-    formatTime,
+    audioError,
     lang
   } = useChoir();
 
-  const [lyricsLang, setLyricsLang] = useState<'sw' | 'en'>(lang);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [lyricsLanguage, setLyricsLanguage] = useState<'sw' | 'en'>(lang);
+  const [isPromptDismissed, setIsPromptDismissed] = useState<boolean>(false);
+  const touchStartYRef = useRef<number | null>(null);
+
+  // Reset prompt dismissed status when currentSong changes
+  useEffect(() => {
+    setIsPromptDismissed(false);
+  }, [currentSong.id]);
+
+  const handleReplayPreview = () => {
+    setIsPromptDismissed(false);
+    seekAudioBySeconds(0);
+    togglePlay();
+  };
+
+  // Sync lyrics language with site language default
+  useEffect(() => {
+    setLyricsLanguage(lang);
+  }, [lang]);
+
+  // Handle Escape key to close without stopping music
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isNowPlayingExpanded) {
+        setIsNowPlayingExpanded(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isNowPlayingExpanded, setIsNowPlayingExpanded]);
 
   if (!isNowPlayingExpanded) return null;
 
-  const handleShare = () => {
-    const shareUrl = `${window.location.origin}?song=${currentSong.id}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareUrl);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2500);
+  const currentIndex = songs.findIndex(s => s.id === currentSong.id);
+  const formattedCurrent = formatTime(currentTimeSeconds);
+  const fullDuration = currentSong.duration || '4:36';
+  const youtubeUrl = currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL;
+
+  // Mobile swipe down to close
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches[0]) {
+      touchStartYRef.current = e.touches[0].clientY;
     }
   };
 
-  const activeLyrics = lyricsLang === 'sw' 
-    ? (currentSong.lyricsSwahili || []) 
-    : (currentSong.lyricsEnglish || []);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current !== null && e.changedTouches[0]) {
+      const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+      if (deltaY > 60) {
+        setIsNowPlayingExpanded(false);
+      }
+      touchStartYRef.current = null;
+    }
+  };
+
+  // Liturgical placement in Mass in normal sentence case
+  const liturgicalPlacement = lang === 'sw' 
+    ? `${currentSong.seasonSwahili || 'Wakati wa Kawaida'} · ${currentSong.partOfMassSwahili || 'Wimbo wa Misa'}`
+    : `${currentSong.season || 'Ordinary Time'} · ${currentSong.partOfMass || 'Meditation'}`;
+
+  // Authentic choir reflection text
+  const choirSentence = lang === 'sw'
+    ? (currentSong.whyWeSingItSw || '')
+    : (currentSong.whyWeSingIt || '');
+
+  // Score preview image mapping
+  const getScoreImage = (songId: string) => {
+    switch (songId) {
+      case 'song-machozi':
+        return 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=700&q=80';
+      case 'song-maisha':
+        return 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80';
+      case 'song-nimzima':
+        return 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80';
+      case 'song-jumuiya':
+      default:
+        return 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=700&q=80';
+    }
+  };
+
+  // Voice parts data without fake live badges
+  const vocalParts = [
+    {
+      id: 'soprano' as const,
+      name: lang === 'sw' ? 'Soprano (Sauti ya Kwanza)' : 'Soprano (Melody)',
+      range: 'C4 – A5',
+      desc: lang === 'sw' ? 'Melodi kuu ya wimbo inayoongoza sala.' : 'Leading melodic line carrying the liturgical text.',
+      volume: voiceMixer.sopranoVolume,
+      active: voiceMixer.soprano
+    },
+    {
+      id: 'alto' as const,
+      name: lang === 'sw' ? 'Alto (Sauti ya Pili)' : 'Alto (Harmonic Interior)',
+      range: 'G3 – D5',
+      desc: lang === 'sw' ? 'Mwangwi wa ndani unaoongeza utulivu na uzuri.' : 'Rich inner harmonic voicing providing depth.',
+      volume: voiceMixer.altoVolume,
+      active: voiceMixer.alto
+    },
+    {
+      id: 'tenor' as const,
+      name: lang === 'sw' ? 'Tenor (Sauti ya Tatu)' : 'Tenor (Counter-Melody)',
+      range: 'C3 – G4',
+      desc: lang === 'sw' ? 'Sauti ya juu ya kiume inayoinua ushirika wa wimbo.' : 'High male harmony uplifting the choral texture.',
+      volume: voiceMixer.tenorVolume,
+      active: voiceMixer.tenor
+    },
+    {
+      id: 'bass' as const,
+      name: lang === 'sw' ? 'Bass (Sauti ya Nne)' : 'Bass (Foundation)',
+      range: 'E2 – C4',
+      desc: lang === 'sw' ? 'Sauti ya chini inayojenga msingi imara wa nguzo za wimbo.' : 'Harmonic foundation grounding the choral chord structure.',
+      volume: voiceMixer.bassVolume,
+      active: voiceMixer.bass
+    }
+  ];
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-[#0C2340]/80 backdrop-blur-md animate-in fade-in duration-200 select-none overflow-hidden"
       onClick={() => setIsNowPlayingExpanded(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Expanded Hymnal Player"
     >
+      {/* OPEN HYMNAL CONTAINER: Fits on 1366x600 laptop screens without scrolling */}
       <div 
-        className="relative w-full max-w-4xl bg-gradient-to-b from-[#0F1E36] to-[#0A1220] rounded-3xl border border-sky-400/30 shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col text-white my-auto max-h-[92vh]"
+        className="relative w-full max-w-4xl bg-[#FAF8F5] text-[#0C2340] rounded-2xl sm:rounded-3xl border border-[#0C2340]/15 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] sm:max-h-[510px]"
         onClick={e => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/5">
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs uppercase tracking-widest font-bold text-[#7EC8F0]">
-              {lang === 'sw' ? 'Inacheza Sasa · Kwaya ya Mtakatifu Monica' : 'Now Playing · St. Monica Choir Nakuru'}
+        
+        {/* HYMNAL TOP HEADER & TABS BAR (No liturgical label in header) */}
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 border-b border-[#0C2340]/10 bg-[#FAF8F5] sticky top-0 z-20 shrink-0">
+          
+          {/* Left: Hymnal Title */}
+          <div className="flex items-center gap-2">
+            <span className="font-eb-garamond font-semibold text-base sm:text-lg text-[#0C2340]">
+              {lang === 'sw' ? 'Kitabu cha Nyimbo' : 'Parish Hymnal'}
             </span>
           </div>
 
+          {/* Center: Four Tabs (Listen, Lyrics, Voices, Score) */}
+          <nav className="flex items-center gap-1 bg-[#EFECE6] p-1 rounded-xl">
+            <button
+              onClick={() => setHymnalTab('listen')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 font-source ${
+                hymnalTab === 'listen'
+                  ? 'bg-[#0C2340] text-white shadow-2xs'
+                  : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-white/60'
+              }`}
+            >
+              <Play className="w-3.5 h-3.5" />
+              <span>{lang === 'sw' ? 'Sikiliza' : 'Listen'}</span>
+            </button>
+
+            <button
+              onClick={() => setHymnalTab('lyrics')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 font-source ${
+                hymnalTab === 'lyrics'
+                  ? 'bg-[#0C2340] text-white shadow-2xs'
+                  : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-white/60'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>{lang === 'sw' ? 'Maneno' : 'Lyrics'}</span>
+            </button>
+
+            <button
+              onClick={() => setHymnalTab('voices')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 font-source ${
+                hymnalTab === 'voices'
+                  ? 'bg-[#0C2340] text-white shadow-2xs'
+                  : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-white/60'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{lang === 'sw' ? 'Sauti Nne' : 'Voices'}</span>
+            </button>
+
+            <button
+              onClick={() => setHymnalTab('score')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 font-source ${
+                hymnalTab === 'score'
+                  ? 'bg-[#0C2340] text-white shadow-2xs'
+                  : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-white/60'
+              }`}
+            >
+              <Music2 className="w-3.5 h-3.5" />
+              <span>{lang === 'sw' ? 'Noti' : 'Score'}</span>
+            </button>
+          </nav>
+
+          {/* Right: Close button (X returns to mini player without stopping music) */}
           <button
             onClick={() => setIsNowPlayingExpanded(false)}
-            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
-            aria-label="Close now playing"
+            className="p-1.5 text-slate-600 hover:text-[#0C2340] hover:bg-[#0C2340]/5 rounded-lg transition-colors cursor-pointer"
+            aria-label="Close player"
+            title="Return to mini player (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Main Body */}
-        <div className="p-6 sm:p-8 overflow-y-auto space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left: Vinyl & Artwork & Song Meta */}
-            <div className="lg:col-span-5 flex flex-col items-center text-center space-y-5">
-              <div className="relative group">
-                <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-2xl bg-gradient-to-br from-[#1058A8] via-[#0B2545] to-[#061426] p-4 flex flex-col items-center justify-center shadow-2xl border border-sky-400/30 relative overflow-hidden">
-                  {/* Subtle Background Glow */}
-                  <div className="absolute inset-0 bg-radial from-sky-400/20 to-transparent pointer-events-none" />
+        {/* BODY CONTAINER */}
+        <div className="flex-1 overflow-y-auto">
+          
+          {/* ================= TAB 1: LISTEN ================= */}
+          {/* Fits completely inside window with no scrolling on 1366x600 screen */}
+          {hymnalTab === 'listen' && (
+            <div className="p-4 sm:p-5 flex flex-col md:flex-row items-center gap-4 sm:gap-6 min-h-full">
+              
+              {/* Left: Smaller Cover (about 220px) with NO text on the image */}
+              <div className="w-[170px] sm:w-[200px] lg:w-[220px] aspect-square rounded-2xl overflow-hidden shrink-0 shadow-md border border-[#0C2340]/15 bg-[#0C2340]">
+                <SongCoverArt song={currentSong} size="hymnal" className="w-full h-full object-cover" />
+              </div>
 
-                  {/* Choir Logo Vinyl Center */}
-                  <ChoirLogo size={90} className={`shadow-xl ${isPlaying ? 'scale-105' : ''} transition-transform duration-700`} />
-                  
-                  <div className="mt-4 text-center z-10">
-                    <span className="text-[11px] uppercase tracking-wider font-bold text-[#7EC8F0] block">
-                      SEC 58 NAKURU
-                    </span>
-                    <span className="text-xs text-white/80 font-serif italic mt-0.5 block">
-                      {currentSong.album}
-                    </span>
+              {/* Right: Title, Composer, Liturgical placement once, Why We Sing It (if exists), Waveform & Controls */}
+              <div className="flex-1 w-full flex flex-col justify-between space-y-2.5 min-w-0">
+                
+                {/* Title and composer on one block, with Ordinary Time · Meditation directly under title */}
+                <div className="space-y-0.5">
+                  <h2 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-[#0C2340] leading-tight truncate">
+                    {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-700 font-source">
+                    {lang === 'sw' ? 'Mtunzi:' : 'Composer:'}{' '}
+                    <strong className="text-[#0C2340] font-semibold">{currentSong.composer}</strong>
+                  </p>
+                  {/* Ordinary Time · Meditation shown only once, directly under the title */}
+                  <p className="text-xs text-[#1058A8] font-source font-medium pt-0.5">
+                    {liturgicalPlacement}
+                  </p>
+                </div>
+
+                {/* Why We Sing This Hymn box */}
+                {choirSentence ? (
+                  <div className="p-2 sm:p-2.5 bg-white rounded-xl border border-[#0C2340]/10 text-xs text-slate-700 leading-relaxed font-source shadow-2xs">
+                    <strong className="block text-[#0C2340] font-semibold mb-0.5">
+                      {lang === 'sw' ? 'Kwanini Tunaimba Wimbo Huu' : 'Why We Sing This Hymn'}
+                    </strong>
+                    <p>{choirSentence}</p>
+                  </div>
+                ) : null}
+
+                {/* Real Audio Waveform built from actual preview file */}
+                <div className="space-y-1 pt-0.5">
+                  <div className="p-2 sm:p-2.5 bg-white rounded-xl border border-[#0C2340]/10 shadow-2xs">
+                    <RealAudioWaveform
+                      song={currentSong}
+                      currentTime={currentTimeSeconds}
+                      duration={40}
+                      isPlaying={isPlaying}
+                      onSeek={(secs) => seekAudioBySeconds(secs)}
+                      height={36}
+                      audioError={audioError}
+                    />
                   </div>
 
-                  {isPlaying && (
-                    <div className="absolute bottom-3 flex items-center gap-1">
-                      <span className="w-1 h-3 bg-[#7EC8F0] rounded animate-bounce" />
-                      <span className="w-1 h-5 bg-[#7EC8F0] rounded animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1 h-2 bg-[#7EC8F0] rounded animate-bounce [animation-delay:300ms]" />
-                      <span className="w-1 h-4 bg-[#7EC8F0] rounded animate-bounce [animation-delay:75ms]" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="font-fraunces text-2xl sm:text-3xl font-bold text-white leading-tight">
-                  {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
-                </h2>
-                <p className="text-sm font-semibold text-[#7EC8F0] mt-1">
-                  {currentSong.composer}
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-white border border-white/15">
-                    {lang === 'sw' ? currentSong.seasonSwahili : currentSong.season}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-500/20 text-[#7EC8F0] border border-sky-400/30">
-                    {lang === 'sw' ? currentSong.partOfMassSwahili : currentSong.partOfMass}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-white/80 bg-white/5 border border-white/10">
-                    Key {currentSong.musicalKey} · {currentSong.voicing}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action buttons under artwork */}
-              <div className="flex items-center gap-2 pt-1 w-full justify-center">
-                <button
-                  onClick={() => setIsYoutubeModalOpen(true)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-red-600/30 hover:bg-red-600/60 border border-red-500/40 flex items-center gap-2 transition-all cursor-pointer shadow-sm"
-                >
-                  <RealYouTubeIcon size={18} variant="badge" />
-                  <span>{lang === 'sw' ? 'Tazama Video Rasmi' : 'Watch Official Video'}</span>
-                </button>
-
-                <button
-                  onClick={handleShare}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4 text-[#7EC8F0]" />}
-                  <span>{copiedLink ? (lang === 'sw' ? 'Imenakiliwa!' : 'Copied!') : (lang === 'sw' ? 'Shiriki' : 'Share')}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Right: Controls, Lyrics & Rehearsal Tools */}
-            <div className="lg:col-span-7 flex flex-col space-y-6">
-              
-              {/* Interactive Large Waveform & Scrubber */}
-              <div className="bg-black/30 p-5 rounded-2xl border border-white/10 space-y-4">
-                <div className="flex items-center justify-between text-xs font-mono font-bold text-white/90">
-                  <span className="text-[#7EC8F0]">{formatTime(currentTimeSeconds)}</span>
-                  <span>{formatTime(totalDurationSeconds)}</span>
+                  {/* Persistent single line under waveform at all times & time display */}
+                  <div className="flex items-center justify-between text-xs font-source tabular-nums text-slate-700 px-1">
+                    <span className="font-semibold text-[#0C2340]">
+                      {formattedCurrent} of 0:40
+                    </span>
+                    <a
+                      href={youtubeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#1058A8] hover:text-[#0C2340] underline underline-offset-2 flex items-center gap-1 font-medium transition-colors"
+                      title={lang === 'sw' ? 'Sikiliza wimbo mzima kwenye YouTube' : 'Listen to the full song on YouTube'}
+                    >
+                      <RealYouTubeIcon size={14} variant="badge" />
+                      <span>
+                        {lang === 'sw' 
+                          ? `Hakiki sek 40 · Rekodi kamili (${fullDuration}) YouTube` 
+                          : `40s liturgical preview · Full recording (${fullDuration}) on YouTube`}
+                      </span>
+                    </a>
+                  </div>
                 </div>
 
-                <div 
-                  onClick={e => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const percent = ((e.clientX - rect.left) / rect.width) * 100;
-                    seekAudioByPercent(percent);
-                  }}
-                  className="w-full h-12 flex items-end justify-between gap-1 p-1 bg-black/40 rounded-xl border border-white/10 cursor-pointer relative group select-none"
-                >
-                  {currentSong.waveformPeaks.map((peak, idx) => {
-                    const barPercent = (idx / currentSong.waveformPeaks.length) * 100;
-                    const isPlayed = barPercent <= audioProgress;
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex-1 rounded-full transition-all duration-75 pointer-events-none ${
-                          isPlayed 
-                            ? 'bg-gradient-to-t from-[#1058A8] to-[#7EC8F0]' 
-                            : 'bg-white/20 group-hover:bg-white/35'
-                        }`}
-                        style={{ height: `${Math.max(20, peak)}%` }}
-                      />
-                    );
-                  })}
+                {/* Primary Playback Controls, Volume, and Song Counter on the SAME horizontal centre line */}
+                <div className="flex items-center justify-between gap-3 pt-1 w-full">
                   
-                  {/* Glowing Playhead Line */}
-                  <div 
-                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_12px_#7EC8F0] pointer-events-none rounded"
-                    style={{ left: `${audioProgress}%` }}
-                  />
-                </div>
+                  {/* Previous, Play/Pause, Next */}
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <button
+                      onClick={playPrevious}
+                      className="p-1.5 text-slate-700 hover:text-[#0C2340] rounded-full hover:bg-black/5 cursor-pointer transition-colors flex items-center justify-center"
+                      title="Previous hymn"
+                      aria-label="Previous hymn"
+                    >
+                      <SkipBack className="w-5 h-5 fill-current" />
+                    </button>
 
-                {/* Primary Player Buttons Cluster */}
-                <div className="flex items-center justify-center gap-4 sm:gap-6 pt-2">
-                  <button
-                    onClick={() => skipSeconds(-10)}
-                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
-                    title="-10 seconds"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </button>
+                    <button
+                      onClick={togglePlay}
+                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#1058A8] hover:bg-[#0C2340] text-white flex items-center justify-center cursor-pointer shadow-md active:scale-95 transition-all"
+                      aria-label={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-5 h-5 fill-current" />
+                      ) : (
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      )}
+                    </button>
 
-                  <button
-                    onClick={playPrevious}
-                    className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
-                    title="Previous Song"
-                  >
-                    <SkipBack className="w-5 h-5 fill-current" />
-                  </button>
-
-                  <button
-                    onClick={togglePlay}
-                    className="w-14 h-14 rounded-full bg-gradient-to-r from-[#1058A8] to-[#2B8CED] text-white flex items-center justify-center shadow-lg shadow-sky-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-sky-300/40"
-                    aria-label={isPlaying ? 'Pause' : 'Play'}
-                  >
-                    {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
-                  </button>
-
-                  <button
-                    onClick={playNext}
-                    className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
-                    title="Next Song"
-                  >
-                    <SkipForward className="w-5 h-5 fill-current" />
-                  </button>
-
-                  <button
-                    onClick={() => skipSeconds(10)}
-                    className="p-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
-                    title="+10 seconds"
-                  >
-                    <RotateCw className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Extra playback speed & volume in bar */}
-                <div className="flex items-center justify-between pt-3 border-t border-white/10 text-xs">
-                  {/* Speed toggle for rehearsal */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-white/60 font-semibold">{lang === 'sw' ? 'Kasi ya Mazoezi:' : 'Practice Speed:'}</span>
-                    {[0.75, 1.0, 1.25].map(spd => (
-                      <button
-                        key={spd}
-                        onClick={() => setPlaybackSpeed(spd)}
-                        className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors cursor-pointer ${
-                          playbackSpeed === spd 
-                            ? 'bg-[#1058A8] text-white border border-sky-400/40' 
-                            : 'bg-white/5 text-white/70 hover:bg-white/10'
-                        }`}
-                      >
-                        {spd}x
-                      </button>
-                    ))}
+                    <button
+                      onClick={playNext}
+                      className="p-1.5 text-slate-700 hover:text-[#0C2340] rounded-full hover:bg-black/5 cursor-pointer transition-colors flex items-center justify-center"
+                      title="Next hymn"
+                      aria-label="Next hymn"
+                    >
+                      <SkipForward className="w-5 h-5 fill-current" />
+                    </button>
                   </div>
 
                   {/* Volume Slider */}
                   <div className="flex items-center gap-2">
-                    <button onClick={toggleMute} className="text-white/70 hover:text-white cursor-pointer">
-                      {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-[#7EC8F0]" />}
+                    <button
+                      onClick={toggleMute}
+                      className="text-slate-600 hover:text-[#0C2340] transition-colors cursor-pointer p-1 flex items-center justify-center"
+                      aria-label={isMuted ? 'Unmute' : 'Mute'}
+                    >
+                      {isMuted || volume === 0 ? (
+                        <VolumeX className="w-4 h-4 text-red-500" />
+                      ) : (
+                        <Volume2 className="w-4 h-4" />
+                      )}
                     </button>
                     <input
                       type="range"
-                      min={0}
-                      max={1}
-                      step={0.05}
+                      min="0"
+                      max="1"
+                      step="0.05"
                       value={isMuted ? 0 : volume}
-                      onChange={e => setVolume(parseFloat(e.target.value))}
-                      className="w-20 sm:w-28 accent-[#7EC8F0] cursor-pointer"
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="w-16 sm:w-24 h-1.5 bg-[#0C2340]/15 rounded-lg appearance-none cursor-pointer accent-[#1058A8]"
+                      aria-label="Volume slider"
                     />
                   </div>
-                </div>
-              </div>
 
-              {/* Synced Lyrics Section */}
-              <div className="bg-black/25 p-5 rounded-2xl border border-white/10 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[#7EC8F0]" />
-                    <h3 className="font-fraunces text-sm font-bold text-white">
-                      {lang === 'sw' ? 'Maneno ya Wimbo (Lyrics)' : 'Hymn Lyrics & Text'}
-                    </h3>
+                  {/* Song Counter: Aligned on the exact same horizontal centre line */}
+                  <div className="text-xs font-source font-semibold tabular-nums text-slate-600 shrink-0 flex items-center">
+                    {lang === 'sw' 
+                      ? `Wimbo ${currentIndex + 1} kati ya ${songs.length}` 
+                      : `Hymn ${currentIndex + 1} of ${songs.length}`}
                   </div>
 
-                  {/* Lyrics Language Switch */}
-                  <div className="flex items-center bg-white/10 rounded-lg p-0.5 text-[11px] font-bold">
-                    <button
-                      onClick={() => setLyricsLang('sw')}
-                      className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
-                        lyricsLang === 'sw' ? 'bg-[#1058A8] text-white' : 'text-white/70 hover:text-white'
-                      }`}
-                    >
-                      Kiswahili
-                    </button>
-                    <button
-                      onClick={() => setLyricsLang('en')}
-                      className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
-                        lyricsLang === 'en' ? 'bg-[#1058A8] text-white' : 'text-white/70 hover:text-white'
-                      }`}
-                    >
-                      English
-                    </button>
-                  </div>
                 </div>
 
-                <div className="max-h-36 overflow-y-auto space-y-2 pr-2 text-xs font-source">
-                  {activeLyrics.map((line, idx) => {
-                    const isCurrent = idx === currentLyricLineIndex;
-                    return (
-                      <p
-                        key={idx}
-                        className={`transition-all py-1 px-2 rounded-lg ${
-                          isCurrent
-                            ? 'bg-[#1058A8]/40 text-[#7EC8F0] font-bold scale-[1.01] border-l-2 border-[#7EC8F0]'
-                            : 'text-white/75 hover:text-white'
-                        }`}
-                      >
-                        {line}
-                      </p>
-                    );
-                  })}
+              </div>
+
+            </div>
+          )}
+
+          {/* ================= TAB 2: LYRICS ================= */}
+          {hymnalTab === 'lyrics' && (
+            <div className="p-5 sm:p-8 space-y-4 max-w-2xl mx-auto">
+              {/* Language Switch */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10">
+                <span className="text-xs font-medium text-slate-600 font-source">
+                  {lang === 'sw' ? 'Lugha ya maneno:' : 'Lyrics translation:'}
+                </span>
+                <div className="flex items-center gap-1 bg-[#EFECE6] p-1 rounded-lg">
+                  <button
+                    onClick={() => setLyricsLanguage('sw')}
+                    className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors font-source cursor-pointer ${
+                      lyricsLanguage === 'sw'
+                        ? 'bg-[#0C2340] text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Kiswahili
+                  </button>
+                  <button
+                    onClick={() => setLyricsLanguage('en')}
+                    className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors font-source cursor-pointer ${
+                      lyricsLanguage === 'en'
+                        ? 'bg-[#0C2340] text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    English
+                  </button>
                 </div>
               </div>
 
-              {/* Repertoire Queue (The Choir's 4 Songs) */}
-              <div className="bg-black/25 p-4 rounded-2xl border border-white/10">
-                <h4 className="text-xs uppercase tracking-wider font-bold text-[#7EC8F0] mb-3 flex items-center gap-1.5">
-                  <Music className="w-3.5 h-3.5" />
-                  <span>{lang === 'sw' ? 'Nyimbo Zote za Kwaya ya SEC 58' : 'All Verified Choir Songs'}</span>
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {songs.map(song => {
-                    const isSelected = song.id === currentSong.id;
-                    return (
-                      <button
-                        key={song.id}
-                        onClick={() => playSong(song)}
-                        className={`text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-between gap-2 border ${
-                          isSelected
-                            ? 'bg-[#1058A8]/30 border-sky-400 text-white shadow-sm'
-                            : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/80'
-                        }`}
-                      >
-                        <div className="min-w-0">
-                          <p className="font-bold text-xs truncate">
-                            {lang === 'sw' ? song.titleSwahili : song.title}
-                          </p>
-                          <p className="text-[10px] text-[#7EC8F0] truncate font-source">
-                            {song.composer}
-                          </p>
-                        </div>
-                        <div className="shrink-0">
-                          {isSelected && isPlaying ? (
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                          ) : (
-                            <Play className="w-3.5 h-3.5 text-white/50" />
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Sheet Music Score Instant Buy Footer */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-sky-500/10 to-transparent border border-amber-400/30 flex items-center justify-between gap-4">
-                <div>
-                  <h4 className="text-xs font-bold text-amber-300">
-                    {lang === 'sw' ? `Noti za ${currentSong.title} (SATB)` : `Official Vocal Score for ${currentSong.title}`}
-                  </h4>
-                  <p className="text-[11px] text-white/80 font-source mt-0.5">
-                    {lang === 'sw' ? 'Mfumo wa Tonic Sol-fa na Staff. Malipo ya haraka kwa M-Pesa.' : 'Tonic Sol-fa & Staff notation PDF score via instant M-Pesa.'}
+              {/* Hymn Lyrics in EB Garamond regular font */}
+              <div className="space-y-4 text-left font-eb-garamond text-base sm:text-lg leading-relaxed text-[#0C2340]">
+                {(lyricsLanguage === 'sw' ? currentSong.lyricsSwahili : currentSong.lyricsEnglish).map((stanza, idx) => (
+                  <p 
+                    key={idx} 
+                    className={stanza.startsWith('Kiitikio:') || stanza.startsWith('Refrain:') ? 'font-semibold italic text-[#1058A8] pl-3 border-l-2 border-[#1058A8]/40' : ''}
+                  >
+                    {stanza}
                   </p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 3: VOICES (SATB Vocal Parts) ================= */}
+          {hymnalTab === 'voices' && (
+            <div className="p-5 sm:p-8 space-y-4 max-w-2xl mx-auto">
+              <div className="space-y-1">
+                <h3 className="font-eb-garamond text-xl font-semibold text-[#0C2340]">
+                  {lang === 'sw' ? 'Mgawanyo wa Sauti Nne (SATB)' : 'Four-Part Vocal Balances'}
+                </h3>
+                <p className="text-xs text-slate-600 font-source">
+                  {lang === 'sw' 
+                    ? 'Rekebisha sauti za waimbaji wa kwaya ili kujifunza sehemu yako ya solfa.'
+                    : 'Adjust individual voice balances for choral rehearsal and tonic sol-fa training.'}
+                </p>
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                {vocalParts.map((part) => (
+                  <div 
+                    key={part.id}
+                    className="p-3 bg-white rounded-xl border border-[#0C2340]/10 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <strong className="text-sm font-semibold text-[#0C2340] font-source">
+                          {part.name}
+                        </strong>
+                        <span className="text-[11px] font-source tabular-nums text-slate-500">
+                          ({part.range})
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 font-source mt-0.5">
+                        {part.desc}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
+                      <button
+                        onClick={() => toggleVoice(part.id)}
+                        className={`px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer transition-colors font-source ${
+                          part.active
+                            ? 'bg-[#1058A8] text-white'
+                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                        }`}
+                      >
+                        {part.active ? (lang === 'sw' ? 'Washa' : 'Active') : (lang === 'sw' ? 'Zima' : 'Mute')}
+                      </button>
+
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={part.volume}
+                        disabled={!part.active}
+                        onChange={(e) => setVoiceVolume(part.id, parseInt(e.target.value))}
+                        className="w-20 h-1.5 bg-[#0C2340]/15 rounded-lg appearance-none cursor-pointer accent-[#1058A8] disabled:opacity-40"
+                        aria-label={`${part.name} volume`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB 4: SCORE ================= */}
+          {hymnalTab === 'score' && (
+            <div className="p-5 sm:p-8 space-y-4 max-w-2xl mx-auto">
+              <div className="space-y-1">
+                <h3 className="font-eb-garamond text-xl font-semibold text-[#0C2340]">
+                  {lang === 'sw' ? 'Noti za Kwaya (SATB)' : 'Liturgical Vocal Score'}
+                </h3>
+                <p className="text-xs text-slate-600 font-source">
+                  {lang === 'sw'
+                    ? 'Noti kamili za Tonic Sol-fa na Stafu kwa ajili ya walimu wa kwaya.'
+                    : 'Full four-part vocal arrangement in Tonic Sol-fa and Staff notation.'}
+                </p>
+              </div>
+
+              {/* Score Preview image */}
+              <div className="w-full h-36 rounded-xl overflow-hidden border border-[#0C2340]/15 relative shadow-2xs bg-slate-100">
+                <img
+                  src={getScoreImage(currentSong.id)}
+                  alt={`${currentSong.title} Score Preview`}
+                  className="w-full h-full object-cover object-top"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/15 pointer-events-none">
+                  <span className="text-xs font-bold text-white tracking-widest bg-black/40 px-3 py-1 rounded-md backdrop-blur-xs font-source">
+                    PREVIEW
+                  </span>
+                </div>
+              </div>
+
+              {/* Vocal parts breakdown */}
+              <div className="flex items-center justify-between text-xs font-source text-slate-700 p-2.5 bg-white rounded-xl border border-[#0C2340]/10">
+                <div>
+                  <strong>Voicing:</strong> {currentSong.voicing}
+                </div>
+                <div>
+                  <strong>Key:</strong> {currentSong.musicalKey}
+                </div>
+                <div>
+                  <strong>Notation:</strong> Sol-fa & Staff
+                </div>
+              </div>
+
+              {/* Price & Buy Score button */}
+              <div className="p-3 bg-white rounded-xl border border-[#0C2340]/10 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="font-eb-garamond font-semibold text-lg text-[#1058A8]">
+                    KES 300
+                  </span>
+                  <span className="text-[10px] font-bold bg-emerald-600 text-white px-2 py-0.5 rounded tracking-normal">
+                    M-Pesa
+                  </span>
                 </div>
 
                 <button
                   onClick={() => {
                     addToCart({
-                      id: `sheet-${currentSong.id}`,
-                      name: `Noti za ${currentSong.title} (SATB PDF)`,
-                      nameSw: `Noti za ${currentSong.title} (SATB PDF)`,
+                      id: `prod-sheet-${currentSong.id}`,
+                      name: `${currentSong.title} Score`,
+                      nameSw: `Noti za ${currentSong.titleSwahili}`,
                       type: 'sheet_music',
-                      priceKes: currentSong.scorePriceKes,
+                      priceKes: currentSong.scorePriceKes || 300,
                       priceUsd: 2.50,
-                      description: `Official vocal score for ${currentSong.title}.`,
-                      descriptionSw: `Noti rasmi za sauti nne za ${currentSong.title}.`,
+                      description: `Complete SATB choral score for ${currentSong.title}.`,
+                      descriptionSw: `Noti kamili za sauti nne kwa ajili ya ${currentSong.titleSwahili}.`,
                       image: 'sheet_music_hymnal',
                       downloadable: true
                     });
                     setIsNowPlayingExpanded(false);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-black bg-amber-400 hover:bg-amber-300 transition-colors shadow-md flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  className="px-5 py-2.5 bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-2xs transition-colors font-source"
                 >
-                  <ShoppingCart className="w-3.5 h-3.5" />
-                  <span>{formatPrice(currentSong.scorePriceKes)}</span>
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>{lang === 'sw' ? 'Nunua Noti' : 'Buy Score'}</span>
                 </button>
               </div>
             </div>
-          </div>
+          )}
+
         </div>
+
+        {/* SLIDE-UP PROMPT OVER BOTTOM HALF OF EXPANDED PLAYER (when 40s preview finishes) */}
+        {currentTimeSeconds >= 40 && !isPromptDismissed && (
+          <div className="absolute inset-x-0 bottom-0 bg-[#0C2340] text-white p-5 sm:p-6 rounded-b-2xl sm:rounded-b-3xl border-t border-white/20 shadow-2xl z-30 animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h4 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-white">
+                  {lang === 'sw' ? 'Umeupenda wimbo huu?' : 'Enjoying this hymn?'}
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-200 font-source leading-relaxed">
+                  {lang === 'sw'
+                    ? `Sikiliza rekodi kamili ya dakika ${fullDuration} kwenye chaneli yetu ya YouTube, bure.`
+                    : `Hear the full ${fullDuration} recording on our YouTube channel, free.`}
+                </p>
+              </div>
+
+              {/* Close prompt button */}
+              <button
+                onClick={() => setIsPromptDismissed(true)}
+                className="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close prompt"
+                title="Close prompt"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Two Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-3.5">
+              <a
+                href={youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-[#1058A8] hover:bg-[#186DC7] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md font-source"
+              >
+                <RealYouTubeIcon size={18} variant="badge" />
+                <span>{lang === 'sw' ? 'Sikiliza wimbo mzima kwenye YouTube' : 'Listen to full hymn on YouTube'}</span>
+              </a>
+
+              <button
+                onClick={handleReplayPreview}
+                className="w-full sm:w-auto py-3 px-5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer font-source"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>{lang === 'sw' ? 'Rudia hakiki ya sek 40' : 'Replay 40s preview'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTLE FLOATING BUTTON AT BOTTOM-RIGHT IF VISITOR CLOSED THE PROMPT */}
+        {currentTimeSeconds >= 40 && isPromptDismissed && (
+          <a
+            href={youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-4 right-4 z-20 px-3.5 py-2 rounded-xl bg-[#0C2340] text-white text-xs font-semibold border border-white/20 hover:bg-[#1058A8] shadow-lg flex items-center gap-2 transition-all font-source animate-in fade-in"
+            title="Listen to full hymn on YouTube"
+          >
+            <RealYouTubeIcon size={15} variant="badge" />
+            <span>{lang === 'sw' ? 'Wimbo mzima YouTube ↗' : 'Full song on YouTube ↗'}</span>
+          </a>
+        )}
+
       </div>
     </div>
   );

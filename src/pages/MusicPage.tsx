@@ -26,6 +26,7 @@ export const MusicPage: React.FC = () => {
     currentSong, 
     isPlaying, 
     playSong, 
+    togglePlay,
     setIsLyricsOpen, 
     addToCart, 
     formatPrice, 
@@ -81,8 +82,8 @@ export const MusicPage: React.FC = () => {
             </h1>
             <p className="text-base text-[#0C2340]/80 font-source mt-2 max-w-2xl">
               {lang === 'sw'
-                ? `Nyimbo halisi za Kwaya ya Mtakatifu Monica Section 58 Nakuru kutoka YouTube (${YOUTUBE_CHANNEL_HANDLE}) na noti za sauti nne (SATB) zinazouzwa kwa walimu wa kwaya.`
-                : `Authentic recordings by St. Monica Choir Section 58 Nakuru from YouTube (${YOUTUBE_CHANNEL_HANDLE}), alongside SATB vocal scores available for choirmasters.`}
+                ? `Nyimbo za Kwaya ya Mtakatifu Monica kutoka YouTube (${YOUTUBE_CHANNEL_HANDLE}) na noti za sauti nne (SATB) zinazouzwa kwa walimu wa kwaya.`
+                : `Official recordings by St. Monica Catholic Choir from YouTube (${YOUTUBE_CHANNEL_HANDLE}), alongside SATB vocal scores available for choirmasters.`}
             </p>
           </div>
 
@@ -209,7 +210,13 @@ export const MusicPage: React.FC = () => {
               >
                 <div className="flex items-start sm:items-center gap-4 min-w-0">
                   <div 
-                    onClick={() => playSong(song)}
+                    onClick={() => {
+                      if (currentSong.id === song.id) {
+                        togglePlay();
+                      } else {
+                        playSong(song);
+                      }
+                    }}
                     className="relative w-24 sm:w-28 aspect-16/9 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs cursor-pointer group"
                   >
                     <img

@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { ChoirProvider, useChoir } from './context/ChoirContext';
 import { ChoirHeader } from './components/ChoirHeader';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
-import { YouTubeAudioHost } from './components/YouTubeAudioHost';
 import { NowPlayingModal } from './components/NowPlayingModal';
 import { YouTubePlayerModal } from './components/YouTubePlayerModal';
-import { VoiceMixerModal } from './components/VoiceMixerModal';
-import { LyricsModal } from './components/LyricsModal';
 import { CartDrawer } from './components/CartDrawer';
 import { ChoirLogo } from './components/ChoirLogo';
 import { ChoirFooter } from './components/ChoirFooter';
@@ -111,13 +108,10 @@ function ChoirApp() {
       }} />
 
       {/* Global Interactive Modals & Player */}
-      <YouTubeAudioHost />
       <AudioPlayerBar />
       <NowPlayingModal />
       <SongCutoffModal />
       <YouTubePlayerModal />
-      <VoiceMixerModal />
-      <LyricsModal />
       <CartDrawer />
     </div>
   );

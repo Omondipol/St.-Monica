@@ -102,8 +102,8 @@ export const YouTubePlayerModal: React.FC = () => {
         <div className="px-5 py-3 bg-[#0B1526] border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-white/70">
           <span className="font-source">
             {lang === 'sw'
-              ? `Wimbo rasmi wa Kwaya ya Mtakatifu Monica, Parokia ya Section 58 Nakuru.`
-              : `Official release from St. Monica Catholic Choir, Section 58 Parish Nakuru.`}
+              ? `Wimbo rasmi wa Kwaya ya Mtakatifu Monica, Nakuru.`
+              : `Official release from St. Monica Catholic Choir, Nakuru.`}
           </span>
           <a
             href={YOUTUBE_CHANNEL_URL}

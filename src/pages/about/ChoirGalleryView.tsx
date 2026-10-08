@@ -34,8 +34,8 @@ export const ChoirGalleryView: React.FC = () => {
             </h1>
             <p className="text-base text-slate-700 font-source mt-2 max-w-2xl">
               {lang === 'sw'
-                ? 'Waimbaji wote arobaini na nane (48) wa Parokia ya Mtakatifu Monica, Section 58 Nakuru wakiwa katika sare za kiliturujia, mazoezi na huduma ya Misa Takatifu.'
-                : 'The unified forty-eight (48) choristers of St. Monica Parish, Section 58 Nakuru in liturgical vestments, sacred rehearsals, and Holy Mass ministry.'}
+                ? 'Waimbaji wote arobaini na nane wa Kwaya ya Mtakatifu Monica wakiwa katika sare za kiliturujia, mazoezi na huduma ya Misa Takatifu.'
+                : 'The unified forty-eight choristers of St. Monica Catholic Choir in liturgical vestments, sacred rehearsals, and Holy Mass ministry.'}
             </p>
           </div>
           <ChoirLogo size={60} interactive={true} className="shrink-0 self-start sm:self-center" />
@@ -69,7 +69,7 @@ export const ChoirGalleryView: React.FC = () => {
         <div className="lg:col-span-7 aspect-16/10 relative overflow-hidden bg-slate-900">
           <img
             src={choirHeroImg}
-            alt="St. Monica Choir Section 58 Nakuru in Full Vestments"
+            alt="St. Monica Catholic Choir in Full Vestments"
             className="w-full h-full object-cover object-center"
             referrerPolicy="no-referrer"
           />

@@ -43,7 +43,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
             St. Monica Choir Nakuru: Strategic Web Plan Analysis
           </h1>
           <p className="mt-4 text-base sm:text-lg text-[#0C2340]/80 leading-relaxed font-source">
-            An in-depth executive appraisal of the 16-page website specification by Polycarp Ochieng. 
+            An in-depth executive appraisal of the 16-page website specification by David Kiprop. 
             Moving beyond conventional parish templates to engineer a headless, high-performing digital platform 
             for music distribution, liturgical repertoire management, and local M-Pesa monetization.
           </p>
@@ -112,7 +112,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
             </h2>
             <div className="space-y-4 text-sm sm:text-base text-[#0C2340]/80 leading-relaxed font-source">
               <p>
-                The St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monica, Section 58) website plan prepared by Polycarp Ochieng 
+                The St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monica, Section 58) website plan prepared by the engineering team 
                 represents a decisive architectural upgrade from conventional church web pages. While taking functional inspiration 
                 from the renowned <strong>KMK Makuburi</strong> choir platform in Dar es Salaam, this Version 3.0 specification 
                 resolutely rejects templated aesthetics, generic stock photography, and boilerplate church mission statements.
@@ -281,7 +281,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
             </div>
           </div>
 
-          {/* Polycarp Ochieng's 3 Non-Negotiable Tenets */}
+          {/* Lead Engineer's 3 Non-Negotiable Tenets */}
           <div className="bg-[#0C2340] text-white rounded-xl p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#7EC8F0]">
               <Flame className="w-4 h-4" />

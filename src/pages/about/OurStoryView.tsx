@@ -84,7 +84,7 @@ export const OurStoryView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div className="lg:col-span-7 space-y-4 text-sm sm:text-base text-[#0C2340]/80 font-source leading-relaxed">
           <h2 className="font-fraunces text-2xl sm:text-3xl font-bold text-[#0C2340]">
-            {lang === 'sw' ? 'Mizizi Yetu Katika Parokia ya Section 58' : 'Our Roots in Section 58 Parish, Nakuru'}
+            {lang === 'sw' ? 'Mizizi Yetu Katika Parokia ya Mtakatifu Monica' : 'Our Roots in St. Monica Parish, Nakuru'}
           </h2>
           <p>
             {lang === 'sw'
@@ -116,7 +116,7 @@ export const OurStoryView: React.FC = () => {
         <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-md">
           <img
             src={churchImg}
-            alt="St. Monica Parish Section 58 Nakuru"
+            alt="St. Monica Parish Church"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />

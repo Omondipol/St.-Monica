@@ -98,7 +98,7 @@ export const ContactPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-[#1058A8] uppercase tracking-wider font-source mb-1">
               <Mail className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Wasiliana Nasi · Section 58 Nakuru' : 'Get in Touch · Section 58 Nakuru'}</span>
+              <span>{lang === 'sw' ? 'Wasiliana Nasi' : 'Get in Touch'}</span>
             </div>
             <h1 className="font-fraunces text-2xl sm:text-4xl font-bold text-[#0C2340] leading-tight">
               {lang === 'sw' ? 'Wasiliana na Kwaya ya Mtakatifu Monica' : 'Contact St. Monica Catholic Choir'}
