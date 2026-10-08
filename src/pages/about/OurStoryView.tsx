@@ -52,9 +52,9 @@ export const OurStoryView: React.FC = () => {
     <div className="space-y-12">
       {/* Page Title Banner */}
       <section className="bg-white border border-[#0C2340]/10 rounded-2xl p-6 sm:p-10 shadow-xs space-y-4">
-        <div className="flex items-center gap-2 text-xs font-bold text-[#1058A8] uppercase tracking-wider font-mono">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#1058A8] uppercase tracking-wider font-source">
           <BookOpen className="w-4 h-4" />
-          <span>{lang === 'sw' ? 'KUHUSU SISI · HISTORIA NA UTUME WETU' : 'ABOUT US · OUR HISTORY & SACRED MISSION'}</span>
+          <span>{lang === 'sw' ? 'Historia na Utume Wetu' : 'Our History & Sacred Mission'}</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -98,17 +98,17 @@ export const OurStoryView: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#0C2340]/10 text-center">
-            <div className="p-3 bg-white rounded-xl border border-[#0C2340]/5">
-              <span className="font-fraunces text-2xl font-bold text-[#1058A8]">52+</span>
-              <p className="text-xs text-[#0C2340]/60 font-source mt-0.5">{lang === 'sw' ? 'Waimbaji Hai' : 'Active Choristers'}</p>
+            <div className="p-3 bg-white rounded-xl border border-[#0C2340]/10">
+              <span className="font-fraunces text-2xl font-bold text-[#1058A8]">{CHOIR_STATS.membersCount}</span>
+              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Waimbaji (SATB)' : 'Active Choristers'}</p>
             </div>
-            <div className="p-3 bg-white rounded-xl border border-[#0C2340]/5">
-              <span className="font-fraunces text-2xl font-bold text-[#1058A8]">14+</span>
-              <p className="text-xs text-[#0C2340]/60 font-source mt-0.5">{lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}</p>
+            <div className="p-3 bg-white rounded-xl border border-[#0C2340]/10">
+              <span className="font-fraunces text-2xl font-bold text-[#0C2340]">{CHOIR_STATS.yearsServing}</span>
+              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}</p>
             </div>
-            <div className="p-3 bg-white rounded-xl border border-[#0C2340]/5">
-              <span className="font-fraunces text-2xl font-bold text-[#1058A8]">3</span>
-              <p className="text-xs text-[#0C2340]/60 font-source mt-0.5">{lang === 'sw' ? 'Albamu za Studio' : 'Studio Albums'}</p>
+            <div className="p-3 bg-white rounded-xl border border-[#0C2340]/10">
+              <span className="font-fraunces text-2xl font-bold text-[#1058A8]">{CHOIR_STATS.repertoireCount}</span>
+              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}</p>
             </div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export const OurStoryView: React.FC = () => {
             <div key={idx} className="relative space-y-1">
               <div className="absolute -left-[25px] sm:-left-[33px] top-1 w-4 h-4 rounded-full bg-[#1058A8] border-4 border-white shadow-xs" />
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full font-mono">
+                <span className="text-xs font-bold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full font-source">
                   {item.year}
                 </span>
                 <h3 className="font-fraunces text-base sm:text-lg font-bold text-[#0C2340]">

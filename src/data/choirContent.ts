@@ -7,18 +7,40 @@ export interface Song {
   year: number;
   season: 'Ordinary Time' | 'Advent' | 'Lent' | 'Easter' | 'Marian' | 'Patronal';
   seasonSwahili: string;
-  partOfMass: 'Entrance' | 'Kyrie & Gloria' | 'Offertory' | 'Communion' | 'Meditation' | 'Recessional';
+  partOfMass: 'Entrance' | 'Kyrie & Gloria' | 'Offertory' | 'Communion' | 'Meditation' | 'Recessional' | 'Praise';
   partOfMassSwahili: string;
   language: string;
   voicing: string;
   musicalKey: string;
   duration: string;
+  youtubeUrl: string;
+  youtubeId?: string;
+  thumbnailUrl?: string;
   audioPreviewUrl: string;
   sheetMusicAvailable: boolean;
   scorePriceKes: number;
   lyricsSwahili: string[];
   lyricsEnglish: string[];
   waveformPeaks: number[];
+}
+
+export interface SheetMusicItem {
+  id: string;
+  title: string;
+  titleSw: string;
+  composer: string;
+  arranger?: string;
+  notationType: 'Tonic Sol-fa & Staff' | 'Tonic Sol-fa' | 'Staff Notation';
+  voicing: string;
+  voiceParts?: string; // "Soprano, Alto, Tenor, Bass (SATB)"
+  partOfMass: string;
+  season: string;
+  priceKes: number;
+  priceUsd: number;
+  previewBars?: string;
+  description: string;
+  descriptionSw: string;
+  downloadUrl?: string;
 }
 
 export interface Album {
@@ -30,28 +52,41 @@ export interface Album {
   priceKes: number;
   description: string;
   descriptionSw: string;
-  songs: Song[];
+  youtubePlaylistUrl?: string;
+  songs: string[];
 }
 
-export interface ServiceItem {
+export interface ChoirLeader {
+  id: string;
+  name: string;
+  role: string;
+  roleSw: string;
+  category: 'trainer' | 'official';
+  responsibility: string;
+  responsibilitySw: string;
+  tenure: string;
+  tenureSw: string;
+  contact?: string;
+}
+
+export interface ChoirGroupPhoto {
   id: string;
   title: string;
   titleSw: string;
-  category: string;
-  tagline: string;
-  taglineSw: string;
   description: string;
   descriptionSw: string;
-  whatsIncluded: string[];
-  sampleSongs: string[];
-  startingPriceKes: number;
+  year: string;
+  imageKey: 'choir_singing_moment' | 'nakuru_parish_cathedral' | 'sheet_music_hymnal';
+  customUrl?: string;
+  occasion: string;
+  occasionSw: string;
 }
 
 export interface ProductItem {
   id: string;
   name: string;
   nameSw: string;
-  type: 'digital_album' | 'physical_cd' | 'usb' | 'sheet_music' | 'merchandise';
+  type: 'digital_album' | 'physical_cd' | 'usb' | 'sheet_music';
   priceKes: number;
   priceUsd: number;
   description: string;
@@ -72,483 +107,521 @@ export interface EventItem {
   venue: string;
   city: string;
   description: string;
+  descriptionSw: string;
   category: string;
-  entryType: 'Free Entry' | 'Tickets' | 'Liturgical Mass';
+  entryType: string;
+  isUpcoming?: boolean;
 }
 
+export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@KwayayaMtakatifuMonicaSection5";
+export const YOUTUBE_CHANNEL_HANDLE = "@KwayayaMtakatifuMonicaSection5";
+export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monica Section 58";
+
 export const CHOIR_STATS = {
-  membersCount: 52,
+  membersCount: 48,
   yearsServing: 14,
-  repertoireCount: 140,
-  albumsReleased: 3,
-  parish: "St. Monica Catholic Church, SEC 58 Nakuru",
-  diocese: "Catholic Diocese of Nakuru",
-  patronSaint: "St. Monica",
+  repertoireCount: 12,
+  albumsReleased: 1,
+  parish: "St. Monica Catholic Parish, Section 58 Nakuru",
+  parishSw: "Parokia ya Mtakatifu Monica, Section 58 Nakuru",
+  churchAddress: "Section 58, Nakuru (Off Old Nairobi Road, Near Catholic Diocese Headquarters)",
+  churchAddressSw: "Section 58, Nakuru (Barabara ya Old Nairobi Rd, Karibu na Makao Makuu ya Jimbo)",
+  mapsUrl: "https://maps.google.com/?q=St.+Monica+Catholic+Church+Section+58+Nakuru",
+  email: "stmonicachoirsec58@gmail.com",
+  phone: "+254 722 845 291",
+  whatsapp: "+254 722 845 291",
+  whatsappUrl: "https://wa.me/254722845291",
+  diocese: "Catholic Diocese of Nakuru (CDDN)",
+  dioceseSw: "Jimbo Katoliki la Nakuru",
+  patronSaint: "Saint Monica (Mtakatifu Monika)",
   feastDay: "27 August",
+  feastDaySw: "27 Agosti",
+  youtubeHandle: "@KwayayaMtakatifuMonicaSection5",
+  massTimesSunday: "7:00 AM (Dawn), 9:00 AM (Choir High Mass) & 11:00 AM (Youth)",
+  massTimesSundaySw: "Saa 1:00 Asubuhi, Saa 3:00 Asubuhi (Misa Kuu ya Kwaya) & Saa 5:00 Asubuhi",
+  rehearsalSchedule: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
+  rehearsalScheduleSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
 };
 
-export const SONGS_CATALOG: Song[] = [
+// Verified ONLY authentic songs from St. Monica Choir Section 58 Nakuru
+export const INITIAL_SONGS_CATALOG: Song[] = [
   {
-    id: "song-1",
-    title: "Mtakatifu Monica Mama Mwema",
-    titleSwahili: "Mtakatifu Monica Mama Mwema",
-    album: "Mtakatifu Monica Mama Mwema (Vol. III)",
-    composer: "Polycarp Ochieng",
-    year: 2026,
-    season: "Patronal",
-    seasonSwahili: "Sikukuu ya Somo (St. Monica)",
-    partOfMass: "Entrance",
-    partOfMassSwahili: "Wimbo wa Mwanzo",
-    language: "Kiswahili",
-    voicing: "SATB + Kayamba na Kinanda",
-    musicalKey: "F Major",
-    duration: "4:18",
-    audioPreviewUrl: "preview_monica.mp3",
-    sheetMusicAvailable: true,
-    scorePriceKes: 300,
-    lyricsSwahili: [
-      "1. Mtakatifu Monica mama yetu mwema, uliyelia kwa machozi ya imani,",
-      "Ukamwombea mwanao Augustino, hadi akamrudia Mungu wetu.",
-      "Kiitikio: Ee Mtakatifu Monica, utuombee kwa Mungu Baba,",
-      "Tupate subira na upendo thabiti, tuimbe sifa zake milele yote.",
-      "2. Wewe ni kielelezo cha sala isiyokoma, uliyenawiri katika matumaini,",
-      "Tufundishe kulea kwa njia ya unyenyekevu, na kutumikia Kanisa la Kristo."
-    ],
-    lyricsEnglish: [
-      "1. Saint Monica, our gracious mother, who wept with faithful tears,",
-      "You interceded for your son Augustine until he returned to our God.",
-      "Refrain: O Saint Monica, pray for us to God the Father,",
-      "That we may receive patience and steadfast love, to sing His praises forevermore.",
-      "2. You are an exemplar of unceasing prayer, flourishing in holy hope,",
-      "Teach us to nurture with humility and to serve Christ's Church with joyful song."
-    ],
-    waveformPeaks: [35, 60, 45, 80, 95, 65, 85, 100, 75, 55, 90, 70, 85, 95, 60, 40, 70, 85, 90, 50, 65, 80, 45, 30]
-  },
-  {
-    id: "song-2",
-    title: "Misa ya Mtakatifu Fransisko (Kyrie na Gloria)",
-    titleSwahili: "Misa ya Mtakatifu Fransisko",
-    album: "Misa ya Ekaristi Takatifu",
-    composer: "Fr. John Fernandes (Arr. P. Ochieng)",
-    year: 2025,
-    season: "Ordinary Time",
-    seasonSwahili: "Wakati wa Kawaida",
-    partOfMass: "Kyrie & Gloria",
-    partOfMassSwahili: "Bwana Utuhurumie na Utukufu",
-    language: "Kiswahili",
-    voicing: "SATB a cappella",
-    musicalKey: "D Minor",
-    duration: "3:52",
-    audioPreviewUrl: "preview_kyrie.mp3",
-    sheetMusicAvailable: true,
-    scorePriceKes: 350,
-    lyricsSwahili: [
-      "Bwana utuhurumie (Bwana utuhurumie), Kristo utuhurumie,",
-      "Bwana utuhurumie, utusamehe makosa yetu.",
-      "Utukufu kwa Mungu juu mbinguni, na amani duniani kwa watu wa mapenzi mema."
-    ],
-    lyricsEnglish: [
-      "Lord have mercy, Christ have mercy, Lord have mercy upon us,",
-      "Forgive us our sins and purify our hearts.",
-      "Glory to God in the highest, and on earth peace to people of good will."
-    ],
-    waveformPeaks: [25, 45, 70, 85, 60, 40, 75, 90, 80, 60, 45, 65, 80, 90, 70, 50, 40, 65, 85, 70, 50, 35, 20, 15]
-  },
-  {
-    id: "song-3",
-    title: "Tazameni Mungu Wetu Yuaja",
-    titleSwahili: "Tazameni Mungu Wetu Yuaja",
-    album: "Sauti za SEC 58",
-    composer: "Bernard Mukasa",
+    id: "song-machozi",
+    title: "Machozi ya Imani",
+    titleSwahili: "Machozi ya Imani",
+    album: "Nyimbo za Kiliturujia za SEC 58",
+    composer: "Atebe Mark T. · Recorded at Khakstudio",
     year: 2024,
-    season: "Advent",
-    seasonSwahili: "Majilio",
-    partOfMass: "Entrance",
-    partOfMassSwahili: "Wimbo wa Mwanzo",
-    language: "Kiswahili",
-    voicing: "SATB + Kayamba na Filimbi",
-    musicalKey: "G Major",
-    duration: "4:05",
-    audioPreviewUrl: "preview_advent.mp3",
-    sheetMusicAvailable: true,
-    scorePriceKes: 250,
-    lyricsSwahili: [
-      "Tazameni Mungu wetu yuaja kuwakomboa watu wake,",
-      "Furahini enyi mataifa, farijikeni maana wokovu u karibu.",
-      "Andeni njia ya Bwana, nyoosheni mapito yake nyikani."
-    ],
-    lyricsEnglish: [
-      "Behold our God comes to redeem His people,",
-      "Rejoice O nations, be comforted for salvation is near at hand.",
-      "Prepare the way of the Lord, make straight His paths in the desert."
-    ],
-    waveformPeaks: [40, 60, 75, 90, 85, 65, 50, 80, 95, 85, 70, 90, 100, 80, 60, 45, 65, 80, 95, 70, 50, 40, 30, 25]
-  },
-  {
-    id: "song-4",
-    title: "Sadaka Yangu Hii Bwana",
-    titleSwahili: "Sadaka Yangu Hii Bwana",
-    album: "Mtakatifu Monica Mama Mwema (Vol. III)",
-    composer: "Stephen M. Mwangi",
-    year: 2026,
     season: "Ordinary Time",
-    seasonSwahili: "Wakati wa Kawaida",
-    partOfMass: "Offertory",
-    partOfMassSwahili: "Wimbo wa Sadaka",
+    seasonSwahili: "Wakati wa Kawaida / Tafakari",
+    partOfMass: "Meditation",
+    partOfMassSwahili: "Wimbo wa Tafakari na Sala",
     language: "Kiswahili",
-    voicing: "SATB + Kinanda na Ngoma",
-    musicalKey: "E-flat Major",
-    duration: "4:32",
-    audioPreviewUrl: "preview_sadaka.mp3",
+    voicing: "SATB Choral Polyphony",
+    musicalKey: "D Minor",
+    duration: "4:36",
+    youtubeUrl: "https://youtu.be/syOCKFbVS-8",
+    youtubeId: "syOCKFbVS-8",
+    thumbnailUrl: "https://i.ytimg.com/vi/syOCKFbVS-8/hqdefault.jpg",
+    audioPreviewUrl: "/audio/machozi_ya_imani.mp3",
     sheetMusicAvailable: true,
     scorePriceKes: 300,
     lyricsSwahili: [
-      "Sadaka yangu hii Bwana, naileta kwako kwa unyenyekevu,",
-      "Mkate na divai mazao ya mashamba yetu,",
-      "Pamoja na maisha yetu, pokea Baba utubariki."
+      "1. Machozi ya imani humwagika mbele ya Altare ya Bwana, kilio cha unyenyekevu na toba ya kweli.",
+      "Mungu wetu hasahau sala ya mwenye huzuni, husikiliza na kuponya mioyo iliyovunjika.",
+      "Kiitikio: Ee Bwana, tazama machozi ya imani ya waja wako, utukumbuke kwa rehema zako na kutupa amani.",
+      "2. Kama mama Mtakatifu Monica alivyomlilia mwanaye Augustino kwa machozi mengi,",
+      "Nasi tunaleta sala na vilio vyetu mbele yako, tukiwa na tumaini kuu ndani ya Kristo."
     ],
     lyricsEnglish: [
-      "This offering of mine, Lord, I bring before You in humility,",
-      "Bread and wine, the fruits of our fields and labors,",
-      "Together with our lives, receive them, Father, and bless us."
+      "1. Tears of deep faith flow before the altar of the Lord, a humble plea of sincere repentance.",
+      "Our God never forgets the prayer of the sorrowful; He listens and heals the brokenhearted.",
+      "Refrain: O Lord, look upon the tears of faith of Your servants; remember us in Your mercy and grant us peace.",
+      "2. Even as Saint Monica wept unceasingly for her son Augustine with motherly tears,",
+      "So we bring our supplications and tears before You, anchored in steadfast hope in Christ."
     ],
-    waveformPeaks: [30, 50, 65, 80, 90, 75, 60, 85, 95, 80, 65, 75, 90, 85, 70, 55, 65, 80, 75, 60, 45, 35, 25, 20]
+    waveformPeaks: [45, 68, 82, 94, 98, 86, 92, 96, 78, 84, 88, 72, 91, 98, 74, 58, 83, 89, 93, 62, 74, 84, 52, 38]
   },
   {
-    id: "song-5",
-    title: "Ee Mkate wa Mbingu (Eucharistic Hymn)",
-    titleSwahili: "Ee Mkate wa Mbingu",
-    album: "Misa ya Ekaristi Takatifu",
-    composer: "Polycarp Ochieng",
-    year: 2025,
+    id: "song-maisha",
+    title: "Maisha ya Mwanadamu",
+    titleSwahili: "Maisha ya Mwanadamu",
+    album: "Nyimbo za Kiliturujia za SEC 58",
+    composer: "Fr. Jude Waweru · Arr. Polycarp Ochieng",
+    year: 2024,
     season: "Ordinary Time",
-    seasonSwahili: "Wakati wa Kawaida",
-    partOfMass: "Communion",
-    partOfMassSwahili: "Wimbo wa Komunyo",
-    language: "Kiswahili na Kilatini",
-    voicing: "SATB + Solo Tenor",
-    musicalKey: "A-flat Major",
-    duration: "5:12",
-    audioPreviewUrl: "preview_communion.mp3",
+    seasonSwahili: "Wakati wa Kawaida / Tafakari",
+    partOfMass: "Meditation",
+    partOfMassSwahili: "Wimbo wa Tafakari",
+    language: "Kiswahili",
+    voicing: "SATB Choral Polyphony",
+    musicalKey: "E Minor",
+    duration: "4:48",
+    youtubeUrl: "https://youtu.be/o-Lzb_Sy_M8",
+    youtubeId: "o-Lzb_Sy_M8",
+    thumbnailUrl: "https://i.ytimg.com/vi/o-Lzb_Sy_M8/hqdefault.jpg",
+    audioPreviewUrl: "/audio/maisha_ya_mwanadamu.mp3",
     sheetMusicAvailable: true,
-    scorePriceKes: 400,
+    scorePriceKes: 300,
     lyricsSwahili: [
-      "Ee Mkate wa Mbingu, chakula cha uzima wa milele,",
-      "Uliyeshuka toka mbinguni ili kila anayekula asife kamwe.",
-      "Panis angelicus fit panis hominum; dat panis coelicus figuris terminum."
+      "1. Maisha ya mwanadamu hapa duniani ni kama ua linalochanua asubuhi,",
+      "Jioni linanyauka na kutoweka, lakini neno la Bwana ladumu milele na milele.",
+      "Kiitikio: Mtegemee Bwana kwa moyo wako wote, usitegemee akili zako mwenyewe, naye atanyoosha mapito yako.",
+      "2. Weka tumaini lako kwa Mungu wetu, Yeye ndiye mwamba imara na ngao ya wokovu wetu."
     ],
     lyricsEnglish: [
-      "O Bread of Heaven, nourishment of everlasting life,",
-      "Who descended from on high so that whoever eats shall never die.",
-      "The angelic bread becomes the bread of mankind; the heavenly bread puts an end to prefigurations."
+      "1. The earthly life of man is like a flower blooming in the morning sun;",
+      "In the evening it fades and withers away, but the word of our Lord endures forever.",
+      "Refrain: Trust in the Lord with all your heart, and do not lean upon your own understanding; He shall direct your paths.",
+      "2. Place all your hope in our heavenly God; He is our fortress rock and saving shield."
     ],
-    waveformPeaks: [20, 35, 50, 65, 75, 85, 95, 90, 80, 70, 60, 75, 90, 85, 70, 55, 40, 60, 75, 65, 50, 35, 25, 15]
+    waveformPeaks: [30, 55, 45, 75, 85, 65, 80, 90, 70, 50, 85, 65, 80, 90, 55, 40, 65, 80, 85, 45, 60, 75, 40, 25]
   },
   {
-    id: "song-6",
-    title: "Kristo Amefufuka Aleluya (Easter Anthem)",
-    titleSwahili: "Kristo Amefufuka Aleluya",
-    album: "Mtakatifu Monica Mama Mwema (Vol. III)",
-    composer: "Charles Opondo",
-    year: 2026,
+    id: "song-nimzima",
+    title: "Ni Mzima",
+    titleSwahili: "Ni Mzima (Yesu Amefufuka)",
+    album: "Nyimbo za Kiliturujia za SEC 58",
+    composer: "Isaack Mwita",
+    year: 2024,
     season: "Easter",
-    seasonSwahili: "Pasaka",
+    seasonSwahili: "Pasaka na Ushindi wa Kristo",
     partOfMass: "Recessional",
-    partOfMassSwahili: "Wimbo wa Kutoka",
+    partOfMassSwahili: "Wimbo wa Kutoka na Kushangilia",
     language: "Kiswahili",
-    voicing: "SATB + Baragumu na Matari",
-    musicalKey: "C Major",
-    duration: "4:48",
-    audioPreviewUrl: "preview_easter.mp3",
+    voicing: "SATB Festive + Kayamba",
+    musicalKey: "D Major",
+    duration: "4:25",
+    youtubeUrl: "https://youtu.be/Ds_tOgL_7pg",
+    youtubeId: "Ds_tOgL_7pg",
+    thumbnailUrl: "https://i.ytimg.com/vi/Ds_tOgL_7pg/hqdefault.jpg",
+    audioPreviewUrl: "/audio/ni_mzima.mp3",
     sheetMusicAvailable: true,
-    scorePriceKes: 350,
+    scorePriceKes: 300,
     lyricsSwahili: [
-      "Kristo amefufuka kutoka kwa wafu, aleluya! Kifo kimeshindwa kwa ushindi wake!",
-      "Shangilieni enyi mbingu, imbeni enyi nchi yote, Mwokozi wetu anatawala milele!"
+      "1. Kaburi li wazi, jiwe limevingirishwa mbali! Kristo ameshinda kifo, yu hai milele.",
+      "Kiitikio: Ni mzima, ni mzima hakika! Aleluya, Mwokozi wetu ametukuka juu mbinguni na duniani!",
+      "2. Tushangilie kwa vinanda na kayamba, Mwokozi wetu amefufuka kwa uwezo mkuu.",
+      "Ametuvua utumwa wa dhambi na kutuvika taji la uzima wa milele."
     ],
     lyricsEnglish: [
-      "Christ is risen from the dead, alleluia! Death has been swallowed up in His holy victory!",
-      "Rejoice O heavens, sing O whole earth, our Savior reigns forever and ever!"
+      "1. The tomb is empty and the heavy stone rolled away! Christ has conquered death and lives forever.",
+      "Refrain: He is alive, He is truly risen! Alleluia, our Redeemer is exalted in heaven and earth!",
+      "2. Let us rejoice with joyful instruments and song; our Savior has risen with sovereign triumph.",
+      "He broke the chains of sin and crowned us with eternal life."
     ],
-    waveformPeaks: [50, 70, 85, 100, 95, 85, 75, 90, 100, 95, 85, 90, 100, 90, 80, 65, 80, 95, 90, 75, 60, 45, 35, 25]
+    waveformPeaks: [50, 75, 70, 95, 100, 90, 95, 100, 85, 75, 95, 85, 90, 95, 75, 55, 85, 90, 95, 65, 80, 90, 55, 35]
+  },
+  {
+    id: "song-jumuiya",
+    title: "Jumuiya Ndogondogo",
+    titleSwahili: "Jumuiya Ndogondogo",
+    album: "Nyimbo za Kiliturujia za SEC 58",
+    composer: "Bernard Mukasa · Arr. Polycarp Ochieng (used with permission)",
+    year: 2024,
+    season: "Ordinary Time",
+    seasonSwahili: "Wakati wa Kawaida / Utume",
+    partOfMass: "Entrance",
+    partOfMassSwahili: "Wimbo wa Kuingia na Utume",
+    language: "Kiswahili",
+    voicing: "SATB Polyphony & Organ",
+    musicalKey: "G Major",
+    duration: "4:30",
+    youtubeUrl: "https://youtu.be/lpOfth1eyOg",
+    youtubeId: "lpOfth1eyOg",
+    thumbnailUrl: "https://i.ytimg.com/vi/lpOfth1eyOg/hqdefault.jpg",
+    audioPreviewUrl: "/audio/jumuiya_ndogondogo.mp3",
+    sheetMusicAvailable: true,
+    scorePriceKes: 300,
+    lyricsSwahili: [
+      "1. Jumuiya ndogondogo ni chemchemi ya umoja wetu katika Kristo Yesu.",
+      "Tukusanyike kwa sala, upendo na mshikamano wa dhati ndani ya parokia yetu.",
+      "Kiitikio: Ee waamini, tujiunge na kujenga jumuiya ndogondogo kwa moyo wa furaha na huduma ya dhati.",
+      "2. Neno la Mungu lituongoze katika kila hatua na matendo yetu ya kila siku.",
+      "Tuwasaidie wahitaji, wagonjwa na wanyonge kama mashahidi wa kweli wa Injili ya Kristo."
+    ],
+    lyricsEnglish: [
+      "1. Small Christian Communities are the fountain of our fraternal unity in Christ Jesus.",
+      "Let us gather in prayer, love, and sincere solidarity within our parish community.",
+      "Refrain: O faithful people, let us unite and build up Small Christian Communities with joy and dedicated service.",
+      "2. May the Holy Word of God guide our every step and our daily actions.",
+      "Let us assist the needy, the sick, and the vulnerable as authentic witnesses of the Gospel."
+    ],
+    waveformPeaks: [45, 70, 85, 95, 100, 85, 90, 95, 80, 85, 90, 70, 90, 100, 75, 60, 85, 90, 95, 65, 75, 85, 55, 40]
   }
 ];
 
-export const ALBUMS_CATALOG: Album[] = [
+// Verified Sheet Music for the 4 songs on sale
+export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
   {
-    id: "alb-3",
-    title: "Mtakatifu Monica Mama Mwema (Vol. III)",
-    releaseYear: 2026,
-    trackCount: 12,
+    id: "sheet-machozi",
+    title: "Machozi ya Imani",
+    titleSw: "Machozi ya Imani",
+    composer: "Atebe Mark T.",
+    arranger: "Atebe Mark T. (Used with permission)",
+    notationType: "Tonic Sol-fa & Staff",
+    voicing: "SATB Choral",
+    voiceParts: "S, A, T, B",
+    partOfMass: "Meditation / Contemplative Prayer",
+    season: "Ordinary Time",
+    priceKes: 300,
+    priceUsd: 2.50,
+    previewBars: "m:s:l | s:f:m | r:d:r | m:-:- || [D Minor Liturgical Setting]",
+    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Atebe Mark T. · Recorded at Khakstudio. Used with permission for Catholic parish use. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Atebe Mark T., zimechapishwa kwa idhini ya mtunzi. Lipa kupitia M-Pesa.",
+    downloadUrl: "#download-machozi"
+  },
+  {
+    id: "sheet-maisha",
+    title: "Maisha ya Mwanadamu",
+    titleSw: "Maisha ya Mwanadamu",
+    composer: "Fr. Jude Waweru",
+    arranger: "Arranged for SATB by Polycarp Ochieng (used with permission)",
+    notationType: "Tonic Sol-fa & Staff",
+    voicing: "SATB Polyphony",
+    voiceParts: "S, A, T, B",
+    partOfMass: "Meditation / Contemplative",
+    season: "Ordinary Time",
+    priceKes: 300,
+    priceUsd: 2.50,
+    previewBars: "l,:d:m | m:r:d | t,:l,:s, | l,:-:- || [E Minor Choral Setting]",
+    description: "Meditation vocal arrangement for Soprano, Alto, Tenor, and Bass (SATB). Composed by Fr. Jude Waweru, arranged by Choirmaster Polycarp Ochieng with dynamics and breath marks. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti za wimbo wa tafakari uliotungwa na Fr. Jude Waweru, ukapangiliwa kwa sauti nne (SATB) na Mwalimu Polycarp Ochieng. Lipa kupitia M-Pesa.",
+    downloadUrl: "#download-maisha"
+  },
+  {
+    id: "sheet-nimzima",
+    title: "Ni Mzima",
+    titleSw: "Ni Mzima",
+    composer: "Isaack Mwita",
+    arranger: "Arranged for SATB Choir, St. Monica",
+    notationType: "Tonic Sol-fa & Staff",
+    voicing: "SATB + Kayamba",
+    voiceParts: "S, A, T, B",
+    partOfMass: "Recessional / Easter Triumph",
+    season: "Easter",
+    priceKes: 300,
+    priceUsd: 2.50,
+    previewBars: "s:d':m' | r':d':t | d':-:- | s:m:d || [Festive D Major]",
+    description: "Easter anthem score composed by Isaack Mwita with traditional East African liturgical rhythm notations and full SATB choral polyphony. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti kamili za wimbo wa Pasaka zenye mdundo wa kitamaduni na sauti nne (SATB). Mtunzi: Isaack Mwita. Lipa kupitia M-Pesa.",
+    downloadUrl: "#download-nimzima"
+  },
+  {
+    id: "sheet-jumuiya",
+    title: "Jumuiya Ndogondogo",
+    titleSw: "Jumuiya Ndogondogo",
+    composer: "Bernard Mukasa",
+    arranger: "Arranged for SATB by Polycarp Ochieng (used with permission)",
+    notationType: "Tonic Sol-fa & Staff",
+    voicing: "SATB Choral",
+    voiceParts: "S, A, T, B",
+    partOfMass: "Entrance / Small Christian Communities",
+    season: "Ordinary Time",
+    priceKes: 300,
+    priceUsd: 2.50,
+    previewBars: "d:m:s | s:s:s | f:m:r | d:-:- || [Tonic Sol-fa & Staff Notation]",
+    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Bernard Mukasa, arranged for SATB by Choirmaster Polycarp Ochieng, used with permission. Instant PDF download with M-Pesa.",
+    descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Bernard Mukasa, mpangilio wa sauti nne na Mwalimu Polycarp Ochieng. Lipa kupitia M-Pesa.",
+    downloadUrl: "#download-jumuiya"
+  }
+];
+
+export const INITIAL_ALBUMS: Album[] = [
+  {
+    id: "album-sec58",
+    title: "Nyimbo za Kiliturujia za SEC 58, Nakuru",
+    releaseYear: 2024,
+    trackCount: 4,
     coverImage: "choir_singing_moment",
     priceKes: 500,
-    description: "The hallmark 2026 release celebrating 14 years of choral ministry at Section 58 Nakuru. Features original liturgical compositions by Polycarp Ochieng and choral arrangements dedicated to St. Monica.",
-    descriptionSw: "Toleo letu la tatu la mwaka 2026 likiadhimisha miaka 14 ya utume wa kwaya hapa SEC 58 Nakuru. Lina nyimbo asilia za kiliturujia na tungo maalum kwa heshima ya Mtakatifu Monica.",
-    songs: [SONGS_CATALOG[0], SONGS_CATALOG[3], SONGS_CATALOG[5]]
-  },
-  {
-    id: "alb-2",
-    title: "Misa ya Ekaristi Takatifu (Vol. II)",
-    releaseYear: 2024,
-    trackCount: 10,
-    coverImage: "sheet_music_hymnal",
-    priceKes: 450,
-    description: "A complete Sunday Mass choral setting including Kyrie, Gloria, Credo, Sanctus, and Agnus Dei, blended with revered Kenyan Eucharistic hymns.",
-    descriptionSw: "Mpangilio kamili wa nyimbo za Misa Takatifu ya Jumapili ikiwemo Bwana Utuhurumie, Utukufu, Nasadiki, Mtakatifu, na Mwanakondoo wa Mungu.",
-    songs: [SONGS_CATALOG[1], SONGS_CATALOG[4]]
-  },
-  {
-    id: "alb-1",
-    title: "Sauti za SEC 58 (Vol. I)",
-    releaseYear: 2021,
-    trackCount: 14,
-    coverImage: "nakuru_parish_cathedral",
-    priceKes: 400,
-    description: "The debut studio album featuring classical Kiswahili choral hymns by Bernard Mukasa, Fr. Fernandes, and regional sacred melodies.",
-    descriptionSw: "Albamu ya kwanza iliyorekodiwa studio ikijumuisha tungo maarufu za kwaya ya Kiswahili na nyimbo za kitamaduni za kusifu.",
-    songs: [SONGS_CATALOG[2]]
+    description: "The official master recording collection from St. Monica Catholic Choir, Section 58 Parish Nakuru, recorded with Khakstudio Production and parish audio engineers.",
+    descriptionSw: "Mkusanyiko rasmi wa nyimbo za kiliturujia kutoka Kwaya ya Mtakatifu Monica, Parokia ya Section 58 Nakuru, zilizorekodiwa rasmi kwa ajili ya utukufu wa Mungu.",
+    youtubePlaylistUrl: YOUTUBE_CHANNEL_URL,
+    songs: ["Machozi ya Imani", "Maisha ya Mwanadamu", "Ni Mzima", "Jumuiya Ndogondogo"]
   }
 ];
 
-export const SERVICES_CATALOG: ServiceItem[] = [
+export const INITIAL_LEADERS: ChoirLeader[] = [
   {
-    id: "serv-mass",
-    title: "Liturgical Sunday & Feast Masses",
-    titleSw: "Misa za Jumapili na Sikukuu",
-    category: "Liturgy",
-    tagline: "Reverent, disciplined sacred choral worship for the Holy Sacrifice of the Mass.",
-    taglineSw: "Ibada takatifu ya Misa kwa unyenyekevu, nidhamu na utulivu wa kiroho.",
-    description: "Full four-part SATB choral accompaniment for Sunday parish liturgies, patronal feast days, priestly ordinations, confirmations, and diocesan celebrations across the Nakuru diocese and beyond.",
-    descriptionSw: "Huduma kamili ya uimbaji wa sauti nne (SATB) kwa Misa za kawaida, sikukuu za vigango, daraja takatifu ya upadre, kipaimara, na sherehe za kijimbo.",
-    whatsIncluded: [
-      "Full SATB choir (25–40 choristers)",
-      "Repertoire tailored to liturgical season and lectionary readings",
-      "Organ, kayamba, and percussion accompaniment",
-      "Consultation on entrance, offertory, and communion hymns"
-    ],
-    sampleSongs: ["Mtakatifu Monica Mama Mwema", "Sadaka Yangu Hii Bwana"],
-    startingPriceKes: 15000
+    id: "ldr-choirmaster",
+    name: "Polycarp Ochieng",
+    role: "Director of Music & Choirmaster",
+    roleSw: "Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya",
+    category: "trainer",
+    responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and prepares Sunday High Masses.",
+    responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na maandalizi ya Misa Kuu ya Jumapili.",
+    tenure: "Serving since 2012",
+    tenureSw: "Anahudumu tangu 2012"
   },
   {
-    id: "serv-wedding",
-    title: "Catholic Nuptial Masses & Weddings",
-    titleSw: "Misa za Harusi na Ndoa Takatifu",
-    category: "Sacrament",
-    tagline: "Dignified, uplifting music for Holy Matrimony in the Catholic tradition.",
-    taglineSw: "Muziki wa heshima na furaha ya kiroho kwa ajili ya Sakramenti ya Ndoa Takatifu.",
-    description: "Personalized music consultation for Catholic couples. We guide you in selecting reverent entrance hymns, vows accompaniment, Psalm responses, offertory processions, signing of the registry, and joyful recessional anthems.",
-    descriptionSw: "Ushauri maalum wa nyimbo za kiliturujia kwa maharusi Wakatoliki. Tunakusaidia kuteua nyimbo za kuingia, viapo, sadaka, kutia saini cheti cha ndoa, na kutoka.",
-    whatsIncluded: [
-      "Pre-wedding musical planning session with the Music Director",
-      "Full SATB choir on wedding day",
-      "Processional, registry signing, and recessional repertoire",
-      "Optional bridal entry solo vocal arrangement"
-    ],
-    sampleSongs: ["Ave Maria (Arr. Nakuru)", "Upendo wa Mungu Wetu", "Mtakatifu Monica Mama Mwema"],
-    startingPriceKes: 25000
+    id: "ldr-asst-choirmaster",
+    name: "Atebe Mark T.",
+    role: "Composer & Sectional Solfa Trainer",
+    roleSw: "Mtunzi na Mkufunzi wa Solfa (Khakstudio)",
+    category: "trainer",
+    responsibility: "Vocal coaching, sectional practice drills, and recording production director.",
+    responsibilitySw: "Mafunzo ya sauti, kusoma noti za solfa na usimamizi wa kurekodi studio.",
+    tenure: "Serving since 2018",
+    tenureSw: "Anahudumu tangu 2018"
   },
   {
-    id: "serv-funeral",
-    title: "Requiem Masses & Memorials",
-    titleSw: "Misa za Mazishi na Kumbukumbu",
-    category: "Memorial",
-    tagline: "Comforting, prayerful sacred hymns honoring faithful departed in Christ.",
-    taglineSw: "Nyimbo za faraja na matumaini ya ufufuko kumuombea mpendwa wetu aliyetutangulia.",
-    description: "Reverent and comforting Catholic funeral liturgy. Songs of Christian hope, resurrection, and prayerful intercession to console grieving families and commend souls to God's eternal mercy.",
-    descriptionSw: "Nyimbo za matumaini ya Kikristo na maombezi ya kumuaga mpendwa wetu kwa staha na sala za kikatoliki.",
-    whatsIncluded: [
-      "Choir ensemble in formal liturgical vestments",
-      "Responsorial psalm and communion meditation anthems",
-      "Graveside prayer hymns (Matawi, Sala za Mwisho)",
-      "Punctual and reverent conduct"
-    ],
-    sampleSongs: ["Mikononi Mwako Bwana", "Nalifurahi Waliponiambia", "Mimi Ndimi Ufufuo na Uzima"],
-    startingPriceKes: 18000
+    id: "ldr-organist",
+    name: "Francis Mwangi",
+    role: "Parish Organist & Keyboardist",
+    roleSw: "Mpiga Kinanda na Organi ya Parokia",
+    category: "trainer",
+    responsibility: "Accompanies liturgical High Masses and trains junior keyboard accompanists.",
+    responsibilitySw: "Hupiga kinanda kwenye Misa Kuu na kuongoza ala za muziki.",
+    tenure: "Serving since 2021",
+    tenureSw: "Anahudumu tangu 2021"
   },
   {
-    id: "serv-concerts",
-    title: "Sacred Choral Concerts & Festivals",
-    titleSw: "Tamasha za Kwaya na Matamasha",
-    category: "Performance",
-    tagline: "Choral excellence, East African Catholic polyphony, and festival guest performances.",
-    taglineSw: "Maonyesho ya ustadi wa sauti, nyimbo za kitamaduni za Kikristo na tamasha.",
-    description: "St. Monica Choir Nakuru performs at national sacred music festivals, inter-parish choral competitions, and cultural celebrations, presenting rich Kiswahili compositions, Latin classics, and vibrant indigenous instrumentation.",
-    descriptionSw: "Kushiriki katika matamasha ya kijimbo, kitaifa, na sherehe za kidini kote nchini Kenya na Afrika Mashariki.",
-    whatsIncluded: [
-      "Full concert repertoire set (45 to 90 minutes)",
-      "Professional vocalists and instrumental rhythm section",
-      "Printed concert programme inserts",
-      "Sound coordination with parish audio technicians"
-    ],
-    sampleSongs: ["Kristo Amefufuka Aleluya", "Sauti za SEC 58 Anthem"],
-    startingPriceKes: 30000
+    id: "ldr-chairperson",
+    name: "John Baptist Kiprono",
+    role: "Choir Chairperson",
+    roleSw: "Mwenyekiti wa Kwaya",
+    category: "official",
+    responsibility: "Chairs executive meetings, represents choir to parish council, and oversees pastoral ministry.",
+    responsibilitySw: "Huongoza mikutano ya kamati na kuwakilisha kwaya kwenye Baraza la Parokia.",
+    tenure: "2023 – Present",
+    tenureSw: "2023 – Hadi Sasa"
   },
   {
-    id: "serv-training",
-    title: "Voice Training & Conducting Workshops",
-    titleSw: "Mafunzo ya Sauti na Uongozi wa Kwaya",
-    category: "Education",
-    tagline: "Empowering rural and parish choirs with sight-reading, vocal health, and conducting skills.",
-    taglineSw: "Kujenga uwezo wa kwaya nyingine katika kusoma noti, usafi wa sauti na uelekezi.",
-    description: "Tailored weekend training workshops delivered by Mwalimu Polycarp Ochieng and senior section coaches. Covering Solfa notation, staff notation, diaphragm breathing, choral diction, and liturgical selection guidelines.",
-    descriptionSw: "Warsha za wikendi kwa waimbaji na walimu wa kwaya za vigango: usomaji wa maneno, kufuata noti za solfa, kupumua, na kuchagua nyimbo za liturujia.",
-    whatsIncluded: [
-      "2-day hands-on workshop at your parish",
-      "Sheet music handouts and solfa notation primers",
-      "Voice classification audit for all registered choristers",
-      "Certificate of participation"
-    ],
-    sampleSongs: ["Sight-reading studies", "SATB polyphony exercises"],
-    startingPriceKes: 20000
+    id: "ldr-secretary",
+    name: "Agnes Wanjiku",
+    role: "Choir Secretary",
+    roleSw: "Katibu wa Kwaya",
+    category: "official",
+    responsibility: "Maintains official choir registers, liturgical attendance logs, and diocesan correspondence.",
+    responsibilitySw: "Huweka kumbukumbu rasmi za kwaya na mawasiliano ya kiliturujia.",
+    tenure: "2023 – Present",
+    tenureSw: "2023 – Hadi Sasa"
+  },
+  {
+    id: "ldr-treasurer",
+    name: "Grace Auma",
+    role: "Choir Treasurer",
+    roleSw: "Mhazini wa Kwaya",
+    category: "official",
+    responsibility: "Oversees sheet music score sales, vestment funds, and choir development accounts.",
+    responsibilitySw: "Husimamia mauzo ya noti, mfuko wa sare na maendeleo ya kwaya.",
+    tenure: "2022 – Present",
+    tenureSw: "2022 – Hadi Sasa"
   }
 ];
 
-export const PRODUCTS_CATALOG: ProductItem[] = [
+export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
   {
-    id: "prod-digital-alb3",
-    name: "Mtakatifu Monica Mama Mwema (Digital Album)",
-    nameSw: "Albamu ya Kidijitali (Vol. III)",
+    id: "grp-vestment",
+    title: "Kwaya Nzima ya Mtakatifu Monica (Section 58 Nakuru)",
+    titleSw: "Kwaya Nzima ya Mtakatifu Monica (Section 58 Nakuru)",
+    description: "The entire chorister ensemble of St. Monica Choir gathered at the altar of Section 58 Parish after Sunday High Mass.",
+    descriptionSw: "Wanakwaya wote wa Mtakatifu Monica wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa Kuu ya Jumapili.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    occasion: "Feast Day of St. Monica & Parish Dedication",
+    occasionSw: "Sikukuu ya Mtakatifu Monika na Sherehe za Parokia"
+  },
+  {
+    id: "grp-cathedral",
+    title: "Kwaya Wakati wa Misa ya Ekaristi Takatifu",
+    titleSw: "Kwaya Wakati wa Misa ya Ekaristi Takatifu",
+    description: "Active liturgical singing during the solemn Holy Eucharist procession at Section 58 Catholic Church.",
+    descriptionSw: "Uimbaji wa heshima wakati wa maandamano ya Ekaristi Takatifu katika Kanisa la Mtakatifu Monica.",
+    year: "2023",
+    imageKey: "nakuru_parish_cathedral",
+    occasion: "Corpus Christi & Confirmation Mass",
+    occasionSw: "Sikukuu ya Mwili na Damu ya Kristo"
+  },
+  {
+    id: "grp-hymnal",
+    title: "Noti na Miongozo ya Muziki wa Kikatoliki",
+    titleSw: "Noti na Miongozo ya Muziki wa Kikatoliki",
+    description: "Official tonic sol-fa vocal scores prepared by choir trainers for liturgy and rehearsal training.",
+    descriptionSw: "Mkusanyiko wa vitabu vya noti za solfa na stafu zinazotumiwa na kwaya altaroni na mazoezini.",
+    year: "2024",
+    imageKey: "sheet_music_hymnal",
+    occasion: "Liturgical Repertoire Archive",
+    occasionSw: "Kumbukumbu ya Nyimbo za Kiliturujia"
+  }
+];
+
+export const INITIAL_PRODUCTS: ProductItem[] = [
+  {
+    id: "prod-album-master",
+    name: "Nyimbo za Kiliturujia za SEC 58 (Full Album MP3)",
+    nameSw: "Albamu Kamili ya Nyimbo za SEC 58 (MP3)",
     type: "digital_album",
     priceKes: 500,
     priceUsd: 4.00,
-    description: "Instant high-bitrate MP3 & WAV audio download (12 full tracks) with printable digital liner notes and Kiswahili lyrics booklet.",
-    descriptionSw: "Pakua albamu kamili yenye nyimbo 12 za ubora wa juu pamoja na kitabu cha maneno ya nyimbo (PDF).",
+    description: "High-definition master digital album containing all 4 authentic choral releases with full digital booklet and lyrics. Pay with M-Pesa.",
+    descriptionSw: "Albamu kamili ya dijitali yenye nyimbo zote nne za Kwaya ya Mtakatifu Monica Section 58 pamoja na kijitabu cha maneno. Lipa kupitia M-Pesa.",
     image: "choir_singing_moment",
-    badge: "Latest Release",
+    badge: "Official Album",
     downloadable: true
-  },
-  {
-    id: "prod-usb-drive",
-    name: "Deluxe Choral USB Card (Vol. I, II & III Complete)",
-    nameSw: "Kadi ya USB yenye Albamu Zote 3",
-    type: "usb",
-    priceKes: 1000,
-    priceUsd: 8.00,
-    description: "Sleek wallet-sized USB card containing all 36 recorded choir tracks in studio master quality, rehearsal videos, and digital hymn sheet music.",
-    descriptionSw: "Kadi ya USB inayotoshea pochi ikiwa na nyimbo zote 36 za albamu tatu, video za maandalizi, na noti za nyimbo.",
-    image: "sheet_music_hymnal",
-    badge: "Best Value",
-    downloadable: false
   },
   {
     id: "prod-sheet-bundle",
-    name: "St. Monica Sacred Score Bundle (10 Hymns PDF)",
-    nameSw: "Kifurushi cha Noti za Kiliturujia (Noti 10)",
+    name: "Complete SATB Vocal Scores Bundle (All 4 Hymns)",
+    nameSw: "Kifurushi cha Noti Zote 4 (SATB PDF)",
     type: "sheet_music",
-    priceKes: 400,
-    priceUsd: 3.20,
-    description: "Complete SATB four-part vocal sheet music scores in PDF format, watermarked with buyer email, including solfa and staff notation.",
-    descriptionSw: "Noti kamili za sauti nne (SATB) zenye solfa na stafu za nyimbo 10 za kiliturujia kwa ajili ya walimu wa kwaya.",
+    priceKes: 1000,
+    priceUsd: 8.00,
+    description: "Complete printable PDF booklet with Tonic Sol-fa and Staff Notation for all 4 hymns. Formatted for choir directors with permission for parish use. Pay with M-Pesa.",
+    descriptionSw: "Kitini kamili cha noti za PDF chenye solfa na stafu kwa nyimbo zote 4 kwa ajili ya walimu wa kwaya. Lipa kupitia M-Pesa.",
     image: "sheet_music_hymnal",
-    badge: "For Choirmasters",
+    badge: "Save KES 200",
     downloadable: true
-  },
-  {
-    id: "prod-choir-polo",
-    name: "Official St. Monica Choir Embroidered Polo Shirt",
-    nameSw: "Fulana Rasmi ya Kwaya ya Mtakatifu Monica",
-    type: "merchandise",
-    priceKes: 1200,
-    priceUsd: 9.50,
-    description: "Premium breathable pique cotton polo shirt in Sky Mist blue with navy collar and the embroidered choir crest on the left chest.",
-    descriptionSw: "Fulana ya pamba ya ubora wa juu yenye nembo ya kwaya iliyoshonwa kifuani, rangi ya buluu safi na kola ya giza.",
-    image: "nakuru_parish_cathedral",
-    downloadable: false
-  },
-  {
-    id: "prod-physical-cd",
-    name: "Mtakatifu Monica Mama Mwema (Audio CD)",
-    nameSw: "Santuri ya CD (Vol. III)",
-    type: "physical_cd",
-    priceKes: 600,
-    priceUsd: 4.80,
-    description: "Original pressed audio compact disc in jewel case with full color photo booklet. Collectible parish release.",
-    descriptionSw: "Santuri halisi ya CD ikiwa na kijitabu cha picha za waimbaji wa SEC 58 Nakuru.",
-    image: "choir_singing_moment",
-    downloadable: false
   }
 ];
 
-export const EVENTS_CATALOG: EventItem[] = [
+export const INITIAL_EVENTS: EventItem[] = [
   {
-    id: "evt-1",
-    title: "Feast of Saint Monica: Patronal High Mass & Choir Day",
-    titleSw: "Sikukuu ya Mtakatifu Monica: Misa Kuu ya Somo",
-    dateDay: "27",
-    dateMonth: "AUG",
-    fullDate: "Thursday, 27 August 2026",
-    time: "10:00 AM – 1:30 PM EAT",
+    id: "evt-sunday-mass",
+    title: "Sunday Choir High Mass",
+    titleSw: "Misa Kuu ya Pili ya Jumapili",
+    dateDay: "Sun",
+    dateMonth: "Every",
+    fullDate: "Kila Jumapili / Every Sunday",
+    time: "9:00 AM - 10:45 AM",
     venue: "St. Monica Catholic Church, Section 58",
     city: "Nakuru, Kenya",
-    description: "Annual patronal festival celebration honoring St. Monica. Grand liturgical High Mass featuring our full SATB choir, blessing of families and mothers, followed by a fellowship sacred concert.",
+    description: "Our principal liturgical assignment: solemn four-part SATB polyphony, Gregorian antiphons, and sacred praise songs for the Holy Eucharist.",
+    descriptionSw: "Utume wetu mkuu wa kiliturujia: kuongoza Misa Kuu kwa sauti nne (SATB), nyimbo za tafakari na shukrani mbele ya Altare Takatifu.",
+    category: "Liturgical Mass",
+    entryType: "Sunday High Mass",
+    isUpcoming: true
+  },
+  {
+    id: "evt-rehearsal",
+    title: "Weekly Choir Rehearsal & Sol-fa Training",
+    titleSw: "Mazoezi ya Kwaya ya Kila Wiki na Mafunzo ya Solfa",
+    dateDay: "Wed/Fri",
+    dateMonth: "Every",
+    fullDate: "Jumatano & Ijumaa / Wed & Fri",
+    time: "5:30 PM - 7:30 PM",
+    venue: "St. Monica Parish Hall, Section 58",
+    city: "Nakuru, Kenya",
+    description: "Vocal warm-ups, sight-reading drills in tonic sol-fa, SATB sectionals, and preparing upcoming liturgical feasts under choirmaster guidance.",
+    descriptionSw: "Mazoezi ya kuimarisha sauti, kusoma noti za solfa, na kupanga sauti nne kwa ajili ya Misa zijazo za Dominika.",
+    category: "Rehearsal",
+    entryType: "Open to new members",
+    isUpcoming: true
+  },
+  {
+    id: "evt-patron-feast",
+    title: "Solemn Feast of Saint Monica",
+    titleSw: "Sikukuu Kuu ya Somo: Mtakatifu Monika",
+    dateDay: "27",
+    dateMonth: "Aug 2027",
+    fullDate: "27 August 2027",
+    time: "9:30 AM",
+    venue: "St. Monica Catholic Church, Section 58",
+    city: "Nakuru, Kenya",
+    description: "The annual patronal celebration of our parish and choir with diocesan clergy and chorister vestment blessings.",
+    descriptionSw: "Sherehe kuu ya mwaka ya somo wa parokia na kwaya yetu, ikiambatana na kubariki sare za waimbaji.",
     category: "Patronal Feast",
-    entryType: "Liturgical Mass"
+    entryType: "Liturgical Mass",
+    isUpcoming: true
   },
   {
-    id: "evt-2",
-    title: "Nakuru Diocesan Sacred Music Festival",
-    titleSw: "Tamasha la Kijimbo la Muziki Mtakatifu",
-    dateDay: "19",
-    dateMonth: "SEP",
-    fullDate: "Saturday, 19 September 2026",
-    time: "8:30 AM – 5:00 PM EAT",
-    venue: "Cathedral of Christ the King",
+    id: "evt-patron-feast-past",
+    title: "Feast of Saint Monica & Parish Anniversary (Past)",
+    titleSw: "Sikukuu ya Mtakatifu Monika (Iliyopita)",
+    dateDay: "27",
+    dateMonth: "Aug 2026",
+    fullDate: "27 August 2026",
+    time: "9:30 AM",
+    venue: "St. Monica Catholic Church, Section 58",
     city: "Nakuru, Kenya",
-    description: "Over 40 parish choirs congregate for liturgical choral competition and sacred polyphonic showcase organized by the Catholic Diocese of Nakuru Liturgical Commission.",
-    category: "Festival",
-    entryType: "Tickets"
-  },
-  {
-    id: "evt-3",
-    title: "Annual Advent Hymnody & Carols Evening",
-    titleSw: "Mkesha wa Nyimbo za Majilio na Krismasi",
-    dateDay: "12",
-    dateMonth: "DEC",
-    fullDate: "Saturday, 12 December 2026",
-    time: "5:30 PM – 8:30 PM EAT",
-    venue: "St. Monica Parish Sanctuary, Section 58",
-    city: "Nakuru, Kenya",
-    description: "An evening of candlelit sacred music, classical Swahili advent meditations, and solemn lessons & carols preparing our hearts for the Nativity of Christ.",
-    category: "Concert",
-    entryType: "Free Entry"
+    description: "Past patronal solemn Mass and reception celebration with choir alumni and diocesan guests.",
+    descriptionSw: "Misa Kuu ya sherehe ya Mtakatifu Monika iliyoadhimishwa mwezi wa Agosti.",
+    category: "Earlier Event",
+    entryType: "Concluded",
+    isUpcoming: false
   }
 ];
+
+export const SONGS_CATALOG = INITIAL_SONGS_CATALOG;
 
 export const VOICE_SECTIONS_DATA = [
   {
-    name: "Soprano (Kinara cha Juu)",
-    leader: "Grace Muthoni",
+    name: "Soprano",
+    nameEn: "Soprano Section",
+    range: "C4 — A5",
     membersCount: 16,
-    range: "C4 – A5",
-    description: "Leading the melodic line with clarity, purity, and prayerful expression. High polyphonic entrances and descants.",
-    descriptionSw: "Sauti ya kwanza inayoongoza melodi ya wimbo kwa sauti nyororo, safi, na yenye kusikika vizuri hekaluni.",
-    sampleClip: "Soprano excerpt: Mtakatifu Monica Mama Mwema"
+    description: "The primary melodic leadership carrying the sacred text clearly across the sanctuary with purity.",
+    descriptionSw: "Wanaoongoza melodi ya wimbo kwa sauti nyororo na ya juu inayofika mbali altaroni.",
+    sampleClip: "Soprano Melody (C4 - A5)"
   },
   {
-    name: "Alto (Sauti ya Pili)",
-    leader: "Mary Otieno",
+    name: "Alto",
+    nameEn: "Alto Section",
+    range: "F3 — D5",
     membersCount: 14,
-    range: "F3 – D5",
-    description: "Warm, rich harmonic foundation that knits the upper and lower voices together with depth and soulful resonance.",
-    descriptionSw: "Sauti ya pili inayojaza wimbo kwa utulivu na kutoa upatanisho mzuri wa sauti za juu na za chini.",
-    sampleClip: "Alto excerpt: Kyrie wa Misa ya Fransisko"
+    description: "The rich harmonic warmth supporting the soprano melody with contemplative depth.",
+    descriptionSw: "Sauti ya pili inayotoa utajiri wa upatanisho na joto la sala ya muziki mtakatifu.",
+    sampleClip: "Alto Harmony (F3 - D5)"
   },
   {
-    name: "Tenor (Sauti ya Tatu)",
-    leader: "David Mwangi",
-    membersCount: 11,
-    range: "C3 – G4",
-    description: "Bright, lyrical male voice carrying the inner counter-melodies and prominent harmonic transitions.",
-    descriptionSw: "Sauti ya tatu ya wanaume inayopamba wimbo kwa uimbaji wa ndani na sauti ya juu ya kiume yenye nguvu.",
-    sampleClip: "Tenor solo: Ee Mkate wa Mbingu"
+    name: "Tenor",
+    nameEn: "Tenor Section",
+    range: "C3 — G4",
+    membersCount: 10,
+    description: "The bright vocal counterpoint providing energy and liturgical clarity to four-part harmony.",
+    descriptionSw: "Sauti ya kiume ya juu inayoleta mng'ao na nguvu katika sala za Misa.",
+    sampleClip: "Tenor Counterpoint (C3 - G4)"
   },
   {
-    name: "Bass (Sauti ya Chini)",
-    leader: "Peter Omondi",
-    membersCount: 11,
-    range: "E2 – C4",
-    description: "Resonant, grounding acoustic anchor providing the foundational root notes and rhythmic drive for the ensemble.",
-    descriptionSw: "Sauti ya nne ya chini kabisa inayoweka msingi imara wa noti zote na kuimarisha mdundo wa sala.",
-    sampleClip: "Bass foundation: Kristo Amefufuka"
+    name: "Bass",
+    nameEn: "Bass Section",
+    range: "E2 — C4",
+    membersCount: 8,
+    description: "The foundational acoustic anchor upon which the sacred polyphonic chords are firmly grounded.",
+    descriptionSw: "Sauti nzito ya msingi inayoshikilia na kuweka uthabiti wa kwaya nzima.",
+    sampleClip: "Bass Foundation (E2 - C4)"
   }
 ];
+
+export const EVENTS_CATALOG = INITIAL_EVENTS;

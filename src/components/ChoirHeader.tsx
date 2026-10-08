@@ -4,16 +4,18 @@ import { useChoir } from '../context/ChoirContext';
 import { 
   ChevronDown, 
   ShoppingBag, 
-  Globe, 
   Menu, 
   X,
   Music,
   BookOpen,
   Users,
   Sparkles,
-  Heart,
-  Sliders
+  Sliders,
+  ShieldCheck,
+  FileText,
+  Youtube
 } from 'lucide-react';
+import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 interface ChoirHeaderProps {
   currentRoute: string;
@@ -26,14 +28,10 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
     setLang, 
     cart, 
     setIsCartOpen, 
-    setIsBookingOpen,
-    setIsVoiceMixerOpen,
-    liturgicalSeason,
-    setLiturgicalSeason
+    setIsVoiceMixerOpen 
   } = useChoir();
 
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
-  const [exploreDropdownOpen, setExploreDropdownOpen] = useState(false);
   const [musicDropdownOpen, setMusicDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -42,7 +40,6 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
   const navigateTo = (route: string) => {
     setCurrentRoute(route);
     setAboutDropdownOpen(false);
-    setExploreDropdownOpen(false);
     setMusicDropdownOpen(false);
     setMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -76,13 +73,13 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             </button>
           </div>
 
-          {/* Center: Desktop Navigation - strictly enabled only at xl (1280px+) as requested in Bug 1 */}
-          <nav className="hidden xl:flex items-center gap-1 text-[13px] font-medium text-white/90">
+          {/* Center: Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1.5 text-[13px] font-medium text-white/90">
             
             {/* Home */}
             <button
               onClick={() => navigateTo('home')}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 currentRoute === 'home' ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
               }`}
             >
@@ -97,91 +94,50 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             >
               <button
                 onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
-                className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
                   currentRoute.startsWith('about-') ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
                 }`}
               >
-                <span>{lang === 'sw' ? 'Kuhusu Sisi' : 'About'}</span>
+                <span>{lang === 'sw' ? 'Kuhusu Kwaya' : 'About'}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-white/70" />
               </button>
 
               {aboutDropdownOpen && (
-                <div className="absolute top-full left-0 w-60 bg-white text-[#0C2340] rounded-xl shadow-2xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute top-full left-0 w-64 bg-white text-[#0C2340] rounded-xl shadow-2xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   <button
                     onClick={() => navigateTo('about-story')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-[#0E56A6]" />
-                    <span>{lang === 'sw' ? 'Historia Yetu' : 'Our Story & History'}</span>
+                    <span>{lang === 'sw' ? 'Historia Yetu' : 'Our Story & Heritage'}</span>
                   </button>
                   <button
                     onClick={() => navigateTo('about-patron')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-[#0E56A6]" />
-                    <span>{lang === 'sw' ? 'Somo: Mt. Monica' : 'Patron: Saint Monica'}</span>
+                    <span>{lang === 'sw' ? 'Somo: Mtakatifu Monika' : 'Patron: Saint Monica'}</span>
                   </button>
                   <button
-                    onClick={() => navigateTo('about-portraits')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                    onClick={() => navigateTo('about-gallery')}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <Users className="w-3.5 h-3.5 text-[#0E56A6]" />
-                    <span>{lang === 'sw' ? 'Picha za Waimbaji' : 'Member Portraits'}</span>
+                    <span>{lang === 'sw' ? 'Picha za Kwaya Nzima' : 'Choir Group Gallery'}</span>
                   </button>
                   <button
                     onClick={() => navigateTo('about-leadership')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
                   >
-                    <Users className="w-3.5 h-3.5 text-[#0E56A6]" />
-                    <span>{lang === 'sw' ? 'Uongozi wa Kwaya' : 'Leadership Committee'}</span>
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#0E56A6]" />
+                    <span>{lang === 'sw' ? 'Walimu na Kamati ya Uongozi' : 'Trainers & Officials'}</span>
                   </button>
                   <button
                     onClick={() => navigateTo('about-sections')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <Music className="w-3.5 h-3.5 text-[#0E56A6]" />
                     <span>{lang === 'sw' ? 'Sauti za Kwaya (SATB)' : 'Choir Voice Sections'}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Explore Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setExploreDropdownOpen(true)}
-              onMouseLeave={() => setExploreDropdownOpen(false)}
-            >
-              <button
-                onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
-                className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
-                  currentRoute.startsWith('services') ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span>{lang === 'sw' ? 'Huduma Zetu' : 'Explore'}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-white/70" />
-              </button>
-
-              {exploreDropdownOpen && (
-                <div className="absolute top-full left-0 w-60 bg-white text-[#0C2340] rounded-xl shadow-2xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <button
-                    onClick={() => navigateTo('services')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Huduma Zote za Kwaya' : 'All Choir Services'}
-                  </button>
-                  <button
-                    onClick={() => navigateTo('services-weddings')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
-                  >
-                    <Heart className="w-3.5 h-3.5 text-rose-500" />
-                    <span>{lang === 'sw' ? 'Misa za Harusi' : 'Catholic Weddings'}</span>
-                  </button>
-                  <button
-                    onClick={() => navigateTo('services-funerals')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Misa za Mazishi' : 'Requiem & Memorials'}
                   </button>
                 </div>
               )}
@@ -195,79 +151,55 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             >
               <button
                 onClick={() => setMusicDropdownOpen(!musicDropdownOpen)}
-                className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
-                  currentRoute.startsWith('music-') ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
+                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+                  currentRoute.startsWith('music-') || currentRoute === 'shop' ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
                 }`}
               >
-                <span>{lang === 'sw' ? 'Muziki na Noti' : 'Music'}</span>
+                <span>{lang === 'sw' ? 'Muziki' : 'Music'}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-white/70" />
               </button>
 
               {musicDropdownOpen && (
-                <div className="absolute top-full left-0 w-64 bg-white text-[#0C2340] rounded-xl shadow-2xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <button
-                    onClick={() => navigateTo('music-albums')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Albamu za Studio' : 'Albums & Studio Masters'}
-                  </button>
+                <div className="absolute top-full left-0 w-56 bg-white text-[#0C2340] rounded-xl shadow-2xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   <button
                     onClick={() => navigateTo('music-repertoire')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Hifadhi ya Nyimbo' : 'Liturgical Repertoire'}
-                  </button>
-                  <button
-                    onClick={() => navigateTo('music-planner')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Mpangaji wa Misa (PDF)' : 'Sunday Mass Planner (PDF)'}
-                  </button>
-                  <button
-                    onClick={() => navigateTo('music-notation')}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
                   >
                     <Music className="w-3.5 h-3.5 text-[#0E56A6]" />
-                    <span>{lang === 'sw' ? 'Wimbo wa Mwezi (Notation)' : 'Hymn of the Month Score'}</span>
+                    <span>{lang === 'sw' ? 'Nyimbo' : 'Songs'}</span>
+                  </button>
+                  <button
+                    onClick={() => navigateTo('music-albums')}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-[#0E56A6]" />
+                    <span>{lang === 'sw' ? 'Albamu Yetu' : 'Our Album'}</span>
+                  </button>
+                  <button
+                    onClick={() => navigateTo('shop')}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-[#EAF4FB] hover:text-[#0E56A6] transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-[#0E56A6]" />
+                    <span>{lang === 'sw' ? 'Duka la Noti' : 'Sheet Music Store'}</span>
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Merchandise */}
-            <button
-              onClick={() => navigateTo('shop')}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                currentRoute === 'shop' ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {lang === 'sw' ? 'Duka la Muziki' : 'Merchandise'}
-            </button>
-
             {/* Events */}
             <button
               onClick={() => navigateTo('events')}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 currentRoute === 'events' ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
               }`}
             >
               {lang === 'sw' ? 'Matukio' : 'Events'}
             </button>
 
-            {/* Members */}
-            <button
-              onClick={() => navigateTo('members')}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                currentRoute === 'members' ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {lang === 'sw' ? 'Wanachama' : 'Members'}
-            </button>
-
             {/* Contact */}
             <button
               onClick={() => navigateTo('contact')}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 currentRoute === 'contact' ? 'text-white font-bold bg-white/15' : 'hover:text-white hover:bg-white/5'
               }`}
             >
@@ -275,13 +207,13 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             </button>
           </nav>
 
-          {/* Right Action Zone: Clean, uncrowded (Bug 1 & 6 fixed: Only Language Switch, Cart, Contact CTA, Hamburger) */}
+          {/* Right Action Zone */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             
-            {/* Language Switch: English / Kiswahili Toggle Pill */}
+            {/* Language Switch: English / Kiswahili */}
             <div 
               className="flex items-center bg-white/10 p-0.5 rounded-full border border-white/20 shrink-0"
-              title="Change Language / Badili Lugha"
+              title={lang === 'sw' ? 'Badili lugha' : 'Change language'}
             >
               <button
                 onClick={() => setLang('en')}
@@ -305,32 +237,32 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
               </button>
             </div>
 
-            {/* Shopping Bag Trigger */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-1.5 text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer shrink-0"
-              aria-label="Open Shopping Cart"
-            >
-              <ShoppingBag className="w-5 h-5 text-white" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#0284C7] text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+            {/* CRITICAL REQUIREMENT: Shopping Bag ONLY visible when cartCount > 0 */}
+            {cartCount > 0 && (
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-white hover:bg-white/10 rounded-full transition-all cursor-pointer shrink-0 animate-in fade-in"
+                aria-label="Open Shopping Cart"
+              >
+                <ShoppingBag className="w-5 h-5 text-[#7EC8F0]" />
+                <span className="absolute -top-1 -right-1 bg-[#1058A8] text-white font-bold text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white/40 shadow-xs">
                   {cartCount}
                 </span>
-              )}
-            </button>
+              </button>
+            )}
 
-            {/* Single Main CTA Button: Contact Us / Wasiliana Nasi (Never clipped) */}
+            {/* Contact CTA Button */}
             <button
               onClick={() => navigateTo('contact')}
-              className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C4A8A] border border-sky-400/30 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
+              className="hidden sm:inline-flex items-center justify-center px-3.5 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C4A8A] border border-sky-400/30 rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap shrink-0"
             >
               {lang === 'sw' ? 'Wasiliana Nasi' : 'Contact Us'}
             </button>
 
-            {/* Mobile / Narrow Screen Hamburger (Visible below 1280px) */}
+            {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer shrink-0"
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer shrink-0"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -339,53 +271,41 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
         </div>
       </div>
 
-      {/* Mobile Drawer Menu (Under 1280px) */}
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-[#1C1E24] text-white border-b border-black/40 px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
+        <div className="lg:hidden bg-[#1C1E24] text-white border-b border-black/40 px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
           <div className="grid grid-cols-2 gap-2 text-xs font-medium">
-            <button onClick={() => navigateTo('home')} className="text-left p-2 hover:bg-white/10 rounded">
+            <button onClick={() => navigateTo('home')} className="text-left p-2.5 hover:bg-white/10 rounded">
               {lang === 'sw' ? 'Mwanzo' : 'Home'}
             </button>
-            <button onClick={() => navigateTo('about-story')} className="text-left p-2 hover:bg-white/10 rounded">
+            <button onClick={() => navigateTo('about-story')} className="text-left p-2.5 hover:bg-white/10 rounded">
               {lang === 'sw' ? 'Historia Yetu' : 'Our Story'}
             </button>
-            <button onClick={() => navigateTo('about-patron')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Somo: Mt. Monica' : 'Patron Saint'}
+            <button onClick={() => navigateTo('about-patron')} className="text-left p-2.5 hover:bg-white/10 rounded">
+              {lang === 'sw' ? 'Somo: Mt. Monika' : 'Patron Saint'}
             </button>
-            <button onClick={() => navigateTo('about-portraits')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Picha za Waimbaji' : 'Member Portraits'}
+            <button onClick={() => navigateTo('about-gallery')} className="text-left p-2.5 hover:bg-white/10 rounded">
+              {lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}
             </button>
-            <button onClick={() => navigateTo('about-sections')} className="text-left p-2 hover:bg-white/10 rounded">
+            <button onClick={() => navigateTo('about-leadership')} className="text-left p-2.5 hover:bg-white/10 rounded">
+              {lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers & Officials'}
+            </button>
+            <button onClick={() => navigateTo('about-sections')} className="text-left p-2.5 hover:bg-white/10 rounded">
               {lang === 'sw' ? 'Sauti za SATB' : 'Voice Sections'}
             </button>
-            <button onClick={() => navigateTo('services')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Huduma Zote' : 'All Services'}
+            <button onClick={() => navigateTo('music-repertoire')} className="text-left p-2.5 hover:bg-white/10 rounded">
+              {lang === 'sw' ? 'Nyimbo' : 'Songs'}
             </button>
-            <button onClick={() => navigateTo('services-weddings')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Misa za Harusi' : 'Weddings'}
+            <button onClick={() => navigateTo('music-albums')} className="text-left p-2.5 hover:bg-white/10 rounded">
+              {lang === 'sw' ? 'Albamu Yetu' : 'Our Album'}
             </button>
-            <button onClick={() => navigateTo('music-albums')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Albamu za Studio' : 'Albums'}
+            <button onClick={() => navigateTo('shop')} className="text-left p-2.5 hover:bg-white/10 rounded">
+              {lang === 'sw' ? 'Duka la Noti' : 'Sheet Music Store'}
             </button>
-            <button onClick={() => navigateTo('music-repertoire')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Hifadhi ya Nyimbo' : 'Hymn Repertoire'}
-            </button>
-            <button onClick={() => navigateTo('music-planner')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Mpangaji wa Misa' : 'Mass Planner'}
-            </button>
-            <button onClick={() => navigateTo('music-notation')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Wimbo wa Mwezi' : 'Hymn Score'}
-            </button>
-            <button onClick={() => navigateTo('shop')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Duka la Muziki' : 'Merchandise'}
-            </button>
-            <button onClick={() => navigateTo('events')} className="text-left p-2 hover:bg-white/10 rounded">
+            <button onClick={() => navigateTo('events')} className="text-left p-2.5 hover:bg-white/10 rounded">
               {lang === 'sw' ? 'Matukio' : 'Events'}
             </button>
-            <button onClick={() => navigateTo('members')} className="text-left p-2 hover:bg-white/10 rounded">
-              {lang === 'sw' ? 'Wanachama' : 'Members'}
-            </button>
-            <button onClick={() => navigateTo('contact')} className="text-left p-2 hover:bg-white/10 rounded col-span-2">
+            <button onClick={() => navigateTo('contact')} className="text-left p-2.5 hover:bg-white/10 rounded">
               {lang === 'sw' ? 'Mawasiliano' : 'Contact'}
             </button>
           </div>
@@ -396,16 +316,14 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 setIsVoiceMixerOpen(true);
                 setMobileMenuOpen(false);
               }}
-              className="px-3 py-2 text-xs font-semibold bg-white/10 text-white rounded-lg flex items-center gap-1"
+              className="px-3 py-2 text-xs font-semibold bg-white/10 text-white rounded-lg flex items-center gap-1 cursor-pointer"
             >
               <Sliders className="w-3.5 h-3.5 text-[#7EC8F0]" />
               <span>Voice Mixer</span>
             </button>
             <button
-              onClick={() => {
-                navigateTo('contact');
-              }}
-              className="flex-1 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C4A8A] rounded-lg text-center"
+              onClick={() => navigateTo('contact')}
+              className="flex-1 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C4A8A] rounded-lg text-center cursor-pointer"
             >
               {lang === 'sw' ? 'Wasiliana Nasi' : 'Contact Us'}
             </button>

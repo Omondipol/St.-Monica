@@ -1,58 +1,66 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useChoir, formatTimeConsistent } from '../context/ChoirContext';
+import { useChoir } from '../context/ChoirContext';
 import { 
   Play, 
   Pause, 
-  Volume2, 
+  SkipBack, 
+  SkipForward, 
+  RotateCcw, 
+  RotateCw, 
   FileText, 
   ShoppingCart, 
   Music, 
+  Sliders, 
+  Maximize2, 
+  Minimize2, 
+  Volume2, 
+  VolumeX, 
+  Youtube, 
+  Sparkles, 
   ChevronUp, 
-  ChevronDown,
-  Sliders,
-  Maximize2,
-  Minimize2
+  ChevronDown 
 } from 'lucide-react';
+import { ChoirLogo } from './ChoirLogo';
+import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 export const AudioPlayerBar: React.FC = () => {
   const { 
     currentSong, 
     isPlaying, 
     togglePlay, 
+    playNext, 
+    playPrevious, 
+    skipSeconds, 
     currentTimeSeconds, 
     totalDurationSeconds, 
     audioProgress, 
     seekAudioByPercent, 
-    seekAudioBySeconds,
-    isPlayerMinimized,
-    setIsPlayerMinimized,
+    volume, 
+    setVolume, 
+    isMuted, 
+    toggleMute, 
+    playbackSpeed, 
+    setPlaybackSpeed, 
+    isPlayerMinimized, 
+    setIsPlayerMinimized, 
+    setIsNowPlayingExpanded, 
     setIsLyricsOpen, 
-    setIsVoiceMixerOpen,
-    addToCart,
-    formatPrice,
+    setIsVoiceMixerOpen, 
+    setIsYoutubeModalOpen, 
+    showVideoScreen,
+    setShowVideoScreen,
+    addToCart, 
+    formatPrice, 
+    formatTime, 
     lang 
   } = useChoir();
 
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTimeText, setHoverTimeText] = useState<string | null>(null);
+  const [hoverPercent, setHoverPercent] = useState<number>(0);
   const waveformRef = useRef<HTMLDivElement>(null);
 
-  // Auto shrink player when user scrolls down more than 150px
-  useEffect(() => {
-    let lastScrollY = window.scrollY;
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > 200 && currentScrollY > lastScrollY && !isPlayerMinimized) {
-        setIsPlayerMinimized(true);
-      }
-      lastScrollY = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isPlayerMinimized, setIsPlayerMinimized]);
-
-  // Scrub calculation from mouse/touch event
+  // Handle waveform scrub
   const handleScrubMove = (clientX: number) => {
     if (!waveformRef.current) return;
     const rect = waveformRef.current.getBoundingClientRect();
@@ -67,19 +75,17 @@ export const AudioPlayerBar: React.FC = () => {
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!waveformRef.current) return;
+    const rect = waveformRef.current.getBoundingClientRect();
+    const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const percent = (offsetX / rect.width) * 100;
+    setHoverPercent(percent);
+    const targetSec = Math.round((percent / 100) * totalDurationSeconds);
+    setHoverTimeText(formatTime(targetSec));
+
     if (isDragging) {
       handleScrubMove(e.clientX);
     }
-    if (waveformRef.current) {
-      const rect = waveformRef.current.getBoundingClientRect();
-      const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
-      const targetSec = Math.round((offsetX / rect.width) * totalDurationSeconds);
-      setHoverTimeText(formatTimeConsistent(targetSec));
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
   };
 
   useEffect(() => {
@@ -88,150 +94,188 @@ export const AudioPlayerBar: React.FC = () => {
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
   }, []);
 
-  // Format times consistently: "m:ss" for both elapsed and total (Bug 3 fixed!)
-  const formattedCurrentTime = formatTimeConsistent(currentTimeSeconds);
-  const formattedTotalTime = formatTimeConsistent(totalDurationSeconds);
-
-  // Recording metadata: "Recorded at St. Monica Parish, 2025" (Bug 5 fixed!)
-  const recordingInfo = lang === 'sw'
-    ? `Ilirekodiwa Parokia ya Mt. Monica, ${currentSong.year}`
-    : `Recorded at St. Monica Parish, ${currentSong.year}`;
+  const formattedCurrentTime = formatTime(currentTimeSeconds);
+  const formattedTotalTime = formatTime(totalDurationSeconds);
 
   return (
     <aside 
-      aria-label="Audio Player"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#0C2340] text-white border-t border-[#7EC8F0]/30 shadow-2xl transition-all duration-300"
+      aria-label="Liturgical Audio Player"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[#09121F]/98 backdrop-blur-2xl text-white border-t border-sky-400/20 shadow-none transition-all duration-300"
     >
-      {/* 
-        EXPAND / COLLAPSE MINI-BAR TOGGLE (Bug 2 fixed)
-        Allows shrinking to a slim 44px bar, or expanding back.
-      */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
-        <button
-          onClick={() => setIsPlayerMinimized(!isPlayerMinimized)}
-          className="absolute -top-6 right-6 sm:right-8 bg-[#0C2340] text-[#7EC8F0] hover:text-white px-3 py-0.5 rounded-t-lg border-t border-x border-[#7EC8F0]/30 text-[11px] font-semibold flex items-center gap-1 cursor-pointer shadow-md transition-colors"
-          title={isPlayerMinimized ? "Expand full audio player" : "Minimize to slim bar"}
+      {/* Top Edge Slim Progress Line (visible across full width) */}
+      <div 
+        className="w-full h-1 bg-white/10 relative cursor-pointer group"
+        onClick={e => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const percent = ((e.clientX - rect.left) / rect.width) * 100;
+          seekAudioByPercent(percent);
+        }}
+      >
+        <div 
+          className="h-full bg-gradient-to-r from-[#1058A8] via-[#2F8EEA] to-sky-400 relative transition-all duration-75"
+          style={{ width: `${audioProgress}%` }}
         >
-          {isPlayerMinimized ? (
-            <>
-              <ChevronUp className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Fungua Player' : 'Expand Player'}</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Fupisha Player' : 'Mini Player'}</span>
-            </>
-          )}
-        </button>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_#7EC8F0] scale-0 group-hover:scale-100 transition-transform" />
+        </div>
       </div>
 
-      {/* MINIMIZED SLIM BAR VIEW (Bug 2) */}
+      {/* Mini Bar Toggle Pill (Only when player is full/expanded) */}
+      {!isPlayerMinimized && (
+        <div className="max-w-7xl mx-auto px-4 relative">
+          <button
+            onClick={() => setIsPlayerMinimized(true)}
+            className="absolute -top-6 right-6 sm:right-10 bg-[#09121F] text-[#7EC8F0] hover:text-white px-3 py-1 rounded-t-md border-t border-x border-sky-400/20 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-none transition-colors"
+            title={lang === 'sw' ? 'Fupisha kicheza muziki' : 'Minimize player'}
+          >
+            <ChevronDown className="w-3.5 h-3.5" />
+            <span>{lang === 'sw' ? 'Fupisha' : 'Minimize'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* MINIMIZED SLIM BAR VIEW: Only song title and play button, expands when tapped */}
       {isPlayerMinimized ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div 
+          onClick={() => setIsPlayerMinimized(false)}
+          className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-4 cursor-pointer select-none group"
+          title={lang === 'sw' ? 'Bofya kufungua wimbo' : 'Tap to expand player'}
+        >
+          <div className="flex items-center gap-3 min-w-0">
             <button
-              onClick={togglePlay}
-              className="w-8 h-8 rounded-full bg-white text-[#0C2340] hover:bg-[#7EC8F0] flex items-center justify-center shrink-0 transition-transform active:scale-95 cursor-pointer shadow-sm"
+              onClick={e => {
+                e.stopPropagation();
+                togglePlay();
+              }}
+              className="w-8 h-8 rounded-full bg-[#1058A8] hover:bg-[#1E7ED6] text-white flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-95 cursor-pointer border border-sky-300/40"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
-              {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+              {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
             </button>
-            <div className="min-w-0">
-              <span className="font-fraunces text-xs sm:text-sm font-bold text-white truncate block">
-                {currentSong.title}
-              </span>
-              <span className="text-[11px] text-[#7EC8F0] truncate block">
-                {currentSong.composer} · {formattedCurrentTime} / {formattedTotalTime}
-              </span>
-            </div>
+
+            <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors truncate block leading-tight">
+              {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setIsLyricsOpen(true)}
-              className="px-2.5 py-1 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-md transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <FileText className="w-3.5 h-3.5 text-[#7EC8F0]" />
-              <span className="hidden sm:inline">{lang === 'sw' ? 'Maneno' : 'Lyrics'}</span>
-            </button>
-
-            <button
-              onClick={() => setIsPlayerMinimized(false)}
-              className="p-1.5 text-[#7EC8F0] hover:text-white rounded-md cursor-pointer"
-              title="Expand player"
-            >
-              <Maximize2 className="w-4 h-4" />
-            </button>
+          <div className="flex items-center gap-1.5 text-xs text-[#7EC8F0] group-hover:text-white transition-colors shrink-0 font-medium">
+            <span>{lang === 'sw' ? 'Wimbo Unaocheza' : 'Now Playing'}</span>
+            <ChevronUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
           </div>
         </div>
       ) : (
-        /* EXPANDED FULL WAVEFORM PLAYER VIEW (Bug 3, 4, 5 fixed) */
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
+        /* MODERN FULL PLAYER BAR */
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-3 sm:gap-4">
             
-            {/* Left: Track Information & High-Contrast Typography (Bug 5 fixed: >= 12px, high contrast) */}
+            {/* LEFT: Cover Artwork & Song Meta */}
             <div className="flex items-center gap-3 w-full lg:w-auto lg:max-w-xs justify-between lg:justify-start">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-[#0E56A6] text-white flex items-center justify-center shrink-0 border border-[#7EC8F0]/30 shadow-inner">
-                  <Music className={`w-5 h-5 ${isPlaying ? 'text-[#7EC8F0] animate-pulse' : 'text-white'}`} />
+              <div 
+                onClick={() => setIsNowPlayingExpanded(true)}
+                className="flex items-center gap-3 min-w-0 cursor-pointer group"
+                title="Click to open full player"
+              >
+                {/* Vinyl seal artwork */}
+                <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-[#1058A8] to-[#0A2244] border border-sky-400/30 flex items-center justify-center shrink-0 shadow-md overflow-hidden group-hover:border-sky-300 transition-colors">
+                  <ChoirLogo size={36} className={`${isPlaying ? 'rotate-6' : ''} transition-transform`} />
+                  {isPlaying && (
+                    <div className="absolute inset-0 bg-sky-500/10 pointer-events-none" />
+                  )}
                 </div>
 
                 <div className="min-w-0">
-                  <h4 className="font-fraunces text-sm sm:text-base font-bold text-white truncate leading-tight">
-                    {currentSong.title}
-                  </h4>
-                  {/* High contrast text >= 12px with real recording info (Bug 5 fixed) */}
-                  <p className="text-xs font-medium text-[#EAF4FB] truncate font-source mt-0.5">
-                    {currentSong.composer} · {currentSong.voicing}
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-fraunces text-sm sm:text-base font-bold text-white group-hover:text-[#7EC8F0] transition-colors truncate leading-tight">
+                      {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
+                    </h4>
+                  </div>
+                  
+                  <p className="text-xs font-medium text-white/80 truncate font-source mt-0.5">
+                    {currentSong.composer}
                   </p>
-                  <p className="text-[12px] font-medium text-[#7EC8F0] truncate font-source">
-                    {recordingInfo}
-                  </p>
+
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] font-bold text-[#7EC8F0] uppercase tracking-wider font-source">
+                      {lang === 'sw' ? currentSong.seasonSwahili : currentSong.season}
+                    </span>
+                    <span className="text-[10px] text-white/40">·</span>
+                    <span className="text-[10px] font-mono text-white/60">
+                      {currentSong.voicing}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Mobile Play button */}
-              <button
-                onClick={togglePlay}
-                className="lg:hidden w-10 h-10 rounded-full bg-white text-[#0C2340] hover:bg-[#7EC8F0] flex items-center justify-center shrink-0 cursor-pointer shadow-md active:scale-95 transition-transform"
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-              >
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-              </button>
+              {/* Mobile Play / Controls */}
+              <div className="lg:hidden flex items-center gap-2">
+                <button
+                  onClick={togglePlay}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-[#1058A8] to-[#2B8CED] text-white flex items-center justify-center shrink-0 cursor-pointer shadow-md active:scale-95 transition-transform border border-sky-300/40"
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                </button>
+              </div>
             </div>
 
-            {/* Center: Real Interactive Click & Drag Waveform with Consistent Times (Bug 3 & 4 fixed) */}
-            <div className="w-full lg:flex-1 lg:max-w-xl flex flex-col items-center gap-1.5">
+            {/* CENTER: Audio Controls & Dynamic Pulsing Waveform */}
+            <div className="w-full lg:flex-1 lg:max-w-xl flex flex-col items-center gap-1">
               
-              {/* Controls bar with Desktop Play */}
-              <div className="w-full flex items-center justify-between gap-2 px-1">
-                <div className="hidden lg:flex items-center gap-2">
-                  <button
-                    onClick={togglePlay}
-                    className="w-9 h-9 rounded-full bg-white text-[#0C2340] hover:bg-[#7EC8F0] flex items-center justify-center shrink-0 cursor-pointer shadow-md transition-transform active:scale-95"
-                    aria-label={isPlaying ? 'Pause' : 'Play'}
-                  >
-                    {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                  </button>
-                  <span className="text-xs font-bold font-mono text-white">
-                    {formattedCurrentTime}
-                  </span>
-                </div>
+              {/* Playback Button Cluster */}
+              <div className="flex items-center gap-3 sm:gap-4">
+                <button
+                  onClick={() => skipSeconds(-10)}
+                  className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                  title="-10s rewind"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
 
-                {/* Mobile time elapsed */}
-                <span className="lg:hidden text-xs font-bold font-mono text-white">
+                <button
+                  onClick={playPrevious}
+                  className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                  title="Previous song"
+                >
+                  <SkipBack className="w-4 h-4 fill-current" />
+                </button>
+
+                <button
+                  onClick={togglePlay}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-[#1058A8] to-[#2B8CED] text-white flex items-center justify-center shrink-0 cursor-pointer shadow-lg shadow-sky-500/25 hover:scale-105 active:scale-95 transition-transform border border-sky-300/40"
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                </button>
+
+                <button
+                  onClick={playNext}
+                  className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                  title="Next song"
+                >
+                  <SkipForward className="w-4 h-4 fill-current" />
+                </button>
+
+                <button
+                  onClick={() => skipSeconds(10)}
+                  className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                  title="+10s skip"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Waveform Scrubber & Timers */}
+              <div className="w-full flex items-center justify-between gap-2 px-1">
+                <span className="text-[11px] font-bold font-mono text-[#7EC8F0] min-w-[35px] text-right">
                   {formattedCurrentTime}
                 </span>
 
-                {/* Interactive Waveform / Scrubbing Bar (Bug 4 fixed) */}
                 <div 
                   ref={waveformRef}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseLeave={() => setHoverTimeText(null)}
-                  className="flex-1 h-8 mx-2 flex items-end justify-between gap-1 px-1.5 py-1 bg-black/25 rounded-lg border border-white/10 cursor-pointer relative group select-none"
-                  title="Click or drag to seek anywhere in the song"
+                  className="flex-1 h-7 flex items-end justify-between gap-1 px-1.5 py-0.5 bg-black/40 rounded-lg border border-white/10 cursor-pointer relative group select-none overflow-hidden"
+                  title={lang === 'sw' ? 'Bofya kuteua muda wa wimbo' : 'Scrub waveform'}
                 >
                   {currentSong.waveformPeaks.map((peak, idx) => {
                     const barPercent = (idx / currentSong.waveformPeaks.length) * 100;
@@ -239,70 +283,108 @@ export const AudioPlayerBar: React.FC = () => {
                     return (
                       <div
                         key={idx}
-                        className={`flex-1 rounded-full transition-all duration-75 pointer-events-none ${
+                        className={`flex-1 rounded-full transition-all duration-100 pointer-events-none ${
                           isPlayed
-                            ? 'bg-[#7EC8F0]'
-                            : 'bg-white/35 group-hover:bg-white/50'
+                            ? 'bg-gradient-to-t from-[#1058A8] to-[#7EC8F0]'
+                            : 'bg-white/20 group-hover:bg-white/35'
                         }`}
-                        style={{ height: `${Math.max(18, peak)}%` }}
+                        style={{ 
+                          height: `${Math.max(16, isPlaying ? Math.min(100, peak * (0.8 + 0.3 * Math.sin(idx + currentTimeSeconds))) : peak)}%` 
+                        }}
                       />
                     );
                   })}
 
-                  {/* Scrubber progress indicator line */}
+                  {/* Playhead bar */}
                   <div 
-                    className="absolute top-0 bottom-0 w-1 bg-white shadow-lg pointer-events-none rounded"
+                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_8px_#7EC8F0] pointer-events-none rounded"
                     style={{ left: `${audioProgress}%` }}
                   />
 
                   {/* Hover tooltip */}
                   {hoverTimeText && (
                     <div 
-                      className="absolute -top-7 px-1.5 py-0.5 bg-[#1C1E24] text-white text-[10px] font-mono rounded border border-white/20 pointer-events-none -translate-x-1/2"
-                      style={{ left: `${audioProgress}%` }}
+                      className="absolute -top-7 px-1.5 py-0.5 bg-[#0A1220] text-white text-[10px] font-mono rounded border border-sky-400/40 pointer-events-none -translate-x-1/2 shadow-md"
+                      style={{ left: `${hoverPercent}%` }}
                     >
                       {hoverTimeText}
                     </div>
                   )}
                 </div>
 
-                {/* Total time (Consistent m:ss format, Bug 3 fixed!) */}
-                <span className="text-xs font-bold font-mono text-white/90">
+                <span className="text-[11px] font-bold font-mono text-white/70 min-w-[35px]">
                   {formattedTotalTime}
                 </span>
               </div>
-
-              {/* Sub-bar hint */}
-              <div className="w-full flex items-center justify-between text-[11px] text-[#EAF4FB]/70 px-2 font-source">
-                <span>{lang === 'sw' ? 'Muziki Halisi wa Kwaya' : 'Authentic Choral Polyphony'}</span>
-                <span>{lang === 'sw' ? 'Bofya au vuta wimbi kusogeza wimbo' : 'Click or drag waveform to scrub'}</span>
-              </div>
             </div>
 
-            {/* Right: Signature Features Actions (Synced Lyrics, SATB Voice Mixer, Sheet Music) */}
-            <div className="flex items-center gap-2 sm:gap-2.5 w-full lg:w-auto justify-end pt-1 lg:pt-0 border-t lg:border-t-0 border-white/10">
+            {/* RIGHT: Actions, Speed, Video, Lyrics, Buy Score */}
+            <div className="flex items-center gap-1.5 sm:gap-2 w-full lg:w-auto justify-end pt-1 lg:pt-0 border-t lg:border-t-0 border-white/10">
               
-              {/* Voice Mixer Button */}
+              {/* Volume Slider (Desktop) */}
+              <div className="hidden xl:flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/10">
+                <button onClick={toggleMute} className="text-white/70 hover:text-white cursor-pointer" title="Mute/Unmute">
+                  {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-[#7EC8F0]" />}
+                </button>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={isMuted ? 0 : volume}
+                  onChange={e => setVolume(parseFloat(e.target.value))}
+                  className="w-16 accent-[#7EC8F0] cursor-pointer h-1"
+                  title="Volume"
+                />
+              </div>
+
+              {/* Rehearsal Speed Button */}
+              <button
+                onClick={() => {
+                  const nextSpeed = playbackSpeed === 1.0 ? 0.75 : playbackSpeed === 0.75 ? 1.25 : 1.0;
+                  setPlaybackSpeed(nextSpeed);
+                }}
+                className="px-2 py-1.5 text-[11px] font-bold text-white/80 hover:text-white bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg transition-colors cursor-pointer"
+                title="Change practice playback speed"
+              >
+                {playbackSpeed}x
+              </button>
+
+              {/* Watch Official YouTube Video Screen */}
+              <button
+                onClick={() => setShowVideoScreen(!showVideoScreen)}
+                className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  showVideoScreen
+                    ? 'bg-red-600 text-white shadow-sm'
+                    : 'text-white/90 hover:text-white bg-red-600/25 hover:bg-red-600/50 border border-red-500/35'
+                }`}
+                title={showVideoScreen ? "Hide video screen" : "Show official recording video"}
+              >
+                <Youtube className="w-3.5 h-3.5 text-red-400" />
+                <span className="hidden md:inline">{showVideoScreen ? 'Hide Video' : 'Video'}</span>
+              </button>
+
+              {/* Voice Mixer */}
               <button
                 onClick={() => setIsVoiceMixerOpen(true)}
-                className="px-2.5 py-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                title="Open SATB Voice Mixer (Soprano, Alto, Tenor, Bass)"
+                className="px-2.5 py-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                title="Open SATB Voice Mixer"
               >
                 <Sliders className="w-3.5 h-3.5 text-[#7EC8F0]" />
-                <span>{lang === 'sw' ? 'Voice Mixer' : 'SATB Mixer'}</span>
+                <span className="hidden sm:inline">Mixer</span>
               </button>
 
-              {/* Synced Lyrics Modal Button */}
+              {/* Synced Lyrics */}
               <button
                 onClick={() => setIsLyricsOpen(true)}
-                className="px-2.5 py-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                title="View synchronized lyrics"
+                className="px-2.5 py-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                title="View lyrics"
               >
                 <FileText className="w-3.5 h-3.5 text-[#7EC8F0]" />
-                <span>{lang === 'sw' ? 'Maneno (Lyrics)' : 'Synced Lyrics'}</span>
+                <span className="hidden sm:inline">{lang === 'sw' ? 'Maneno' : 'Lyrics'}</span>
               </button>
 
-              {/* Buy Sheet Music Score */}
+              {/* Direct M-Pesa Sheet Music Score Button */}
               {currentSong.sheetMusicAvailable && (
                 <button
                   onClick={() => {
@@ -312,19 +394,29 @@ export const AudioPlayerBar: React.FC = () => {
                       nameSw: `Noti za ${currentSong.title} (SATB PDF)`,
                       type: 'sheet_music',
                       priceKes: currentSong.scorePriceKes,
-                      priceUsd: Math.round((currentSong.scorePriceKes / 128) * 10) / 10,
-                      description: `Official four-part SATB vocal sheet music score for ${currentSong.title}.`,
-                      descriptionSw: `Noti rasmi za sauti nne (SATB) za wimbo wa ${currentSong.title}.`,
+                      priceUsd: 2.50,
+                      description: `Official vocal score for ${currentSong.title}.`,
+                      descriptionSw: `Noti rasmi za sauti nne za ${currentSong.title}.`,
                       image: 'sheet_music_hymnal',
                       downloadable: true
                     });
                   }}
-                  className="px-3 py-1.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C4A8A] border border-sky-400/40 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                  className="px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-[#1058A8] to-[#1E7ED6] hover:from-[#0C4A8A] hover:to-[#196BBA] border border-sky-400/40 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  title="Buy Sheet Music Score with M-Pesa"
                 >
                   <ShoppingCart className="w-3.5 h-3.5" />
-                  <span>{formatPrice(currentSong.scorePriceKes)} Noti</span>
+                  <span>{lang === 'sw' ? `Noti · ${formatPrice(currentSong.scorePriceKes)}` : `Sheet Music · ${formatPrice(currentSong.scorePriceKes)}`}</span>
                 </button>
               )}
+
+              {/* Expand to Luxury Modal */}
+              <button
+                onClick={() => setIsNowPlayingExpanded(true)}
+                className="p-1.5 text-[#7EC8F0] hover:text-white bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg transition-colors cursor-pointer"
+                title="Expand Now Playing view"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>

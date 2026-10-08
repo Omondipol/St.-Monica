@@ -1,5 +1,21 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Song, SONGS_CATALOG, ProductItem, PRODUCTS_CATALOG } from '../data/choirContent';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { 
+  Song, 
+  INITIAL_SONGS_CATALOG, 
+  SheetMusicItem,
+  INITIAL_SHEET_MUSIC,
+  ChoirLeader,
+  INITIAL_LEADERS,
+  ChoirGroupPhoto,
+  INITIAL_GROUP_PHOTOS,
+  ProductItem, 
+  INITIAL_PRODUCTS,
+  Album,
+  INITIAL_ALBUMS,
+  EventItem,
+  INITIAL_EVENTS,
+  CHOIR_STATS
+} from '../data/choirContent';
 
 export interface CartItem {
   product: ProductItem;
@@ -26,18 +42,32 @@ interface ChoirContextType {
   formatPrice: (kesAmount: number) => string;
   formatTime: (totalSeconds: number) => string;
   
-  // Audio state
+  // Real Audio State & Controls
+  songs: Song[];
   currentSong: Song;
   isPlaying: boolean;
   playSong: (song: Song) => void;
   togglePlay: () => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  skipSeconds: (delta: number) => void;
   currentTimeSeconds: number;
   totalDurationSeconds: number;
   audioProgress: number; // 0 to 100 percentage
   seekAudioByPercent: (percent: number) => void;
   seekAudioBySeconds: (seconds: number) => void;
+  volume: number; // 0 to 1
+  setVolume: (v: number) => void;
+  isMuted: boolean;
+  toggleMute: () => void;
+  playbackSpeed: number; // 0.75, 1.0, 1.25, 1.5
+  setPlaybackSpeed: (speed: number) => void;
+
+  // View States
   isPlayerMinimized: boolean;
   setIsPlayerMinimized: (min: boolean) => void;
+  isNowPlayingExpanded: boolean;
+  setIsNowPlayingExpanded: (expanded: boolean) => void;
 
   // Synced Lyrics
   isLyricsOpen: boolean;
@@ -50,6 +80,16 @@ interface ChoirContextType {
   setVoiceVolume: (part: 'soprano' | 'alto' | 'tenor' | 'bass', volume: number) => void;
   isVoiceMixerOpen: boolean;
   setIsVoiceMixerOpen: (open: boolean) => void;
+
+  // YouTube Real Audio Engine & Video Dock
+  syncFromYouTube: (curTime: number, dur: number, playingState: boolean) => void;
+  seekCommand: { targetSeconds: number; nonce: number } | null;
+  showVideoScreen: boolean;
+  setShowVideoScreen: (show: boolean) => void;
+  isYoutubeModalOpen: boolean;
+  setIsYoutubeModalOpen: (open: boolean) => void;
+  isIntroCutoffOpen: boolean;
+  dismissIntroCutoff: () => void;
 
   // Liturgical Season
   liturgicalSeason: 'ordinary' | 'lent_advent' | 'easter_christmas';
@@ -65,16 +105,36 @@ interface ChoirContextType {
   setIsCartOpen: (open: boolean) => void;
   cartTotalKes: number;
 
-  // Modals
-  isBookingOpen: boolean;
-  setIsBookingOpen: (open: boolean) => void;
-  isMassPlannerOpen: boolean;
-  setIsMassPlannerOpen: (open: boolean) => void;
+  // Dynamic Content Data (Editable via Admin Panel)
+  sheetMusicList: SheetMusicItem[];
+  leadersList: ChoirLeader[];
+  groupPhotosList: ChoirGroupPhoto[];
+  productsList: ProductItem[];
+  eventsList: EventItem[];
+
+  // Admin CRUD Functions
+  addSong: (song: Omit<Song, 'id'>) => void;
+  updateSong: (id: string, updated: Partial<Song>) => void;
+  deleteSong: (id: string) => void;
+
+  addSheetMusic: (item: Omit<SheetMusicItem, 'id'>) => void;
+  updateSheetMusic: (id: string, updated: Partial<SheetMusicItem>) => void;
+  deleteSheetMusic: (id: string) => void;
+
+  addLeader: (leader: Omit<ChoirLeader, 'id'>) => void;
+  updateLeader: (id: string, updated: Partial<ChoirLeader>) => void;
+  deleteLeader: (id: string) => void;
+
+  addGroupPhoto: (photo: Omit<ChoirGroupPhoto, 'id'>) => void;
+  deleteGroupPhoto: (id: string) => void;
+
+  resetToDefaults: () => void;
+  exportDataJson: () => string;
+  importDataJson: (jsonStr: string) => boolean;
 }
 
 const ChoirContext = createContext<ChoirContextType | undefined>(undefined);
 
-// Helper to format any seconds into consistent "m:ss" format (e.g. "1:01", "4:18")
 export const formatTimeConsistent = (totalSeconds: number): string => {
   if (isNaN(totalSeconds) || totalSeconds < 0) return "0:00";
   const mins = Math.floor(totalSeconds / 60);
@@ -82,7 +142,6 @@ export const formatTimeConsistent = (totalSeconds: number): string => {
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-// Helper to convert "4:18" string to total seconds (258s)
 export const parseDurationToSeconds = (dur: string): number => {
   const parts = dur.split(':');
   if (parts.length === 2) {
@@ -91,24 +150,35 @@ export const parseDurationToSeconds = (dur: string): number => {
   return 240;
 };
 
+// Storage keys - version bumped to v5 to guarantee clean migration to verified 4 songs only
+const STORAGE_KEYS = {
+  SONGS: 'st_monica_songs_data_v5',
+  SHEET: 'st_monica_sheet_data_v5',
+  LEADERS: 'st_monica_leaders_data_v5',
+  PHOTOS: 'st_monica_photos_data_v5',
+  PRODUCTS: 'st_monica_products_data_v5',
+  CART: 'st_monica_cart_data_v5',
+  LANG: 'st_monica_choir_lang_choice'
+};
+
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // 1. Language state with English as primary default
+  // 1. Language state
   const [lang, setLangState] = useState<'en' | 'sw'>(() => {
     try {
-      const explicitUserChoice = localStorage.getItem('st_monica_choir_lang_user_choice');
-      if (explicitUserChoice === 'sw' || explicitUserChoice === 'en') {
-        return explicitUserChoice;
+      const explicit = localStorage.getItem(STORAGE_KEYS.LANG);
+      if (explicit === 'sw' || explicit === 'en') {
+        return explicit;
       }
     } catch (e) {
       // ignore
     }
-    return 'en'; // Strict primary default to English
+    return 'en';
   });
 
   const setLang = (newLang: 'en' | 'sw') => {
     setLangState(newLang);
     try {
-      localStorage.setItem('st_monica_choir_lang_user_choice', newLang);
+      localStorage.setItem(STORAGE_KEYS.LANG, newLang);
     } catch (e) {
       // ignore
     }
@@ -125,71 +195,304 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // 2. Currency state
   const [currency, setCurrency] = useState<'KES' | 'USD'>('KES');
-  const usdConversionRate = 128; // approx 1 USD = 128 KES
+  const usdConversionRate = 128;
 
-  // 3. Audio & Playback state
-  const [currentSong, setCurrentSong] = useState<Song>(SONGS_CATALOG[0]);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentTimeSeconds, setCurrentTimeSeconds] = useState<number>(35); // starting seconds
-  const [isPlayerMinimized, setIsPlayerMinimized] = useState<boolean>(false);
-
-  const totalDurationSeconds = parseDurationToSeconds(currentSong.duration);
-  const audioProgress = Math.min(100, Math.max(0, (currentTimeSeconds / totalDurationSeconds) * 100));
-
-  // Auto-collapse mini-player on mobile by default
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 640) {
-      setIsPlayerMinimized(true);
+  // 3. Songs Catalog (migrates cleanly to verified 4 songs only)
+  const [songs, setSongs] = useState<Song[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SONGS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // If stored catalog contains hoax/extra songs, force clean reset to INITIAL_SONGS_CATALOG
+          const hasInvalidSongs = parsed.some(s => s.id === 'song-tutangaze' || s.id === 'song-rejoice' || s.id === 'song-monica');
+          if (!hasInvalidSongs) return parsed;
+        }
+      }
+    } catch (e) {
+      // ignore
     }
+    return INITIAL_SONGS_CATALOG;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(songs));
+    } catch (e) {
+      // ignore
+    }
+  }, [songs]);
+
+  // 4. Sheet Music Catalog
+  const [sheetMusicList, setSheetMusicList] = useState<SheetMusicItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SHEET);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_SHEET_MUSIC;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SHEET, JSON.stringify(sheetMusicList));
+    } catch (e) {
+      // ignore
+    }
+  }, [sheetMusicList]);
+
+  // 5. Leaders List
+  const [leadersList, setLeadersList] = useState<ChoirLeader[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.LEADERS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_LEADERS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.LEADERS, JSON.stringify(leadersList));
+    } catch (e) {
+      // ignore
+    }
+  }, [leadersList]);
+
+  // 6. Group Photos
+  const [groupPhotosList, setGroupPhotosList] = useState<ChoirGroupPhoto[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.PHOTOS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_GROUP_PHOTOS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.PHOTOS, JSON.stringify(groupPhotosList));
+    } catch (e) {
+      // ignore
+    }
+  }, [groupPhotosList]);
+
+  // 7. Store Products
+  const [productsList, setProductsList] = useState<ProductItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_PRODUCTS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsList));
+    } catch (e) {
+      // ignore
+    }
+  }, [productsList]);
+
+  const [eventsList] = useState<EventItem[]>(INITIAL_EVENTS);
+
+  // 8. REAL AUDIBLE HTML5 AUDIO PLAYBACK ENGINE
+  const [currentSong, setCurrentSong] = useState<Song>(() => songs[0] || INITIAL_SONGS_CATALOG[0]);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentTimeSeconds, setCurrentTimeSeconds] = useState<number>(0);
+  const [durationFromAudio, setDurationFromAudio] = useState<number>(0);
+  const [isPlayerMinimized, setIsPlayerMinimized] = useState<boolean>(true);
+  const [isNowPlayingExpanded, setIsNowPlayingExpanded] = useState<boolean>(false);
+  const [volume, setVolumeState] = useState<number>(0.85);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeedState] = useState<number>(1.0);
+  const [isYoutubeModalOpen, setIsYoutubeModalOpen] = useState<boolean>(false);
+  const [seekCommand, setSeekCommand] = useState<{ targetSeconds: number; nonce: number } | null>(null);
+  const [showVideoScreen, setShowVideoScreen] = useState<boolean>(false);
+  const [isIntroCutoffOpen, setIsIntroCutoffOpen] = useState<boolean>(false);
+  const hasTriggeredCutoffRef = useRef<{ [songId: string]: boolean }>({});
+
+  const dismissIntroCutoff = () => {
+    setIsIntroCutoffOpen(false);
+  };
+
+  const syncFromYouTube = (curTime: number, dur: number, playingState: boolean) => {
+    setCurrentTimeSeconds(curTime);
+    if (dur > 0 && !isNaN(dur)) {
+      setDurationFromAudio(dur);
+    }
+    
+    // 40-second intro limit: silently pause and show creative YouTube / 100 KES support modal
+    if (curTime >= 40 && playingState && !hasTriggeredCutoffRef.current[currentSong.id]) {
+      hasTriggeredCutoffRef.current[currentSong.id] = true;
+      setIsPlaying(false);
+      setIsIntroCutoffOpen(true);
+      return;
+    }
+
+    setIsPlaying(playingState);
+  };
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize Audio element once
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = currentSong.audioPreviewUrl;
+    audio.volume = isMuted ? 0 : volume;
+    audio.playbackRate = playbackSpeed;
+    audioRef.current = audio;
+
+    const onTimeUpdate = () => {
+      setCurrentTimeSeconds(audio.currentTime);
+      // 40-second intro limit for HTML5 audio
+      if (audio.currentTime >= 40 && !audio.paused && !hasTriggeredCutoffRef.current[currentSong.id]) {
+        hasTriggeredCutoffRef.current[currentSong.id] = true;
+        audio.pause();
+        setIsPlaying(false);
+        setIsIntroCutoffOpen(true);
+      }
+    };
+
+    const onDurationChange = () => {
+      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+        setDurationFromAudio(audio.duration);
+      }
+    };
+
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+
+    const onEnded = () => {
+      // Auto-advance to next song in choir list
+      const idx = songs.findIndex(s => s.id === currentSong.id);
+      const nextIdx = (idx + 1) % songs.length;
+      playSong(songs[nextIdx]);
+    };
+
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('durationchange', onDurationChange);
+    audio.addEventListener('loadedmetadata', onDurationChange);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+    audio.addEventListener('ended', onEnded);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('durationchange', onDurationChange);
+      audio.removeEventListener('loadedmetadata', onDurationChange);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('ended', onEnded);
+    };
   }, []);
 
-  // Synced Lyrics Index calculation based on time
-  const lyricsCount = currentSong.lyricsSwahili.length;
-  const currentLyricLineIndex = Math.min(
-    lyricsCount - 1,
-    Math.floor((currentTimeSeconds / Math.max(1, totalDurationSeconds)) * lyricsCount)
-  );
+  const totalDurationSeconds = durationFromAudio > 0 
+    ? durationFromAudio 
+    : parseDurationToSeconds(currentSong.duration);
 
-  // Play audio interval simulation
-  useEffect(() => {
-    let interval: any;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentTimeSeconds(prev => {
-          if (prev >= totalDurationSeconds) {
-            return 0; // loop or reset
-          }
-          return prev + 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, totalDurationSeconds]);
+  const audioProgress = totalDurationSeconds > 0 
+    ? Math.min(100, Math.max(0, (currentTimeSeconds / totalDurationSeconds) * 100))
+    : 0;
 
+  // Real Play Song (Drives authentic YouTube song audio)
   const playSong = (song: Song) => {
-    if (currentSong.id !== song.id) {
-      setCurrentSong(song);
-      setCurrentTimeSeconds(0);
-    }
+    hasTriggeredCutoffRef.current[song.id] = false;
+    setIsIntroCutoffOpen(false);
+    setCurrentSong(song);
     setIsPlaying(true);
+    setIsPlayerMinimized(false);
   };
 
+  // Real Toggle Play/Pause
   const togglePlay = () => {
-    setIsPlaying(prev => !prev);
+    setIsPlaying(prev => {
+      const next = !prev;
+      if (next) {
+        setIsPlayerMinimized(false);
+      }
+      return next;
+    });
   };
 
+  // Play Next Song
+  const playNext = () => {
+    const currentIndex = songs.findIndex(s => s.id === currentSong.id);
+    const nextIndex = (currentIndex + 1) % songs.length;
+    playSong(songs[nextIndex]);
+  };
+
+  // Play Previous Song
+  const playPrevious = () => {
+    const currentIndex = songs.findIndex(s => s.id === currentSong.id);
+    const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
+    playSong(songs[prevIndex]);
+  };
+
+  // Skip Ahead or Back
+  const skipSeconds = (delta: number) => {
+    const target = Math.max(0, Math.min(totalDurationSeconds, currentTimeSeconds + delta));
+    seekAudioBySeconds(target);
+  };
+
+  // Scrubbing
   const seekAudioByPercent = (percent: number) => {
     const clamped = Math.max(0, Math.min(100, percent));
-    const targetSeconds = Math.round((clamped / 100) * totalDurationSeconds);
-    setCurrentTimeSeconds(targetSeconds);
+    const targetSeconds = (clamped / 100) * totalDurationSeconds;
+    seekAudioBySeconds(targetSeconds);
   };
 
   const seekAudioBySeconds = (secs: number) => {
     const clamped = Math.max(0, Math.min(totalDurationSeconds, secs));
     setCurrentTimeSeconds(clamped);
+    setSeekCommand({ targetSeconds: clamped, nonce: Date.now() });
   };
 
-  // 4. SATB Voice Mixer State
+  // Volume & Mute
+  const setVolume = (val: number) => {
+    const clamped = Math.max(0, Math.min(1, val));
+    setVolumeState(clamped);
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : clamped;
+    }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const next = !prev;
+      if (audioRef.current) {
+        audioRef.current.volume = next ? 0 : volume;
+      }
+      return next;
+    });
+  };
+
+  // Playback Speed
+  const setPlaybackSpeed = (speed: number) => {
+    setPlaybackSpeedState(speed);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = speed;
+    }
+  };
+
+  // Synced Lyrics Index
+  const lyricsCount = currentSong.lyricsSwahili?.length || 1;
+  const currentLyricLineIndex = Math.min(
+    lyricsCount - 1,
+    Math.floor((currentTimeSeconds / Math.max(1, totalDurationSeconds)) * lyricsCount)
+  );
+  const [isLyricsOpen, setIsLyricsOpen] = useState<boolean>(false);
+
+  // 9. Voice Mixer
   const [voiceMixer, setVoiceMixer] = useState<VoiceMixerState>({
     soprano: true,
     alto: true,
@@ -209,37 +512,46 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   };
 
-  const setVoiceVolume = (part: 'soprano' | 'alto' | 'tenor' | 'bass', volume: number) => {
-    const clamped = Math.max(0, Math.min(100, volume));
+  const setVoiceVolume = (part: 'soprano' | 'alto' | 'tenor' | 'bass', vol: number) => {
+    const clamped = Math.max(0, Math.min(100, vol));
     setVoiceMixer(prev => ({
       ...prev,
-      [`${part}Volume`]: clamped,
-      [part]: clamped > 0
+      [`${part}Volume`]: clamped
     }));
   };
 
-  // 5. Liturgical Season State (Ordinary Green/Gold, Lent Violet, Easter Gold)
+  // 10. Liturgical Season
   const [liturgicalSeason, setLiturgicalSeason] = useState<'ordinary' | 'lent_advent' | 'easter_christmas'>('ordinary');
 
-  // 6. Lyrics Modal
-  const [isLyricsOpen, setIsLyricsOpen] = useState<boolean>(false);
+  // 11. Shopping Cart
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CART);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  });
 
-  // 7. Cart State
-  const [cart, setCart] = useState<CartItem[]>([
-    { product: PRODUCTS_CATALOG[0], quantity: 1 }
-  ]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
-  // 8. Modals
-  const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
-  const [isMassPlannerOpen, setIsMassPlannerOpen] = useState<boolean>(false);
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+    } catch (e) {
+      // ignore
+    }
+  }, [cart]);
 
   const addToCart = (product: ProductItem) => {
     setCart(prev => {
       const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
         return prev.map(item =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
       }
       return [...prev, { product, quantity: 1 }];
@@ -257,22 +569,142 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
     setCart(prev =>
-      prev.map(item => (item.product.id === productId ? { ...item, quantity } : item))
+      prev.map(item =>
+        item.product.id === productId ? { ...item, quantity } : item
+      )
     );
   };
 
-  const clearCart = () => {
-    setCart([]);
-  };
+  const clearCart = () => setCart([]);
 
-  const cartTotalKes = cart.reduce((acc, curr) => acc + curr.product.priceKes * curr.quantity, 0);
+  const cartTotalKes = cart.reduce(
+    (total, item) => total + item.product.priceKes * item.quantity,
+    0
+  );
 
-  const formatPrice = (kesAmount: number) => {
+  const formatPrice = (kesAmount: number): string => {
     if (currency === 'USD') {
       const usd = (kesAmount / usdConversionRate).toFixed(2);
       return `$${usd}`;
     }
     return `KES ${kesAmount.toLocaleString()}`;
+  };
+
+  // Admin CRUD Functions
+  const addSong = (newSong: Omit<Song, 'id'>) => {
+    const id = `song-${Date.now()}`;
+    const song: Song = { ...newSong, id };
+    setSongs(prev => [song, ...prev]);
+  };
+
+  const updateSong = (id: string, updated: Partial<Song>) => {
+    setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+    if (currentSong.id === id) {
+      setCurrentSong(prev => ({ ...prev, ...updated }));
+    }
+  };
+
+  const deleteSong = (id: string) => {
+    setSongs(prev => {
+      const filtered = prev.filter(s => s.id !== id);
+      if (currentSong.id === id && filtered.length > 0) {
+        setCurrentSong(filtered[0]);
+      }
+      return filtered;
+    });
+  };
+
+  const addSheetMusic = (item: Omit<SheetMusicItem, 'id'>) => {
+    const id = `sheet-${Date.now()}`;
+    setSheetMusicList(prev => [{ ...item, id }, ...prev]);
+  };
+
+  const updateSheetMusic = (id: string, updated: Partial<SheetMusicItem>) => {
+    setSheetMusicList(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+  };
+
+  const deleteSheetMusic = (id: string) => {
+    setSheetMusicList(prev => prev.filter(m => m.id !== id));
+  };
+
+  const addLeader = (leader: Omit<ChoirLeader, 'id'>) => {
+    const id = `ldr-${Date.now()}`;
+    setLeadersList(prev => [...prev, { ...leader, id }]);
+  };
+
+  const updateLeader = (id: string, updated: Partial<ChoirLeader>) => {
+    setLeadersList(prev => prev.map(l => l.id === id ? { ...l, ...updated } : l));
+  };
+
+  const deleteLeader = (id: string) => {
+    setLeadersList(prev => prev.filter(l => l.id !== id));
+  };
+
+  const addGroupPhoto = (photo: Omit<ChoirGroupPhoto, 'id'>) => {
+    const id = `grp-${Date.now()}`;
+    setGroupPhotosList(prev => [{ ...photo, id }, ...prev]);
+  };
+
+  const deleteGroupPhoto = (id: string) => {
+    setGroupPhotosList(prev => prev.filter(p => p.id !== id));
+  };
+
+  const resetToDefaults = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.SONGS);
+      localStorage.removeItem(STORAGE_KEYS.SHEET);
+      localStorage.removeItem(STORAGE_KEYS.LEADERS);
+      localStorage.removeItem(STORAGE_KEYS.PHOTOS);
+      localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
+    } catch (e) {
+      // ignore
+    }
+    setSongs(INITIAL_SONGS_CATALOG);
+    setCurrentSong(INITIAL_SONGS_CATALOG[0]);
+    setSheetMusicList(INITIAL_SHEET_MUSIC);
+    setLeadersList(INITIAL_LEADERS);
+    setGroupPhotosList(INITIAL_GROUP_PHOTOS);
+    setProductsList(INITIAL_PRODUCTS);
+  };
+
+  const exportDataJson = (): string => {
+    const backup = {
+      version: '4.0',
+      exportDate: new Date().toISOString(),
+      parish: CHOIR_STATS.parish,
+      songs,
+      sheetMusicList,
+      leadersList,
+      groupPhotosList,
+      productsList
+    };
+    return JSON.stringify(backup, null, 2);
+  };
+
+  const importDataJson = (jsonStr: string): boolean => {
+    try {
+      const data = JSON.parse(jsonStr);
+      if (data.songs && Array.isArray(data.songs)) {
+        setSongs(data.songs);
+        if (data.songs.length > 0) setCurrentSong(data.songs[0]);
+      }
+      if (data.sheetMusicList && Array.isArray(data.sheetMusicList)) {
+        setSheetMusicList(data.sheetMusicList);
+      }
+      if (data.leadersList && Array.isArray(data.leadersList)) {
+        setLeadersList(data.leadersList);
+      }
+      if (data.groupPhotosList && Array.isArray(data.groupPhotosList)) {
+        setGroupPhotosList(data.groupPhotosList);
+      }
+      if (data.productsList && Array.isArray(data.productsList)) {
+        setProductsList(data.productsList);
+      }
+      return true;
+    } catch (err) {
+      console.error('Failed to import JSON data', err);
+      return false;
+    }
   };
 
   return (
@@ -285,27 +717,54 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         usdConversionRate,
         formatPrice,
         formatTime: formatTimeConsistent,
+
+        songs,
         currentSong,
         isPlaying,
         playSong,
         togglePlay,
+        playNext,
+        playPrevious,
+        skipSeconds,
         currentTimeSeconds,
         totalDurationSeconds,
         audioProgress,
         seekAudioByPercent,
         seekAudioBySeconds,
+        volume,
+        setVolume,
+        isMuted,
+        toggleMute,
+        playbackSpeed,
+        setPlaybackSpeed,
+
         isPlayerMinimized,
         setIsPlayerMinimized,
+        isNowPlayingExpanded,
+        setIsNowPlayingExpanded,
+
         isLyricsOpen,
         setIsLyricsOpen,
         currentLyricLineIndex,
+
         voiceMixer,
         toggleVoice,
         setVoiceVolume,
         isVoiceMixerOpen,
         setIsVoiceMixerOpen,
+
+        syncFromYouTube,
+        seekCommand,
+        showVideoScreen,
+        setShowVideoScreen,
+        isYoutubeModalOpen,
+        setIsYoutubeModalOpen,
+        isIntroCutoffOpen,
+        dismissIntroCutoff,
+
         liturgicalSeason,
         setLiturgicalSeason,
+
         cart,
         addToCart,
         removeFromCart,
@@ -314,10 +773,31 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isCartOpen,
         setIsCartOpen,
         cartTotalKes,
-        isBookingOpen,
-        setIsBookingOpen,
-        isMassPlannerOpen,
-        setIsMassPlannerOpen,
+
+        sheetMusicList,
+        leadersList,
+        groupPhotosList,
+        productsList,
+        eventsList,
+
+        addSong,
+        updateSong,
+        deleteSong,
+
+        addSheetMusic,
+        updateSheetMusic,
+        deleteSheetMusic,
+
+        addLeader,
+        updateLeader,
+        deleteLeader,
+
+        addGroupPhoto,
+        deleteGroupPhoto,
+
+        resetToDefaults,
+        exportDataJson,
+        importDataJson
       }}
     >
       {children}
@@ -328,7 +808,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 export const useChoir = () => {
   const context = useContext(ChoirContext);
   if (!context) {
-    throw new Error('useChoir must be used within ChoirProvider');
+    throw new Error('useChoir must be used within a ChoirProvider');
   }
   return context;
 };

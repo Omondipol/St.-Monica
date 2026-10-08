@@ -1,6 +1,6 @@
 {
   "name": "St. Monica Choir Nakuru — Kwaya ya Mtakatifu Monica (SEC 58)",
-  "description": "Official website of St. Monica Catholic Choir Nakuru, Section 58. Sacred liturgical music, recordings, repertoire, sheet music, and choir bookings.",
+  "description": "Official website of St. Monica Catholic Choir Nakuru, Section 58. Sacred liturgical music, official YouTube recordings, repertoire, and SATB sheet music scores on sale.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
