@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { CHOIR_STATS, Song } from '../data/choirContent';
 import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import choirCoverImg from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
+import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { SupportChoirModal } from './SupportChoirModal';
 
 interface ChoirHeaderProps {
@@ -186,110 +188,112 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 )}
               </button>
 
-              {/* 560px Wide Panel with Pointer Notch */}
+              {/* Narrower 490px Panel with Pointer Notch & Thin Woven Border */}
               <div 
-                className={`absolute top-full left-0 pt-2 w-[560px] z-50 transition-all duration-180 ease-out ${
+                className={`absolute top-full left-0 pt-2 w-[490px] z-50 transition-all duration-180 ease-out ${
                   aboutDropdownOpen 
                     ? 'opacity-100 translate-y-0 pointer-events-auto visible' 
                     : 'opacity-0 -translate-y-2 pointer-events-none invisible'
                 }`}
               >
-                <div className="relative bg-[#0C2340]/96 backdrop-blur-md rounded-2xl shadow-2xl border border-white/15 p-5 text-white">
-                  
+                <div className="relative bg-[#0C2340]/96 backdrop-blur-md rounded-2xl shadow-2xl border border-white/15 overflow-hidden text-white">
+                  {/* Thin woven border strip along top edge */}
+                  <AfricanGeometricBorder />
+
                   {/* Pointer Notch */}
                   <div className="absolute -top-1.5 left-7 w-3.5 h-3.5 bg-[#0C2340] border-t border-l border-white/15 rotate-45 transform" />
 
-                  <div className="grid grid-cols-12 gap-5 relative z-10">
+                  <div className="p-4 sm:p-5 grid grid-cols-12 gap-4 relative z-10">
                     
-                    {/* Left: Titles & Descriptions */}
+                    {/* Left: 2-line items (Swahili serif, English soft white) */}
                     <div className="col-span-7 space-y-1">
                       <button
                         onClick={() => navigateTo('about-story')}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Historia Yetu' : 'Our Story'}
+                        <span className="font-eb-garamond text-[15px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Historia Yetu
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Jinsi kwaya ilivyoanza mwaka 2012 na safari yetu.' : 'How the choir began in 2012.'}
+                        <span className="text-[11px] text-white/80 font-source block mt-0.5 leading-snug">
+                          Our Story
                         </span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('about-patron')}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Mtakatifu Monika' : 'Patron Saint Monica'}
+                        <span className="font-eb-garamond text-[15px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Mtakatifu Monika
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Kwa nini tunaimba chini ya jina na mfano wake.' : 'Why we sing under her name.'}
+                        <span className="text-[11px] text-white/80 font-source block mt-0.5 leading-snug">
+                          Patron Saint Monica
                         </span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('about-gallery')}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}
+                        <span className="font-eb-garamond text-[15px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Picha za Kwaya
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Picha za waimbaji wakati wa Misa na matamasha.' : 'Photos from Mass and festivals.'}
+                        <span className="text-[11px] text-white/80 font-source block mt-0.5 leading-snug">
+                          Choir Gallery
                         </span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('about-leadership')}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers and Officials'}
+                        <span className="font-eb-garamond text-[15px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Walimu na Viongozi
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Watu wanaoongoza mazoezi na utume wa kwaya.' : 'The people who lead the choir.'}
+                        <span className="text-[11px] text-white/80 font-source block mt-0.5 leading-snug">
+                          Trainers and Officials
                         </span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('about-sections')}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Sauti za Kwaya (SATB)' : 'Voice Sections'}
+                        <span className="font-eb-garamond text-[15px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Sauti za Kwaya
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Soprano, alto, tenor na bass.' : 'Soprano, alto, tenor and bass.'}
+                        <span className="text-[11px] text-white/80 font-source block mt-0.5 leading-snug">
+                          Voice Sections (SATB)
                         </span>
                       </button>
                     </div>
 
-                    {/* Right: Featured Card "Meet the choir" */}
+                    {/* Right: Featured Card */}
                     <div className="col-span-5 bg-white/5 rounded-xl p-3 border border-white/10 flex flex-col justify-between">
-                      <div className="space-y-2.5">
+                      <div className="space-y-2">
                         <div className="relative aspect-4/3 rounded-lg overflow-hidden border border-white/10 shadow-sm">
                           <img 
                             src={choirHeroImg} 
                             alt="St. Monica Catholic Choir" 
                             className="w-full h-full object-cover"
                           />
-                          <span className="absolute top-2 left-2 bg-[#0C2340]/90 text-[#7EC8F0] text-[10px] font-bold px-2 py-0.5 rounded">
+                          <span className="absolute top-1.5 left-1.5 bg-[#0C2340]/90 text-white text-[10px] font-semibold px-2 py-0.5 rounded font-source">
                             {lang === 'sw' ? 'Wanakwaya' : 'Meet the choir'}
                           </span>
                         </div>
                         <div>
-                          <strong className="font-fraunces text-xs font-bold text-white block">
+                          <strong className="font-eb-garamond text-sm font-bold text-white block leading-tight">
                             St. Monica Ensemble
                           </strong>
-                          <p className="text-[11px] text-slate-300 font-source mt-0.5 leading-tight">
-                            {lang === 'sw' ? 'Waimbaji 48 wakihudumu katika Misa Kuu.' : '48 active choristers singing every Sunday.'}
+                          <p className="text-[11px] text-white/80 font-source mt-0.5 leading-tight">
+                            {lang === 'sw' ? 'Waimbaji 48 wakihudumu katika Misa.' : '48 choristers singing every Sunday.'}
                           </p>
                         </div>
                       </div>
 
                       <button
                         onClick={() => navigateTo('about-gallery')}
-                        className="mt-3 w-full py-2 px-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="mt-2.5 w-full py-1.5 px-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-source"
                       >
                         <span>{lang === 'sw' ? 'Tazama Picha' : 'View Gallery'}</span>
                         <ArrowRight className="w-3.5 h-3.5 text-[#7EC8F0]" />
@@ -301,7 +305,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
               </div>
             </div>
 
-            {/* Music Dropdown (560px Wide with pointer notch & featured latest recording card) */}
+            {/* Music Dropdown (Narrower 490px Panel with pointer notch, woven border & Wimbo wa Wiki) */}
             <div 
               className="relative"
               onMouseEnter={handleMusicMouseEnter}
@@ -322,78 +326,80 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 )}
               </button>
 
-              {/* 560px Wide Panel with Pointer Notch */}
+              {/* Narrower 490px Panel with Pointer Notch & Thin Woven Border */}
               <div 
-                className={`absolute top-full left-0 pt-2 w-[560px] z-50 transition-all duration-180 ease-out ${
+                className={`absolute top-full left-0 pt-2 w-[490px] z-50 transition-all duration-180 ease-out ${
                   musicDropdownOpen 
                     ? 'opacity-100 translate-y-0 pointer-events-auto visible' 
                     : 'opacity-0 -translate-y-2 pointer-events-none invisible'
                 }`}
               >
-                <div className="relative bg-[#0C2340]/96 backdrop-blur-md rounded-2xl shadow-2xl border border-white/15 p-5 text-white">
-                  
+                <div className="relative bg-[#0C2340]/96 backdrop-blur-md rounded-2xl shadow-2xl border border-white/15 overflow-hidden text-white">
+                  {/* Thin woven border strip along top edge */}
+                  <AfricanGeometricBorder />
+
                   {/* Pointer Notch */}
                   <div className="absolute -top-1.5 left-7 w-3.5 h-3.5 bg-[#0C2340] border-t border-l border-white/15 rotate-45 transform" />
 
-                  <div className="grid grid-cols-12 gap-5 relative z-10">
+                  <div className="p-4 sm:p-5 grid grid-cols-12 gap-4 relative z-10">
                     
-                    {/* Left: Titles & Descriptions */}
+                    {/* Left: 2-line items (Swahili serif, English soft white) */}
                     <div className="col-span-7 space-y-1.5">
                       <button
                         onClick={() => navigateTo('music-repertoire')}
-                        className="w-full text-left p-3 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Nyimbo Zetu' : 'Songs'}
+                        <span className="font-eb-garamond text-base font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Nyimbo
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Sikiliza rekodi zetu za sauti na video.' : 'Listen to our recordings.'}
+                        <span className="text-xs text-white/80 font-source block mt-0.5 leading-snug">
+                          Our Songs
                         </span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('music-albums')}
-                        className="w-full text-left p-3 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Albamu Yetu' : 'Our Album'}
+                        <span className="font-eb-garamond text-base font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Albamu Yetu
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Mkusanyiko rasmi wa nyimbo za kiliturujia.' : 'The official collection.'}
+                        <span className="text-xs text-white/80 font-source block mt-0.5 leading-snug">
+                          Our Album
                         </span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('shop')}
-                        className="w-full text-left p-3 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
+                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer block"
                       >
-                        <span className="font-fraunces text-sm font-bold text-white group-hover:text-[#7EC8F0] transition-colors block">
-                          {lang === 'sw' ? 'Duka la Noti' : 'Sheet Music'}
+                        <span className="font-eb-garamond text-base font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
+                          Noti
                         </span>
-                        <span className="text-xs text-[#7EC8F0]/80 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Nunua noti za SATB kupitia M-Pesa.' : 'Buy SATB scores with M-Pesa.'}
+                        <span className="text-xs text-white/80 font-source block mt-0.5 leading-snug">
+                          Sheet Music
                         </span>
                       </button>
                     </div>
 
-                    {/* Right: Featured Card "Latest recording" with Play Button */}
+                    {/* Right: Featured Card "Wimbo wa Wiki" with clean cover photo */}
                     <div className="col-span-5 bg-white/5 rounded-xl p-3 border border-white/10 flex flex-col justify-between">
-                      <div className="space-y-2.5">
+                      <div className="space-y-2">
                         <div className="relative aspect-16/9 rounded-lg overflow-hidden border border-white/10 shadow-sm group">
                           <img 
-                            src={latestSong.thumbnailUrl} 
+                            src={choirCoverImg} 
                             alt={latestSong.title} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
-                          <span className="absolute top-2 left-2 bg-[#0C2340]/90 text-[#7EC8F0] text-[10px] font-bold px-2 py-0.5 rounded">
-                            {lang === 'sw' ? 'Wimbo wa Hivi Karibuni' : 'Latest recording'}
+                          <span className="absolute top-1.5 left-1.5 bg-[#0C2340]/90 text-white text-[10px] font-semibold px-2 py-0.5 rounded font-source">
+                            Wimbo wa Wiki
                           </span>
                         </div>
                         <div>
-                          <strong className="font-fraunces text-xs font-bold text-white block">
+                          <strong className="font-eb-garamond text-sm font-bold text-white block leading-tight truncate">
                             {latestSong.title}
                           </strong>
-                          <span className="text-[11px] text-slate-300 font-source block mt-0.5">
+                          <span className="text-[11px] text-white/80 font-source block mt-0.5 truncate">
                             {latestSong.composer}
                           </span>
                         </div>
@@ -401,16 +407,16 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
 
                       <button
                         onClick={() => playSong(latestSong)}
-                        className="mt-3 w-full py-2 px-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                        className="mt-2.5 w-full py-1.5 px-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm font-source"
                       >
                         {isLatestPlaying ? (
                           <>
-                            <Pause className="w-3.5 h-3.5 fill-current text-[#7EC8F0]" />
+                            <Pause className="w-3.5 h-3.5 fill-current text-white" />
                             <span>{lang === 'sw' ? 'Inacheza' : 'Playing'}</span>
                           </>
                         ) : (
                           <>
-                            <Play className="w-3.5 h-3.5 fill-current text-[#7EC8F0]" />
+                            <Play className="w-3.5 h-3.5 fill-current text-white" />
                             <span>{lang === 'sw' ? 'Sikiliza Sasa' : 'Play Now'}</span>
                           </>
                         )}

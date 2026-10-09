@@ -46,13 +46,24 @@ export const AudioPlayerBar: React.FC = () => {
     }
   };
 
-  // Automatically minimize when scrolling down, and restore when returning to main start page / top
+  // Track scroll direction: hide minimized bubble when scrolling down, show when scrolling up or playing
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const lastScrollYRef = React.useRef<number>(0);
+
+  // Automatically minimize when scrolling down, and restore when returning to top
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const scrollY = window.scrollY || document.documentElement.scrollTop;
+          const scrollY = window.scrollY || document.documentElement?.scrollTop || 0;
+          if (scrollY > lastScrollYRef.current + 8 && scrollY > 60) {
+            setScrollDirection('down');
+          } else if (scrollY < lastScrollYRef.current - 8) {
+            setScrollDirection('up');
+          }
+          lastScrollYRef.current = scrollY;
+
           if (scrollY > 140) {
             setIsCollapsed(true);
           } else if (scrollY <= 60) {
@@ -74,23 +85,28 @@ export const AudioPlayerBar: React.FC = () => {
   const isPreviewComplete = currentTimeSeconds >= 40;
 
   // -------------------------------------------------------------
-  // FLOATING ROUND BUTTON STATE (Bottom-Right Floating Disc)
-  // Shows song cover with thin circular progress ring & play/pause
+  // FLOATING ROUND BUTTON STATE (48px Bubble, 24px from Corner)
+  // Hidden while scrolling down, shown when scrolling up or playing
   // -------------------------------------------------------------
   if (isCollapsed) {
-    const radius = 26;
+    const radius = 21;
     const circumference = 2 * Math.PI * radius;
     const progressFraction = Math.min(1, Math.max(0, currentTimeSeconds / 40));
     const strokeDashoffset = circumference - progressFraction * circumference;
+    const isBubbleVisible = scrollDirection === 'up' || isPlaying;
 
     return (
       <div 
-        className="fixed bottom-5 right-5 z-40 select-none animate-in fade-in zoom-in-95 duration-200"
+        className={`fixed bottom-6 right-6 z-40 select-none transition-all duration-300 ease-out ${
+          isBubbleVisible 
+            ? 'opacity-100 translate-y-0 pointer-events-auto' 
+            : 'opacity-0 translate-y-6 pointer-events-none'
+        }`}
         title={`${currentSong.title} — ${lang === 'sw' ? 'Bofya kupanua kichezaji' : 'Click to expand player'}`}
       >
         <div 
           onClick={() => handleSetCollapsed(false)}
-          className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl cursor-pointer group bg-[#0C2340] border-2 border-white/20 hover:border-white/40 transition-all hover:scale-105 active:scale-95 flex items-center justify-center overflow-hidden"
+          className="relative w-12 h-12 min-w-[48px] min-h-[48px] rounded-full shadow-2xl cursor-pointer group bg-[#0C2340] border-2 border-white/20 hover:border-white/40 transition-all hover:scale-105 active:scale-95 flex items-center justify-center overflow-hidden"
           role="button"
           aria-label={lang === 'sw' ? 'Panua kichezaji' : 'Expand player'}
         >
@@ -103,22 +119,22 @@ export const AudioPlayerBar: React.FC = () => {
           {/* SVG Thin Progress Ring in Site's Single Blue */}
           <svg 
             className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" 
-            viewBox="0 0 60 60"
+            viewBox="0 0 48 48"
           >
             <circle
-              cx="30"
-              cy="30"
+              cx="24"
+              cy="24"
               r={radius}
               stroke="rgba(255,255,255,0.2)"
-              strokeWidth="2.5"
+              strokeWidth="2"
               fill="none"
             />
             <circle
-              cx="30"
-              cy="30"
+              cx="24"
+              cy="24"
               r={radius}
               stroke="#1058A8"
-              strokeWidth="2.5"
+              strokeWidth="2"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
@@ -133,13 +149,13 @@ export const AudioPlayerBar: React.FC = () => {
               e.stopPropagation();
               togglePlay();
             }}
-            className="relative z-10 w-8 h-8 rounded-full bg-[#1058A8]/90 group-hover:bg-[#1058A8] text-white flex items-center justify-center shadow-md active:scale-90 transition-all cursor-pointer"
+            className="relative z-10 w-7 h-7 rounded-full bg-[#1058A8]/95 group-hover:bg-[#1058A8] text-white flex items-center justify-center shadow-md active:scale-90 transition-all cursor-pointer"
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
-              <Pause className="w-3.5 h-3.5 fill-current" />
+              <Pause className="w-3 h-3 fill-current" />
             ) : (
-              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              <Play className="w-3 h-3 fill-current ml-0.5" />
             )}
           </button>
         </div>

@@ -57,8 +57,8 @@ function ChoirApp() {
         setCurrentRoute={setCurrentRoute}
       />
 
-      {/* Main Content Rendered by Route */}
-      <main className={`flex-1 w-full pb-20 ${currentRoute === 'home' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
+      {/* Main Content Rendered by Route: ample bottom spacing so minimized bubble or player never covers content */}
+      <main className={`flex-1 w-full pb-32 sm:pb-36 ${currentRoute === 'home' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
         {currentRoute === 'home' && (
           <HomePage onNavigate={(r) => setCurrentRoute(r)} />
         )}
