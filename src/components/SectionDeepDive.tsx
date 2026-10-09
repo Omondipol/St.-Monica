@@ -69,7 +69,7 @@ export const SectionDeepDive: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate pr-2">
-                    <span className={`font-mono text-[11px] shrink-0 ${isSelected ? 'text-white' : 'text-[#1058A8]'}`}>
+                    <span className={`font-source tabular-nums text-xs font-semibold shrink-0 ${isSelected ? 'text-white' : 'text-[#1058A8]'}`}>
                       {sec.number}.
                     </span>
                     <span className="truncate">{sec.title}</span>

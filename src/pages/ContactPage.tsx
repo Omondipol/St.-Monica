@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, ExternalLink, MessageCircle, AlertCircle } from 'lucide-react';
-import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, CHOIR_STATS } from '../data/choirContent';
+import { Send, CheckCircle2, ExternalLink, MessageCircle } from 'lucide-react';
+import { CHOIR_STATS } from '../data/choirContent';
 
 export const ContactPage: React.FC = () => {
   const { lang } = useChoir();
@@ -12,7 +12,7 @@ export const ContactPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [inquiryType, setInquiryType] = useState('I want to join the choir');
   const [message, setMessage] = useState('');
-  const [honeypot, setHoneypot] = useState(''); // Hidden spam protection field
+  const [honeypot, setHoneypot] = useState('');
 
   // Feedback states
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -21,7 +21,6 @@ export const ContactPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validatePhone = (num: string): boolean => {
-    // Valid Kenyan phone patterns: 07XX, 01XX, +254..., or international minimum 9 digits
     const cleaned = num.replace(/[\s\-\(\)]/g, '');
     return /^(?:\+254|0)[17]\d{8}$/.test(cleaned) || cleaned.length >= 9;
   };
@@ -29,9 +28,7 @@ export const ContactPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Spam protection check: bots fill hidden fields
     if (honeypot) {
-      console.warn('Spam submission suppressed.');
       return;
     }
 
@@ -61,7 +58,6 @@ export const ContactPage: React.FC = () => {
     setErrors({});
     setIsSubmitting(true);
 
-    // Save message locally into localStorage so admin area and choirmaster have permanent record
     try {
       const existing = JSON.parse(localStorage.getItem('st_monica_contact_messages_v1') || '[]');
       const newEntry = {
@@ -74,7 +70,7 @@ export const ContactPage: React.FC = () => {
         date: new Date().toISOString()
       };
       localStorage.setItem('st_monica_contact_messages_v1', JSON.stringify([newEntry, ...existing]));
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -90,20 +86,19 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-6xl mx-auto">
       
-      {/* 1. SLIM HEADER BANNER (Starts top of page without pushing form below the fold) */}
-      <section className="bg-white border border-[#0C2340]/10 rounded-2xl p-5 sm:p-7 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 1. Header Banner */}
+      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#1058A8] uppercase tracking-wider font-source mb-1">
-              <Mail className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Wasiliana Nasi' : 'Get in Touch'}</span>
-            </div>
-            <h1 className="font-fraunces text-2xl sm:text-4xl font-bold text-[#0C2340] leading-tight">
-              {lang === 'sw' ? 'Wasiliana na Kwaya ya Mtakatifu Monica' : 'Contact St. Monica Catholic Choir'}
+            <span className="text-[14px] font-semibold text-[#1058A8] font-source block mb-1">
+              {lang === 'sw' ? 'Wasiliana nasi' : 'Get in touch'}
+            </span>
+            <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
+              {lang === 'sw' ? 'Wasiliana na Kwaya ya Mtakatifu Monika' : 'Contact St. Monica Catholic Choir'}
             </h1>
-            <p className="text-sm text-slate-700 font-source mt-1">
+            <p className="text-[17px] text-slate-700 font-source mt-2 leading-relaxed">
               {lang === 'sw'
                 ? 'Tuma ujumbe wako au wasiliana moja kwa moja kupitia WhatsApp au simu.'
                 : 'Send a message or reach out directly via WhatsApp or phone call.'}
@@ -114,68 +109,68 @@ export const ContactPage: React.FC = () => {
             href={CHOIR_STATS.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="self-start sm:self-center px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-sm flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
+            className="self-start sm:self-center px-5 py-3 rounded-[12px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-[14px] shadow-xs flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
           >
             <MessageCircle className="w-4 h-4 fill-current" />
-            <span>{lang === 'sw' ? 'Chat WhatsApp Haraka' : 'Quick WhatsApp Chat'}</span>
+            <span>{lang === 'sw' ? 'Wasiliana kwa WhatsApp' : 'Chat on WhatsApp'}</span>
           </a>
         </div>
       </section>
 
-      {/* 2. MAIN 2-COLUMN SECTION: SEND A MESSAGE AT TOP & DIRECT CONTACTS */}
+      {/* 2. Main 2-Column Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* LEFT COLUMN (lg:col-span-7): Send a Message Form directly above the fold */}
-        <div className="lg:col-span-7 bg-white border border-[#0C2340]/10 rounded-3xl p-6 sm:p-8 shadow-xs">
+        {/* Left Column: Send a Message Form */}
+        <div className="lg:col-span-7 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8">
           {sent ? (
             <div className="p-8 text-center space-y-4 animate-in fade-in duration-200">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
-              <h3 className="font-fraunces text-2xl font-bold text-[#0C2340]">
+              <h3 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
                 {lang === 'sw' 
                   ? `Asante, ${submittedName}.` 
                   : `Thank you, ${submittedName}.`}
               </h3>
-              <p className="text-sm text-slate-700 font-source max-w-md mx-auto leading-relaxed">
+              <p className="text-[17px] text-slate-700 font-source max-w-md mx-auto leading-relaxed">
                 {lang === 'sw'
                   ? 'Ujumbe wako umepokelewa salama. Viongozi wa kwaya na mwalimu watawasiliana nawe ndani ya siku mbili.'
                   : 'We have received your message. Our choir officials and choirmaster will reply within two days.'}
               </p>
 
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   onClick={() => setSent(false)}
-                  className="px-5 py-2.5 text-xs font-bold text-[#1058A8] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-xl cursor-pointer transition-colors"
+                  className="px-5 py-2.5 text-[14px] font-bold text-[#1058A8] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-[12px] cursor-pointer transition-colors"
                 >
-                  {lang === 'sw' ? 'Tuma Ujumbe Mwingine' : 'Send Another Message'}
+                  {lang === 'sw' ? 'Tuma ujumbe mwingine' : 'Send another message'}
                 </button>
 
                 <a
                   href={CHOIR_STATS.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-xl cursor-pointer transition-colors flex items-center gap-1.5"
+                  className="px-5 py-2.5 text-[14px] font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-[12px] cursor-pointer transition-colors flex items-center gap-2"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                  <MessageCircle className="w-4 h-4 fill-current" />
                   <span>WhatsApp: {CHOIR_STATS.whatsapp}</span>
                 </a>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs font-source" noValidate>
-              <div className="border-b border-[#0C2340]/10 pb-3">
-                <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
-                  {lang === 'sw' ? 'Tuma Ujumbe au Swali' : 'Send a Message'}
+            <form onSubmit={handleSubmit} className="space-y-5 text-[14px] font-source" noValidate>
+              <div className="border-b border-[#0C2340]/10 pb-4">
+                <h2 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
+                  {lang === 'sw' ? 'Tuma ujumbe au swali' : 'Send a message'}
                 </h2>
-                <p className="text-xs text-slate-600 mt-0.5">
+                <p className="text-[14px] text-slate-600 mt-1">
                   {lang === 'sw'
-                    ? 'Jaza fomu hapa chini au piga simu moja kwa moja.'
+                    ? 'Jaza maelezo yako hapa chini au wasiliana nasi moja kwa moja.'
                     : 'Fill in your details below or contact us directly.'}
                 </p>
               </div>
 
-              {/* Hidden honeypot spam protection field */}
+              {/* Hidden honeypot field */}
               <input 
                 type="text" 
                 name="user_confirm_token_hp" 
@@ -190,8 +185,8 @@ export const ContactPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Full Name */}
                 <div>
-                  <label className="font-bold text-[#0C2340] block mb-1">
-                    {lang === 'sw' ? 'Jina Kamili *' : 'Full Name *'}
+                  <label className="font-semibold text-[#0C2340] block mb-1.5">
+                    {lang === 'sw' ? 'Jina kamili *' : 'Full name *'}
                   </label>
                   <input
                     type="text"
@@ -201,22 +196,21 @@ export const ContactPage: React.FC = () => {
                       setName(e.target.value);
                       if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
                     }}
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none bg-[#FAF8F5] transition-colors ${
-                      errors.name ? 'border-red-500 focus:border-red-600' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
+                    className={`w-full px-3.5 py-2.5 text-[14px] border rounded-[12px] focus:outline-none bg-[#FCFAF7] transition-colors ${
+                      errors.name ? 'border-[#0C2340]/60 ring-1 ring-[#0C2340]/40' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
                     }`}
                   />
                   {errors.name && (
-                    <span className="text-red-600 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3 shrink-0" />
-                      <span>{errors.name}</span>
+                    <span className="text-[#0C2340] text-[14px] mt-1 block">
+                      {errors.name}
                     </span>
                   )}
                 </div>
 
-                {/* Phone Number (REQUIRED in Kenya) */}
+                {/* Phone Number */}
                 <div>
-                  <label className="font-bold text-[#0C2340] block mb-1">
-                    {lang === 'sw' ? 'Nambari ya Simu *' : 'Phone Number *'}
+                  <label className="font-semibold text-[#0C2340] block mb-1.5">
+                    {lang === 'sw' ? 'Nambari ya simu *' : 'Phone number *'}
                   </label>
                   <input
                     type="tel"
@@ -226,48 +220,47 @@ export const ContactPage: React.FC = () => {
                       setPhone(e.target.value);
                       if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
                     }}
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none bg-[#FAF8F5] transition-colors ${
-                      errors.phone ? 'border-red-500 focus:border-red-600' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
+                    className={`w-full px-3.5 py-2.5 text-[14px] border rounded-[12px] focus:outline-none bg-[#FCFAF7] transition-colors tabular-nums ${
+                      errors.phone ? 'border-[#0C2340]/60 ring-1 ring-[#0C2340]/40' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
                     }`}
                   />
                   {errors.phone && (
-                    <span className="text-red-600 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3 shrink-0" />
-                      <span>{errors.phone}</span>
+                    <span className="text-[#0C2340] text-[14px] mt-1 block">
+                      {errors.phone}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Email (OPTIONAL) */}
+              {/* Email */}
               <div>
-                <label className="font-bold text-[#0C2340] block mb-1">
-                  {lang === 'sw' ? 'Barua Pepe / Email (Sio lazima)' : 'Email Address (Optional)'}
+                <label className="font-semibold text-[#0C2340] block mb-1.5">
+                  {lang === 'sw' ? 'Barua pepe (Sio lazima)' : 'Email address (Optional)'}
                 </label>
                 <input
                   type="email"
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[#0C2340]/20 rounded-xl focus:outline-none focus:border-[#1058A8] bg-[#FAF8F5]"
+                  className="w-full px-3.5 py-2.5 text-[14px] border border-[#0C2340]/20 rounded-[12px] focus:outline-none focus:border-[#1058A8] bg-[#FCFAF7]"
                 />
               </div>
 
-              {/* Dropdown: Inquiry Purpose */}
+              {/* Inquiry Purpose */}
               <div>
-                <label className="font-bold text-[#0C2340] block mb-1">
-                  {lang === 'sw' ? 'Kusudi la Ujumbe Wako *' : 'How can we help you? *'}
+                <label className="font-semibold text-[#0C2340] block mb-1.5">
+                  {lang === 'sw' ? 'Kusudi la ujumbe wako *' : 'How can we help you? *'}
                 </label>
                 <select
                   value={inquiryType}
                   onChange={(e) => setInquiryType(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[#0C2340]/20 rounded-xl focus:outline-none focus:border-[#1058A8] bg-[#FAF8F5] cursor-pointer"
+                  className="w-full px-3.5 py-2.5 text-[14px] border border-[#0C2340]/20 rounded-[12px] focus:outline-none focus:border-[#1058A8] bg-[#FCFAF7] cursor-pointer"
                 >
                   <option value="I want to join the choir">
                     {lang === 'sw' ? 'Nataka kujiunga na kwaya (Waimbaji wapya)' : 'I want to join the choir'}
                   </option>
                   <option value="I want to buy sheet music">
-                    {lang === 'sw' ? 'Nataka kununua noti za muziki (SATB Scores)' : 'I want to buy sheet music'}
+                    {lang === 'sw' ? 'Nataka kununua noti za muziki (SATB)' : 'I want to buy sheet music'}
                   </option>
                   <option value="I want to invite the choir to sing">
                     {lang === 'sw' ? 'Kualika kwaya kuimba katika Misa au tukio' : 'I want to invite the choir to sing'}
@@ -280,36 +273,35 @@ export const ContactPage: React.FC = () => {
 
               {/* Message */}
               <div>
-                <label className="font-bold text-[#0C2340] block mb-1">
-                  {lang === 'sw' ? 'Ujumbe Wako *' : 'Your Message *'}
+                <label className="font-semibold text-[#0C2340] block mb-1.5">
+                  {lang === 'sw' ? 'Ujumbe wako *' : 'Your message *'}
                 </label>
                 <textarea
                   rows={4}
-                  placeholder={lang === 'sw' ? "Andika ujumbe wako hapa..." : "Type your message or question..."}
+                  placeholder={lang === 'sw' ? 'Andika ujumbe wako hapa...' : 'Type your message or question...'}
                   value={message}
                   onChange={(e) => {
                     setMessage(e.target.value);
                     if (errors.message) setErrors(prev => ({ ...prev, message: '' }));
                   }}
-                  className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none bg-[#FAF8F5] transition-colors ${
-                    errors.message ? 'border-red-500 focus:border-red-600' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
+                  className={`w-full px-3.5 py-2.5 text-[14px] border rounded-[12px] focus:outline-none bg-[#FCFAF7] transition-colors ${
+                    errors.message ? 'border-[#0C2340]/60 ring-1 ring-[#0C2340]/40' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
                   }`}
                 />
                 {errors.message && (
-                  <span className="text-red-600 text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3 shrink-0" />
-                    <span>{errors.message}</span>
+                  <span className="text-[#0C2340] text-[14px] mt-1 block">
+                    {errors.message}
                   </span>
                 )}
               </div>
 
-              {/* Action buttons & Delivery expectation line */}
+              {/* Action buttons */}
               <div className="pt-2 space-y-3">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="min-h-[44px] px-7 py-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer flex items-center justify-center gap-2 shadow-xs transition-colors"
+                    className="min-h-[44px] px-7 py-3 text-[14px] font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-[12px] cursor-pointer flex items-center justify-center gap-2 shadow-xs transition-colors"
                   >
                     <Send className="w-4 h-4" />
                     <span>{isSubmitting ? (lang === 'sw' ? 'Inatuma...' : 'Sending...') : (lang === 'sw' ? 'Tuma Ujumbe' : 'Send Message')}</span>
@@ -319,15 +311,14 @@ export const ContactPage: React.FC = () => {
                     href={CHOIR_STATS.whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-h-[44px] px-5 py-3 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl cursor-pointer flex items-center justify-center gap-2 transition-colors"
+                    className="min-h-[44px] px-5 py-3 text-[14px] font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-[12px] cursor-pointer flex items-center justify-center gap-2 transition-colors"
                   >
-                    <MessageCircle className="w-4 h-4 fill-emerald-600" />
-                    <span>{lang === 'sw' ? 'Unapendelea WhatsApp? Tuma ujumbe sasa' : 'Prefer WhatsApp? Message us directly'}</span>
+                    <MessageCircle className="w-4 h-4 fill-current" />
+                    <span>{lang === 'sw' ? 'Wasiliana kwa WhatsApp' : 'Message on WhatsApp'}</span>
                   </a>
                 </div>
 
-                {/* Clear expectation feedback line */}
-                <p className="text-xs text-slate-500 text-center sm:text-left pt-1">
+                <p className="text-[14px] text-slate-500 pt-1">
                   {lang === 'sw' ? 'Kwa kawaida tunajibu ndani ya siku mbili.' : 'We usually reply within two days.'}
                 </p>
               </div>
@@ -335,110 +326,82 @@ export const ContactPage: React.FC = () => {
           )}
         </div>
 
-        {/* RIGHT COLUMN (lg:col-span-5): Tap-to-call, Tap-to-WhatsApp, Shared Schedule, and Embedded Google Map */}
+        {/* Right Column: Direct Parish Contacts and Google Map */}
         <div className="lg:col-span-5 space-y-6">
           
           {/* Parish Information Card */}
-          <div className="p-6 sm:p-7 bg-white border border-[#0C2340]/10 rounded-3xl shadow-xs space-y-5">
-            <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">
-              {lang === 'sw' ? 'Mawasiliano ya Moja kwa Moja' : 'Direct Parish Contacts'}
+          <div className="p-6 sm:p-7 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] space-y-5">
+            <h3 className="font-fraunces text-[22px] font-bold text-[#0C2340]">
+              {lang === 'sw' ? 'Mawasiliano ya moja kwa moja' : 'Direct parish contacts'}
             </h3>
 
-            <div className="space-y-4 text-xs font-source">
-              {/* Tap to Call */}
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 text-[#1058A8] flex items-center justify-center shrink-0 mt-0.5">
-                  <Phone className="w-4 h-4" />
-                </div>
-                <div>
-                  <strong className="block text-[#0C2340] font-bold">
-                    {lang === 'sw' ? 'Piga Simu / Phone:' : 'Phone Call (Tap to dial):'}
-                  </strong>
-                  <a 
-                    href={`tel:${CHOIR_STATS.phone.replace(/\s+/g, '')}`}
-                    className="text-sm font-semibold text-[#1058A8] hover:underline block mt-0.5"
-                    title="Tap to call"
-                  >
-                    {CHOIR_STATS.phone}
-                  </a>
-                </div>
+            <div className="space-y-4 text-[14px] font-source">
+              {/* Phone */}
+              <div>
+                <span className="block text-slate-600">
+                  {lang === 'sw' ? 'Simu' : 'Phone'}
+                </span>
+                <a 
+                  href={`tel:${CHOIR_STATS.phone.replace(/\s+/g, '')}`}
+                  className="text-[17px] font-semibold text-[#1058A8] hover:underline block mt-0.5 tabular-nums"
+                >
+                  {CHOIR_STATS.phone}
+                </a>
               </div>
 
-              {/* Tap to WhatsApp */}
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <MessageCircle className="w-4 h-4 fill-current" />
-                </div>
-                <div>
-                  <strong className="block text-[#0C2340] font-bold">
-                    {lang === 'sw' ? 'WhatsApp ya Kwaya:' : 'WhatsApp Chat:'}
-                  </strong>
-                  <a 
-                    href={CHOIR_STATS.whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-semibold text-emerald-600 hover:underline block mt-0.5"
-                    title="Tap to chat on WhatsApp"
-                  >
-                    {CHOIR_STATS.whatsapp}
-                  </a>
-                </div>
+              {/* WhatsApp */}
+              <div>
+                <span className="block text-slate-600">
+                  {lang === 'sw' ? 'WhatsApp ya kwaya' : 'Choir WhatsApp'}
+                </span>
+                <a 
+                  href={CHOIR_STATS.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[17px] font-semibold text-[#1058A8] hover:underline block mt-0.5 tabular-nums"
+                >
+                  {CHOIR_STATS.whatsapp}
+                </a>
               </div>
 
-              {/* Tap to Email */}
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 text-[#0C2340] flex items-center justify-center shrink-0 mt-0.5">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <div>
-                  <strong className="block text-[#0C2340] font-bold">
-                    {lang === 'sw' ? 'Barua Pepe (Email):' : 'Official Email (Tap to write):'}
-                  </strong>
-                  <a 
-                    href={`mailto:${CHOIR_STATS.email}`}
-                    className="text-sm font-semibold text-slate-800 hover:text-[#1058A8] hover:underline block mt-0.5"
-                    title="Tap to email"
-                  >
-                    {CHOIR_STATS.email}
-                  </a>
-                </div>
+              {/* Email */}
+              <div>
+                <span className="block text-slate-600">
+                  {lang === 'sw' ? 'Barua pepe' : 'Email'}
+                </span>
+                <a 
+                  href={`mailto:${CHOIR_STATS.email}`}
+                  className="text-[17px] font-semibold text-[#0C2340] hover:text-[#1058A8] hover:underline block mt-0.5"
+                >
+                  {CHOIR_STATS.email}
+                </a>
               </div>
 
-              {/* Location & Map Pin */}
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 text-[#1058A8] flex items-center justify-center shrink-0 mt-0.5">
-                  <MapPin className="w-4 h-4" />
-                </div>
+              {/* Location matching exact map pin */}
+              <div>
+                <span className="block text-slate-600">
+                  {lang === 'sw' ? 'Mahali pa kanisa' : 'Church address'}
+                </span>
+                <span className="text-slate-800 font-medium block mt-0.5 leading-relaxed">
+                  St. Monica Catholic Church, Section 58, Nakuru (Lanet Rd / Off Old Nairobi Rd)
+                </span>
+              </div>
+
+              {/* Mass and Rehearsal Times */}
+              <div className="pt-3 border-t border-[#0C2340]/10 space-y-3">
                 <div>
-                  <strong className="block text-[#0C2340] font-bold">
-                    {lang === 'sw' ? 'Mahali pa Kanisa:' : 'Church Location:'}
-                  </strong>
-                  <span className="text-slate-700 block mt-0.5">
-                    {CHOIR_STATS.churchAddress}
+                  <span className="text-slate-600 block">
+                    {lang === 'sw' ? 'Misa za Jumapili' : 'Sunday Masses'}
                   </span>
-                  <a 
-                    href={CHOIR_STATS.mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#1058A8] hover:underline font-bold mt-1"
-                  >
-                    <span>View on Google Maps</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Shared Rehearsal & Mass Times (Reads directly from CHOIR_STATS so they never drift) */}
-              <div className="pt-3 border-t border-[#0C2340]/10 space-y-2 text-xs">
-                <div>
-                  <strong className="text-[#0C2340] block font-semibold">Sunday Masses:</strong>
-                  <span className="text-slate-600">
+                  <span className="text-slate-800 font-medium block mt-0.5 tabular-nums">
                     {lang === 'sw' ? CHOIR_STATS.massTimesSundaySw : CHOIR_STATS.massTimesSunday}
                   </span>
                 </div>
                 <div>
-                  <strong className="text-[#0C2340] block font-semibold">Choir Rehearsals:</strong>
-                  <span className="text-slate-600">
+                  <span className="text-slate-600 block">
+                    {lang === 'sw' ? 'Mazoezi ya kwaya' : 'Choir rehearsals'}
+                  </span>
+                  <span className="text-slate-800 font-medium block mt-0.5 tabular-nums">
                     {lang === 'sw' ? CHOIR_STATS.rehearsalScheduleSw : CHOIR_STATS.rehearsalSchedule}
                   </span>
                 </div>
@@ -446,21 +409,20 @@ export const ContactPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 3. EMBEDDED GOOGLE MAP OF ST. MONICA CATHOLIC CHURCH NAKURU */}
-          <div className="bg-white border border-[#0C2340]/10 rounded-3xl overflow-hidden shadow-xs">
-            <div className="p-3.5 bg-[#FAF8F5] border-b border-[#0C2340]/10 flex items-center justify-between">
-              <span className="text-xs font-bold text-[#0C2340] flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#1058A8]" />
-                <span>St. Monica Catholic Church, Section 58</span>
+          {/* Embedded Google Map */}
+          <div className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] overflow-hidden">
+            <div className="p-4 bg-[#FCFAF7] border-b border-[#0C2340]/10 flex items-center justify-between">
+              <span className="text-[14px] font-semibold text-[#0C2340]">
+                St. Monica Catholic Church, Section 58
               </span>
               <a
                 href={CHOIR_STATS.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] font-bold text-[#1058A8] hover:underline flex items-center gap-1"
+                className="text-[14px] font-semibold text-[#1058A8] hover:underline flex items-center gap-1 font-source"
               >
-                <span>Full Map</span>
-                <ExternalLink className="w-3 h-3" />
+                <span>{lang === 'sw' ? 'Fungua kwenye Ramani' : 'Open in Maps'}</span>
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
 

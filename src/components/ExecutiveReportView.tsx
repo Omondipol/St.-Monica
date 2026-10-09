@@ -44,7 +44,7 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
         </h1>
 
         <div className="flex flex-wrap items-center gap-3 text-xs text-[#0C2340]/70 font-source pt-2">
-          <span><strong>Organization:</strong> Kwaya ya Mtakatifu Monica (SEC 58 Nakuru, Kenya)</span>
+          <span><strong>Organization:</strong> Kwaya ya Mtakatifu Monika (SEC 58 Nakuru, Kenya)</span>
           <span aria-hidden="true">·</span>
           <span><strong>Document Author:</strong> David Kiprop (Lead Web Developer)</span>
           <span aria-hidden="true">·</span>
@@ -69,7 +69,7 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
 
         <p className="text-base text-[#0C2340]/90 leading-relaxed font-source first-letter:text-5xl first-letter:font-fraunces first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:text-[#1058A8]">
           This executive report provides a thorough analysis of the 16-page technical and brand development plan 
-          drafted by full-stack developer David Kiprop for St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monica, Section 58). 
+          drafted by full-stack developer David Kiprop for St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monika, Section 58). 
           The project transitions the choir from static, generic parish webpage habits into an authoritative, 
           audio-first headless web application designed to archive liturgical repertoire, distribute recordings, 
           and collect payments natively via Safaricom M-Pesa.

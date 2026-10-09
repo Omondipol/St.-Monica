@@ -380,8 +380,8 @@ export const SupportChoirModal: React.FC = () => {
                 </div>
 
                 {amountError && (
-                  <p className="text-red-600 text-xs flex items-center gap-1 font-source pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <p className="text-[#0C2340] text-xs flex items-center gap-1 font-source pt-0.5 font-semibold">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#1058A8]" />
                     <span>{amountError}</span>
                   </p>
                 )}
@@ -480,13 +480,13 @@ export const SupportChoirModal: React.FC = () => {
                       if (phoneError) setPhoneError('');
                     }}
                     className={`w-full min-h-[48px] pl-10 pr-4 py-2 bg-white text-[#0C2340] rounded-xl text-xs sm:text-sm border focus:outline-none transition-colors ${
-                      phoneError ? 'border-red-500 focus:border-red-500' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
+                      phoneError ? 'border-[#0C2340]/60 ring-1 ring-[#0C2340]/40' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
                     }`}
                   />
                 </div>
                 {phoneError && (
-                  <p className="text-red-600 text-xs flex items-center gap-1 font-source">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <p className="text-[#0C2340] text-xs flex items-center gap-1 font-source font-semibold">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#1058A8]" />
                     <span>{phoneError}</span>
                   </p>
                 )}
@@ -704,7 +704,7 @@ export const SupportChoirModal: React.FC = () => {
 
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(
-                    `Nimeshiriki kuunga mkono Kwaya ya Mtakatifu Monica, Nakuru. Sikiliza nyimbo zao na ungana nao: ${window.location.origin}`
+                    `Nimeshiriki kuunga mkono Kwaya ya Mtakatifu Monika, Nakuru. Sikiliza nyimbo zao na ungana nao: ${window.location.origin}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

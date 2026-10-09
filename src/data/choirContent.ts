@@ -118,7 +118,7 @@ export interface EventItem {
 
 export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@KwayayaMtakatifuMonicaSection5";
 export const YOUTUBE_CHANNEL_HANDLE = "@KwayayaMtakatifuMonicaSection5";
-export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monica - Nakuru";
+export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monika - Nakuru";
 
 export const CHOIR_STATS = {
   membersCount: 48,
@@ -126,9 +126,9 @@ export const CHOIR_STATS = {
   repertoireCount: 12,
   albumsReleased: 1,
   parish: "St. Monica Catholic Parish, Section 58 Nakuru",
-  parishSw: "Parokia ya Mtakatifu Monica, Section 58 Nakuru",
-  churchAddress: "Section 58, Nakuru (Off Old Nairobi Road, Near Catholic Diocese Headquarters)",
-  churchAddressSw: "Section 58, Nakuru (Barabara ya Old Nairobi Rd, Karibu na Makao Makuu ya Jimbo)",
+  parishSw: "Parokia ya Mtakatifu Monika, Section 58 Nakuru",
+  churchAddress: "St. Monica Catholic Church, Section 58, Nakuru (Lanet Rd / Off Old Nairobi Rd)",
+  churchAddressSw: "Kanisa Katoliki la Mtakatifu Monika, Section 58, Nakuru (Lanet Rd / Barabara ya Old Nairobi Rd)",
   mapsUrl: "https://maps.google.com/?q=St.+Monica+Catholic+Church+Section+58+Nakuru",
   email: "stmonicachoirsec58@gmail.com",
   phone: "+254 722 845 291",
@@ -180,7 +180,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
       "1. Machozi ya imani humwagika mbele ya Altare ya Bwana, kilio cha unyenyekevu na toba ya kweli.",
       "Mungu wetu hasahau sala ya mwenye huzuni, husikiliza na kuponya mioyo iliyovunjika.",
       "Kiitikio: Ee Bwana, tazama machozi ya imani ya waja wako, utukumbuke kwa rehema zako na kutupa amani.",
-      "2. Kama mama Mtakatifu Monica alivyomlilia mwanaye Augustino kwa machozi mengi,",
+      "2. Kama mama Mtakatifu Monika alivyomlilia mwanaye Augustino kwa machozi mengi,",
       "Nasi tunaleta sala na vilio vyetu mbele yako, tukiwa na tumaini kuu ndani ya Kristo."
     ],
     lyricsEnglish: [
@@ -394,7 +394,7 @@ export const INITIAL_ALBUMS: Album[] = [
     coverImage: "choir_singing_moment",
     priceKes: 500,
     description: "The official master recording collection from St. Monica Catholic Choir, recorded with Khakstudio Production and parish audio engineers.",
-    descriptionSw: "Mkusanyiko rasmi wa nyimbo za kiliturujia kutoka Kwaya ya Mtakatifu Monica, zilizorekodiwa rasmi kwa ajili ya utukufu wa Mungu.",
+    descriptionSw: "Mkusanyiko rasmi wa nyimbo za kiliturujia kutoka Kwaya ya Mtakatifu Monika, zilizorekodiwa rasmi kwa ajili ya utukufu wa Mungu.",
     youtubePlaylistUrl: YOUTUBE_CHANNEL_URL,
     songs: ["Machozi ya Imani", "Maisha ya Mwanadamu", "Ni Mzima", "Jumuiya Ndogondogo"]
   }
@@ -472,10 +472,10 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
 export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
   {
     id: "grp-vestment",
-    title: "Kwaya Nzima ya Mtakatifu Monica",
-    titleSw: "Kwaya Nzima ya Mtakatifu Monica",
+    title: "Kwaya Nzima ya Mtakatifu Monika",
+    titleSw: "Kwaya Nzima ya Mtakatifu Monika",
     description: "The entire chorister ensemble of St. Monica Choir gathered at the altar of Section 58 Parish after Sunday High Mass.",
-    descriptionSw: "Wanakwaya wote wa Mtakatifu Monica wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa Kuu ya Jumapili.",
+    descriptionSw: "Wanakwaya wote wa Mtakatifu Monika wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa Kuu ya Jumapili.",
     year: "2024",
     imageKey: "choir_singing_moment",
     occasion: "Feast Day of St. Monica & Parish Dedication",
@@ -486,7 +486,7 @@ export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
     title: "Kwaya Wakati wa Misa ya Ekaristi Takatifu",
     titleSw: "Kwaya Wakati wa Misa ya Ekaristi Takatifu",
     description: "Active liturgical singing during the solemn Holy Eucharist procession at Section 58 Catholic Church.",
-    descriptionSw: "Uimbaji wa heshima wakati wa maandamano ya Ekaristi Takatifu katika Kanisa la Mtakatifu Monica.",
+    descriptionSw: "Uimbaji wa heshima wakati wa maandamano ya Ekaristi Takatifu katika Kanisa la Mtakatifu Monika.",
     year: "2023",
     imageKey: "nakuru_parish_cathedral",
     occasion: "Corpus Christi & Confirmation Mass",
@@ -514,7 +514,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
     priceKes: 500,
     priceUsd: 4.00,
     description: "High-definition master digital album containing all 4 authentic choral releases with full digital booklet and lyrics. Pay with M-Pesa.",
-    descriptionSw: "Albamu kamili ya dijitali yenye nyimbo zote nne za Kwaya ya Mtakatifu Monica pamoja na kijitabu cha maneno. Lipa kupitia M-Pesa.",
+    descriptionSw: "Albamu kamili ya dijitali yenye nyimbo zote nne za Kwaya ya Mtakatifu Monika pamoja na kijitabu cha maneno. Lipa kupitia M-Pesa.",
     image: "choir_singing_moment",
     badge: "Official Album",
     downloadable: true
@@ -538,17 +538,17 @@ export const INITIAL_EVENTS: EventItem[] = [
   {
     id: "evt-sunday-mass",
     title: "Sunday High Mass",
-    titleSw: "Misa Kuu ya Jumapili (Sunday High Mass)",
+    titleSw: "Misa Kuu ya Jumapili",
     dateDay: "Sun",
     dateMonth: "Every",
     fullDate: "Kila Jumapili / Every Sunday",
     time: "9:00 AM - 10:45 AM",
     venue: "St. Monica Catholic Church, Section 58",
     city: "Nakuru, Kenya",
-    description: "Our principal liturgical assignment: solemn four-part SATB polyphony, Gregorian antiphons, and sacred praise songs for the Holy Eucharist.",
-    descriptionSw: "Utume wetu mkuu wa kiliturujia: kuongoza Misa Kuu kwa sauti nne (SATB), nyimbo za tafakari na shukrani mbele ya Altare Takatifu.",
+    description: "Our principal liturgical assignment: solemn four-part SATB polyphony, hymns, psalms, and sacred praise songs for the Holy Eucharist.",
+    descriptionSw: "Utume wetu mkuu wa kiliturujia: kuongoza Misa Kuu kwa sauti nne (SATB), nyimbo za sifa na tafakari mbele ya Altare Takatifu.",
     category: "Liturgical Mass",
-    entryType: "Sunday High Mass",
+    entryType: "Sunday Liturgy",
     isUpcoming: true
   },
   {
@@ -585,16 +585,16 @@ export const INITIAL_EVENTS: EventItem[] = [
   },
   {
     id: "evt-patron-feast-past",
-    title: "Feast of Saint Monica & Parish Anniversary (Past)",
-    titleSw: "Sikukuu ya Mtakatifu Monika (Iliyopita)",
+    title: "Feast of Saint Monica (2026)",
+    titleSw: "Sikukuu ya Mtakatifu Monika (2026)",
     dateDay: "27",
     dateMonth: "Aug 2026",
     fullDate: "27 August 2026",
     time: "9:30 AM",
     venue: "St. Monica Catholic Church, Section 58",
     city: "Nakuru, Kenya",
-    description: "Past patronal solemn Mass and reception celebration with choir alumni and diocesan guests.",
-    descriptionSw: "Misa Kuu ya sherehe ya Mtakatifu Monika iliyoadhimishwa mwezi wa Agosti.",
+    description: "Past patronal solemn Mass celebration with choir and parish community.",
+    descriptionSw: "Misa Kuu ya sikukuu ya Mtakatifu Monika iliyoadhimishwa mwezi wa Agosti 2026.",
     category: "Earlier Event",
     entryType: "Concluded",
     isUpcoming: false

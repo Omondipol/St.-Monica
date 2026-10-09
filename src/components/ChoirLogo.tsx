@@ -10,7 +10,7 @@ interface ChoirLogoProps {
 }
 
 /**
- * High-definition Choir Logo & Seal Component for Kwaya ya Mtakatifu Monica (SEC 58 Nakuru).
+ * High-definition Choir Logo & Seal Component for Kwaya ya Mtakatifu Monika (SEC 58 Nakuru).
  * Features high-resolution official crest image rendering with an ultra-precise vector SVG fallback,
  * dignified gold & royal blue heraldry, and crisp Catholic choral seal typography.
  */
@@ -33,7 +33,7 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="shrink-0 block select-none"
-      aria-label="Kwaya ya Mtakatifu Monica, SEC 58 Nakuru Official Seal"
+      aria-label="Kwaya ya Mtakatifu Monika, SEC 58 Nakuru Official Seal"
       shapeRendering="geometricPrecision"
       textRendering="geometricPrecision"
     >
@@ -292,12 +292,12 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
       className={`relative rounded-full select-none shrink-0 overflow-hidden shadow-md ring-2 ring-[#7EC8F0]/70 hover:ring-[#38BDF8] transition-all bg-white flex items-center justify-center ${className}`}
       onClick={interactive ? () => setShowModal(true) : undefined}
       role={interactive ? "button" : undefined}
-      title="Official Seal: Kwaya ya Mtakatifu Monica, SEC 58 Nakuru"
+      title="Official Seal: Kwaya ya Mtakatifu Monika, SEC 58 Nakuru"
     >
       {!imageError ? (
         <img
           src={sealImg}
-          alt="Kwaya ya Mtakatifu Monica, SEC 58 Nakuru Official Seal"
+          alt="Kwaya ya Mtakatifu Monika, SEC 58 Nakuru Official Seal"
           className="w-full h-full object-cover rounded-full"
           loading="eager"
           onError={() => setImageError(true)}
@@ -369,7 +369,7 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           <div>
             <h3 className="font-fraunces text-2xl font-bold text-[#0C2340]">
-              Kwaya ya Mtakatifu Monica
+              Kwaya ya Mtakatifu Monika
             </h3>
             <p className="text-xs font-bold uppercase tracking-widest text-[#1058A8] mt-1 font-source">
               Catholic Diocese of Nakuru · Kenya
@@ -379,7 +379,7 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="bg-[#F0F9FF] border border-sky-200 rounded-xl p-4 text-xs text-[#0C4A8A] text-left space-y-2 leading-relaxed">
             <p className="font-bold text-[#0C2340]">Alama na Maana ya Ngao ya Kwaya (Seal Heraldry):</p>
             <ul className="list-disc pl-4 space-y-1">
-              <li><strong>Mtakatifu Monica:</strong> Mama mwenye sala isiyokoma na uvumilivu wa kiliturujia, somo wa kiroho wa waimbaji.</li>
+              <li><strong>Mtakatifu Monika:</strong> Mama mwenye sala isiyokoma na uvumilivu wa kiliturujia, somo wa kiroho wa waimbaji.</li>
               <li><strong>Ufunguo wa Muziki (Treble Clef):</strong> Uongozi wa sauti nne za SATB kwa heshima ya Altare na Misa Takatifu.</li>
               <li><strong>Kinanda cha Piano:</strong> Ala za kiliturujia zinazosindikiza maombi na sifa za Kanisa Katoliki.</li>
               <li><strong>Nyota Mbili:</strong> Mshikamano, nidhamu na utume wa kwaya katika Jimbo Katoliki la Nakuru.</li>

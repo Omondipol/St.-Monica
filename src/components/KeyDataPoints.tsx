@@ -443,7 +443,7 @@ export const KeyDataPoints: React.FC = () => {
               Section 3: 'The Concert Programme' Design Tokens & Palette
             </h3>
             <p className="text-xs text-[#0C2340]/70 font-source mb-6">
-              Sampled directly from the choir's emblem (Kwaya ya Mtakatifu Monica, SEC 58 Nakuru).
+              Sampled directly from the choir's emblem (Kwaya ya Mtakatifu Monika, SEC 58 Nakuru).
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

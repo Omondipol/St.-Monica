@@ -112,7 +112,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
             </h2>
             <div className="space-y-4 text-sm sm:text-base text-[#0C2340]/80 leading-relaxed font-source">
               <p>
-                The St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monica, Section 58) website plan prepared by the engineering team 
+                The St. Monica Choir Nakuru (Kwaya ya Mtakatifu Monika, Section 58) website plan prepared by the engineering team 
                 represents a decisive architectural upgrade from conventional church web pages. While taking functional inspiration 
                 from the renowned <strong>KMK Makuburi</strong> choir platform in Dar es Salaam, this Version 3.0 specification 
                 resolutely rejects templated aesthetics, generic stock photography, and boilerplate church mission statements.

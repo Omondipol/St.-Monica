@@ -203,7 +203,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       audioPreviewUrl: songForm.audioPreviewUrl.trim() || 'preview.mp3',
       sheetMusicAvailable: songForm.sheetMusicAvailable,
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
-      lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monica SEC 58.'],
+      lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monika SEC 58.'],
       lyricsEnglish: lyricsEnglish.length ? lyricsEnglish : ['Song of St. Monica Choir SEC 58.'],
       waveformPeaks: [40, 60, 50, 80, 95, 70, 85, 90, 75, 60, 85, 70, 80, 90, 60, 40, 70, 85, 90, 50, 65, 80, 45, 30]
     };
@@ -519,11 +519,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           <ChoirLogo size={58} className="ring-2 ring-[#7EC8F0] shrink-0" />
           <div>
             <div className="flex items-center gap-2">
-              <span className="bg-[#1058A8] text-white text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold tracking-wider">
-                ADMIN PORTAL · MSIMAMIZI
+              <span className="bg-[#1058A8] text-white text-[11px] font-source px-2 py-0.5 rounded-[12px] font-semibold">
+                Admin Portal · Msimamizi
               </span>
-              <span className="text-xs text-[#7EC8F0] font-mono">
-                SEC 58 NAKURU
+              <span className="text-xs text-[#7EC8F0] font-source">
+                Section 58 Nakuru
               </span>
             </div>
             <h1 className="font-fraunces text-2xl sm:text-3xl font-bold text-white mt-1">
@@ -546,7 +546,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             href={YOUTUBE_CHANNEL_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3.5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-3.5 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs transition-colors"
           >
             <RealYouTubeIcon size={18} variant="badge" />
             <span>YouTube Channel</span>
@@ -662,7 +662,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           <div className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-source">
-                <thead className="bg-[#F8FAFC] border-b border-[#0C2340]/10 text-[#0C2340]/70 uppercase font-mono text-[10px]">
+                <thead className="bg-[#F8FAFC] border-b border-[#0C2340]/10 text-[#0C2340]/70 text-[12px] font-semibold font-source">
                   <tr>
                     <th className="py-3 px-4">Title & Swahili</th>
                     <th className="py-3 px-4">Composer</th>
@@ -691,7 +691,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                         </span>
                         <div className="text-[10px] text-[#0C2340]/60 mt-0.5">{song.season}</div>
                       </td>
-                      <td className="py-3 px-4 text-[#0C2340]/70 font-mono text-[11px]">
+                      <td className="py-3 px-4 text-[#0C2340]/70 font-source text-[11px]">
                         {song.voicing} · {song.musicalKey}
                       </td>
                       <td className="py-3 px-4">
@@ -699,7 +699,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                           href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-red-600 hover:text-red-700 font-bold flex items-center gap-1.5 text-[11px]"
+                          className="text-[#1058A8] hover:text-[#0C2340] font-bold flex items-center gap-1.5 text-[11px]"
                         >
                           <RealYouTubeIcon size={16} variant="badge" />
                           <span>Watch</span>
@@ -779,7 +779,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div key={item.id} className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl shadow-xs space-y-3 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="bg-[#EAF4FB] text-[#1058A8] font-bold text-[10px] px-2 py-0.5 rounded font-mono uppercase">
+                    <span className="bg-[#EAF4FB] text-[#1058A8] font-bold text-[11px] px-2 py-0.5 rounded font-source">
                       {item.notationType}
                     </span>
                     <span className="text-base font-bold font-fraunces text-[#1058A8]">
@@ -856,11 +856,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     <div>
                       <h3 className="font-fraunces text-base font-bold text-[#0C2340]">{leader.name}</h3>
                       <span className="text-xs font-bold text-[#1058A8] block">{leader.role}</span>
-                      <span className="text-[11px] text-[#0C2340]/50 font-mono">{leader.tenure}</span>
+                      <span className="text-[12px] text-[#0C2340]/50 font-source tabular-nums">{leader.tenure}</span>
                     </div>
                   </div>
 
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono uppercase ${
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded font-source ${
                     leader.category === 'trainer' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                   }`}>
                     {leader.category}
@@ -872,7 +872,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </p>
 
                 <div className="pt-2 flex items-center justify-between text-xs">
-                  <span className="text-[#0C2340]/60 font-mono text-[11px]">{leader.contact || 'SEC 58 Parish'}</span>
+                  <span className="text-[#0C2340]/60 font-source text-xs">{leader.contact || 'SEC 58 Parish'}</span>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openEditLeaderModal(leader)}
@@ -925,7 +925,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div key={photo.id} className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between">
                 <div className="aspect-16/10 bg-[#EAF4FB] relative overflow-hidden flex items-center justify-center">
                   <ImageIcon className="w-12 h-12 text-[#1058A8]/40" />
-                  <span className="absolute top-2 left-2 bg-[#0C2340] text-white font-mono text-[10px] px-2 py-0.5 rounded">
+                  <span className="absolute top-2 left-2 bg-[#0C2340] text-white font-source tabular-nums text-xs px-2 py-0.5 rounded-[12px]">
                     {photo.year}
                   </span>
                 </div>
@@ -1034,7 +1034,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">
                   {editingSongId ? 'Edit Song Details' : 'Add New Song to Catalog'}
                 </h3>
-                <span className="text-xs text-[#1058A8] font-mono">
+                <span className="text-xs text-[#1058A8] font-source">
                   {editingSongId ? `Editing ID: ${editingSongId}` : 'St. Monica Choir Repertoire'}
                 </span>
               </div>
@@ -1197,7 +1197,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   value={songForm.lyricsSwahiliText}
                   onChange={e => setSongForm({ ...songForm, lyricsSwahiliText: e.target.value })}
                   placeholder="Mstari wa kwanza..."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-mono text-[11px]"
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-source text-xs"
                 />
               </div>
 
@@ -1208,7 +1208,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   value={songForm.lyricsEnglishText}
                   onChange={e => setSongForm({ ...songForm, lyricsEnglishText: e.target.value })}
                   placeholder="First verse line..."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-mono text-[11px]"
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-source text-xs"
                 />
               </div>
 

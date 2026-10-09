@@ -46,7 +46,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
         >
           <div className="space-y-2 text-center md:text-left">
             <h3 className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
-              {lang === 'sw' ? 'Imba Nasi Mtakatifu Monica' : 'Sing with us at St. Monica'}
+              {lang === 'sw' ? 'Imba Nasi Mtakatifu Monika' : 'Sing with us at St. Monica'}
             </h3>
             <p className="text-sm sm:text-base text-slate-300 font-source max-w-2xl leading-relaxed">
               {lang === 'sw'
@@ -93,7 +93,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <ChoirLogo size={46} interactive={true} className="shrink-0" />
               <div>
                 <h4 className="font-fraunces text-lg font-bold text-white leading-snug">
-                  {lang === 'sw' ? 'Kwaya ya Mtakatifu Monica' : 'St. Monica Catholic Choir'}
+                  {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
                 </h4>
                 <span className="text-xs text-[#7EC8F0] block mt-0.5">
                   Section 58 Parish · CDDN Nakuru
@@ -103,7 +103,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             <p className="text-slate-300 text-sm leading-relaxed">
               {lang === 'sw'
-                ? 'Catholic Diocese of Nakuru, Parokia ya Mtakatifu Monica. Utume wa uimbaji mtakatifu kwa ajili ya Misa Kuu ya Jumapili na sala ya taifa la Mungu.'
+                ? 'Catholic Diocese of Nakuru, Parokia ya Mtakatifu Monika. Utume wa uimbaji mtakatifu kwa ajili ya Misa Kuu ya Jumapili na sala ya taifa la Mungu.'
                 : 'Catholic Diocese of Nakuru, St. Monica Parish. Consecrated liturgical vocal ministry dedicated to Sunday High Mass and sacred praise.'}
             </p>
           </div>
@@ -115,17 +115,15 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               onClick={() => setMobileExploreOpen(!mobileExploreOpen)}
               className="w-full min-h-[44px] flex sm:hidden items-center justify-between text-left cursor-pointer"
             >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#7EC8F0] flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5" />
-                <span>{lang === 'sw' ? 'Gundua Kurasa' : 'Explore'}</span>
+              <span className="text-[14px] font-semibold text-[#7EC8F0] font-source">
+                {lang === 'sw' ? 'Gundua kurasa' : 'Explore'}
               </span>
               {mobileExploreOpen ? <ChevronUp className="w-4 h-4 text-[#7EC8F0]" /> : <ChevronDown className="w-4 h-4 text-[#7EC8F0]" />}
             </button>
 
             {/* Desktop Section Heading */}
-            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
-              <Compass className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Gundua Kurasa' : 'Explore'}</span>
+            <span className="hidden sm:block text-[14px] font-semibold text-[#7EC8F0] font-source mb-3">
+              {lang === 'sw' ? 'Gundua kurasa' : 'Explore'}
             </span>
 
             {/* Links list: real destinations only */}
@@ -188,27 +186,25 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               onClick={() => setMobileServiceOpen(!mobileServiceOpen)}
               className="w-full min-h-[44px] flex sm:hidden items-center justify-between text-left cursor-pointer"
             >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#7EC8F0] flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{lang === 'sw' ? 'Ratiba ya Ibada' : 'Service Times'}</span>
+              <span className="text-[14px] font-semibold text-[#7EC8F0] font-source">
+                {lang === 'sw' ? 'Ratiba ya ibada' : 'Service times'}
               </span>
               {mobileServiceOpen ? <ChevronUp className="w-4 h-4 text-[#7EC8F0]" /> : <ChevronDown className="w-4 h-4 text-[#7EC8F0]" />}
             </button>
 
             {/* Desktop Section Heading */}
-            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Ratiba ya Ibada' : 'Service Times'}</span>
+            <span className="hidden sm:block text-[14px] font-semibold text-[#7EC8F0] font-source mb-3">
+              {lang === 'sw' ? 'Ratiba ya ibada' : 'Service times'}
             </span>
 
             <div className={`space-y-3 text-sm text-slate-300 ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
                 <strong className="text-white block font-medium">Sunday High Mass</strong>
-                <span className="text-slate-300 text-xs">9:00 AM (Section 58 Sanctuary)</span>
+                <span className="text-slate-300 text-xs tabular-nums">9:00 AM (Section 58 Sanctuary)</span>
               </div>
               <div>
                 <strong className="text-white block font-medium">Choir Rehearsals</strong>
-                <span className="text-slate-300 text-xs">Wed & Fri: 5:30 PM – 7:30 PM</span>
+                <span className="text-slate-300 text-xs tabular-nums">Wed & Fri: 5:30 PM – 7:30 PM</span>
               </div>
               <div>
                 <strong className="text-white block font-medium">Feast of St. Monica</strong>
@@ -224,15 +220,15 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               onClick={() => setMobileContactOpen(!mobileContactOpen)}
               className="w-full min-h-[44px] flex sm:hidden items-center justify-between text-left cursor-pointer"
             >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#7EC8F0] flex items-center gap-1.5">
-                <span>{lang === 'sw' ? 'Mawasiliano' : 'Contact'}</span>
+              <span className="text-[14px] font-semibold text-[#7EC8F0] font-source">
+                {lang === 'sw' ? 'Mawasiliano' : 'Contact'}
               </span>
               {mobileContactOpen ? <ChevronUp className="w-4 h-4 text-[#7EC8F0]" /> : <ChevronDown className="w-4 h-4 text-[#7EC8F0]" />}
             </button>
 
             {/* Desktop Section Heading */}
-            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7EC8F0] mb-3">
-              <span>{lang === 'sw' ? 'Mawasiliano' : 'Contact'}</span>
+            <span className="hidden sm:block text-[14px] font-semibold text-[#7EC8F0] font-source mb-3">
+              {lang === 'sw' ? 'Mawasiliano' : 'Contact'}
             </span>
 
             <div className={`space-y-3 text-sm text-slate-300 ${mobileContactOpen ? 'block pt-2' : 'hidden sm:block'}`}>
@@ -298,14 +294,14 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           {/* Large 44px real brand social icons with explicit tooltips */}
           <div className="flex items-center justify-center gap-4">
             
-            {/* Real YouTube Icon & Link */}
+            {/* Real YouTube Icon & Link - Site Blue */}
             <a
               href={YOUTUBE_CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Official YouTube Channel: ${YOUTUBE_CHANNEL_HANDLE}`}
               title={`Watch on YouTube (${YOUTUBE_CHANNEL_HANDLE})`}
-              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-[#FF0000]/15 hover:bg-[#FF0000] border border-red-500/30 hover:border-red-500 flex items-center justify-center text-red-400 hover:text-white transition-all shadow-md group cursor-pointer"
+              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-[#1058A8]/20 hover:bg-[#1058A8] border border-[#1058A8]/40 hover:border-[#7EC8F0] flex items-center justify-center text-[#7EC8F0] hover:text-white transition-all shadow-md group cursor-pointer"
             >
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
@@ -347,7 +343,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           <div className="text-center sm:text-left">
             <span>
               {lang === 'sw'
-                ? '© 2026 Kwaya ya Mtakatifu Monica, Nakuru. Utume wa bure wa kiliturujia.'
+                ? '© 2026 Kwaya ya Mtakatifu Monika, Nakuru. Utume wa bure wa kiliturujia.'
                 : '© 2026 St. Monica Catholic Choir, Nakuru. Consecrated liturgical vocal ministry.'}
             </span>
           </div>

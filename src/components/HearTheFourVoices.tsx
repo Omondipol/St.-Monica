@@ -217,7 +217,7 @@ export const HearTheFourVoices: React.FC = () => {
                       <h3 className="font-fraunces text-lg sm:text-xl font-bold text-[#0C2340]">
                         {lang === 'sw' ? voice.nameSw : voice.name}
                       </h3>
-                      <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                      <span className="text-xs font-source font-semibold tabular-nums px-2 py-0.5 rounded-[12px] bg-slate-100 text-slate-600">
                         {voice.range}
                       </span>
                     </div>

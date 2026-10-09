@@ -34,7 +34,7 @@ export const YouTubePlayerModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#14243B]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center shrink-0 shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-[#1058A8] flex items-center justify-center shrink-0 shadow-sm">
               <RealYouTubeIcon size={20} variant="badge" />
             </div>
             <div className="min-w-0">
@@ -89,7 +89,7 @@ export const YouTubePlayerModal: React.FC = () => {
                 href={currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-md"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-lg transition-colors shadow-md"
               >
                 <RealYouTubeIcon size={18} variant="badge" />
                 <span>{lang === 'sw' ? 'Tazama YouTube' : 'Watch on YouTube'}</span>
@@ -102,7 +102,7 @@ export const YouTubePlayerModal: React.FC = () => {
         <div className="px-5 py-3 bg-[#0B1526] border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-white/70">
           <span className="font-source">
             {lang === 'sw'
-              ? `Wimbo rasmi wa Kwaya ya Mtakatifu Monica, Nakuru.`
+              ? `Wimbo rasmi wa Kwaya ya Mtakatifu Monika, Nakuru.`
               : `Official release from St. Monica Catholic Choir, Nakuru.`}
           </span>
           <a

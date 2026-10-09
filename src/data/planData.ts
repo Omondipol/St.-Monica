@@ -21,7 +21,7 @@ export const DOCUMENT_METADATA: DocumentMetadata = {
   date: "October 2026",
   author: "David Kiprop",
   authorRole: "Full-Stack Web Developer",
-  organization: "St. Monica Choir (Kwaya ya Mtakatifu Monica)",
+  organization: "St. Monica Choir (Kwaya ya Mtakatifu Monika)",
   location: "SEC 58, Nakuru, Kenya",
   patronSaint: "St. Monica",
   feastDay: "27 August",
@@ -73,7 +73,7 @@ export const TYPOGRAPHY_ROLES = [
     role: "Headlines & Hero",
     font: "Fraunces (variable serif)",
     purpose: "Warm, characterful, editorial printed-programme feel; used large with tight optical letter-spacing",
-    sample: "Kwaya ya Mtakatifu Monica — SEC 58 Nakuru",
+    sample: "Kwaya ya Mtakatifu Monika — SEC 58 Nakuru",
   },
   {
     role: "Body & UI Elements",
@@ -701,7 +701,7 @@ export const SECTION_ANALYSIS = [
 export const SAMPLE_REPERTOIRE = [
   {
     id: "rep-1",
-    title: "Mtakatifu Monica Mama Mwema",
+    title: "Mtakatifu Monika Mama Mwema",
     composer: "Bernard Mukasa",
     season: "Patronal Feast (Ordinary Time)",
     partOfMass: "Entrance / Communion",

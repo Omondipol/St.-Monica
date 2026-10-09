@@ -420,7 +420,7 @@ export const NowPlayingModal: React.FC = () => {
                           aria-label={isMuted ? 'Unmute' : 'Mute'}
                         >
                           {isMuted || volume === 0 ? (
-                            <VolumeX className="w-4 h-4 text-red-500" />
+                            <VolumeX className="w-4 h-4 text-[#0C2340]/60" />
                           ) : (
                             <Volume2 className="w-4 h-4" />
                           )}
