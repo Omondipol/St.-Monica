@@ -271,61 +271,69 @@ export const NowPlayingModal: React.FC = () => {
                 {/* WHEN PREVIEW REACHES 40 SECONDS: Support Prompt inside right column of Listen tab */}
                 {showSupportPrompt ? (
                   <div className="bg-[#FAF8F5] border border-[#0C2340]/15 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col gap-3 text-[#0C2340]">
-                    <div className="space-y-1">
-                      <h3 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-[#0C2340] leading-tight">
-                        {lang === 'sw' ? 'Unafurahia wimbo?' : 'Enjoying the song?'}
+                    <div className="space-y-1.5">
+                      <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
+                        {lang === 'sw' ? 'Hizo zilikuwa sekunde 40 za mwanzo.' : 'That was the first 40 seconds.'}
                       </h3>
-                      <p className="text-xs sm:text-sm text-slate-700 font-source leading-relaxed">
-                        {lang === 'sw'
-                          ? `Umesikiliza sekunde 40 za mwanzo za ${currentSong.titleSwahili}. Sikiliza wimbo mzima bure kwenye YouTube, au unga mkono kwaya yetu.`
-                          : `You just heard the first 40 seconds of ${currentSong.title}. Listen to the full song free on YouTube, or support our choir ministry directly.`}
-                      </p>
+                      <div className="pt-0.5 space-y-1">
+                        <p className="font-eb-garamond italic text-[14px] sm:text-[15px] text-[#0C2340] leading-relaxed">
+                          "{lang === 'sw'
+                            ? (currentSong.whyWeSingItSw || 'Tunarekodi uimbaji wetu St. Monica ili waumini popote walipo waweze kusali kupitia muziki wa liturujia.')
+                            : (currentSong.whyWeSingIt || 'We record our singing at St. Monica so parishioners near and far can pray with the music of the liturgy.')}"
+                        </p>
+                        <p className="font-eb-garamond italic font-semibold text-[14px] sm:text-[15px] text-[#0C2340]">
+                          Asante sana. — St. Monica Choir
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Buttons: One filled blue Support the Choir, one outlined Listen on YouTube */}
+                    {/* Buttons: One filled blue Full song on YouTube (no red), one outlined Support the Choir */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
-                      {/* Button 1: Filled Blue Button called Support the Choir */}
-                      <button
-                        onClick={() => openSupportModal(currentSong.title)}
-                        className="flex-1 py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        <Heart className="w-4 h-4 fill-current text-sky-200 shrink-0" />
-                        <span>{lang === 'sw' ? 'Saidia Kwaya' : 'Support the Choir'}</span>
-                      </button>
-
-                      {/* Button 2: Outlined Button called Listen to the full song on YouTube with YouTube icon */}
+                      {/* Button 1: Filled Blue Button for Full song on YouTube */}
                       <a
                         href={youtubeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-2.5 px-4 rounded-xl border-2 border-[#1058A8] hover:bg-[#1058A8]/10 text-[#0C2340] font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-between"
+                        className="flex-1 min-h-[46px] py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer flex items-center justify-between group"
                       >
                         <div className="flex items-center gap-2">
-                          <RealYouTubeIcon size={18} variant="badge" />
+                          <RealYouTubeIcon size={18} variant="monochrome" className="text-white shrink-0" />
                           <span>{lang === 'sw' ? 'Wimbo kamili YouTube' : 'Full song on YouTube'}</span>
                         </div>
-                        <ExternalLink className="w-3.5 h-3.5 text-[#1058A8]" />
+                        <ExternalLink className="w-3.5 h-3.5 text-white/80 group-hover:translate-x-0.5 transition-transform" />
                       </a>
+
+                      {/* Button 2: Outlined Button for Support the Choir */}
+                      <button
+                        type="button"
+                        onClick={() => openSupportModal(currentSong.title)}
+                        className="flex-1 min-h-[46px] py-2.5 px-4 rounded-xl border-2 border-[#1058A8] hover:bg-[#1058A8]/10 text-[#1058A8] font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <Heart className="w-4 h-4 fill-current shrink-0" />
+                        <span>{lang === 'sw' ? 'Unga Mkono Kwaya' : 'Support the Choir'}</span>
+                      </button>
                     </div>
 
-                    {/* Replay preview and Maybe later links under buttons */}
-                    <div className="flex items-center justify-center gap-4 pt-1 text-xs font-source">
+                    {/* Replay preview and Maybe later plain text links beneath */}
+                    <div className="flex items-center justify-center gap-4 pt-1 font-source">
                       <button
+                        type="button"
                         onClick={handleReplayPreview}
-                        className="font-semibold text-[#1058A8] hover:text-[#0C2340] underline underline-offset-2 cursor-pointer flex items-center gap-1 py-1"
+                        className="text-[14px] text-slate-600 hover:text-[#0C2340] hover:underline cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 font-medium"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        <span>{lang === 'sw' ? 'Rudia hakiki' : 'Replay preview'}</span>
+                        <RotateCcw className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                        <span>{lang === 'sw' ? 'Rudia kusikiliza utangulizi' : 'Replay preview'}</span>
                       </button>
-                      <span className="text-slate-300">·</span>
+                      <span className="text-slate-400 select-none font-bold">·</span>
                       <button
+                        type="button"
                         onClick={() => {
                           setIsPromptDismissed(true);
                           if (dismissIntroCutoff) dismissIntroCutoff();
                         }}
-                        className="font-medium text-slate-500 hover:text-slate-800 underline underline-offset-2 cursor-pointer py-1"
+                        className="text-[14px] text-slate-600 hover:text-[#0C2340] hover:underline cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 font-medium"
                       >
-                        {lang === 'sw' ? 'Labda baadaye' : 'Maybe later'}
+                        <span>{lang === 'sw' ? 'Labda baadaye' : 'Maybe later'}</span>
                       </button>
                     </div>
 

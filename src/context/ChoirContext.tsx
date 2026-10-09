@@ -101,6 +101,8 @@ interface ChoirContextType {
   setCurrentTimeSeconds: (time: number) => void;
   setIsIntroCutoffOpen: (open: boolean) => void;
   setAudioError: (err: boolean) => void;
+  hasShownCutoffInVisit: (songId: string) => boolean;
+  markCutoffShownInVisit: (songId: string) => void;
 
   // Unified Support Flow
   isSupportModalOpen: boolean;
@@ -121,6 +123,8 @@ interface ChoirContextType {
   clearCart: () => void;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
+  isMenuOpen: boolean;
+  setIsMenuOpen: (open: boolean) => void;
   cartTotalKes: number;
 
   // Dynamic Content Data (Editable via Admin Panel)
@@ -325,15 +329,103 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentTimeSeconds, setCurrentTimeSeconds] = useState<number>(0);
   const [durationFromAudio, setDurationFromAudio] = useState<number>(0);
   const [isPlayerMinimized, setIsPlayerMinimized] = useState<boolean>(true);
-  const [isNowPlayingExpanded, setIsNowPlayingExpanded] = useState<boolean>(false);
+  const [isNowPlayingExpanded, setIsNowPlayingExpandedState] = useState<boolean>(false);
   const [volume, setVolumeState] = useState<number>(0.85);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeedState] = useState<number>(1.0);
-  const [isYoutubeModalOpen, setIsYoutubeModalOpen] = useState<boolean>(false);
+  const [isYoutubeModalOpen, setIsYoutubeModalOpenState] = useState<boolean>(false);
   const [seekCommand, setSeekCommand] = useState<{ targetSeconds: number; nonce: number } | null>(null);
   const [showVideoScreen, setShowVideoScreen] = useState<boolean>(false);
-  const [isIntroCutoffOpen, setIsIntroCutoffOpen] = useState<boolean>(false);
-  const hasTriggeredCutoffRef = useRef<{ [songId: string]: boolean }>({});
+  const [isIntroCutoffOpen, setIsIntroCutoffOpenState] = useState<boolean>(false);
+  const [isSupportModalOpen, setIsSupportModalOpenState] = useState<boolean>(false);
+  const [isCartOpen, setIsCartOpenState] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpenState] = useState<boolean>(false);
+
+  // Fix 1: Make sure only one window is open at a time
+  const setIsNowPlayingExpanded = useCallback((expanded: boolean) => {
+    setIsNowPlayingExpandedState(expanded);
+    if (expanded) {
+      setIsSupportModalOpenState(false);
+      setIsIntroCutoffOpenState(false);
+      setIsCartOpenState(false);
+      setIsMenuOpenState(false);
+      setIsYoutubeModalOpenState(false);
+    }
+  }, []);
+
+  const setIsIntroCutoffOpen = useCallback((open: boolean) => {
+    setIsIntroCutoffOpenState(open);
+    if (open) {
+      setIsNowPlayingExpandedState(false);
+      setIsSupportModalOpenState(false);
+      setIsCartOpenState(false);
+      setIsMenuOpenState(false);
+      setIsYoutubeModalOpenState(false);
+    }
+  }, []);
+
+  const setIsSupportModalOpen = useCallback((open: boolean) => {
+    setIsSupportModalOpenState(open);
+    if (open) {
+      setIsNowPlayingExpandedState(false);
+      setIsIntroCutoffOpenState(false);
+      setIsCartOpenState(false);
+      setIsMenuOpenState(false);
+      setIsYoutubeModalOpenState(false);
+    }
+  }, []);
+
+  const setIsCartOpen = useCallback((open: boolean) => {
+    setIsCartOpenState(open);
+    if (open) {
+      setIsNowPlayingExpandedState(false);
+      setIsIntroCutoffOpenState(false);
+      setIsSupportModalOpenState(false);
+      setIsMenuOpenState(false);
+      setIsYoutubeModalOpenState(false);
+    }
+  }, []);
+
+  const setIsMenuOpen = useCallback((open: boolean) => {
+    setIsMenuOpenState(open);
+    if (open) {
+      setIsNowPlayingExpandedState(false);
+      setIsIntroCutoffOpenState(false);
+      setIsSupportModalOpenState(false);
+      setIsCartOpenState(false);
+      setIsYoutubeModalOpenState(false);
+    }
+  }, []);
+
+  const setIsYoutubeModalOpen = useCallback((open: boolean) => {
+    setIsYoutubeModalOpenState(open);
+    if (open) {
+      setIsNowPlayingExpandedState(false);
+      setIsIntroCutoffOpenState(false);
+      setIsSupportModalOpenState(false);
+      setIsCartOpenState(false);
+      setIsMenuOpenState(false);
+    }
+  }, []);
+  
+  // Track which songs have shown the 40-second cutoff popup during this visit
+  const shownCutoffSongsPerVisitRef = useRef<Set<string>>(new Set());
+
+  const hasShownCutoffInVisit = useCallback((songId: string): boolean => {
+    try {
+      if (sessionStorage.getItem(`st_monica_cutoff_shown_${songId}`) === 'true') {
+        return true;
+      }
+    } catch (_) {}
+    return shownCutoffSongsPerVisitRef.current.has(songId);
+  }, []);
+
+  const markCutoffShownInVisit = useCallback((songId: string) => {
+    shownCutoffSongsPerVisitRef.current.add(songId);
+    try {
+      sessionStorage.setItem(`st_monica_cutoff_shown_${songId}`, 'true');
+    } catch (_) {}
+  }, []);
 
   // Clear any legacy cutoff dismissal keys from storage
   useEffect(() => {
@@ -349,6 +441,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const dismissIntroCutoff = (andPlay: boolean = false) => {
     setIsIntroCutoffOpen(false);
+    markCutoffShownInVisit(currentSong.id);
 
     // Reset position to start so pressing play or replaying begins at 0:00 without getting stuck
     if (currentTimeSeconds >= 39) {
@@ -360,7 +453,6 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     if (andPlay) {
-      hasTriggeredCutoffRef.current[currentSong.id] = false;
       setIsPlaying(true);
       try {
         ytPlayerRef.current?.seekTo(0, true);
@@ -417,8 +509,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           // Restore visitor's volume setting to ensure replay or next song plays at full intended volume
           player.setVolume(isMuted ? 0 : Math.round(volume * 100));
 
-          if (!hasTriggeredCutoffRef.current[currentSong.id]) {
-            hasTriggeredCutoffRef.current[currentSong.id] = true;
+          if (!hasShownCutoffInVisit(currentSong.id)) {
+            markCutoffShownInVisit(currentSong.id);
             setIsIntroCutoffOpen(true);
           }
         } else {
@@ -437,7 +529,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, 100);
 
     return () => clearInterval(intervalId);
-  }, [isPlaying, volume, isMuted, currentSong.id]);
+  }, [isPlaying, volume, isMuted, currentSong.id, hasShownCutoffInVisit, markCutoffShownInVisit]);
 
   const audioProgress = Math.min(100, Math.max(0, (currentTimeSeconds / PREVIEW_DURATION) * 100));
 
@@ -445,7 +537,6 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const playSong = (song: Song) => {
     setAudioError(false);
     setIsIntroCutoffOpen(false);
-    hasTriggeredCutoffRef.current[song.id] = false;
     setCurrentSong(song);
     setCurrentTimeSeconds(0);
     setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
@@ -476,14 +567,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (next) {
         setIsPlayerMinimized(false);
         if (currentTimeSeconds >= 39.5) {
-          hasTriggeredCutoffRef.current[currentSong.id] = false;
           setCurrentTimeSeconds(0);
           setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
           try {
             ytPlayerRef.current?.seekTo(0, true);
           } catch (_) {}
-        } else {
-          hasTriggeredCutoffRef.current[currentSong.id] = false;
         }
         try {
           ytPlayerRef.current?.unMute();
@@ -528,9 +616,6 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const seekAudioBySeconds = (secs: number) => {
     const clamped = Math.max(0, Math.min(40, secs));
-    if (clamped < 39) {
-      hasTriggeredCutoffRef.current[currentSong.id] = false;
-    }
     setCurrentTimeSeconds(clamped);
     setSeekCommand({ targetSeconds: clamped, nonce: Date.now() });
     if (ytPlayerRef.current) {
@@ -541,8 +626,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setIsPlaying(false);
           ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
 
-          if (!hasTriggeredCutoffRef.current[currentSong.id]) {
-            hasTriggeredCutoffRef.current[currentSong.id] = true;
+          if (!hasShownCutoffInVisit(currentSong.id)) {
+            markCutoffShownInVisit(currentSong.id);
             setIsIntroCutoffOpen(true);
           }
         } else if (clamped < 35) {
@@ -644,17 +729,50 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // 10. Unified Support Flow Modal
-  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
   const [supportSongTitle, setSupportSongTitle] = useState<string>('');
 
+  // Fix 1: When Support the Choir is tapped, close or slide away the Our Songs player window
+  // and the post-preview popup, and open the Support form on its own.
+  // Pause any playing song or video while the Support form is open, and remember where it was.
   const openSupportModal = useCallback((songTitle?: string) => {
     setSupportSongTitle(songTitle || '');
-    setIsSupportModalOpen(true);
+    setIsNowPlayingExpandedState(false);
+    setIsIntroCutoffOpenState(false);
+    setIsCartOpenState(false);
+    setIsMenuOpenState(false);
+    setIsYoutubeModalOpenState(false);
+
+    if (ytPlayerRef.current) {
+      try {
+        ytPlayerRef.current.pauseVideo();
+      } catch (_) {}
+    }
+    setIsPlaying(false);
+
+    setIsSupportModalOpenState(true);
   }, []);
 
+  // When the Support form is closed, return to the site page with the mini player showing.
   const closeSupportModal = useCallback(() => {
-    setIsSupportModalOpen(false);
+    setIsSupportModalOpenState(false);
+    setIsNowPlayingExpandedState(false);
+    setIsIntroCutoffOpenState(false);
+    setIsPlayerMinimized(false);
   }, []);
+
+  // Fix 3: Also hide the page's own scrollbar while any window is open.
+  const isAnyWindowOpen = isNowPlayingExpanded || isIntroCutoffOpen || isSupportModalOpen || isCartOpen || isMenuOpen || isYoutubeModalOpen;
+
+  useEffect(() => {
+    if (isAnyWindowOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isAnyWindowOpen]);
 
   // 11. Liturgical Season
   const [liturgicalSeason, setLiturgicalSeason] = useState<'ordinary' | 'lent_advent' | 'easter_christmas'>('ordinary');
@@ -669,8 +787,6 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     return [];
   });
-
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -907,6 +1023,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentTimeSeconds,
         setIsIntroCutoffOpen,
         setAudioError,
+        hasShownCutoffInVisit,
+        markCutoffShownInVisit,
 
         isSupportModalOpen,
         setIsSupportModalOpen,
@@ -924,6 +1042,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         clearCart,
         isCartOpen,
         setIsCartOpen,
+        isMenuOpen,
+        setIsMenuOpen,
         cartTotalKes,
 
         sheetMusicList,

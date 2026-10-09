@@ -30,12 +30,17 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
     playSong,
     isPlaying,
     currentSong,
-    openSupportModal
+    openSupportModal,
+    setIsMenuOpen
   } = useChoir();
 
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [musicDropdownOpen, setMusicDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMenuOpen(mobileMenuOpen);
+  }, [mobileMenuOpen, setIsMenuOpen]);
 
   // Accordion state for full-screen phone menu
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);

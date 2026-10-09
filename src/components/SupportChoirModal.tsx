@@ -25,41 +25,14 @@ import choirSingingImg from '../assets/images/choir_singing_moment_1791356740170
 interface AmountOption {
   kes: number;
   label: string;
-  impactEn: string;
-  impactSw: string;
 }
 
 const AMOUNTS: AmountOption[] = [
-  { 
-    kes: 100, 
-    label: 'KES 100', 
-    impactEn: 'Sheet music for one chorister', 
-    impactSw: 'Noti za mwanakwaya mmoja' 
-  },
-  { 
-    kes: 200, 
-    label: 'KES 200', 
-    impactEn: 'Song score printing', 
-    impactSw: 'Uchapishaji wa nyimbo' 
-  },
-  { 
-    kes: 500, 
-    label: 'KES 500', 
-    impactEn: 'Rehearsal audio recording', 
-    impactSw: 'Kurekodi mazoezi ya sauti' 
-  },
-  { 
-    kes: 1000, 
-    label: 'KES 1,000', 
-    impactEn: 'Sunday Mass sound & cables', 
-    impactSw: 'Vifaa na sauti ya Misa' 
-  },
-  { 
-    kes: 2000, 
-    label: 'KES 2,000', 
-    impactEn: 'Full session parish ministry', 
-    impactSw: 'Huduma kamili ya kwaya' 
-  }
+  { kes: 100, label: 'KES 100' },
+  { kes: 200, label: 'KES 200' },
+  { kes: 500, label: 'KES 500' },
+  { kes: 1000, label: 'KES 1,000' },
+  { kes: 2000, label: 'KES 2,000' }
 ];
 
 export const SupportChoirModal: React.FC = () => {
@@ -270,16 +243,15 @@ export const SupportChoirModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-end sm:items-start justify-center p-0 sm:p-4 sm:pt-14 lg:pt-18 bg-[#0C2340]/60 backdrop-blur-xs animate-in fade-in duration-200 select-none overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-3 sm:py-3 bg-[#0C2340]/50 animate-in fade-in duration-200 select-none overflow-y-auto"
       onClick={closeSupportModal}
       role="dialog"
       aria-modal="true"
       aria-labelledby="support-form-heading"
     >
       {/* SONG-BOOK CONTAINER: Warm cream paper, navy text, fits 1366x600 laptop screen without scrolling */}
-      {/* Top position remains fixed when M-Pesa menu expands; grows downward with internal scroll */}
       <div 
-        className="relative w-full max-w-lg bg-[#FAF8F5] text-[#0C2340] rounded-t-3xl sm:rounded-3xl border border-[#0C2340]/15 shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[530px] overflow-hidden transition-all duration-200"
+        className="relative w-full max-w-lg bg-[#FAF8F5] text-[#0C2340] rounded-t-3xl sm:rounded-2xl border border-[#0C2340]/15 shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[530px] overflow-hidden transition-all duration-200"
         onClick={e => e.stopPropagation()}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -304,17 +276,17 @@ export const SupportChoirModal: React.FC = () => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* INNER SCROLLABLE BODY WITH THIN DARK/NAVY SCROLLBAR (NEVER WHITE) */}
-        <div className="flex-1 p-4 sm:p-5 overflow-y-auto scrollbar-thin scrollbar-thumb-[#0C2340]/25 scrollbar-track-transparent [scrollbar-color:rgba(12,35,64,0.25)_transparent]">
+        {/* INNER SCROLLABLE BODY WITH THIN CREAM/NAVY SCROLLBAR (NEVER WHITE) */}
+        <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto scrollbar-thin [scrollbar-color:rgba(12,35,64,0.30)_#FAF8F5] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#FAF8F5] [&::-webkit-scrollbar-thumb]:bg-[#0C2340]/30 [&::-webkit-scrollbar-thumb]:rounded-full">
 
           {/* ================= STEP 1: AMOUNT & PURPOSE ================= */}
           {modalState === 'form' && formStep === 1 && (
-            <form onSubmit={handleStep1Continue} className="space-y-3">
+            <form onSubmit={handleStep1Continue} className="space-y-2.5">
               
-              {/* Header: Human Voice & Real Choir Photo */}
-              <div className="flex items-start gap-3 pr-14">
+              {/* Header: Compact Choir Photo & Heading */}
+              <div className="flex items-center gap-2.5 pr-12">
                 {/* Real rehearsal / Mass photo of the choir */}
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden shrink-0 border-2 border-[#1058A8]/20 shadow-xs bg-[#EFECE6]">
+                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-[#1058A8]/20 shadow-2xs bg-[#EFECE6]">
                   <img 
                     src={choirSingingImg} 
                     alt="St. Monica Choir" 
@@ -322,21 +294,21 @@ export const SupportChoirModal: React.FC = () => {
                   />
                 </div>
 
-                <div className="space-y-0.5 min-w-0">
-                  <h3 id="support-form-heading" className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
+                <div className="min-w-0">
+                  <h3 id="support-form-heading" className="font-eb-garamond text-lg sm:text-xl font-bold text-[#0C2340] leading-tight">
                     {lang === 'sw' ? 'Imba nasi, kwa namna yako' : 'Sing with us, in your own way'}
                   </h3>
                 </div>
               </div>
 
-              {/* Dedicated note in choir's voice: 16px dark navy, serif italic with sign-off in same size */}
-              <div className="space-y-1 pr-4">
-                <p className="font-eb-garamond italic text-[16px] text-[#0C2340] leading-relaxed">
+              {/* Shortened note from choir: 3 lines at most, serif italic with sign-off */}
+              <div className="space-y-0.5 pr-2">
+                <p className="font-eb-garamond italic text-[14px] text-[#0C2340] leading-snug">
                   {lang === 'sw'
-                    ? 'Tunarekodi uimbaji wetu St. Monica ili waumini popote walipo waweze kusali kupitia muziki wa liturujia. Kila mchango unatusaidia kupata noti na kurekodi Misa ya Jumapili.'
-                    : 'We record our singing at St. Monica so parishioners near and far can pray with the music of the liturgy. Every gift directly helps us buy sheet music and record Sunday Mass.'}
+                    ? 'Tunarekodi uimbaji wetu St. Monica ili waumini popote walipo waweze kusali kupitia muziki. Kila mchango unatusaidia kupata noti na kurekodi Misa ya Jumapili.'
+                    : 'We record our singing at St. Monica so parishioners near and far can pray with the music. Every gift helps us buy sheet music and record Sunday Mass.'}
                 </p>
-                <p className="font-eb-garamond italic text-[16px] text-[#0C2340] leading-relaxed font-semibold">
+                <p className="font-eb-garamond italic text-[14px] text-[#0C2340] leading-snug font-semibold">
                   {lang === 'sw'
                     ? 'Asante sana na Mungu akubariki. — Wanakwaya wa St. Monica'
                     : 'Asante sana na Mungu akubariki. — St. Monica Choir'}
@@ -345,22 +317,21 @@ export const SupportChoirModal: React.FC = () => {
 
               {/* Optional Song Badge if visitor opened from a song */}
               {supportSongTitle && (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#1058A8]/10 border border-[#1058A8]/20 rounded-lg text-xs text-[#1058A8] font-source font-medium">
-                  <Music className="w-3.5 h-3.5 shrink-0" />
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#1058A8]/10 border border-[#1058A8]/20 rounded-md text-[11px] text-[#1058A8] font-source font-medium">
+                  <Music className="w-3 h-3 shrink-0" />
                   <span className="truncate">
                     {lang === 'sw' ? `Mchango kwa wimbo: ${supportSongTitle}` : `Gift inspired by: ${supportSongTitle}`}
                   </span>
                 </div>
               )}
 
-              {/* 12px margin between the choir note and amount cards */}
-              <div className="space-y-1.5 pt-1">
+              {/* Amount Cards: reduced gap, 5 words or fewer per line, 13px body font */}
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-[#0C2340] font-source">
                   {lang === 'sw' ? 'Chagua kiasi cha mchango (KES):' : 'Select your gift amount (KES):'}
                 </label>
 
-                {/* Amount Cards: chosen amount has 2px blue border & light blue fill, none selected by default */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
                   {AMOUNTS.map((amt) => {
                     const isSelected = !customAmount && selectedAmount === amt.kes;
                     return (
@@ -372,24 +343,25 @@ export const SupportChoirModal: React.FC = () => {
                           setCustomAmount('');
                           setAmountError('');
                         }}
-                        className={`min-h-[48px] p-2 text-left rounded-xl transition-all cursor-pointer flex flex-col justify-between ${
+                        className={`min-h-[44px] py-2 px-3 text-center rounded-xl transition-all cursor-pointer flex items-center justify-center font-source ${
                           isSelected
-                            ? 'border-2 border-[#1058A8] bg-[#E8F1FC] text-[#0C2340] shadow-xs'
-                            : 'border border-[#0C2340]/15 bg-white hover:bg-[#F2EFE9] text-[#0C2340]'
+                            ? 'border-2 border-[#1058A8] bg-[#E8F1FC] text-[#1058A8] font-bold shadow-xs'
+                            : 'border border-[#0C2340]/15 bg-white hover:bg-[#F2EFE9] text-[#0C2340] font-semibold'
                         }`}
                       >
-                        <span className="text-xs sm:text-sm font-bold font-source text-[#0C2340]">
+                        <span className="text-sm sm:text-base font-bold tabular-nums">
                           {amt.label}
-                        </span>
-                        <span className={`text-[10px] leading-tight font-source mt-0.5 ${isSelected ? 'text-[#1058A8] font-medium' : 'text-slate-600'}`}>
-                          {lang === 'sw' ? amt.impactSw : amt.impactEn}
                         </span>
                       </button>
                     );
                   })}
 
-                  {/* Custom Amount Field */}
-                  <div className="col-span-1 sm:col-span-1 flex flex-col justify-end">
+                  {/* Custom Amount Field: clean number input only */}
+                  <div className={`col-span-1 sm:col-span-1 flex items-center px-3 py-1.5 rounded-xl border transition-all min-h-[44px] bg-white ${
+                    customAmount
+                      ? 'border-2 border-[#1058A8] bg-[#E8F1FC]'
+                      : 'border-[#0C2340]/15 hover:border-[#0C2340]/30'
+                  }`}>
                     <input
                       type="number"
                       inputMode="numeric"
@@ -402,15 +374,8 @@ export const SupportChoirModal: React.FC = () => {
                         setSelectedAmount(null);
                         if (amountError) setAmountError('');
                       }}
-                      className={`w-full min-h-[48px] px-3 py-2 text-[#0C2340] rounded-xl text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none transition-colors ${
-                        customAmount 
-                          ? 'border-2 border-[#1058A8] bg-[#E8F1FC]' 
-                          : 'border border-[#0C2340]/20 bg-white focus:border-[#1058A8]'
-                      }`}
+                      className="w-full text-sm sm:text-base font-bold font-source text-[#0C2340] placeholder:text-slate-400 placeholder:font-normal focus:outline-none bg-transparent tabular-nums text-center sm:text-left"
                     />
-                    <span className="text-[10px] text-slate-500 font-source block mt-1 px-0.5">
-                      {lang === 'sw' ? 'Kiwango cha chini: KES 100' : 'Minimum KES 100'}
-                    </span>
                   </div>
                 </div>
 
@@ -431,7 +396,7 @@ export const SupportChoirModal: React.FC = () => {
                   <select
                     value={purpose}
                     onChange={(e) => setPurpose(e.target.value)}
-                    className="w-full px-3 py-2 bg-white text-[#0C2340] rounded-xl text-xs sm:text-sm border border-[#0C2340]/20 focus:outline-none focus:border-[#1058A8] appearance-none pr-8 cursor-pointer font-source"
+                    className="w-full px-3 py-1.5 bg-white text-[#0C2340] rounded-xl text-xs sm:text-sm border border-[#0C2340]/20 focus:outline-none focus:border-[#1058A8] appearance-none pr-8 cursor-pointer font-source"
                   >
                     <option value="needed_most">
                       {lang === 'sw' ? 'Pale panapohitajika zaidi' : 'Where it is needed most'}
@@ -451,13 +416,13 @@ export const SupportChoirModal: React.FC = () => {
               </div>
 
               {/* Proceed to Step 2 Button: Disabled in grey style until an amount is chosen */}
-              <div className="pt-1">
+              <div className="pt-0.5">
                 <button
                   type="submit"
                   disabled={!isAmountValid}
-                  className={`w-full min-h-[48px] py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 font-source ${
+                  className={`w-full min-h-[44px] py-2 px-4 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 font-source ${
                     isAmountValid
-                      ? 'bg-[#1058A8] hover:bg-[#0E56A6] text-white shadow-md cursor-pointer active:scale-[0.99]'
+                      ? 'bg-[#1058A8] hover:bg-[#0E56A6] text-white shadow-xs cursor-pointer active:scale-[0.99]'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed border-none shadow-none'
                   }`}
                 >

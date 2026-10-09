@@ -29,7 +29,14 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
     hymnalTab,
     registerYouTubePlayer,
     setIsIntroCutoffOpen,
+    isIntroCutoffOpen,
+    isSupportModalOpen,
+    isCartOpen,
+    isMenuOpen,
+    isYoutubeModalOpen,
     setAudioError,
+    hasShownCutoffInVisit,
+    markCutoffShownInVisit,
     lang
   } = useChoir();
 
@@ -91,7 +98,10 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
               } else if (event.data === window.YT.PlayerState.ENDED) {
                 setIsPlaying(false);
                 setCurrentTimeSeconds(40);
-                setIsIntroCutoffOpen(true);
+                if (!hasShownCutoffInVisit(currentSong.id)) {
+                  markCutoffShownInVisit(currentSong.id);
+                  setIsIntroCutoffOpen(true);
+                }
               }
             },
             onError: () => {
@@ -185,16 +195,20 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
     };
   }, [updatePosition]);
 
-  // Hide video screen when player is paused, idle, or preview has ended (>= 40s).
-  // When user pauses player, the video screen disappears; when pressing play, it reappears.
-  const isPreviewEnded = currentTimeSeconds >= 40;
-  const isActivelyPlaying = isPlaying && !isPreviewEnded;
+  // Fix 2: Hide floating video card whenever any window is open:
+  // - Our Songs player window (isNowPlayingExpanded)
+  // - post-preview popup (isIntroCutoffOpen)
+  // - Support form (isSupportModalOpen)
+  // - Cart (isCartOpen)
+  // - Menu (isMenuOpen)
+  // - Full video modal (isYoutubeModalOpen)
+  const isAnyWindowOrMenuOpen = isNowPlayingExpanded || isIntroCutoffOpen || isSupportModalOpen || isCartOpen || isMenuOpen || isYoutubeModalOpen;
 
   const isDockedInModal = isNowPlayingExpanded && hymnalTab === 'listen' && slotRect !== null;
-  const isDockedInMobile = !isNowPlayingExpanded && isMobile && mobileSlotRect !== null && isActivelyPlaying;
+  const isDockedInMobile = !isNowPlayingExpanded && isMobile && mobileSlotRect !== null && isPlaying && !isAnyWindowOrMenuOpen;
 
-  // Floating video screen on screen: show ONLY while actively playing
-  const shouldShowFloating = !isNowPlayingExpanded && !isMobile && isActivelyPlaying;
+  // Remove the YouTube screen anytime it's on pause and return when played
+  const shouldShowFloating = !isAnyWindowOrMenuOpen && !isMobile && isPlaying;
 
   // Only on main homepage (when not scrolled) can be seen well (opacity-100).
   // When scrolling or on other pages, it is see-through with smooth hover reveal.
@@ -207,8 +221,8 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
       className={`fixed transition-all duration-300 ease-out select-none ${
         isDockedInModal
           ? 'z-55 pointer-events-auto shadow-lg rounded-2xl overflow-hidden border border-[#0C2340]/20 bg-black opacity-100'
-          : isNowPlayingExpanded
-            ? 'z-40 opacity-0 pointer-events-none'
+          : isAnyWindowOrMenuOpen
+            ? 'z-0 opacity-0 pointer-events-none w-1 h-1 overflow-hidden'
             : isDockedInMobile
               ? 'z-45 pointer-events-auto rounded-lg overflow-hidden border border-white/10 bg-black opacity-100'
               : shouldShowFloating
@@ -235,20 +249,19 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
             : shouldShowFloating
               ? {
                   bottom: '76px', // 16px above the mini player
-                  right: '24px'   // Stays on the right side
+                  right: '24px',  // At the bottom right of the screen
+                  width: '320px'
                 }
               : {
                   bottom: '-9999px',
                   right: '-9999px'
                 }
       }
-      title={currentSong.title}
     >
-      {/* Transparent Click Interceptor: clicking the video toggles site playback (no native YouTube UI or extra title bar) */}
+      {/* Transparent Click Interceptor: clicking the video toggles site playback (NO tooltip on card) */}
       <div 
         onClick={togglePlay}
         className="absolute inset-0 z-10 cursor-pointer"
-        title={isPlaying ? (lang === 'sw' ? 'Sitisha wimbo' : 'Pause song') : (lang === 'sw' ? 'Cheza wimbo' : 'Play song')}
       />
 
       {/* The YouTube iframe container (permanent DOM element, never unmounted) */}

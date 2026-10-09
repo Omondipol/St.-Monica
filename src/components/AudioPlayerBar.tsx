@@ -17,7 +17,8 @@ export const AudioPlayerBar: React.FC = () => {
     setIsNowPlayingExpanded,
     formatTime,
     audioError,
-    lang 
+    lang,
+    isPlayerMinimized
   } = useChoir();
 
   // Remember visitor's choice or scroll-driven state
@@ -28,6 +29,13 @@ export const AudioPlayerBar: React.FC = () => {
       return false;
     }
   });
+
+  // When support form or modal closes, restore mini player bar immediately
+  useEffect(() => {
+    if (!isPlayerMinimized) {
+      setIsCollapsed(false);
+    }
+  }, [isPlayerMinimized]);
 
   const handleSetCollapsed = (val: boolean) => {
     setIsCollapsed(val);
