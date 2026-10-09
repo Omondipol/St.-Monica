@@ -142,8 +142,9 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
     const mobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
     setIsMobile(mobile);
 
-    // Track scroll position: when scrolled down (>60px), make floating video see-through
-    const scrolled = typeof window !== 'undefined' ? window.scrollY > 60 : false;
+    // Track scroll position: only when scrolled down (>60px), make floating video see-through
+    const scrollY = typeof window !== 'undefined' ? (window.scrollY || document.documentElement?.scrollTop || 0) : 0;
+    const scrolled = scrollY > 60;
     setIsScrolledDown(scrolled);
 
     if (isNowPlayingExpanded && hymnalTab === 'listen') {
@@ -210,10 +211,8 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
   // Remove the YouTube screen anytime it's on pause and return when played
   const shouldShowFloating = !isAnyWindowOrMenuOpen && !isMobile && isPlaying;
 
-  // Only on main homepage (when not scrolled) can be seen well (opacity-100).
-  // When scrolling or on other pages, it is see-through with smooth hover reveal.
-  const isMainHomePage = currentRoute === 'home';
-  const isSeeThrough = isScrolledDown || !isMainHomePage;
+  // User instruction: only see thru when i scroll down if not let the video just be solid youtube video screen
+  const isSeeThrough = isScrolledDown;
 
   return (
     <div
