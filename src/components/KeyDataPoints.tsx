@@ -321,7 +321,7 @@ export const KeyDataPoints: React.FC = () => {
                     <li>• <strong>Global State:</strong> Lightweight Zustand stores for audio player & cart.</li>
                     <li>• <strong>Audio:</strong> HTML5 Audio API + Media Session API for mobile lock-screen scrubbing.</li>
                     <li>• <strong>Bilingual:</strong> <code>next-intl</code> routing for /en and /sw (Kiswahili).</li>
-                    <li>• <strong>Offline:</strong> Workbox PWA service worker caching sheet music and hymn lyrics.</li>
+                    <li>• <strong>Offline:</strong> Workbox PWA service worker caching sheet music and song lyrics.</li>
                   </ul>
                 </div>
 

@@ -8,10 +8,12 @@ import {
   X,
   Play,
   Pause,
-  ArrowRight
+  ArrowRight,
+  Heart
 } from 'lucide-react';
 import { CHOIR_STATS, Song } from '../data/choirContent';
 import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { SupportChoirModal } from './SupportChoirModal';
 
 interface ChoirHeaderProps {
   currentRoute: string;
@@ -27,7 +29,8 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
     songs,
     playSong,
     isPlaying,
-    currentSong
+    currentSong,
+    openSupportModal
   } = useChoir();
 
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
@@ -426,19 +429,41 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
               )}
             </button>
+
+            {/* Contact Us - Plain text link in main menu */}
+            <button
+              onClick={() => navigateTo('contact')}
+              className={`relative px-3.5 py-2 rounded-lg transition-colors cursor-pointer ${
+                currentRoute === 'contact' ? 'text-white font-bold bg-white/10' : 'hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span>{lang === 'sw' ? 'Wasiliana Nasi' : 'Contact Us'}</span>
+              {currentRoute === 'contact' && (
+                <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
+              )}
+            </button>
           </nav>
 
           {/* Right Action Zone */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             
-            {/* Language Switch: English / Kiswahili */}
+            {/* Single Filled Blue Button: Support Choir without heart icon */}
+            <button
+              onClick={() => openSupportModal()}
+              className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] border border-[#7EC8F0]/30 rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
+              title={lang === 'sw' ? 'Unga Mkono Kwaya Yetu' : 'Support St. Monica Choir'}
+            >
+              <span>{lang === 'sw' ? 'Unga Mkono Kwaya' : 'Support Choir'}</span>
+            </button>
+
+            {/* Language Switch: Small switch EN / SW */}
             <div 
-              className="flex items-center bg-white/10 p-0.5 rounded-full border border-white/20 shrink-0"
+              className="flex items-center bg-white/10 p-0.5 rounded-full border border-white/20 shrink-0 text-xs font-bold"
               title={lang === 'sw' ? 'Badili lugha' : 'Change language'}
             >
               <button
                 onClick={() => setLang('en')}
-                className={`px-2.5 py-0.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                className={`px-2 py-0.5 text-[11px] font-bold rounded-full transition-all cursor-pointer ${
                   lang === 'en'
                     ? 'bg-[#1058A8] text-white shadow-xs'
                     : 'text-white/80 hover:text-white'
@@ -448,7 +473,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
               </button>
               <button
                 onClick={() => setLang('sw')}
-                className={`px-2.5 py-0.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                className={`px-2 py-0.5 text-[11px] font-bold rounded-full transition-all cursor-pointer ${
                   lang === 'sw'
                     ? 'bg-[#1058A8] text-white shadow-xs'
                     : 'text-white/80 hover:text-white'
@@ -471,14 +496,6 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 </span>
               </button>
             )}
-
-            {/* Contact CTA Button (Quiet blue styling) */}
-            <button
-              onClick={() => navigateTo('contact')}
-              className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] border border-[#7EC8F0]/30 rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap shrink-0"
-            >
-              {lang === 'sw' ? 'Wasiliana Nasi' : 'Contact Us'}
-            </button>
 
             {/* Mobile Menu Hamburger */}
             <button
@@ -608,6 +625,18 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 className="w-full min-h-[56px] flex items-center justify-between text-left text-base font-bold text-white hover:text-[#7EC8F0] px-2 cursor-pointer"
               >
                 <span>{lang === 'sw' ? 'Wasiliana Nasi' : 'Contact Us'}</span>
+                <ArrowRight className="w-4 h-4 text-[#7EC8F0]" />
+              </button>
+
+              {/* Support the Choir (Mobile section) */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openSupportModal();
+                }}
+                className="w-full min-h-[56px] flex items-center justify-between text-left text-base font-bold text-sky-200 hover:text-white px-2 cursor-pointer bg-white/5 rounded-xl my-1"
+              >
+                <span>{lang === 'sw' ? 'Unga Mkono Kwaya' : 'Support the Choir'}</span>
                 <ArrowRight className="w-4 h-4 text-[#7EC8F0]" />
               </button>
             </div>

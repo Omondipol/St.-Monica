@@ -192,7 +192,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     ],
     waveformPeaks: [80,92,88,85,89,94,57,90,100,99,89,97,66,83,88,90,91,90,88,60,84,83,88,87,89,55,98,94,94,87,94,78,71,84,87,88,86,88,55,93,90,88,89,91,90,90,90,58,89,88,91,88,88,61,87,94,97,92,91,89,60,87,85,85,86,86,53,87,85,85,79,71,53,46,49,39,32,23,13,12],
     recordedAt: "Recorded at Khakstudio, Nakuru",
-    whyWeSingIt: "Recorded at Khakstudio in 2024, our choir learned this hymn for the Nakuru Deanery Choral Festival and sings it during post-Communion prayer.",
+    whyWeSingIt: "Recorded at Khakstudio in 2024, our choir learned this song for the Nakuru Deanery Choral Festival and sings it during post-Communion prayer.",
     whyWeSingItSw: "Wimbo huu ulirekodiwa Khakstudio mwaka 2024; kwaya iliujifunza kwa ajili ya Tamasha la Dekania na tunauimba wakati wa tafakari baada ya Komunyo."
   },
   {
@@ -308,7 +308,7 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     ],
     waveformPeaks: [80,100,89,92,61,87,84,88,85,60,98,93,87,62,84,89,90,87,57,87,90,86,71,74,90,90,83,54,88,88,93,85,61,88,89,93,93,90,84,62,91,94,91,65,81,84,86,85,56,91,88,89,72,72,93,91,92,57,82,83,82,80,58,85,86,84,59,84,89,91,84,46,68,58,49,38,31,23,12,12],
     recordedAt: "Recorded at Khakstudio, Nakuru",
-    whyWeSingIt: "Composed by Bernard Mukasa, this entrance hymn was adopted by our parish in 2021 to open celebrations honoring Small Christian Communities.",
+    whyWeSingIt: "Composed by Bernard Mukasa, this entrance song was adopted by our parish in 2021 to open celebrations honoring Small Christian Communities.",
     whyWeSingItSw: "Ulitungwa na Bernard Mukasa na kupokelewa parokiani mwaka 2021 kama wimbo wa kuingia unaoenzi Jumuiya Ndogondogo."
   }
 ];
@@ -521,12 +521,12 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
   },
   {
     id: "prod-sheet-bundle",
-    name: "Complete SATB Vocal Scores Bundle (All 4 Hymns)",
+    name: "Complete SATB Vocal Scores Bundle (All 4 Songs)",
     nameSw: "Kifurushi cha Noti Zote 4 (SATB PDF)",
     type: "sheet_music",
     priceKes: 1000,
     priceUsd: 8.00,
-    description: "Complete printable PDF booklet with Tonic Sol-fa and Staff Notation for all 4 hymns. Formatted for choir directors for parish use. Pay with M-Pesa.",
+    description: "Complete printable PDF booklet with Tonic Sol-fa and Staff Notation for all 4 songs. Formatted for choir directors for parish use. Pay with M-Pesa.",
     descriptionSw: "Kitini kamili cha noti za PDF chenye solfa na stafu kwa nyimbo zote 4 kwa ajili ya walimu wa kwaya. Lipa kupitia M-Pesa.",
     image: "sheet_music_hymnal",
     badge: "Save KES 200",

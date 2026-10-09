@@ -102,6 +102,13 @@ interface ChoirContextType {
   setIsIntroCutoffOpen: (open: boolean) => void;
   setAudioError: (err: boolean) => void;
 
+  // Unified Support Flow
+  isSupportModalOpen: boolean;
+  setIsSupportModalOpen: (open: boolean) => void;
+  supportSongTitle: string;
+  openSupportModal: (songTitle?: string) => void;
+  closeSupportModal: () => void;
+
   // Liturgical Season
   liturgicalSeason: 'ordinary' | 'lent_advent' | 'easter_christmas';
   setLiturgicalSeason: (season: 'ordinary' | 'lent_advent' | 'easter_christmas') => void;
@@ -327,13 +334,21 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [showVideoScreen, setShowVideoScreen] = useState<boolean>(false);
   const [isIntroCutoffOpen, setIsIntroCutoffOpen] = useState<boolean>(false);
   const hasTriggeredCutoffRef = useRef<{ [songId: string]: boolean }>({});
-  const hasDismissedCutoffRef = useRef<{ [songId: string]: boolean }>({});
+
+  // Clear any legacy cutoff dismissal keys from storage
+  useEffect(() => {
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('st_monica_cutoff_dismissed_')) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (_) {}
+  }, []);
 
   const dismissIntroCutoff = (andPlay: boolean = false) => {
     setIsIntroCutoffOpen(false);
-    // Mark as dismissed for this visit so the visitor is never interrupted again for this song
-    hasDismissedCutoffRef.current[currentSong.id] = true;
-    hasTriggeredCutoffRef.current[currentSong.id] = true;
 
     // Reset position to start so pressing play or replaying begins at 0:00 without getting stuck
     if (currentTimeSeconds >= 39) {
@@ -345,6 +360,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     if (andPlay) {
+      hasTriggeredCutoffRef.current[currentSong.id] = false;
       setIsPlaying(true);
       try {
         ytPlayerRef.current?.seekTo(0, true);
@@ -401,7 +417,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           // Restore visitor's volume setting to ensure replay or next song plays at full intended volume
           player.setVolume(isMuted ? 0 : Math.round(volume * 100));
 
-          if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+          if (!hasTriggeredCutoffRef.current[currentSong.id]) {
             hasTriggeredCutoffRef.current[currentSong.id] = true;
             setIsIntroCutoffOpen(true);
           }
@@ -429,6 +445,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const playSong = (song: Song) => {
     setAudioError(false);
     setIsIntroCutoffOpen(false);
+    hasTriggeredCutoffRef.current[song.id] = false;
     setCurrentSong(song);
     setCurrentTimeSeconds(0);
     setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
@@ -459,11 +476,14 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (next) {
         setIsPlayerMinimized(false);
         if (currentTimeSeconds >= 39.5) {
+          hasTriggeredCutoffRef.current[currentSong.id] = false;
           setCurrentTimeSeconds(0);
           setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
           try {
             ytPlayerRef.current?.seekTo(0, true);
           } catch (_) {}
+        } else {
+          hasTriggeredCutoffRef.current[currentSong.id] = false;
         }
         try {
           ytPlayerRef.current?.unMute();
@@ -508,6 +528,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const seekAudioBySeconds = (secs: number) => {
     const clamped = Math.max(0, Math.min(40, secs));
+    if (clamped < 39) {
+      hasTriggeredCutoffRef.current[currentSong.id] = false;
+    }
     setCurrentTimeSeconds(clamped);
     setSeekCommand({ targetSeconds: clamped, nonce: Date.now() });
     if (ytPlayerRef.current) {
@@ -517,7 +540,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           ytPlayerRef.current.pauseVideo();
           setIsPlaying(false);
           ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
-          if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+
+          if (!hasTriggeredCutoffRef.current[currentSong.id]) {
             hasTriggeredCutoffRef.current[currentSong.id] = true;
             setIsIntroCutoffOpen(true);
           }
@@ -619,7 +643,20 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   };
 
-  // 10. Liturgical Season
+  // 10. Unified Support Flow Modal
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
+  const [supportSongTitle, setSupportSongTitle] = useState<string>('');
+
+  const openSupportModal = useCallback((songTitle?: string) => {
+    setSupportSongTitle(songTitle || '');
+    setIsSupportModalOpen(true);
+  }, []);
+
+  const closeSupportModal = useCallback(() => {
+    setIsSupportModalOpen(false);
+  }, []);
+
+  // 11. Liturgical Season
   const [liturgicalSeason, setLiturgicalSeason] = useState<'ordinary' | 'lent_advent' | 'easter_christmas'>('ordinary');
 
   // 11. Shopping Cart
@@ -870,6 +907,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentTimeSeconds,
         setIsIntroCutoffOpen,
         setAudioError,
+
+        isSupportModalOpen,
+        setIsSupportModalOpen,
+        supportSongTitle,
+        openSupportModal,
+        closeSupportModal,
 
         liturgicalSeason,
         setLiturgicalSeason,

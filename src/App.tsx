@@ -9,6 +9,7 @@ import { CartDrawer } from './components/CartDrawer';
 import { ChoirLogo } from './components/ChoirLogo';
 import { ChoirFooter } from './components/ChoirFooter';
 import { SongCutoffModal } from './components/SongCutoffModal';
+import { SupportChoirModal } from './components/SupportChoirModal';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, CHOIR_STATS } from './data/choirContent';
 
 // Pages & Subviews
@@ -109,10 +110,11 @@ function ChoirApp() {
       }} />
 
       {/* Global Interactive Modals & Player */}
-      <YouTubeAudioHost />
+      <YouTubeAudioHost currentRoute={currentRoute} />
       <AudioPlayerBar />
       <NowPlayingModal />
       <SongCutoffModal />
+      <SupportChoirModal />
       <YouTubePlayerModal />
       <CartDrawer />
     </div>

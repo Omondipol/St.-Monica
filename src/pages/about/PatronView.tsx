@@ -47,7 +47,7 @@ export const PatronView: React.FC = () => {
         <div className="lg:col-span-5 aspect-4/3 rounded-xl overflow-hidden border border-[#0C2340]/10 shadow-sm">
           <img
             src={hymnalImg}
-            alt="Saint Monica Choral Hymnal"
+            alt="Saint Monica Choral Song Scores"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />

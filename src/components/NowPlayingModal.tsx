@@ -10,7 +10,6 @@ import {
   VolumeX, 
   ShoppingBag, 
   BookOpen, 
-  Layers, 
   Music2, 
   ChevronLeft, 
   ChevronRight,
@@ -21,6 +20,7 @@ import {
 import { SongCoverArt } from './SongCoverArt';
 import { RealAudioWaveform } from './RealAudioWaveform';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
+import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 export const NowPlayingModal: React.FC = () => {
@@ -42,31 +42,31 @@ export const NowPlayingModal: React.FC = () => {
     setIsNowPlayingExpanded,
     hymnalTab,
     setHymnalTab,
-    voiceMixer,
-    setVoiceVolume,
-    toggleVoice,
     addToCart,
     audioError,
     isIntroCutoffOpen,
     dismissIntroCutoff,
+    openSupportModal,
     lang
   } = useChoir();
 
   const [lyricsLanguage, setLyricsLanguage] = useState<'sw' | 'en'>(lang);
   const [isPromptDismissed, setIsPromptDismissed] = useState<boolean>(false);
-  const [showSupportMpesa, setShowSupportMpesa] = useState<boolean>(false);
-  const [mpesaPhone, setMpesaPhone] = useState<string>('');
-  const [mpesaPaid, setMpesaPaid] = useState<boolean>(false);
   const touchStartYRef = useRef<number | null>(null);
 
-  // Reset prompt dismissed status when currentSong changes
+  // Reset prompt dismissed status when currentSong changes or playback restarts
   useEffect(() => {
     setIsPromptDismissed(false);
   }, [currentSong.id]);
 
+  useEffect(() => {
+    if (currentTimeSeconds < 38) {
+      setIsPromptDismissed(false);
+    }
+  }, [currentTimeSeconds]);
+
   const handleReplayPreview = () => {
     setIsPromptDismissed(false);
-    setShowSupportMpesa(false);
     if (dismissIntroCutoff) {
       dismissIntroCutoff(true);
     } else {
@@ -141,69 +141,35 @@ export const NowPlayingModal: React.FC = () => {
     }
   };
 
-  // Voice parts data without fake live badges
-  const vocalParts = [
-    {
-      id: 'soprano' as const,
-      name: lang === 'sw' ? 'Soprano (Sauti ya Kwanza)' : 'Soprano (Melody)',
-      range: 'C4 – A5',
-      desc: lang === 'sw' ? 'Melodi kuu ya wimbo inayoongoza sala.' : 'Leading melodic line carrying the liturgical text.',
-      volume: voiceMixer.sopranoVolume,
-      active: voiceMixer.soprano
-    },
-    {
-      id: 'alto' as const,
-      name: lang === 'sw' ? 'Alto (Sauti ya Pili)' : 'Alto (Harmonic Interior)',
-      range: 'G3 – D5',
-      desc: lang === 'sw' ? 'Mwangwi wa ndani unaoongeza utulivu na uzuri.' : 'Rich inner harmonic voicing providing depth.',
-      volume: voiceMixer.altoVolume,
-      active: voiceMixer.alto
-    },
-    {
-      id: 'tenor' as const,
-      name: lang === 'sw' ? 'Tenor (Sauti ya Tatu)' : 'Tenor (Counter-Melody)',
-      range: 'C3 – G4',
-      desc: lang === 'sw' ? 'Sauti ya juu ya kiume inayoinua ushirika wa wimbo.' : 'High male harmony uplifting the choral texture.',
-      volume: voiceMixer.tenorVolume,
-      active: voiceMixer.tenor
-    },
-    {
-      id: 'bass' as const,
-      name: lang === 'sw' ? 'Bass (Sauti ya Nne)' : 'Bass (Foundation)',
-      range: 'E2 – C4',
-      desc: lang === 'sw' ? 'Sauti ya chini inayojenga msingi imara wa nguzo za wimbo.' : 'Harmonic foundation grounding the choral chord structure.',
-      volume: voiceMixer.bassVolume,
-      active: voiceMixer.bass
-    }
-  ];
-
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-[#0C2340]/80 backdrop-blur-md animate-in fade-in duration-200 select-none overflow-hidden"
       onClick={() => setIsNowPlayingExpanded(false)}
       role="dialog"
       aria-modal="true"
-      aria-label="Expanded Hymnal Player"
+      aria-label={lang === 'sw' ? 'Nyimbo Zetu - Kichezaji' : 'Our Songs - Music Player'}
     >
-      {/* OPEN HYMNAL CONTAINER: Fits on 1366x600 laptop screens without scrolling */}
+      {/* OUR SONGS CONTAINER: Fits on 1366x600 laptop screens without scrolling */}
       <div 
         className="relative w-full max-w-4xl bg-[#FAF8F5] text-[#0C2340] rounded-2xl sm:rounded-3xl border border-[#0C2340]/15 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] sm:max-h-[510px]"
         onClick={e => e.stopPropagation()}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Subtle African geometric pattern border strip along top edge */}
+        <AfricanGeometricBorder />
         
-        {/* HYMNAL TOP HEADER & TABS BAR (No liturgical label in header) */}
+        {/* TOP HEADER & TABS BAR */}
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 border-b border-[#0C2340]/10 bg-[#FAF8F5] sticky top-0 z-20 shrink-0">
           
-          {/* Left: Hymnal Title */}
+          {/* Left: Player Window Title */}
           <div className="flex items-center gap-2">
             <span className="font-eb-garamond font-semibold text-base sm:text-lg text-[#0C2340]">
-              {lang === 'sw' ? 'Kitabu cha Nyimbo' : 'Parish Hymnal'}
+              {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
             </span>
           </div>
 
-          {/* Center: Four Tabs (Listen, Lyrics, Voices, Score) */}
+          {/* Center: Three Tabs (Listen, Lyrics, Score) */}
           <nav className="flex items-center gap-1 bg-[#EFECE6] p-1 rounded-xl">
             <button
               onClick={() => setHymnalTab('listen')}
@@ -227,18 +193,6 @@ export const NowPlayingModal: React.FC = () => {
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>{lang === 'sw' ? 'Maneno' : 'Lyrics'}</span>
-            </button>
-
-            <button
-              onClick={() => setHymnalTab('voices')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 font-source ${
-                hymnalTab === 'voices'
-                  ? 'bg-[#0C2340] text-white shadow-2xs'
-                  : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-white/60'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Sauti Nne' : 'Voices'}</span>
             </button>
 
             <button
@@ -304,11 +258,11 @@ export const NowPlayingModal: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Why We Sing This Hymn box (shown when not in support prompt mode to keep clean breathing room) */}
+                {/* Why We Sing This Song box (shown when not in support prompt mode to keep clean breathing room) */}
                 {choirSentence && !showSupportPrompt ? (
                   <div className="p-2 sm:p-2.5 bg-white rounded-xl border border-[#0C2340]/10 text-xs text-slate-700 leading-relaxed font-source shadow-2xs">
                     <strong className="block text-[#0C2340] font-semibold mb-0.5">
-                      {lang === 'sw' ? 'Kwanini Tunaimba Wimbo Huu' : 'Why We Sing This Hymn'}
+                      {lang === 'sw' ? 'Kwanini Tunaimba Wimbo Huu' : 'Why We Sing This Song'}
                     </strong>
                     <p>{choirSentence}</p>
                   </div>
@@ -318,16 +272,13 @@ export const NowPlayingModal: React.FC = () => {
                 {showSupportPrompt ? (
                   <div className="bg-[#FAF8F5] border border-[#0C2340]/15 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col gap-3 text-[#0C2340]">
                     <div className="space-y-1">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-[#1058A8] font-source">
-                        {lang === 'sw' ? 'Mwisho wa hakiki (Sek 40)' : '40-second preview complete'}
-                      </div>
                       <h3 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-[#0C2340] leading-tight">
-                        {lang === 'sw' ? 'Umeupenda wimbo huu?' : 'Enjoying the hymn?'}
+                        {lang === 'sw' ? 'Unafurahia wimbo?' : 'Enjoying the song?'}
                       </h3>
                       <p className="text-xs sm:text-sm text-slate-700 font-source leading-relaxed">
                         {lang === 'sw'
                           ? `Umesikiliza sekunde 40 za mwanzo za ${currentSong.titleSwahili}. Sikiliza wimbo mzima bure kwenye YouTube, au unga mkono kwaya yetu.`
-                          : `You just heard the first 40 seconds of ${currentSong.title}. Listen to the full hymn free on YouTube, or support our choir ministry directly.`}
+                          : `You just heard the first 40 seconds of ${currentSong.title}. Listen to the full song free on YouTube, or support our choir ministry directly.`}
                       </p>
                     </div>
 
@@ -335,19 +286,14 @@ export const NowPlayingModal: React.FC = () => {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
                       {/* Button 1: Filled Blue Button called Support the Choir */}
                       <button
-                        onClick={() => setShowSupportMpesa(prev => !prev)}
-                        className="flex-1 py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center justify-between"
+                        onClick={() => openSupportModal(currentSong.title)}
+                        className="flex-1 py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
                       >
-                        <div className="flex items-center gap-2">
-                          <Heart className="w-4 h-4 fill-current text-sky-200 shrink-0" />
-                          <span>{lang === 'sw' ? 'Saidia Kwaya' : 'Support the Choir'}</span>
-                        </div>
-                        <span className="font-bold text-xs px-2 py-0.5 bg-white/20 rounded-md">
-                          KES 100
-                        </span>
+                        <Heart className="w-4 h-4 fill-current text-sky-200 shrink-0" />
+                        <span>{lang === 'sw' ? 'Saidia Kwaya' : 'Support the Choir'}</span>
                       </button>
 
-                      {/* Button 2: Outlined Button called Listen to the full hymn on YouTube with YouTube icon */}
+                      {/* Button 2: Outlined Button called Listen to the full song on YouTube with YouTube icon */}
                       <a
                         href={youtubeUrl}
                         target="_blank"
@@ -356,49 +302,11 @@ export const NowPlayingModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2">
                           <RealYouTubeIcon size={18} variant="badge" />
-                          <span>{lang === 'sw' ? 'Wimbo mzima YouTube' : 'Listen to the full hymn on YouTube'}</span>
+                          <span>{lang === 'sw' ? 'Wimbo kamili YouTube' : 'Full song on YouTube'}</span>
                         </div>
                         <ExternalLink className="w-3.5 h-3.5 text-[#1058A8]" />
                       </a>
                     </div>
-
-                    {/* M-Pesa Interactive Prompt if user clicks Support the Choir */}
-                    {showSupportMpesa && (
-                      <div className="p-3 bg-white rounded-xl border border-[#0C2340]/15 space-y-2 animate-in fade-in duration-150">
-                        <div className="flex items-center justify-between text-xs font-semibold text-[#0C2340]">
-                          <span>{lang === 'sw' ? 'Weka namba ya M-Pesa:' : 'Enter M-Pesa phone number:'}</span>
-                          <span className="text-[#1058A8] font-bold">KES 100</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="tel"
-                            placeholder="0712 345 678"
-                            value={mpesaPhone}
-                            onChange={(e) => setMpesaPhone(e.target.value)}
-                            className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-[#1058A8]"
-                          />
-                          <button
-                            onClick={() => {
-                              if (mpesaPhone.trim()) {
-                                setMpesaPaid(true);
-                                setTimeout(() => {
-                                  setShowSupportMpesa(false);
-                                  setMpesaPaid(false);
-                                }, 3000);
-                              }
-                            }}
-                            className="px-3 py-1.5 bg-[#1058A8] text-white rounded-lg text-xs font-bold hover:bg-[#0E56A6] cursor-pointer"
-                          >
-                            {mpesaPaid ? (lang === 'sw' ? 'Asante!' : 'Sent!') : (lang === 'sw' ? 'Tuma' : 'Pay')}
-                          </button>
-                        </div>
-                        {mpesaPaid && (
-                          <p className="text-[11px] text-emerald-600 font-medium">
-                            {lang === 'sw' ? 'Ombi la M-Pesa limetumwa. Asante sana kwa kuunga mkono kwaya!' : 'STK push sent to your phone. Thank you for supporting the choir!'}
-                          </p>
-                        )}
-                      </div>
-                    )}
 
                     {/* Replay preview and Maybe later links under buttons */}
                     <div className="flex items-center justify-center gap-4 pt-1 text-xs font-source">
@@ -453,8 +361,8 @@ export const NowPlayingModal: React.FC = () => {
                           <RealYouTubeIcon size={14} variant="badge" />
                           <span>
                             {lang === 'sw' 
-                              ? `Wimbo mzima ${fullDuration} YouTube ↗` 
-                              : `Full hymn ${fullDuration} on YouTube ↗`}
+                              ? 'Wimbo kamili YouTube ↗' 
+                              : 'Full song on YouTube ↗'}
                           </span>
                         </a>
                       </div>
@@ -468,8 +376,8 @@ export const NowPlayingModal: React.FC = () => {
                         <button
                           onClick={playPrevious}
                           className="p-1.5 text-slate-700 hover:text-[#0C2340] rounded-full hover:bg-black/5 cursor-pointer transition-colors flex items-center justify-center"
-                          title="Previous hymn"
-                          aria-label="Previous hymn"
+                          title="Previous song"
+                          aria-label="Previous song"
                         >
                           <SkipBack className="w-5 h-5 fill-current" />
                         </button>
@@ -489,8 +397,8 @@ export const NowPlayingModal: React.FC = () => {
                         <button
                           onClick={playNext}
                           className="p-1.5 text-slate-700 hover:text-[#0C2340] rounded-full hover:bg-black/5 cursor-pointer transition-colors flex items-center justify-center"
-                          title="Next hymn"
-                          aria-label="Next hymn"
+                          title="Next song"
+                          aria-label="Next song"
                         >
                           <SkipForward className="w-5 h-5 fill-current" />
                         </button>
@@ -525,7 +433,7 @@ export const NowPlayingModal: React.FC = () => {
                       <div className="text-xs font-source font-semibold tabular-nums text-slate-600 shrink-0 flex items-center">
                         {lang === 'sw' 
                           ? `Wimbo ${currentIndex + 1} kati ya ${songs.length}` 
-                          : `Hymn ${currentIndex + 1} of ${songs.length}`}
+                          : `Song ${currentIndex + 1} of ${songs.length}`}
                       </div>
 
                     </div>
@@ -569,7 +477,7 @@ export const NowPlayingModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Hymn Lyrics in EB Garamond regular font */}
+              {/* Song Lyrics in EB Garamond regular font */}
               <div className="space-y-4 text-left font-eb-garamond text-base sm:text-lg leading-relaxed text-[#0C2340]">
                 {(lyricsLanguage === 'sw' ? currentSong.lyricsSwahili : currentSong.lyricsEnglish).map((stanza, idx) => (
                   <p 
@@ -583,70 +491,7 @@ export const NowPlayingModal: React.FC = () => {
             </div>
           )}
 
-          {/* ================= TAB 3: VOICES (SATB Vocal Parts) ================= */}
-          {hymnalTab === 'voices' && (
-            <div className="p-5 sm:p-8 space-y-4 max-w-2xl mx-auto">
-              <div className="space-y-1">
-                <h3 className="font-eb-garamond text-xl font-semibold text-[#0C2340]">
-                  {lang === 'sw' ? 'Mgawanyo wa Sauti Nne (SATB)' : 'Four-Part Vocal Balances'}
-                </h3>
-                <p className="text-xs text-slate-600 font-source">
-                  {lang === 'sw' 
-                    ? 'Rekebisha sauti za waimbaji wa kwaya ili kujifunza sehemu yako ya solfa.'
-                    : 'Adjust individual voice balances for choral rehearsal and tonic sol-fa training.'}
-                </p>
-              </div>
-
-              <div className="space-y-2.5 pt-1">
-                {vocalParts.map((part) => (
-                  <div 
-                    key={part.id}
-                    className="p-3 bg-white rounded-xl border border-[#0C2340]/10 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <strong className="text-sm font-semibold text-[#0C2340] font-source">
-                          {part.name}
-                        </strong>
-                        <span className="text-[11px] font-source tabular-nums text-slate-500">
-                          ({part.range})
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-600 font-source mt-0.5">
-                        {part.desc}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
-                      <button
-                        onClick={() => toggleVoice(part.id)}
-                        className={`px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer transition-colors font-source ${
-                          part.active
-                            ? 'bg-[#1058A8] text-white'
-                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
-                        }`}
-                      >
-                        {part.active ? (lang === 'sw' ? 'Washa' : 'Active') : (lang === 'sw' ? 'Zima' : 'Mute')}
-                      </button>
-
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={part.volume}
-                        disabled={!part.active}
-                        onChange={(e) => setVoiceVolume(part.id, parseInt(e.target.value))}
-                        className="w-20 h-1.5 bg-[#0C2340]/15 rounded-lg appearance-none cursor-pointer accent-[#1058A8] disabled:opacity-40"
-                        aria-label={`${part.name} volume`}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ================= TAB 4: SCORE ================= */}
+          {/* ================= TAB 3: SCORE ================= */}
           {hymnalTab === 'score' && (
             <div className="p-5 sm:p-8 space-y-4 max-w-2xl mx-auto">
               <div className="space-y-1">
@@ -725,18 +570,18 @@ export const NowPlayingModal: React.FC = () => {
 
         </div>
 
-        {/* SLIDE-UP PROMPT OVER BOTTOM HALF OF EXPANDED PLAYER (when 40s preview finishes) */}
-        {currentTimeSeconds >= 40 && !isPromptDismissed && (
+        {/* SLIDE-UP PROMPT OVER BOTTOM HALF OF EXPANDED PLAYER (when 40s preview finishes on non-listen tabs) */}
+        {currentTimeSeconds >= 40 && !isPromptDismissed && hymnalTab !== 'listen' && (
           <div className="absolute inset-x-0 bottom-0 bg-[#0C2340] text-white p-5 sm:p-6 rounded-b-2xl sm:rounded-b-3xl border-t border-white/20 shadow-2xl z-30 animate-in slide-in-from-bottom duration-300">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <h4 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-white">
-                  {lang === 'sw' ? 'Umeupenda wimbo huu?' : 'Enjoying this hymn?'}
+                  {lang === 'sw' ? 'Unafurahia wimbo?' : 'Enjoying the song?'}
                 </h4>
                 <p className="text-xs sm:text-sm text-slate-200 font-source leading-relaxed">
                   {lang === 'sw'
-                    ? `Sikiliza rekodi kamili ya dakika ${fullDuration} kwenye chaneli yetu ya YouTube, bure.`
-                    : `Hear the full ${fullDuration} recording on our YouTube channel, free.`}
+                    ? 'Sikiliza rekodi kamili kwenye chaneli yetu ya YouTube, bure.'
+                    : 'Hear the full recording on our YouTube channel, free.'}
                 </p>
               </div>
 
@@ -760,7 +605,7 @@ export const NowPlayingModal: React.FC = () => {
                 className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-[#1058A8] hover:bg-[#186DC7] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md font-source"
               >
                 <RealYouTubeIcon size={18} variant="badge" />
-                <span>{lang === 'sw' ? 'Sikiliza wimbo mzima kwenye YouTube' : 'Listen to full hymn on YouTube'}</span>
+                <span>{lang === 'sw' ? 'Wimbo kamili YouTube' : 'Full song on YouTube'}</span>
               </a>
 
               <button
@@ -781,10 +626,10 @@ export const NowPlayingModal: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-4 right-4 z-20 px-3.5 py-2 rounded-xl bg-[#0C2340] text-white text-xs font-semibold border border-white/20 hover:bg-[#1058A8] shadow-lg flex items-center gap-2 transition-all font-source animate-in fade-in"
-            title="Listen to full hymn on YouTube"
+            title="Listen to full song on YouTube"
           >
             <RealYouTubeIcon size={15} variant="badge" />
-            <span>{lang === 'sw' ? 'Wimbo mzima YouTube ↗' : 'Full song on YouTube ↗'}</span>
+            <span>{lang === 'sw' ? 'Wimbo kamili YouTube ↗' : 'Full song on YouTube ↗'}</span>
           </a>
         )}
 

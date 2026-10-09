@@ -27,10 +27,10 @@ export const OurStoryView: React.FC = () => {
     },
     {
       year: "2021",
-      title: lang === 'sw' ? "Albamu ya Kwanza: Nyimbo za Kiliturujia" : "Debut Album: Liturgical Hymns",
+      title: lang === 'sw' ? "Albamu ya Kwanza: Nyimbo za Kiliturujia" : "Debut Album: Liturgical Songs",
       desc: lang === 'sw'
         ? "Kurekodiwa na kusambazwa kwa santuri ya kwanza ya kwaya yenye nyimbo za kikatoliki za kiswahili."
-        : "Studio recording and distribution of the choir's first album featuring Kiswahili Catholic choral hymns."
+        : "Studio recording and distribution of the choir's first album featuring Kiswahili Catholic choral songs."
     },
     {
       year: "2024",

@@ -29,7 +29,7 @@ const VOICES: VoiceConfig[] = [
     borderColor: 'border-[#7EC8F0]',
     filterType: 'highpass',
     filterFreq: 1100,
-    description: 'The highest voice leading the liturgical hymn melody with purity and clarity.',
+    description: 'The highest voice leading the liturgical song melody with purity and clarity.',
     descriptionSw: 'Sauti inayoongoza melodi ya wimbo kwa usafi na mng\'ao wa kiliturujia.'
   },
   {

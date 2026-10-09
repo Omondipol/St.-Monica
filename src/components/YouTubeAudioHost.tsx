@@ -10,12 +10,17 @@ declare global {
   }
 }
 
-export const YouTubeAudioHost: React.FC = () => {
+interface YouTubeAudioHostProps {
+  currentRoute?: string;
+}
+
+export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute = 'home' }) => {
   const {
     currentSong,
     isPlaying,
     setIsPlaying,
     togglePlay,
+    currentTimeSeconds,
     setCurrentTimeSeconds,
     volume,
     isMuted,
@@ -127,8 +132,8 @@ export const YouTubeAudioHost: React.FC = () => {
     const mobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
     setIsMobile(mobile);
 
-    // Track scroll position: when scrolled down (>80px), make floating video see-through
-    const scrolled = typeof window !== 'undefined' ? window.scrollY > 80 : false;
+    // Track scroll position: when scrolled down (>60px), make floating video see-through
+    const scrolled = typeof window !== 'undefined' ? window.scrollY > 60 : false;
     setIsScrolledDown(scrolled);
 
     if (isNowPlayingExpanded && hymnalTab === 'listen') {
@@ -180,8 +185,21 @@ export const YouTubeAudioHost: React.FC = () => {
     };
   }, [updatePosition]);
 
+  // Hide video screen when player is paused, idle, or preview has ended (>= 40s).
+  // When user pauses player, the video screen disappears; when pressing play, it reappears.
+  const isPreviewEnded = currentTimeSeconds >= 40;
+  const isActivelyPlaying = isPlaying && !isPreviewEnded;
+
   const isDockedInModal = isNowPlayingExpanded && hymnalTab === 'listen' && slotRect !== null;
-  const isDockedInMobile = !isNowPlayingExpanded && isMobile && mobileSlotRect !== null;
+  const isDockedInMobile = !isNowPlayingExpanded && isMobile && mobileSlotRect !== null && isActivelyPlaying;
+
+  // Floating video screen on screen: show ONLY while actively playing
+  const shouldShowFloating = !isNowPlayingExpanded && !isMobile && isActivelyPlaying;
+
+  // Only on main homepage (when not scrolled) can be seen well (opacity-100).
+  // When scrolling or on other pages, it is see-through with smooth hover reveal.
+  const isMainHomePage = currentRoute === 'home';
+  const isSeeThrough = isScrolledDown || !isMainHomePage;
 
   return (
     <div
@@ -193,11 +211,11 @@ export const YouTubeAudioHost: React.FC = () => {
             ? 'z-40 opacity-0 pointer-events-none'
             : isDockedInMobile
               ? 'z-45 pointer-events-auto rounded-lg overflow-hidden border border-white/10 bg-black opacity-100'
-              : `z-40 w-[320px] aspect-video rounded-2xl border border-white/20 bg-black overflow-hidden pointer-events-auto ${
-                  isScrolledDown
-                    ? 'opacity-35 hover:opacity-100 shadow-lg backdrop-blur-xs'
-                    : 'opacity-100 shadow-2xl'
-                }`
+              : shouldShowFloating
+                ? `z-40 w-[320px] aspect-video rounded-2xl border border-white/20 bg-black overflow-hidden pointer-events-auto shadow-2xl transition-opacity duration-300 ${
+                    isSeeThrough ? 'opacity-30 hover:opacity-100 backdrop-blur-xs' : 'opacity-100'
+                  }`
+                : 'z-0 opacity-0 pointer-events-none w-1 h-1 overflow-hidden'
       }`}
       style={
         isDockedInModal
@@ -214,50 +232,23 @@ export const YouTubeAudioHost: React.FC = () => {
                 width: `${mobileSlotRect.width}px`,
                 height: `${mobileSlotRect.height}px`
               }
-            : !isNowPlayingExpanded && !isMobile
+            : shouldShowFloating
               ? {
-                  bottom: '80px', // 16px above the mini player
-                  right: '24px'   // Stays permanently on the right side
+                  bottom: '76px', // 16px above the mini player
+                  right: '24px'   // Stays on the right side
                 }
-              : undefined
+              : {
+                  bottom: '-9999px',
+                  right: '-9999px'
+                }
       }
       title={currentSong.title}
     >
-      {/* Floating Card Header on Desktop with song title label */}
-      {!isDockedInModal && !isDockedInMobile && !isNowPlayingExpanded && (
-        <div className="absolute top-0 inset-x-0 bg-gradient-to-b from-black/85 via-black/40 to-transparent px-3 py-2 flex items-center justify-between text-xs text-white z-20 pointer-events-auto transition-opacity duration-300">
-          <div className="flex items-center gap-1.5 min-w-0 pr-2 font-source">
-            <RealYouTubeIcon size={14} variant="badge" />
-            <span className="truncate font-semibold text-xs tracking-tight text-white/95">
-              {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <a
-              href={currentSong.youtubeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1 text-white/80 hover:text-white transition-colors"
-              title="YouTube"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-            <button
-              onClick={() => setIsNowPlayingExpanded(true)}
-              className="p-1 text-white/80 hover:text-white transition-colors cursor-pointer"
-              title="Expand hymnal"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Transparent Click Interceptor: clicking the video toggles site playback (no native YouTube UI) */}
+      {/* Transparent Click Interceptor: clicking the video toggles site playback (no native YouTube UI or extra title bar) */}
       <div 
         onClick={togglePlay}
         className="absolute inset-0 z-10 cursor-pointer"
-        title={isPlaying ? (lang === 'sw' ? 'Sitisha wimbo' : 'Pause hymn') : (lang === 'sw' ? 'Cheza wimbo' : 'Play hymn')}
+        title={isPlaying ? (lang === 'sw' ? 'Sitisha wimbo' : 'Pause song') : (lang === 'sw' ? 'Cheza wimbo' : 'Play song')}
       />
 
       {/* The YouTube iframe container (permanent DOM element, never unmounted) */}

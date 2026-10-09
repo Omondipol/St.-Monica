@@ -261,7 +261,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
           <div className="bg-white border border-[#0C2340]/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
             <img 
               src={hymnalImg} 
-              alt="Hymn score and music stave" 
+              alt="Song score and music stave" 
               className="w-20 h-20 rounded-lg object-cover shrink-0 border border-[#0C2340]/10"
               referrerPolicy="no-referrer"
             />

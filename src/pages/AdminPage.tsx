@@ -204,7 +204,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       sheetMusicAvailable: songForm.sheetMusicAvailable,
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
       lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monica SEC 58.'],
-      lyricsEnglish: lyricsEnglish.length ? lyricsEnglish : ['Hymn of St. Monica Choir SEC 58.'],
+      lyricsEnglish: lyricsEnglish.length ? lyricsEnglish : ['Song of St. Monica Choir SEC 58.'],
       waveformPeaks: [40, 60, 50, 80, 95, 70, 85, 90, 75, 60, 85, 70, 80, 90, 60, 40, 70, 85, 90, 50, 65, 80, 45, 30]
     };
 
@@ -647,7 +647,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 Choir Repertoire & YouTube Releases
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                Manage all hymns shown on the music page, player, and linked to the official YouTube channel ({YOUTUBE_CHANNEL_HANDLE}).
+                Manage all songs shown on the music page, player, and linked to the official YouTube channel ({YOUTUBE_CHANNEL_HANDLE}).
               </p>
             </div>
             <button

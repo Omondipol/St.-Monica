@@ -205,30 +205,16 @@ export const AudioPlayerBar: React.FC = () => {
                 {formattedCurrent} of 0:40
               </span>
               <span className="text-white/30 leading-none">·</span>
-              {isPreviewComplete ? (
-                <a
-                  href={youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-[#7EC8F0] hover:text-white underline underline-offset-2 transition-colors font-medium inline-flex items-center gap-1 leading-none"
-                >
-                  <span>{lang === 'sw' ? 'Hakiki sek 40 kamili' : '40s preview complete'}</span>
-                  <span>·</span>
-                  <span className="font-semibold">{lang === 'sw' ? 'Wimbo mzima YouTube' : 'Hear full hymn on YouTube'} ↗</span>
-                </a>
-              ) : (
-                <a
-                  href={youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-[#7EC8F0] hover:text-white underline underline-offset-2 transition-colors inline-flex items-center gap-1 leading-none"
-                  title={lang === 'sw' ? 'Sikiliza wimbo mzima YouTube' : 'Listen to full recording on YouTube'}
-                >
-                  {lang === 'sw' ? `Hakiki sek 40 · Rekodi kamili (${fullDuration}) YouTube ↗` : `Full hymn ${fullDuration} on YouTube ↗`}
-                </a>
-              )}
+              <a
+                href={youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[#7EC8F0] hover:text-white underline underline-offset-2 transition-colors font-medium inline-flex items-center gap-1 leading-none"
+                title={lang === 'sw' ? 'Sikiliza wimbo mzima YouTube' : 'Listen to full recording on YouTube'}
+              >
+                {lang === 'sw' ? 'Wimbo kamili YouTube ↗' : 'Full song on YouTube ↗'}
+              </a>
             </div>
           </div>
 

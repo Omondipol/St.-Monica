@@ -143,7 +143,7 @@ export const MusicPage: React.FC = () => {
             <Search className="w-4 h-4 text-[#0C2340]/40 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder={lang === 'sw' ? "Tafuta wimbo au mtunzi..." : "Search hymn title or composer..."}
+              placeholder={lang === 'sw' ? "Tafuta wimbo au mtunzi..." : "Search song title or composer..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-xs border border-[#0C2340]/20 rounded-lg focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"

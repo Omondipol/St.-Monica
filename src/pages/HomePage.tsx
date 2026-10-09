@@ -67,10 +67,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         />
 
         {/* Soft dark gradient fading to clear by the middle of the photo (50%) so singers' faces remain totally clear */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/90 via-[#0C2340]/55 via-35% to-transparent to-50%" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/80 via-transparent to-transparent sm:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/60 via-30% to-transparent to-50%" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/85 via-transparent to-transparent sm:hidden" />
 
-        <div className="relative z-10 max-w-xl text-left space-y-4 pb-4 sm:pb-8">
+        <div className="relative z-10 w-full sm:max-w-[45%] text-left space-y-4 pb-4 sm:pb-8">
           <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-[1.1]">
             {lang === 'sw' ? (
               <>
@@ -85,10 +85,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             )}
           </h1>
 
-          <p className="font-source text-base sm:text-lg text-white/95 max-w-xl leading-relaxed">
+          <p className="font-source text-base sm:text-lg text-white/95 leading-relaxed">
             {lang === 'sw'
-              ? 'Tunaimba katika Misa Kuu ya Jumapili na maadhimisho ya kijimbo. Kuimba Misa daima ni bure.'
-              : 'We sing at Sunday High Mass and at diocesan celebrations. Singing at Mass is always free.'}
+              ? 'Kwaya kuu ya Misa ya Tatu, St. Monica, Nakuru'
+              : 'Main third mass choir at St. Monica, Nakuru'}
           </p>
 
           {/* Action buttons: Single strong button, quiet YouTube link, outlined gallery */}
@@ -258,7 +258,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <p className="text-sm sm:text-base text-white/80 font-source mt-1">
                 {lang === 'sw'
                   ? 'Nyimbo nne zilizorekodiwa na kwaya katika Section 58, Nakuru.'
-                  : 'Four hymns recorded by the choir at Section 58, Nakuru.'}
+                  : 'Four songs recorded by the choir at Section 58, Nakuru.'}
               </p>
             </div>
 
@@ -340,7 +340,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               onClick={() => onNavigate('music-repertoire')}
               className="px-5 py-2.5 text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-full cursor-pointer transition-colors"
             >
-              {lang === 'sw' ? 'Tazama Nyimbo Zote na Maneno' : 'View Full Hymn Catalog & Lyrics'} →
+              {lang === 'sw' ? 'Tazama Orodha ya Nyimbo na Maneno' : 'View Song Catalog & Song Lyrics'} →
             </button>
           </div>
         </div>
@@ -486,7 +486,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <p className="text-base text-slate-800 font-source leading-relaxed">
                 {lang === 'sw'
                   ? '“Karibu sana kwenye jukwaa la Kwaya ya Mtakatifu Monica, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe dhabihu safi na sala ya kicho mbele ya Mwenyezi Mungu.”'
-                  : '“Welcome to the musical home of St. Monica Catholic Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every hymn offered is an authentic sacrifice of praise before Almighty God.”'}
+                  : '“Welcome to the musical home of St. Monica Catholic Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is an authentic sacrifice of praise before Almighty God.”'}
               </p>
 
               <div className="pt-2 flex items-center gap-3.5">
