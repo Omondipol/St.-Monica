@@ -12,8 +12,12 @@ interface RealAudioWaveformProps {
   audioError?: boolean;
 }
 
+const TOTAL_BARS = 76;
+const FLAT_HEIGHT_PCT = 24; // Flat settled state when paused or ended
+const DOT_RADIUS = 7; // Dot is 14px wide, radius is 7px
+
 export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
-  song,
+  song: _song, // Standard calm visual is the same for every song
   currentTime,
   duration = 40,
   isPlaying,
@@ -40,9 +44,12 @@ export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
     }
   }, []);
 
-  // 30 FPS animation loop for gentle rise and fall around playhead when playing
+  const isPreviewEnded = currentTime >= 39.9;
+  const isActivelyPlaying = isPlaying && !isPreviewEnded;
+
+  // Calm 30 FPS animation loop: bars rise and fall in a gentle wave traveling left to right
   useEffect(() => {
-    if (!isPlaying) {
+    if (!isActivelyPlaying || prefersReducedMotionRef.current) {
       setPhase(0);
       return;
     }
@@ -58,36 +65,40 @@ export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
 
       if (delta >= interval) {
         lastTime = timestamp - (delta % interval);
-        if (!prefersReducedMotionRef.current) {
-          setPhase((prev) => (prev + 0.22) % (Math.PI * 2));
-        }
+        // Calm, gentle speed traveling left to right
+        setPhase((prev) => (prev + 0.08) % (Math.PI * 2));
       }
       animId = requestAnimationFrame(animate);
     };
 
     animId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying]);
+  }, [isActivelyPlaying]);
 
-  // Use song's real extracted waveform peaks (80 bars)
-  const basePeaks = useMemo(() => {
-    if (song.waveformPeaks && song.waveformPeaks.length >= 70) {
-      return song.waveformPeaks.slice(0, 80);
+  // Compute heights for the bars:
+  // - Settle flat (24%) when paused or when preview ends
+  // - When playing: gentle wave traveling left to right (phase - norm * frequency)
+  // - Reduced motion: flat bar visual
+  const barHeights = useMemo(() => {
+    if (!isActivelyPlaying || prefersReducedMotionRef.current) {
+      return Array.from({ length: TOTAL_BARS }, () => FLAT_HEIGHT_PCT);
     }
-    // Authentic fallback peaks if ever needed
-    return Array.from({ length: 80 }, (_, i) => {
-      const fade = i > 70 ? Math.max(0.1, (80 - i) / 10) : 1;
-      return Math.round((40 + Math.sin(i * 0.4) * 35 + Math.cos(i * 0.9) * 20) * fade);
-    });
-  }, [song.waveformPeaks]);
 
-  // Safe clamped ratio between 0 and 1
+    return Array.from({ length: TOTAL_BARS }, (_, i) => {
+      const norm = i / (TOTAL_BARS - 1);
+      // Wave traveling left to right: phase minus position
+      const wave = Math.sin(phase - norm * Math.PI * 4.2);
+      const secondary = Math.cos(phase * 0.75 - norm * Math.PI * 2.1) * 0.35;
+      const combined = (wave + secondary) / 1.35;
+      // Gentle height modulation between 18% and 68%
+      const val = Math.round(43 + combined * 25);
+      return Math.max(16, Math.min(70, val));
+    });
+  }, [isActivelyPlaying, phase]);
+
+  // Clamped ratio between 0 and 1
   const effectiveDuration = Math.max(1, duration);
   const ratio = Math.max(0, Math.min(1, currentTime / effectiveDuration));
-  const playheadBarIndex = Math.min(79, Math.floor(ratio * 80));
-
-  // Dot is 14px wide, radius is 7px
-  const DOT_RADIUS = 7;
 
   // Click & Drag Seeking (Mouse + Touch)
   const handleSeekFromEvent = useCallback((clientX: number) => {
@@ -148,19 +159,6 @@ export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
     };
   }, [isDragging, handleSeekFromEvent]);
 
-  // Compute heights for the 80 bars
-  const barHeights = useMemo(() => {
-    return basePeaks.map((peakVal, i) => {
-      let dynamicBoost = 0;
-      const distFromPlayhead = Math.abs(i - playheadBarIndex);
-      if (isPlaying && !prefersReducedMotionRef.current && distFromPlayhead <= 5) {
-        const proximity = (6 - distFromPlayhead) / 6;
-        dynamicBoost = Math.sin(phase + i * 1.3) * 14 * proximity;
-      }
-      return Math.max(15, Math.min(88, peakVal + dynamicBoost));
-    });
-  }, [basePeaks, isPlaying, phase, playheadBarIndex]);
-
   return (
     <div
       ref={containerRef}
@@ -187,12 +185,12 @@ export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
           className="relative w-full h-full flex items-center"
           style={{ paddingLeft: `${DOT_RADIUS}px`, paddingRight: `${DOT_RADIUS}px` }}
         >
-          {/* Layer 1: All 80 bars in soft grey-blue (unplayed state) */}
+          {/* Layer 1: Bars in soft grey-blue (unplayed state) */}
           <div className="w-full h-full flex items-center justify-between gap-[2px] pointer-events-none">
             {barHeights.map((barHeightPct, i) => (
               <div
                 key={`grey-${i}`}
-                className="flex-1 rounded-full bg-[#94A3B8]/50 group-hover:bg-[#94A3B8]/70"
+                className="flex-1 rounded-full bg-[#94A3B8]/40 group-hover:bg-[#94A3B8]/60 transition-all duration-150"
                 style={{
                   height: `${barHeightPct}%`,
                   minWidth: '2px',
@@ -202,7 +200,7 @@ export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
             ))}
           </div>
 
-          {/* Layer 2: All 80 bars in site's blue (#1058A8), precisely clipped to match the playhead dot */}
+          {/* Layer 2: Bars in site's blue (#1058A8), precisely clipped to match the playhead dot */}
           <div 
             className="absolute inset-y-0 pointer-events-none flex items-center justify-between gap-[2px]"
             style={{
@@ -214,7 +212,7 @@ export const RealAudioWaveform: React.FC<RealAudioWaveformProps> = ({
             {barHeights.map((barHeightPct, i) => (
               <div
                 key={`blue-${i}`}
-                className="flex-1 rounded-full bg-[#1058A8]"
+                className="flex-1 rounded-full bg-[#1058A8] transition-all duration-150"
                 style={{
                   height: `${barHeightPct}%`,
                   minWidth: '2px',

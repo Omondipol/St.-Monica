@@ -85,7 +85,9 @@ export const HearTheFourVoices: React.FC = () => {
 
   useEffect(() => {
     // Setup audio element for demo excerpt (Machozi ya Imani liturgical choir recording)
-    const audio = new Audio('/audio/machozi_ya_imani.mp3');
+    const base = typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL ? import.meta.env.BASE_URL : './';
+    const audioUrl = `${base.endsWith('/') ? base : base + '/'}audio/machozi_ya_imani.mp3`;
+    const audio = new Audio(audioUrl);
     audio.preload = 'metadata';
     audio.loop = true;
     audioRef.current = audio;

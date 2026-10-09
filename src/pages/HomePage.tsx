@@ -58,7 +58,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     <div className="w-full space-y-0">
       
       {/* 1. HERO SECTION: Lightened overlay so singers' faces are clearly visible */}
-      <section className="relative min-h-[75vh] sm:min-h-[82vh] flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]">
+      <section id="home-hero-section" className="relative min-h-[75vh] sm:min-h-[82vh] flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]">
         <img
           src={choirHeroImg}
           alt="St. Monica Catholic Choir"

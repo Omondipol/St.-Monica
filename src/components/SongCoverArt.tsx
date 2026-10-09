@@ -22,7 +22,7 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
   if (size === 'thumbnail') {
     return (
       <div 
-        className={`relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/15 shadow-xs bg-[#0C2340] select-none ${className}`}
+        className={`relative w-10 h-10 aspect-square rounded-lg overflow-hidden shrink-0 border border-white/15 shadow-xs bg-[#0C2340] select-none ${className}`}
         title={`${song.title} · ${song.composer}`}
       >
         <img

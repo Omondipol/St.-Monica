@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChoirProvider, useChoir } from './context/ChoirContext';
 import { ChoirHeader } from './components/ChoirHeader';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
+import { YouTubeAudioHost } from './components/YouTubeAudioHost';
 import { NowPlayingModal } from './components/NowPlayingModal';
 import { YouTubePlayerModal } from './components/YouTubePlayerModal';
 import { CartDrawer } from './components/CartDrawer';
@@ -108,6 +109,7 @@ function ChoirApp() {
       }} />
 
       {/* Global Interactive Modals & Player */}
+      <YouTubeAudioHost />
       <AudioPlayerBar />
       <NowPlayingModal />
       <SongCutoffModal />

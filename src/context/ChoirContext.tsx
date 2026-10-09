@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Song, 
   INITIAL_SONGS_CATALOG, 
@@ -95,6 +95,12 @@ interface ChoirContextType {
   setIsYoutubeModalOpen: (open: boolean) => void;
   isIntroCutoffOpen: boolean;
   dismissIntroCutoff: (andPlay?: boolean) => void;
+  registerYouTubePlayer: (player: any) => void;
+  isYouTubeReady: boolean;
+  setIsPlaying: (playing: boolean) => void;
+  setCurrentTimeSeconds: (time: number) => void;
+  setIsIntroCutoffOpen: (open: boolean) => void;
+  setAudioError: (err: boolean) => void;
 
   // Liturgical Season
   liturgicalSeason: 'ordinary' | 'lent_advent' | 'easter_christmas';
@@ -333,19 +339,19 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (currentTimeSeconds >= 39) {
       setCurrentTimeSeconds(0);
       setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
-      }
+      try {
+        ytPlayerRef.current?.seekTo(0, true);
+      } catch (_) {}
     }
 
     if (andPlay) {
       setIsPlaying(true);
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
-        audioRef.current.play().catch(() => {});
-      }
+      try {
+        ytPlayerRef.current?.seekTo(0, true);
+        ytPlayerRef.current?.unMute();
+        ytPlayerRef.current?.setVolume(isMuted ? 0 : Math.round(volume * 100));
+        ytPlayerRef.current?.playVideo();
+      } catch (_) {}
     }
   };
 
@@ -361,103 +367,92 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return baseVol * fadeFactor;
   };
 
-  const syncFromYouTube = (_curTime: number, _dur: number, _playingState: boolean) => {
-    // No-op: Public playback is strictly driven by the choir's authentic 40-second preview clips
+  const [audioError, setAudioError] = useState<boolean>(false);
+  const ytPlayerRef = useRef<any>(null);
+  const [isYouTubeReady, setIsYouTubeReady] = useState<boolean>(false);
+
+  const registerYouTubePlayer = useCallback((player: any) => {
+    ytPlayerRef.current = player;
+    setIsYouTubeReady(true);
+  }, []);
+
+  const syncFromYouTube = (curTime: number, _dur: number, playingState: boolean) => {
+    setCurrentTimeSeconds(curTime);
+    setIsPlaying(playingState);
   };
 
-  const [audioError, setAudioError] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize Audio element once
+  // 100ms sync loop for YouTube playback: track real seconds, 35s-40s smooth volume fade, 40s pause & support prompt
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isPlaying) return;
 
-    const audio = new Audio();
-    audio.preload = 'auto';
-    audio.src = currentSong.audioPreviewUrl;
-    audio.volume = calculateEffectiveVolume(0, volume, isMuted);
-    audio.playbackRate = playbackSpeed;
-    audioRef.current = audio;
+    const intervalId = setInterval(() => {
+      const player = ytPlayerRef.current;
+      if (!player || typeof player.getCurrentTime !== 'function') return;
 
-    const onTimeUpdate = () => {
-      const cur = audio.currentTime;
-      
-      // Smooth fade-out in player from 35 to 40 seconds
-      if (cur >= 40) {
-        audio.pause();
-        audio.currentTime = 40;
-        audio.volume = 0;
-        setCurrentTimeSeconds(40);
-        setIsPlaying(false);
+      try {
+        const cur = player.getCurrentTime();
+        if (typeof cur !== 'number' || isNaN(cur)) return;
 
-        // Slide up gentle prompt only once per song per visit
-        if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
-          hasTriggeredCutoffRef.current[currentSong.id] = true;
-          setIsIntroCutoffOpen(true);
+        if (cur >= 40) {
+          player.pauseVideo();
+          player.seekTo(40, true);
+          setCurrentTimeSeconds(40);
+          setIsPlaying(false);
+          // Restore visitor's volume setting to ensure replay or next song plays at full intended volume
+          player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+
+          if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+            hasTriggeredCutoffRef.current[currentSong.id] = true;
+            setIsIntroCutoffOpen(true);
+          }
+        } else {
+          setCurrentTimeSeconds(cur);
+
+          // In the last 5 seconds (35s to 40s), lower the volume gradually to silence
+          if (cur >= 35) {
+            const fadeFactor = Math.max(0, (40 - cur) / 5);
+            const effVol = isMuted ? 0 : Math.round(volume * fadeFactor * 100);
+            player.setVolume(effVol);
+          } else {
+            player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          }
         }
-      } else {
-        setCurrentTimeSeconds(cur);
-        audio.volume = calculateEffectiveVolume(cur, volume, isMuted);
-      }
-    };
+      } catch (_) {}
+    }, 100);
 
-    const onPlay = () => {
-      setAudioError(false);
-      setIsPlaying(true);
-    };
-    const onPause = () => setIsPlaying(false);
-
-    const onEnded = () => {
-      setCurrentTimeSeconds(40);
-      setIsPlaying(false);
-      if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
-        hasTriggeredCutoffRef.current[currentSong.id] = true;
-        setIsIntroCutoffOpen(true);
-      }
-    };
-
-    const onError = () => {
-      setAudioError(true);
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-    audio.addEventListener('ended', onEnded);
-    audio.addEventListener('error', onError);
-
-    return () => {
-      audio.pause();
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-      audio.removeEventListener('ended', onEnded);
-      audio.removeEventListener('error', onError);
-    };
-  }, []);
+    return () => clearInterval(intervalId);
+  }, [isPlaying, volume, isMuted, currentSong.id]);
 
   const audioProgress = Math.min(100, Math.max(0, (currentTimeSeconds / PREVIEW_DURATION) * 100));
 
-  // Real Play Song (Drives authentic 40-second preview audio)
+  // Real Play Song: Drives official YouTube recording of the choir
   const playSong = (song: Song) => {
     setAudioError(false);
     setIsIntroCutoffOpen(false);
     setCurrentSong(song);
     setCurrentTimeSeconds(0);
     setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = song.audioPreviewUrl;
-      audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
-      audioRef.current.play().catch(() => {});
-    }
     setIsPlaying(true);
     setIsPlayerMinimized(false);
+
+    if (ytPlayerRef.current) {
+      try {
+        if (typeof ytPlayerRef.current.loadVideoById === 'function') {
+          ytPlayerRef.current.loadVideoById({
+            videoId: song.youtubeId,
+            startSeconds: 0
+          });
+          ytPlayerRef.current.unMute();
+          ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          ytPlayerRef.current.playVideo();
+        }
+      } catch (e) {
+        console.warn('YouTube playSong error:', e);
+      }
+    }
   };
 
-  // Real Toggle Play/Pause (rewinds to 0 if at cutoff so clicking Play always plays)
+  // Real Toggle Play/Pause
   const togglePlay = () => {
     setIsPlaying(prev => {
       const next = !prev;
@@ -466,18 +461,19 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (currentTimeSeconds >= 39.5) {
           setCurrentTimeSeconds(0);
           setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
-          if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.volume = calculateEffectiveVolume(0, volume, isMuted);
-          }
+          try {
+            ytPlayerRef.current?.seekTo(0, true);
+          } catch (_) {}
         }
-        if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
-        }
+        try {
+          ytPlayerRef.current?.unMute();
+          ytPlayerRef.current?.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          ytPlayerRef.current?.playVideo();
+        } catch (_) {}
       } else {
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
+        try {
+          ytPlayerRef.current?.pauseVideo();
+        } catch (_) {}
       }
       return next;
     });
@@ -514,17 +510,21 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const clamped = Math.max(0, Math.min(40, secs));
     setCurrentTimeSeconds(clamped);
     setSeekCommand({ targetSeconds: clamped, nonce: Date.now() });
-    if (audioRef.current) {
-      audioRef.current.currentTime = clamped;
-      audioRef.current.volume = calculateEffectiveVolume(clamped, volume, isMuted);
-      if (clamped >= 40) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
-          hasTriggeredCutoffRef.current[currentSong.id] = true;
-          setIsIntroCutoffOpen(true);
+    if (ytPlayerRef.current) {
+      try {
+        ytPlayerRef.current.seekTo(clamped, true);
+        if (clamped >= 40) {
+          ytPlayerRef.current.pauseVideo();
+          setIsPlaying(false);
+          ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          if (!hasTriggeredCutoffRef.current[currentSong.id] && !hasDismissedCutoffRef.current[currentSong.id]) {
+            hasTriggeredCutoffRef.current[currentSong.id] = true;
+            setIsIntroCutoffOpen(true);
+          }
+        } else if (clamped < 35) {
+          ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
         }
-      }
+      } catch (_) {}
     }
   };
 
@@ -532,16 +532,25 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const setVolume = (val: number) => {
     const clamped = Math.max(0, Math.min(1, val));
     setVolumeState(clamped);
-    if (audioRef.current) {
-      audioRef.current.volume = calculateEffectiveVolume(currentTimeSeconds, clamped, isMuted);
+    if (ytPlayerRef.current) {
+      try {
+        ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(clamped * 100));
+      } catch (_) {}
     }
   };
 
   const toggleMute = () => {
     setIsMuted(prev => {
       const next = !prev;
-      if (audioRef.current) {
-        audioRef.current.volume = calculateEffectiveVolume(currentTimeSeconds, volume, next);
+      if (ytPlayerRef.current) {
+        try {
+          if (next) {
+            ytPlayerRef.current.mute();
+          } else {
+            ytPlayerRef.current.unMute();
+            ytPlayerRef.current.setVolume(Math.round(volume * 100));
+          }
+        } catch (_) {}
       }
       return next;
     });
@@ -550,8 +559,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Playback Speed
   const setPlaybackSpeed = (speed: number) => {
     setPlaybackSpeedState(speed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = speed;
+    if (ytPlayerRef.current) {
+      try {
+        ytPlayerRef.current.setPlaybackRate(speed);
+      } catch (_) {}
     }
   };
 
@@ -853,6 +864,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsYoutubeModalOpen,
         isIntroCutoffOpen,
         dismissIntroCutoff,
+        registerYouTubePlayer,
+        isYouTubeReady,
+        setIsPlaying,
+        setCurrentTimeSeconds,
+        setIsIntroCutoffOpen,
+        setAudioError,
 
         liturgicalSeason,
         setLiturgicalSeason,

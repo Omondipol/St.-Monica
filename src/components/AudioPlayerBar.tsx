@@ -262,7 +262,9 @@ export const AudioPlayerBar: React.FC = () => {
         >
           {/* Cover & Title */}
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <SongCoverArt song={currentSong} size="thumbnail" className="w-10 h-10 shrink-0" />
+            <div id="mobile-mini-player-slot" className="w-10 h-10 rounded-lg overflow-hidden shrink-0 relative">
+              <SongCoverArt song={currentSong} size="thumbnail" className="w-10 h-10 shrink-0" />
+            </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[15px] font-semibold text-white truncate leading-tight">
                 {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}

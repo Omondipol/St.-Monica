@@ -1,260 +1,269 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useChoir } from '../context/ChoirContext';
+import { Maximize2, ExternalLink } from 'lucide-react';
+import { RealYouTubeIcon } from './RealYouTubeIcon';
 
 declare global {
   interface Window {
+    YT: any;
     onYouTubeIframeAPIReady?: () => void;
-    YT?: any;
   }
 }
 
-interface YouTubeAudioHostProps {
-  className?: string;
-  isMiniView?: boolean;
-}
-
-export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ 
-  className = '',
-  isMiniView = false
-}) => {
+export const YouTubeAudioHost: React.FC = () => {
   const {
     currentSong,
     isPlaying,
+    setIsPlaying,
+    togglePlay,
+    setCurrentTimeSeconds,
     volume,
     isMuted,
-    playbackSpeed,
-    playNext,
-    syncFromYouTube,
-    seekCommand,
-    showVideoScreen,
-    setShowVideoScreen
+    isNowPlayingExpanded,
+    setIsNowPlayingExpanded,
+    hymnalTab,
+    registerYouTubePlayer,
+    setIsIntroCutoffOpen,
+    setAudioError,
+    lang
   } = useChoir();
 
   const playerRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isApiReady, setIsApiReady] = useState<boolean>(false);
   const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
-  const prevSongIdRef = useRef<string>(currentSong.id);
-  const timerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [slotRect, setSlotRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [mobileSlotRect, setMobileSlotRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [isScrolledDown, setIsScrolledDown] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  // 1. Load YouTube IFrame API once
+  // Initialize YouTube Player with clean embedded parameters
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    let isCancelled = false;
+
+    const setupPlayer = () => {
+      if (isCancelled || playerRef.current) return;
+      if (!window.YT || !window.YT.Player) {
+        setTimeout(setupPlayer, 100);
+        return;
+      }
+
+      const targetEl = document.getElementById('st-monica-yt-audio-player');
+      if (!targetEl) {
+        setTimeout(setupPlayer, 100);
+        return;
+      }
+
+      try {
+        const player = new window.YT.Player('st-monica-yt-audio-player', {
+          videoId: currentSong.youtubeId || 'syOCKFbVS-8',
+          playerVars: {
+            autoplay: 0,
+            controls: 0,        // Hide YouTube's own controls, progress bar, title bar
+            disablekb: 1,       // Disable keyboard shortcuts
+            fs: 0,              // Hide fullscreen button
+            iv_load_policy: 3,  // Hide annotations
+            modestbranding: 1,  // Minimal branding
+            rel: 0,             // Relate videos to same channel only
+            playsinline: 1,     // Inline playback on mobile
+            enablejsapi: 1,
+            origin: typeof window !== 'undefined' ? window.location.origin : undefined
+          },
+          events: {
+            onReady: (event: any) => {
+              if (isCancelled) return;
+              playerRef.current = event.target;
+              registerYouTubePlayer(event.target);
+              setIsPlayerReady(true);
+              // Set initial volume
+              event.target.setVolume(isMuted ? 0 : Math.round(volume * 100));
+            },
+            onStateChange: (event: any) => {
+              if (isCancelled) return;
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                setIsPlaying(true);
+              } else if (event.data === window.YT.PlayerState.PAUSED) {
+                setIsPlaying(false);
+              } else if (event.data === window.YT.PlayerState.ENDED) {
+                setIsPlaying(false);
+                setCurrentTimeSeconds(40);
+                setIsIntroCutoffOpen(true);
+              }
+            },
+            onError: () => {
+              if (!isCancelled) {
+                setAudioError(true);
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.warn('YouTube Player initialization warning:', err);
+      }
+    };
 
     if (window.YT && window.YT.Player) {
-      setIsApiReady(true);
-      return;
+      setupPlayer();
+    } else {
+      const prevHandler = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (prevHandler) prevHandler();
+        setupPlayer();
+      };
+      // Backup timer in case API is already ready
+      setTimeout(setupPlayer, 250);
     }
 
-    const prevCallback = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      if (prevCallback) prevCallback();
-      setIsApiReady(true);
+    return () => {
+      isCancelled = true;
     };
-
-    if (!document.getElementById('yt-iframe-api-script')) {
-      const tag = document.createElement('script');
-      tag.id = 'yt-iframe-api-script';
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
   }, []);
 
-  // 2. Initialize YT.Player once API is ready
-  useEffect(() => {
-    if (!isApiReady || !containerRef.current) return;
+  // Update position of the player container:
+  // 1. In expanded hymnal 'listen' tab: anchor directly over #yt-expanded-player-slot in the left column.
+  // 2. On phones: dock inside mini player as #mobile-mini-player-slot.
+  // 3. On desktop main screen: stays on one side (RIGHT SIDE) 16px above mini player,
+  //    and when user scrolls down, becomes see-through (transparent with hover reveal).
+  const updatePosition = useCallback(() => {
+    const mobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
+    setIsMobile(mobile);
 
-    const videoId = currentSong.youtubeId || 'syOCKFbVS-8';
+    // Track scroll position: when scrolled down (>80px), make floating video see-through
+    const scrolled = typeof window !== 'undefined' ? window.scrollY > 80 : false;
+    setIsScrolledDown(scrolled);
 
-    try {
-      const player = new window.YT.Player(containerRef.current, {
-        height: '100%',
-        width: '100%',
-        videoId: videoId,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          modestbranding: 1,
-          rel: 0,
-          playsinline: 1,
-          origin: window.location.origin
-        },
-        events: {
-          onReady: (event: any) => {
-            playerRef.current = event.target;
-            setIsPlayerReady(true);
-            try {
-              event.target.setVolume(isMuted ? 0 : volume * 100);
-              event.target.setPlaybackRate(playbackSpeed);
-            } catch (e) {
-              // ignore
-            }
-          },
-          onStateChange: (event: any) => {
-            if (!window.YT) return;
-            // YT.PlayerState.ENDED is 0
-            if (event.data === window.YT.PlayerState.ENDED) {
-              playNext();
-            } else if (event.data === window.YT.PlayerState.PLAYING) {
-              syncFromYouTube(
-                event.target.getCurrentTime?.() || 0,
-                event.target.getDuration?.() || 0,
-                true
-              );
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              syncFromYouTube(
-                event.target.getCurrentTime?.() || 0,
-                event.target.getDuration?.() || 0,
-                false
-              );
-            }
-          },
-          onError: (e: any) => {
-            console.warn('YouTube Player notice:', e);
-          }
+    if (isNowPlayingExpanded && hymnalTab === 'listen') {
+      const slot = document.getElementById('yt-expanded-player-slot');
+      if (slot) {
+        const r = slot.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          setSlotRect({
+            top: r.top,
+            left: r.left,
+            width: r.width,
+            height: r.height
+          });
+          return;
         }
-      });
-    } catch (err) {
-      console.warn('Failed to construct YT.Player:', err);
+      }
     }
+    setSlotRect(null);
+
+    // On mobile when not expanded, check mobile mini player slot
+    if (!isNowPlayingExpanded && mobile) {
+      const mSlot = document.getElementById('mobile-mini-player-slot');
+      if (mSlot) {
+        const mr = mSlot.getBoundingClientRect();
+        if (mr.width > 0 && mr.height > 0) {
+          setMobileSlotRect({
+            top: mr.top,
+            left: mr.left,
+            width: mr.width,
+            height: mr.height
+          });
+          return;
+        }
+      }
+    }
+    setMobileSlotRect(null);
+  }, [isNowPlayingExpanded, hymnalTab]);
+
+  useEffect(() => {
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, { passive: true });
+    const interval = setInterval(updatePosition, 150);
 
     return () => {
-      if (playerRef.current && playerRef.current.destroy) {
-        try {
-          playerRef.current.destroy();
-        } catch (e) {
-          // ignore
-        }
-      }
-      playerRef.current = null;
-      setIsPlayerReady(false);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
+      clearInterval(interval);
     };
-  }, [isApiReady]);
+  }, [updatePosition]);
 
-  // 3. React to currentSong change
-  useEffect(() => {
-    if (!isPlayerReady || !playerRef.current) return;
-
-    if (prevSongIdRef.current !== currentSong.id) {
-      prevSongIdRef.current = currentSong.id;
-      const videoId = currentSong.youtubeId || 'syOCKFbVS-8';
-      try {
-        if (isPlaying) {
-          playerRef.current.loadVideoById(videoId);
-        } else {
-          playerRef.current.cueVideoById(videoId);
-        }
-      } catch (err) {
-        console.warn('Error loading video by ID', err);
-      }
-    }
-  }, [currentSong.id, isPlayerReady, isPlaying]);
-
-  // 4. React to isPlaying changes
-  useEffect(() => {
-    if (!isPlayerReady || !playerRef.current) return;
-
-    try {
-      if (isPlaying) {
-        const playerState = playerRef.current.getPlayerState?.();
-        if (playerState !== window.YT?.PlayerState?.PLAYING) {
-          playerRef.current.playVideo();
-        }
-      } else {
-        const playerState = playerRef.current.getPlayerState?.();
-        if (playerState === window.YT?.PlayerState?.PLAYING) {
-          playerRef.current.pauseVideo();
-        }
-      }
-    } catch (err) {
-      console.warn('Error syncing play/pause state:', err);
-    }
-  }, [isPlaying, isPlayerReady]);
-
-  // 5. React to seekCommand
-  useEffect(() => {
-    if (!isPlayerReady || !playerRef.current || !seekCommand) return;
-    try {
-      playerRef.current.seekTo(seekCommand.targetSeconds, true);
-    } catch (err) {
-      console.warn('Error seeking video:', err);
-    }
-  }, [seekCommand, isPlayerReady]);
-
-  // 6. React to volume & mute changes
-  useEffect(() => {
-    if (!isPlayerReady || !playerRef.current) return;
-    try {
-      if (isMuted) {
-        playerRef.current.mute();
-      } else {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(Math.round(volume * 100));
-      }
-    } catch (err) {
-      // ignore
-    }
-  }, [volume, isMuted, isPlayerReady]);
-
-  // 7. React to playback speed changes
-  useEffect(() => {
-    if (!isPlayerReady || !playerRef.current) return;
-    try {
-      playerRef.current.setPlaybackRate(playbackSpeed);
-    } catch (err) {
-      // ignore
-    }
-  }, [playbackSpeed, isPlayerReady]);
-
-  // 8. Polling for real-time time updates while playing
-  useEffect(() => {
-    if (isPlaying && isPlayerReady && playerRef.current) {
-      timerRef.current = setInterval(() => {
-        try {
-          const curTime = playerRef.current.getCurrentTime?.() || 0;
-          const dur = playerRef.current.getDuration?.() || 0;
-          if (dur > 0) {
-            syncFromYouTube(curTime, dur, true);
-          }
-        } catch (e) {
-          // ignore
-        }
-      }, 350);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPlaying, isPlayerReady]);
+  const isDockedInModal = isNowPlayingExpanded && hymnalTab === 'listen' && slotRect !== null;
+  const isDockedInMobile = !isNowPlayingExpanded && isMobile && mobileSlotRect !== null;
 
   return (
-    <div 
-      className={`overflow-hidden transition-all duration-300 z-50 ${className} ${
-        showVideoScreen
-          ? 'fixed bottom-24 right-4 sm:right-6 w-72 sm:w-80 h-44 sm:h-52 rounded-2xl shadow-2xl border-2 border-sky-400/60 bg-black block animate-in slide-in-from-bottom-4'
-          : 'w-1 h-1 opacity-0 pointer-events-none fixed -bottom-96 -left-96'
+    <div
+      ref={containerRef}
+      className={`fixed transition-all duration-300 ease-out select-none ${
+        isDockedInModal
+          ? 'z-55 pointer-events-auto shadow-lg rounded-2xl overflow-hidden border border-[#0C2340]/20 bg-black opacity-100'
+          : isNowPlayingExpanded
+            ? 'z-40 opacity-0 pointer-events-none'
+            : isDockedInMobile
+              ? 'z-45 pointer-events-auto rounded-lg overflow-hidden border border-white/10 bg-black opacity-100'
+              : `z-40 w-[320px] aspect-video rounded-2xl border border-white/20 bg-black overflow-hidden pointer-events-auto ${
+                  isScrolledDown
+                    ? 'opacity-35 hover:opacity-100 shadow-lg backdrop-blur-xs'
+                    : 'opacity-100 shadow-2xl'
+                }`
       }`}
+      style={
+        isDockedInModal
+          ? {
+              top: `${slotRect.top}px`,
+              left: `${slotRect.left}px`,
+              width: `${slotRect.width}px`,
+              height: `${slotRect.height}px`
+            }
+          : isDockedInMobile
+            ? {
+                top: `${mobileSlotRect.top}px`,
+                left: `${mobileSlotRect.left}px`,
+                width: `${mobileSlotRect.width}px`,
+                height: `${mobileSlotRect.height}px`
+              }
+            : !isNowPlayingExpanded && !isMobile
+              ? {
+                  bottom: '80px', // 16px above the mini player
+                  right: '24px'   // Stays permanently on the right side
+                }
+              : undefined
+      }
+      title={currentSong.title}
     >
-      {showVideoScreen && (
-        <div className="flex items-center justify-between px-3 py-1.5 bg-[#0A1322] border-b border-white/10 text-xs">
-          <span className="font-bold text-white truncate max-w-[200px] text-[11px]">
-            {currentSong.title} (SEC 58 Nakuru)
-          </span>
-          <button 
-            onClick={() => setShowVideoScreen(false)} 
-            className="text-white/70 hover:text-white p-0.5 rounded cursor-pointer"
-            title="Minimize to audio player"
-          >
-            ✕
-          </button>
+      {/* Floating Card Header on Desktop with song title label */}
+      {!isDockedInModal && !isDockedInMobile && !isNowPlayingExpanded && (
+        <div className="absolute top-0 inset-x-0 bg-gradient-to-b from-black/85 via-black/40 to-transparent px-3 py-2 flex items-center justify-between text-xs text-white z-20 pointer-events-auto transition-opacity duration-300">
+          <div className="flex items-center gap-1.5 min-w-0 pr-2 font-source">
+            <RealYouTubeIcon size={14} variant="badge" />
+            <span className="truncate font-semibold text-xs tracking-tight text-white/95">
+              {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <a
+              href={currentSong.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1 text-white/80 hover:text-white transition-colors"
+              title="YouTube"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            <button
+              onClick={() => setIsNowPlayingExpanded(true)}
+              className="p-1 text-white/80 hover:text-white transition-colors cursor-pointer"
+              title="Expand hymnal"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
-      <div ref={containerRef} className="w-full h-full" />
+
+      {/* Transparent Click Interceptor: clicking the video toggles site playback (no native YouTube UI) */}
+      <div 
+        onClick={togglePlay}
+        className="absolute inset-0 z-10 cursor-pointer"
+        title={isPlaying ? (lang === 'sw' ? 'Sitisha wimbo' : 'Pause hymn') : (lang === 'sw' ? 'Cheza wimbo' : 'Play hymn')}
+      />
+
+      {/* The YouTube iframe container (permanent DOM element, never unmounted) */}
+      <div className="w-full h-full relative">
+        <div id="st-monica-yt-audio-player" className="w-full h-full border-0 pointer-events-none" />
+      </div>
     </div>
   );
 };
