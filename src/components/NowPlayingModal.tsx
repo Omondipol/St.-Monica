@@ -282,7 +282,7 @@ export const NowPlayingModal: React.FC = () => {
                             : (currentSong.whyWeSingIt || 'We record our singing at St. Monica so parishioners near and far can pray with the music of the liturgy.')}"
                         </p>
                         <p className="font-eb-garamond italic font-semibold text-[14px] sm:text-[15px] text-[#0C2340]">
-                          Asante sana. — St. Monica Choir
+                          {lang === 'sw' ? 'Asante sana. — Wanakwaya wa St. Monica' : 'Thank you very much. — St. Monica Choir'}
                         </p>
                       </div>
                     </div>
@@ -294,7 +294,7 @@ export const NowPlayingModal: React.FC = () => {
                         href={youtubeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 min-h-[46px] py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer flex items-center justify-between group"
+                        className="flex-1 min-h-[46px] py-2.5 px-4 rounded-[12px] bg-[#1058A8] hover:bg-[#0E56A6] text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer flex items-center justify-between group"
                       >
                         <div className="flex items-center gap-2">
                           <RealYouTubeIcon size={18} variant="monochrome" className="text-white shrink-0" />
@@ -307,7 +307,7 @@ export const NowPlayingModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => openSupportModal(currentSong.title)}
-                        className="flex-1 min-h-[46px] py-2.5 px-4 rounded-xl border-2 border-[#1058A8] hover:bg-[#1058A8]/10 text-[#1058A8] font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
+                        className="flex-1 min-h-[46px] py-2.5 px-4 rounded-[12px] border-2 border-[#1058A8] hover:bg-[#1058A8]/10 text-[#1058A8] font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
                       >
                         <Heart className="w-4 h-4 fill-current shrink-0" />
                         <span>{lang === 'sw' ? 'Unga Mkono Kwaya' : 'Support the Choir'}</span>
@@ -567,7 +567,7 @@ export const NowPlayingModal: React.FC = () => {
                     });
                     setIsNowPlayingExpanded(false);
                   }}
-                  className="px-5 py-2.5 bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-2xs transition-colors font-source"
+                  className="px-5 py-2.5 bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-[12px] text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-2xs transition-colors font-source"
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
                   <span>{lang === 'sw' ? 'Nunua Noti' : 'Buy Score'}</span>
@@ -580,7 +580,7 @@ export const NowPlayingModal: React.FC = () => {
 
         {/* SLIDE-UP PROMPT OVER BOTTOM HALF OF EXPANDED PLAYER (when 40s preview finishes on non-listen tabs) */}
         {currentTimeSeconds >= 40 && !isPromptDismissed && hymnalTab !== 'listen' && (
-          <div className="absolute inset-x-0 bottom-0 bg-[#0C2340] text-white p-5 sm:p-6 rounded-b-2xl sm:rounded-b-3xl border-t border-white/20 shadow-2xl z-30 animate-in slide-in-from-bottom duration-300">
+          <div className="absolute inset-x-0 bottom-0 bg-[#0C2340] text-white p-5 sm:p-6 rounded-b-[16px] border-t border-white/20 shadow-2xl z-30 animate-in slide-in-from-bottom duration-300">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <h4 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-white">
@@ -610,7 +610,7 @@ export const NowPlayingModal: React.FC = () => {
                 href={youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-[#1058A8] hover:bg-[#186DC7] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md font-source"
+                className="w-full sm:flex-1 py-3 px-5 rounded-[12px] bg-[#1058A8] hover:bg-[#186DC7] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md font-source"
               >
                 <RealYouTubeIcon size={18} variant="badge" />
                 <span>{lang === 'sw' ? 'Wimbo kamili YouTube' : 'Full song on YouTube'}</span>
@@ -618,7 +618,7 @@ export const NowPlayingModal: React.FC = () => {
 
               <button
                 onClick={handleReplayPreview}
-                className="w-full sm:w-auto py-3 px-5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer font-source"
+                className="w-full sm:w-auto py-3 px-5 rounded-[12px] bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer font-source"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>{lang === 'sw' ? 'Rudia hakiki ya sek 40' : 'Replay 40s preview'}</span>

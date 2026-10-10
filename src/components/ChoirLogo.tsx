@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import sealImg from '../assets/images/st_monica_choir_seal_1791360974646.jpg';
+import { useChoir } from '../context/ChoirContext';
 
 interface ChoirLogoProps {
   size?: number;
@@ -21,6 +22,7 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
   variant = 'badge',
   interactive = false
 }) => {
+  const { lang } = useChoir();
   const [imageError, setImageError] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -324,11 +326,11 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
       <div className={`inline-flex items-center gap-3 ${className}`}>
         {logoContent}
         <div className="flex flex-col text-left justify-center min-w-0">
-          <span className="font-fraunces text-base sm:text-lg font-bold text-[#0C2340] leading-tight tracking-tight">
-            St. Monica Catholic Choir
+          <span className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] leading-tight tracking-tight">
+            {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
           </span>
-          <span className="text-[11px] font-semibold text-[#1058A8] tracking-wider uppercase font-source mt-0.5">
-            Catholic Diocese of Nakuru
+          <span className="text-[11px] font-semibold text-[#1058A8] font-source mt-0.5">
+            {lang === 'sw' ? 'Jimbo Katoliki la Nakuru' : 'Catholic Diocese of Nakuru'}
           </span>
         </div>
       </div>
@@ -341,19 +343,21 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
 
 // Modal for inspecting the official Choir crest in high resolution with heraldic details
 const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { lang } = useChoir();
+
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/75 backdrop-blur-xs animate-fadeIn"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-sky-200 relative text-left"
+        className="bg-[#FAF8F5] text-[#0C2340] rounded-[12px] max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 relative text-left"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 p-2 rounded-full cursor-pointer"
-          aria-label="Close"
+          className="absolute top-4 right-4 text-slate-400 hover:text-[#0C2340] p-2 rounded-full cursor-pointer transition-colors"
+          aria-label={lang === 'sw' ? 'Funga' : 'Close'}
         >
           ✕
         </button>
@@ -362,35 +366,48 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden shadow-xl ring-4 ring-[#1058A8] bg-white p-1">
             <img 
               src={sealImg} 
-              alt="Official Seal of St. Monica Catholic Choir" 
+              alt={lang === 'sw' ? 'Ngao Rasmi ya Kwaya ya Mtakatifu Monika' : 'Official Seal of St. Monica Catholic Choir'} 
               className="w-full h-full object-cover rounded-full"
             />
           </div>
 
           <div>
-            <h3 className="font-fraunces text-2xl font-bold text-[#0C2340]">
-              Kwaya ya Mtakatifu Monika
+            <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+              {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
             </h3>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#1058A8] mt-1 font-source">
-              Catholic Diocese of Nakuru · Kenya
+            <p className="text-xs font-semibold text-[#1058A8] mt-1 font-source">
+              {lang === 'sw' ? 'Jimbo Katoliki la Nakuru · Kenya' : 'Catholic Diocese of Nakuru · Kenya'}
             </p>
           </div>
 
-          <div className="bg-[#F0F9FF] border border-sky-200 rounded-xl p-4 text-xs text-[#0C4A8A] text-left space-y-2 leading-relaxed">
-            <p className="font-bold text-[#0C2340]">Alama na Maana ya Ngao ya Kwaya (Seal Heraldry):</p>
+          <div className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-4 text-xs text-[#0C2340]/90 text-left space-y-2 leading-relaxed font-source">
+            <p className="font-bold text-[#0C2340]">
+              {lang === 'sw' ? 'Alama na Maana ya Ngao ya Kwaya:' : 'Choir Seal & Heraldry Meaning:'}
+            </p>
             <ul className="list-disc pl-4 space-y-1">
-              <li><strong>Mtakatifu Monika:</strong> Mama mwenye sala isiyokoma na uvumilivu wa kiliturujia, somo wa kiroho wa waimbaji.</li>
-              <li><strong>Ufunguo wa Muziki (Treble Clef):</strong> Uongozi wa sauti nne za SATB kwa heshima ya Altare na Misa Takatifu.</li>
-              <li><strong>Kinanda cha Piano:</strong> Ala za kiliturujia zinazosindikiza maombi na sifa za Kanisa Katoliki.</li>
-              <li><strong>Nyota Mbili:</strong> Mshikamano, nidhamu na utume wa kwaya katika Jimbo Katoliki la Nakuru.</li>
+              {lang === 'sw' ? (
+                <>
+                  <li><strong>Mtakatifu Monika:</strong> Mama mwenye sala isiyokoma na uvumilivu wa kiliturujia, somo wa kiroho wa waimbaji.</li>
+                  <li><strong>Ufunguo wa Muziki:</strong> Uongozi wa sauti nne za SATB kwa heshima ya Altare na Misa Takatifu.</li>
+                  <li><strong>Kinanda cha Piano:</strong> Ala za kiliturujia zinazosindikiza maombi na sifa za Kanisa Katoliki.</li>
+                  <li><strong>Nyota Mbili:</strong> Mshikamano, nidhamu na utume wa kwaya katika Jimbo Katoliki la Nakuru.</li>
+                </>
+              ) : (
+                <>
+                  <li><strong>Saint Monica:</strong> Mother of unceasing prayer and liturgical patience, our spiritual patroness and guide.</li>
+                  <li><strong>Treble Clef & Clefs:</strong> The four SATB vocal parts raised in dignity for Holy Mass and sacred liturgy.</li>
+                  <li><strong>Piano Keyboard:</strong> Liturgical instruments accompanying the sacred praise and prayer of the Church.</li>
+                  <li><strong>Two Stars:</strong> Unity, discipline, and fellowship across our liturgical ministry in Nakuru Diocese.</li>
+                </>
+              )}
             </ul>
           </div>
 
           <button
             onClick={onClose}
-            className="w-full py-2.5 bg-[#1058A8] hover:bg-[#0C4A8A] text-white font-semibold rounded-xl text-sm transition-colors cursor-pointer"
+            className="w-full py-2.5 bg-[#1058A8] hover:bg-[#0E56A6] text-white font-semibold rounded-[12px] text-sm transition-colors cursor-pointer font-source"
           >
-            Funga / Close
+            {lang === 'sw' ? 'Funga' : 'Close'}
           </button>
         </div>
       </div>

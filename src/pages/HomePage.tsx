@@ -70,25 +70,25 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/60 via-30% to-transparent to-50%" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/85 via-transparent to-transparent sm:hidden" />
 
-        <div className="relative z-10 w-full sm:max-w-[45%] text-left space-y-4 pb-4 sm:pb-8">
+        <div className="relative z-10 w-full sm:max-w-[55%] lg:max-w-[50%] text-left space-y-4 pb-4 sm:pb-8">
           <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-[1.1]">
             {lang === 'sw' ? (
               <>
-                Kuinua Mioyo Katika<br />
-                Sala na Wimbo
+                Kuunganisha mioyo kupitia<br />
+                muziki mtakatifu
               </>
             ) : (
               <>
-                Lifting Hearts in<br />
-                Sacred Song
+                Uniting hearts through<br />
+                sacred music
               </>
             )}
           </h1>
 
           <p className="font-source text-base sm:text-lg text-white/95 leading-relaxed">
             {lang === 'sw'
-              ? 'Kwaya kuu ya Misa ya Tatu, St. Monica, Nakuru'
-              : 'Main third mass choir at St. Monica, Nakuru'}
+              ? 'Kwaya ya Misa ya 3 · St. Monica Section 58'
+              : 'St. Monica Section 58 3rd mass choir'}
           </p>
 
           {/* Action buttons: Single strong button, quiet YouTube link, outlined gallery */}
@@ -146,7 +146,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
             <div className="lg:col-span-7 space-y-5">
-              <h2 className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340] leading-tight">
+              <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340] leading-tight">
                 {lang === 'sw' 
                   ? 'Kutoka Altare ya Parokia Hadi Matamasha ya Kijimbo'
                   : 'From Parish Altar to Diocesan Celebrations'}
@@ -252,7 +252,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+              <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
                 {lang === 'sw' ? 'Nyimbo Zetu Zilizorekodiwa' : 'Our Recorded Songs'}
               </h2>
               <p className="text-sm sm:text-base text-white/80 font-source mt-1">
@@ -319,7 +319,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     </div>
 
                     <div className="min-w-0">
-                      <h4 className="font-fraunces font-bold text-base text-white truncate group-hover:text-sky-300 transition-colors">
+                      <h4 className="font-eb-garamond font-bold text-base text-white truncate group-hover:text-sky-300 transition-colors">
                         {lang === 'sw' ? song.titleSwahili : song.title}
                       </h4>
                       <p className="text-xs text-white/75 truncate font-source mt-0.5">
@@ -357,7 +357,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-[#0C2340]/60 backdrop-blur-[1px]" />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
-          <blockquote className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug">
+          <blockquote className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug">
             {lang === 'sw'
               ? '“Uimbaji wenye nidhamu altaroni ni sala mara mbili mbele ya Mungu wetu.”'
               : '“Disciplined singing at the holy altar is prayer made twice before our God.”'}
@@ -376,7 +376,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340]">
                 {lang === 'sw' ? 'Noti za Nyimbo Zilizopangiliwa' : 'Choral Sheet Music Scores'}
               </h2>
               <p className="text-sm sm:text-base text-slate-700 font-source mt-1">
@@ -415,7 +415,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
                   {/* Title only with SATB small tag */}
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-fraunces font-bold text-base text-[#0C2340] leading-snug">
+                    <h4 className="font-eb-garamond font-bold text-base text-[#0C2340] leading-snug">
                       {lang === 'sw' ? item.titleSw : item.title}
                     </h4>
                     <span className="text-[10px] font-bold bg-[#EAF4FB] text-[#1058A8] px-1.5 py-0.5 rounded shrink-0">
@@ -436,7 +436,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   {/* Price with small M-Pesa logo beside it */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-fraunces font-bold text-base text-[#1058A8]">
+                      <span className="font-eb-garamond font-bold text-base text-[#1058A8]">
                         KES {item.priceKes}
                       </span>
                       <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded tracking-wider shadow-2xs">
@@ -479,7 +479,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             
             {/* Choirmaster Profile & Message */}
             <div className="lg:col-span-7 space-y-4">
-              <h2 className="font-fraunces text-2xl sm:text-3xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
                 {lang === 'sw' ? 'Ujumbe Kutoka kwa Mwalimu wa Kwaya' : 'A Word from the Choirmaster'}
               </h2>
 
@@ -497,7 +497,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#1058A8] shadow-sm shrink-0"
                 />
                 <div>
-                  <strong className="text-base font-bold text-[#0C2340] font-fraunces block">
+                  <strong className="text-base font-bold text-[#0C2340] font-eb-garamond block">
                     Mwalimu Joseph Otieno
                   </strong>
                   <span className="text-sm text-slate-700 font-source block">
@@ -511,7 +511,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="lg:col-span-5 bg-white rounded-2xl p-6 sm:p-7 border border-[#0C2340]/15 space-y-4 shadow-xs">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[#1058A8]" />
-                <h3 className="font-fraunces font-bold text-lg text-[#0C2340]">
+                <h3 className="font-eb-garamond font-bold text-lg text-[#0C2340]">
                   {lang === 'sw' ? 'Ratiba ya Misa ya Jumapili' : 'Sunday Mass Schedule'}
                 </h3>
               </div>

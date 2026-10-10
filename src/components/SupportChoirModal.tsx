@@ -311,7 +311,7 @@ export const SupportChoirModal: React.FC = () => {
                 <p className="font-eb-garamond italic text-[14px] text-[#0C2340] leading-snug font-semibold">
                   {lang === 'sw'
                     ? 'Asante sana na Mungu akubariki. — Wanakwaya wa St. Monica'
-                    : 'Asante sana na Mungu akubariki. — St. Monica Choir'}
+                    : 'Thank you very much and may God bless you. — St. Monica Choir'}
                 </p>
               </div>
 
@@ -580,17 +580,17 @@ export const SupportChoirModal: React.FC = () => {
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 text-[#1058A8] font-semibold font-source">
                         <Smartphone className="w-3.5 h-3.5" />
-                        <span>M-Pesa Buy Goods Till:</span>
+                        <span>{lang === 'sw' ? 'Lipa kwa Till ya M-Pesa:' : 'M-Pesa Buy Goods Till:'}</span>
                       </div>
                       <div className="flex items-center justify-between bg-[#FAF8F5] p-2 rounded-lg border border-[#0C2340]/10">
                         <div>
-                          <span className="text-slate-500 block text-[10px] font-source">Till Number:</span>
+                          <span className="text-slate-500 block text-[10px] font-source">{lang === 'sw' ? 'Nambari ya Till:' : 'Till Number:'}</span>
                           {/* Body font, semi-bold, 22px, tabular numerals (no monospace!) */}
                           <strong className="text-[#0C2340] text-[22px] font-semibold font-source tabular-nums tracking-wide block">
                             9842150
                           </strong>
                           <span className="text-slate-600 block text-[10px] mt-0.5 font-source">
-                            St. Monica Catholic Choir
+                            {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
                           </span>
                         </div>
                         <button
@@ -704,11 +704,13 @@ export const SupportChoirModal: React.FC = () => {
 
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(
-                    `Nimeshiriki kuunga mkono Kwaya ya Mtakatifu Monika, Nakuru. Sikiliza nyimbo zao na ungana nao: ${window.location.origin}`
+                    lang === 'sw'
+                      ? `Nimeshiriki kuunga mkono Kwaya ya Mtakatifu Monika, Nakuru. Sikiliza nyimbo zao na ungana nao: ${window.location.origin}`
+                      : `I supported St. Monica Catholic Choir, Nakuru. Listen to their sacred recordings and join them: ${window.location.origin}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer font-source"
+                  className="w-full sm:flex-1 py-2.5 px-4 rounded-[12px] bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer font-source"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>{lang === 'sw' ? 'Shiriki WhatsApp' : 'Share on WhatsApp'}</span>

@@ -129,14 +129,14 @@ export const SongCutoffModal: React.FC = () => {
               "{songChoirNote}"
             </p>
             <p className="font-eb-garamond italic font-semibold text-[15px] sm:text-[16px] text-[#0C2340]">
-              Asante sana. — St. Monica Choir
+              {lang === 'sw' ? 'Asante sana. — Wanakwaya wa St. Monica' : 'Thank you very much. — St. Monica Choir'}
             </p>
           </div>
         </div>
 
         {/* Song Card: rounded square with NO text on it, title, composer and length beside it in body font */}
-        <div className="p-3 bg-white/80 rounded-xl border border-[#0C2340]/10 flex items-center gap-3.5 shadow-2xs">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 aspect-square rounded-xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340]">
+        <div className="p-3 bg-[#FCFAF7] rounded-[12px] border border-[#0C2340]/10 flex items-center gap-3.5 shadow-2xs">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 aspect-square rounded-[12px] overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340]">
             <img
               src={cleanCoverPhoto}
               alt={currentSong.title}
@@ -166,7 +166,7 @@ export const SongCutoffModal: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => dismissIntroCutoff()}
-            className="w-full min-h-[48px] py-3 px-5 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] active:bg-[#0C4785] text-white font-bold text-sm sm:text-base shadow-sm transition-all cursor-pointer flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-[#1058A8]"
+            className="w-full min-h-[48px] py-3 px-5 rounded-[12px] bg-[#1058A8] hover:bg-[#0E56A6] active:bg-[#0C4785] text-white font-bold text-sm sm:text-base shadow-sm transition-all cursor-pointer flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-[#1058A8]"
           >
             <div className="flex items-center gap-2.5">
               <RealYouTubeIcon variant="monochrome" size={20} className="text-white shrink-0" />
@@ -184,7 +184,7 @@ export const SongCutoffModal: React.FC = () => {
               dismissIntroCutoff();
               openSupportModal(currentSong.title);
             }}
-            className="w-full min-h-[48px] py-3 px-5 rounded-xl border-2 border-[#1058A8] hover:bg-[#1058A8]/10 active:bg-[#1058A8]/20 text-[#1058A8] hover:text-[#0C2340] font-bold text-sm sm:text-base transition-colors cursor-pointer flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#1058A8]"
+            className="w-full min-h-[48px] py-3 px-5 rounded-[12px] border-2 border-[#1058A8] hover:bg-[#1058A8]/10 active:bg-[#1058A8]/20 text-[#1058A8] hover:text-[#0C2340] font-bold text-sm sm:text-base transition-colors cursor-pointer flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#1058A8]"
           >
             <Heart className="w-4 h-4 fill-current shrink-0" />
             <span>
@@ -198,7 +198,7 @@ export const SongCutoffModal: React.FC = () => {
           <button
             type="button"
             onClick={handleDismissAndReplay}
-            className="text-[14px] text-slate-600 hover:text-[#0C2340] hover:underline cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 font-source font-medium focus:outline-none focus:ring-1 focus:ring-[#1058A8] rounded-lg transition-colors"
+            className="text-[14px] text-slate-600 hover:text-[#0C2340] hover:underline cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 font-source font-medium focus:outline-none focus:ring-1 focus:ring-[#1058A8] rounded-[12px] transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1.5 shrink-0" />
             <span>{lang === 'sw' ? 'Rudia kusikiliza utangulizi' : 'Replay preview'}</span>
@@ -207,7 +207,7 @@ export const SongCutoffModal: React.FC = () => {
           <button
             type="button"
             onClick={() => dismissIntroCutoff()}
-            className="text-[14px] text-slate-600 hover:text-[#0C2340] hover:underline cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 font-source font-medium focus:outline-none focus:ring-1 focus:ring-[#1058A8] rounded-lg transition-colors"
+            className="text-[14px] text-slate-600 hover:text-[#0C2340] hover:underline cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 font-source font-medium focus:outline-none focus:ring-1 focus:ring-[#1058A8] rounded-[12px] transition-colors"
           >
             <span>{lang === 'sw' ? 'Labda baadaye' : 'Maybe later'}</span>
           </button>
