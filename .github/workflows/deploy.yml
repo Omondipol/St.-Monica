@@ -31,6 +31,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
@@ -41,9 +44,13 @@ jobs:
 
       - name: Build production site
         run: npm run build
+        env:
+          GITHUB_ACTIONS: 'true'
 
-      - name: SPA fallback for GitHub Pages (404.html)
-        run: cp dist/index.html dist/404.html
+      - name: SPA fallback for GitHub Pages (404.html & .nojekyll)
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3

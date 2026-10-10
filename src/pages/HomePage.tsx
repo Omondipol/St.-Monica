@@ -70,22 +70,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/60 via-30% to-transparent to-50%" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/85 via-transparent to-transparent sm:hidden" />
 
-        <div className="relative z-10 w-full sm:max-w-[55%] lg:max-w-[50%] text-left space-y-4 pb-4 sm:pb-8">
-          <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-[1.1]">
-            {lang === 'sw' ? (
-              <>
-                Kuunganisha mioyo kupitia<br />
-                muziki mtakatifu
-              </>
-            ) : (
-              <>
-                Uniting hearts through<br />
-                sacred music
-              </>
-            )}
+        <div className="relative z-10 w-full sm:max-w-[60%] lg:max-w-[55%] text-left space-y-3 sm:space-y-4 pb-4 sm:pb-8">
+          <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm">
+            {lang === 'sw' ? 'Kuunganisha mioyo kupitia muziki mtakatifu' : 'Uniting hearts through sacred music'}
           </h1>
 
-          <p className="font-source text-base sm:text-lg text-white/95 leading-relaxed">
+          <p className="font-source text-base sm:text-lg lg:text-xl text-white/95 font-medium leading-relaxed">
             {lang === 'sw'
               ? 'Kwaya ya Misa ya 3 · St. Monica Section 58'
               : 'St. Monica Section 58 3rd mass choir'}

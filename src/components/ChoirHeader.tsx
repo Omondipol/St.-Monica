@@ -129,22 +129,22 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
         <div className="flex items-center justify-between h-18 sm:h-20 gap-2 sm:gap-3">
           
           {/* Left: Crest & Title */}
-          <div className="flex items-center min-w-0 flex-1 mr-2 sm:mr-4">
+          <div className="flex items-center min-w-0 flex-1 mr-1 sm:mr-4 overflow-hidden">
             <button 
               onClick={() => navigateTo('home')} 
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer text-left focus:outline-none group py-1 min-w-0 max-w-full"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer text-left focus:outline-none group py-1 min-w-0 max-w-full overflow-hidden"
               aria-label="Home page"
             >
               <ChoirLogo 
-                size={42} 
+                size={40} 
                 className="group-hover:scale-105 transition-transform shrink-0" 
               />
 
-              <div className="flex flex-col min-w-0 justify-center">
-                <span className="font-eb-garamond text-[15px] sm:text-lg lg:text-xl font-bold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight truncate">
+              <div className="flex flex-col min-w-0 flex-1 justify-center overflow-hidden">
+                <span className="font-eb-garamond text-[14px] sm:text-lg lg:text-xl font-bold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight truncate block">
                   {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
                 </span>
-                <span className="text-[10px] sm:text-xs text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate">
+                <span className="text-[10px] sm:text-xs text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate block">
                   {lang === 'sw' ? 'Jimbo Katoliki la Nakuru' : 'Catholic Diocese of Nakuru'}
                 </span>
               </div>
@@ -224,7 +224,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                           {lang === 'sw' ? 'Historia Yetu' : 'Our Story'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Our Story' : 'Historia Yetu'}
+                          {lang === 'sw' ? 'Mwanzo wa kwaya mwaka 2012' : 'How the choir began in 2012'}
                         </span>
                       </button>
 
@@ -236,7 +236,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                           {lang === 'sw' ? 'Mtakatifu Monika' : 'Patron Saint Monica'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Patron Saint Monica' : 'Mtakatifu Monika'}
+                          {lang === 'sw' ? 'Somo wa machozi na sala ya kudumu' : 'Patroness of tears & sacred prayer'}
                         </span>
                       </button>
 
@@ -248,7 +248,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                           {lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Choir Gallery' : 'Picha za Kwaya'}
+                          {lang === 'sw' ? 'Picha za Misa na matukio ya kwaya' : 'Mass and performance photographs'}
                         </span>
                       </button>
 
@@ -260,7 +260,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                           {lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers & Officials'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Trainers and Officials' : 'Walimu na Viongozi'}
+                          {lang === 'sw' ? 'Mwalimu mkuu na viongozi wa kwaya' : 'Choirmaster & leadership team'}
                         </span>
                       </button>
 
@@ -272,7 +272,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                           {lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections (SATB)'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Voice Sections (SATB)' : 'Sauti za Kwaya'}
+                          {lang === 'sw' ? 'Soprano, Alto, Tenor na Bass' : 'Soprano, Alto, Tenor, and Bass'}
                         </span>
                       </button>
                     </div>
@@ -368,10 +368,10 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                         className="w-full text-left rounded-[12px] hover:bg-white/5 transition-colors group cursor-pointer block p-1 -m-1"
                       >
                         <span className="font-eb-garamond text-[17px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
-                          {lang === 'sw' ? 'Nyimbo' : 'Our Songs'}
+                          {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Our Songs' : 'Nyimbo Zetu'}
+                          {lang === 'sw' ? 'Muziki wa liturujia na rekodi zetu' : 'Liturgical repertoire and recordings'}
                         </span>
                       </button>
 
@@ -383,7 +383,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                           {lang === 'sw' ? 'Albamu Yetu' : 'Our Album'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Our Album' : 'Albamu Yetu'}
+                          {lang === 'sw' ? 'Machozi ya Imani na rekodi rasmi' : 'Machozi ya Imani official tracks'}
                         </span>
                       </button>
 
@@ -392,10 +392,10 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                         className="w-full text-left rounded-[12px] hover:bg-white/5 transition-colors group cursor-pointer block p-1 -m-1"
                       >
                         <span className="font-eb-garamond text-[17px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
-                          {lang === 'sw' ? 'Noti' : 'Sheet Music'}
+                          {lang === 'sw' ? 'Duka la Noti' : 'Sheet Music'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Sheet Music' : 'Noti za Kwaya'}
+                          {lang === 'sw' ? 'Noti asili za sauti nne na Sol-fa' : 'SATB vocal scores with Tonic Sol-fa'}
                         </span>
                       </button>
                     </div>
@@ -530,14 +530,18 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             {/* Mobile Menu Hamburger (The Three Lines) */}
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
-              className="lg:hidden w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-white bg-white/10 hover:bg-white/20 active:bg-white/25 border border-white/20 rounded-[12px] transition-colors cursor-pointer shrink-0 ml-1"
+              className="lg:hidden w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-white bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/25 rounded-[12px] transition-all cursor-pointer shrink-0 ml-1 shadow-xs"
               aria-label={mobileMenuOpen ? (lang === 'sw' ? 'Funga menyu' : 'Close menu') : (lang === 'sw' ? 'Fungua menyu ya urambazaji' : 'Open navigation menu')}
               title={lang === 'sw' ? 'Menyu' : 'Menu'}
             >
               {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-[#7EC8F0]" strokeWidth={2.2} />
+                <X className="w-6 h-6 text-[#7EC8F0]" strokeWidth={2.5} />
               ) : (
-                <Menu className="w-6 h-6 text-white" strokeWidth={2.2} />
+                <span className="flex flex-col justify-center items-center w-5 h-5 gap-1 select-none" aria-hidden="true">
+                  <span className="block w-5 h-[2.5px] bg-white rounded-full"></span>
+                  <span className="block w-5 h-[2.5px] bg-white rounded-full"></span>
+                  <span className="block w-5 h-[2.5px] bg-white rounded-full"></span>
+                </span>
               )}
             </button>
           </div>

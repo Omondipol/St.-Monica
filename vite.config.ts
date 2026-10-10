@@ -4,8 +4,12 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
+  // If building in GitHub Actions without a custom base path, automatically set to repository subpath
+  const ghRepo = process.env.GITHUB_REPOSITORY ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` : './';
+  const base = process.env.VITE_BASE_PATH || (process.env.GITHUB_ACTIONS === 'true' ? ghRepo : './');
+
   return {
-    base: process.env.VITE_BASE_PATH || './',
+    base,
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

@@ -11,7 +11,14 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    <script>
+      // Automatically normalize missing trailing slash on GitHub Pages directory roots
+      if (window.location.hostname.endsWith('github.io') && 
+          window.location.pathname.split('/').filter(Boolean).length === 1 && 
+          !window.location.pathname.endsWith('/')) {
+        window.history.replaceState(null, '', window.location.pathname + '/' + window.location.search + window.location.hash);
+      }
+    </script>
     <script src="https://www.youtube.com/iframe_api"></script>
   </head>
   <body class="bg-[#FAF8F5] text-[#0C2340] antialiased selection:bg-[#1058A8] selection:text-white">
