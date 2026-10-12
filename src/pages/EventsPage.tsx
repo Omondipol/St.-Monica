@@ -158,7 +158,7 @@ export const EventsPage: React.FC = () => {
             rel="noopener noreferrer"
             className="text-[14px] font-semibold text-[#1058A8] hover:underline flex items-center gap-1 font-source"
           >
-            <span>Open in Maps</span>
+            <span>{lang === 'sw' ? 'Fungua kwenye Ramani' : 'Open in Maps'}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>

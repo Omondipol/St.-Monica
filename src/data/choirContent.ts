@@ -121,6 +121,8 @@ export const YOUTUBE_CHANNEL_HANDLE = "@KwayayaMtakatifuMonicaSection5";
 export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monika - Nakuru";
 
 export const CHOIR_STATS = {
+  choirName: "St. Monica Third Mass Choir",
+  choirNameSw: "Kwaya ya Misa ya Tatu ya Mtakatifu Monika",
   membersCount: 48,
   yearsServing: 14,
   repertoireCount: 12,
@@ -129,7 +131,14 @@ export const CHOIR_STATS = {
   parishSw: "Parokia ya Mtakatifu Monika, Section 58 Nakuru",
   churchAddress: "St. Monica Catholic Church, Section 58, Nakuru (Lanet Rd / Off Old Nairobi Rd)",
   churchAddressSw: "Kanisa Katoliki la Mtakatifu Monika, Section 58, Nakuru (Lanet Rd / Barabara ya Old Nairobi Rd)",
-  mapsUrl: "https://maps.google.com/?q=St.+Monica+Catholic+Church+Section+58+Nakuru",
+  mapsUrl: "https://maps.app.goo.gl/qd9c7QUumHUnUGXc6",
+  mapsFullUrl: "https://www.google.com/maps/place/St.+Monica's+Catholic+Church/@-0.2845249,36.0940117,17z",
+  mapsDirectionsUrl: "https://www.google.com/maps/dir/?api=1&destination=-0.2845249,36.0940117",
+  coordinates: {
+    lat: -0.2845249,
+    lng: 36.0940117,
+  },
+  coordinatesDisplay: "-0.284525, 36.094012",
   email: "stmonicachoirsec58@gmail.com",
   phone: "+254 722 845 291",
   whatsapp: "+254 722 845 291",

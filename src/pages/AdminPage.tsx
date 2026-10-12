@@ -18,10 +18,14 @@ import {
   RotateCcw, 
   ExternalLink,
   Play,
-  Save
+  Save,
+  BookOpen,
+  Table,
+  FileSpreadsheet
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
+import { LIBRARY_CATEGORIES, LibrarySong } from '../data/libraryData';
 
 interface AdminPageProps {
   onNavigateHome: () => void;
@@ -45,6 +49,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     groupPhotosList,
     addGroupPhoto,
     deleteGroupPhoto,
+    librarySongs,
+    addLibrarySong,
+    updateLibrarySong,
+    deleteLibrarySong,
+    bulkImportLibrarySongs,
     resetToDefaults,
     exportDataJson,
     importDataJson,
@@ -61,8 +70,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'songs' | 'sheet' | 'leaders' | 'photos' | 'backup'>('songs');
+  const [activeTab, setActiveTab] = useState<'songs' | 'sheet' | 'library' | 'leaders' | 'photos' | 'backup'>('songs');
   const [successMessage, setSuccessMessage] = useState<string>('');
+
+  // Maktaba ya Noti Library Form State (Step 6)
+  const [showLibModal, setShowLibModal] = useState<boolean>(false);
+  const [editingLibSongId, setEditingLibSongId] = useState<string | null>(null);
+  const [libTitle, setLibTitle] = useState('');
+  const [libComposer, setLibComposer] = useState('');
+  const [libLanguage, setLibLanguage] = useState<'Kiswahili' | 'English' | 'Latin' | 'Kikuyu' | 'Dholuo' | 'Kalenjin' | 'Other'>('Kiswahili');
+  const [libCategories, setLibCategories] = useState<string[]>(['kuingia']);
+  const [libVoices, setLibVoices] = useState<'SATB' | 'Unison' | 'Solo' | 'SSAA' | 'TTBB'>('SATB');
+  const [libLyrics, setLibLyrics] = useState('');
+  const [libPdfUrl, setLibPdfUrl] = useState('');
+  const [libAudioUrl, setLibAudioUrl] = useState('');
+  const [libSharingStatus, setLibSharingStatus] = useState<'Public domain' | 'Shared with permission' | 'Link only'>('Public domain');
+  const [libPermissionGivenBy, setLibPermissionGivenBy] = useState('');
+  const [libPermissionDate, setLibPermissionDate] = useState('');
+  const [libExternalSourceUrl, setLibExternalSourceUrl] = useState('');
+  const [showBulkSpreadsheetModal, setShowBulkSpreadsheetModal] = useState<boolean>(false);
+  const [csvSpreadsheetText, setCsvSpreadsheetText] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -602,6 +629,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </button>
 
         <button
+          onClick={() => setActiveTab('library')}
+          className={`px-4 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-colors ${
+            activeTab === 'library'
+              ? 'bg-[#1058A8] text-white shadow-2xs'
+              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>Maktaba ya Noti ({librarySongs.length})</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('leaders')}
           className={`px-4 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-colors ${
             activeTab === 'leaders'
@@ -820,6 +859,559 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: MAKTABA YA NOTI (FREE SHEET MUSIC LIBRARY) */}
+      {activeTab === 'library' && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+                Maktaba ya Noti (Free Sheet Music Library)
+              </h2>
+              <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
+                Manage public domain & permission-cleared Catholic scores. Download counts visible to admin only.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => {
+                  setCsvSpreadsheetText(`Title,Composer,Language,Category,Voices,SharingStatus,PermissionBy,PermissionDate
+Bwana Mchungaji Wangu,Fr. Kayetta,Kiswahili,zaburi|komunyo,SATB,Shared with permission,Fr. Kayetta Archive,2025-01-10
+Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
+                  setShowBulkSpreadsheetModal(true);
+                }}
+                className="px-3.5 py-2 text-xs font-bold bg-white border border-[#0C2340]/20 hover:bg-[#EAF4FB] text-[#0C2340] rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-[#1058A8]" />
+                <span>Import from Spreadsheet</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setEditingLibSongId(null);
+                  setLibTitle('');
+                  setLibComposer('');
+                  setLibLanguage('Kiswahili');
+                  setLibCategories(['kuingia']);
+                  setLibVoices('SATB');
+                  setLibLyrics('');
+                  setLibPdfUrl('');
+                  setLibAudioUrl('');
+                  setLibSharingStatus('Public domain');
+                  setLibPermissionGivenBy('');
+                  setLibPermissionDate('');
+                  setLibExternalSourceUrl('');
+                  setShowLibModal(true);
+                }}
+                className="px-4 py-2 text-xs font-bold bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Song to Library</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Stats: Admin-Only metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-source">
+            <div className="bg-white p-4 rounded-xl border border-[#0C2340]/10 space-y-1 shadow-2xs">
+              <span className="text-slate-500 font-semibold block">Total Library Songs</span>
+              <strong className="text-2xl font-bold text-[#0C2340] block">{librarySongs.length}</strong>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-emerald-500/20 bg-emerald-50/20 space-y-1 shadow-2xs">
+              <span className="text-emerald-700 font-semibold block">Total Downloads (Admin Only)</span>
+              <strong className="text-2xl font-bold text-emerald-800 block">
+                {librarySongs.reduce((sum, s) => sum + (s.downloadCount || 0), 0).toLocaleString()}
+              </strong>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-[#0C2340]/10 space-y-1 shadow-2xs">
+              <span className="text-slate-500 font-semibold block">Public Domain Scores</span>
+              <strong className="text-2xl font-bold text-[#0C2340] block">
+                {librarySongs.filter(s => s.sharingStatus === 'Public domain').length}
+              </strong>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-[#0C2340]/10 space-y-1 shadow-2xs">
+              <span className="text-slate-500 font-semibold block">Permission Cleared</span>
+              <strong className="text-2xl font-bold text-[#1058A8] block">
+                {librarySongs.filter(s => s.sharingStatus === 'Shared with permission').length}
+              </strong>
+            </div>
+          </div>
+
+          {/* Table of Songs */}
+          <div className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF8F5] border-b border-[#0C2340]/10 text-slate-600 font-semibold uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3.5">Title & Composer</th>
+                    <th className="p-3.5">Language / Voices</th>
+                    <th className="p-3.5">Categories</th>
+                    <th className="p-3.5">Sharing Status</th>
+                    <th className="p-3.5 text-center">Downloads (Admin)</th>
+                    <th className="p-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#0C2340]/5">
+                  {librarySongs.map(song => (
+                    <tr key={song.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                      <td className="p-3.5">
+                        <strong className="font-eb-garamond text-base font-bold text-[#0C2340] block">
+                          {song.title}
+                        </strong>
+                        <span className="text-slate-500">{song.composer}</span>
+                      </td>
+                      <td className="p-3.5">
+                        <span className="font-medium text-slate-800 block">{song.language}</span>
+                        <span className="text-slate-500 text-[11px]">{song.voices}</span>
+                      </td>
+                      <td className="p-3.5">
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                          {song.categories.map(cId => {
+                            const cat = LIBRARY_CATEGORIES.find(c => c.id === cId);
+                            return (
+                              <span key={cId} className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-medium">
+                                {cat ? cat.nameSw : cId}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td className="p-3.5">
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                          song.sharingStatus === 'Public domain'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : song.sharingStatus === 'Shared with permission'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {song.sharingStatus}
+                        </span>
+                        {song.permissionGivenBy && (
+                          <span className="block text-[11px] text-slate-500 mt-0.5 truncate max-w-[160px]" title={song.permissionGivenBy}>
+                            By: {song.permissionGivenBy}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3.5 text-center">
+                        <span className="inline-flex items-center gap-1 font-mono font-bold text-[#0C2340] bg-slate-100 px-2.5 py-1 rounded-full text-xs">
+                          <Download className="w-3 h-3 text-[#1058A8]" />
+                          {song.downloadCount || 0}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingLibSongId(song.id);
+                              setLibTitle(song.title);
+                              setLibComposer(song.composer);
+                              setLibLanguage(song.language);
+                              setLibCategories(song.categories);
+                              setLibVoices(song.voices);
+                              setLibLyrics(song.lyrics || '');
+                              setLibPdfUrl(song.pdfUrl || '');
+                              setLibAudioUrl(song.audioUrl || '');
+                              setLibSharingStatus(song.sharingStatus);
+                              setLibPermissionGivenBy(song.permissionGivenBy || '');
+                              setLibPermissionDate(song.permissionDate || '');
+                              setLibExternalSourceUrl(song.externalSourceUrl || '');
+                              setShowLibModal(true);
+                            }}
+                            className="p-1.5 text-[#1058A8] hover:bg-[#EAF4FB] rounded-lg transition-colors cursor-pointer"
+                            title="Edit Song"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Delete song "${song.title}" from library?`)) {
+                                deleteLibrarySong(song.id);
+                                setSuccessMessage(`Removed "${song.title}" from library.`);
+                              }
+                            }}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            title="Delete Song"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / EDIT LIBRARY SONG (Step 6 Form) */}
+      {showLibModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/75 backdrop-blur-xs animate-fadeIn overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 space-y-5 my-8 text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
+              <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                {editingLibSongId ? 'Edit Library Song' : 'Add Song to Maktaba ya Noti'}
+              </h3>
+              <button 
+                onClick={() => setShowLibModal(false)}
+                className="text-slate-400 hover:text-[#0C2340] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!libTitle.trim() || !libComposer.trim()) return;
+
+                if (editingLibSongId) {
+                  updateLibrarySong(editingLibSongId, {
+                    title: libTitle.trim(),
+                    composer: libComposer.trim(),
+                    language: libLanguage,
+                    categories: libCategories,
+                    voices: libVoices,
+                    lyrics: libLyrics.trim() || undefined,
+                    pdfUrl: libPdfUrl.trim() || undefined,
+                    audioUrl: libAudioUrl.trim() || undefined,
+                    hasAudio: !!libAudioUrl.trim(),
+                    sharingStatus: libSharingStatus,
+                    permissionGivenBy: libSharingStatus === 'Shared with permission' ? libPermissionGivenBy.trim() : undefined,
+                    permissionDate: libSharingStatus === 'Shared with permission' ? libPermissionDate.trim() : undefined,
+                    externalSourceUrl: libSharingStatus === 'Link only' ? libExternalSourceUrl.trim() : undefined,
+                  });
+                  setSuccessMessage(`Updated "${libTitle}" in Maktaba ya Noti.`);
+                } else {
+                  addLibrarySong({
+                    title: libTitle.trim(),
+                    composer: libComposer.trim(),
+                    language: libLanguage,
+                    categories: libCategories,
+                    voices: libVoices,
+                    lyrics: libLyrics.trim() || undefined,
+                    pdfUrl: libPdfUrl.trim() || undefined,
+                    audioUrl: libAudioUrl.trim() || undefined,
+                    hasAudio: !!libAudioUrl.trim(),
+                    sharingStatus: libSharingStatus,
+                    permissionGivenBy: libSharingStatus === 'Shared with permission' ? libPermissionGivenBy.trim() : undefined,
+                    permissionDate: libSharingStatus === 'Shared with permission' ? libPermissionDate.trim() : undefined,
+                    externalSourceUrl: libSharingStatus === 'Link only' ? libExternalSourceUrl.trim() : undefined,
+                  });
+                  setSuccessMessage(`Added "${libTitle}" to Maktaba ya Noti.`);
+                }
+                setShowLibModal(false);
+              }}
+              className="space-y-4 text-xs font-source"
+            >
+              {/* Title & Composer */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Song Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={libTitle}
+                    onChange={(e) => setLibTitle(e.target.value)}
+                    placeholder="e.g. Twende Wote Nyumbani Mwa Bwana"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Composer *</label>
+                  <input
+                    type="text"
+                    required
+                    value={libComposer}
+                    onChange={(e) => setLibComposer(e.target.value)}
+                    placeholder="e.g. Fr. G. Shengena / Traditional"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Language & Voices */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Language</label>
+                  <select
+                    value={libLanguage}
+                    onChange={(e) => setLibLanguage(e.target.value as any)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 bg-white outline-none"
+                  >
+                    <option value="Kiswahili">Kiswahili</option>
+                    <option value="English">English</option>
+                    <option value="Latin">Latin</option>
+                    <option value="Kikuyu">Kikuyu</option>
+                    <option value="Dholuo">Dholuo</option>
+                    <option value="Kalenjin">Kalenjin</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Voices</label>
+                  <select
+                    value={libVoices}
+                    onChange={(e) => setLibVoices(e.target.value as any)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 bg-white outline-none"
+                  >
+                    <option value="SATB">SATB (Soprano, Alto, Tenor, Bass)</option>
+                    <option value="Unison">Unison</option>
+                    <option value="Solo">Solo</option>
+                    <option value="SSAA">SSAA</option>
+                    <option value="TTBB">TTBB</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Categories (Multi-select checkboxes - more than one allowed) */}
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">
+                  Categories (Select one or more) *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 max-h-40 overflow-y-auto">
+                  {LIBRARY_CATEGORIES.map(cat => {
+                    const isChecked = libCategories.includes(cat.id);
+                    return (
+                      <label key={cat.id} className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-800">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setLibCategories(prev => [...prev, cat.id]);
+                            } else {
+                              if (libCategories.length > 1) {
+                                setLibCategories(prev => prev.filter(c => c !== cat.id));
+                              }
+                            }
+                          }}
+                          className="rounded text-[#1058A8] focus:ring-0"
+                        />
+                        <span>{cat.nameSw}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sharing Status */}
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Sharing Status *</label>
+                <select
+                  value={libSharingStatus}
+                  onChange={(e) => setLibSharingStatus(e.target.value as any)}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 bg-white outline-none font-semibold"
+                >
+                  <option value="Public domain">Public domain (Author rights expired / Traditional)</option>
+                  <option value="Shared with permission">Shared with permission (Consent obtained)</option>
+                  <option value="Link only">Link only (Copyrighted external score - no download)</option>
+                </select>
+              </div>
+
+              {/* Conditional permission fields */}
+              {libSharingStatus === 'Shared with permission' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-blue-50/50 rounded-xl border border-blue-200">
+                  <div>
+                    <label className="font-semibold text-blue-900 block mb-1">Person who gave permission *</label>
+                    <input
+                      type="text"
+                      required={libSharingStatus === 'Shared with permission'}
+                      value={libPermissionGivenBy}
+                      onChange={(e) => setLibPermissionGivenBy(e.target.value)}
+                      placeholder="e.g. Fr. Kayetta (Author) via WhatsApp"
+                      className="w-full p-2 rounded-lg border border-blue-300 bg-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-blue-900 block mb-1">Permission Date</label>
+                    <input
+                      type="date"
+                      value={libPermissionDate}
+                      onChange={(e) => setLibPermissionDate(e.target.value)}
+                      className="w-full p-2 rounded-lg border border-blue-300 bg-white outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Conditional link only field */}
+              {libSharingStatus === 'Link only' && (
+                <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200">
+                  <label className="font-semibold text-amber-900 block mb-1">External Publisher / Source URL *</label>
+                  <input
+                    type="url"
+                    required={libSharingStatus === 'Link only'}
+                    value={libExternalSourceUrl}
+                    onChange={(e) => setLibExternalSourceUrl(e.target.value)}
+                    placeholder="https://example.com/scores/original-publisher"
+                    className="w-full p-2 rounded-lg border border-amber-300 bg-white outline-none"
+                  />
+                </div>
+              )}
+
+              {/* PDF and Audio URL */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">PDF File URL</label>
+                  <input
+                    type="text"
+                    value={libPdfUrl}
+                    onChange={(e) => setLibPdfUrl(e.target.value)}
+                    placeholder="https://.../score.pdf"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Audio Recording URL (Optional)</label>
+                  <input
+                    type="text"
+                    value={libAudioUrl}
+                    onChange={(e) => setLibAudioUrl(e.target.value)}
+                    placeholder="https://.../preview.mp3"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Lyrics */}
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Song Lyrics / Text</label>
+                <textarea
+                  rows={4}
+                  value={libLyrics}
+                  onChange={(e) => setLibLyrics(e.target.value)}
+                  placeholder="Enter stanzas and refrain..."
+                  className="w-full p-2.5 rounded-xl border border-slate-300 font-serif text-xs outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowLibModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold cursor-pointer shadow-xs"
+                >
+                  {editingLibSongId ? 'Save Changes' : 'Add to Maktaba ya Noti'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: SPREADSHEET BATCH IMPORT (Step 6) */}
+      {showBulkSpreadsheetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/75 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 space-y-4 text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-[#1058A8]" />
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                  Import Many Songs from Spreadsheet (CSV)
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowBulkSpreadsheetModal(false)}
+                className="text-slate-400 hover:text-[#0C2340] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Paste rows copied directly from Google Sheets or Excel. Format: 
+              <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] block mt-1 font-mono">
+                Title, Composer, Language, Categories, Voices, SharingStatus, PermissionBy, PermissionDate
+              </code>
+            </p>
+
+            <textarea
+              rows={8}
+              value={csvSpreadsheetText}
+              onChange={(e) => setCsvSpreadsheetText(e.target.value)}
+              placeholder="Title,Composer,Language,Category,Voices,SharingStatus,PermissionBy,PermissionDate"
+              className="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-[#1058A8]"
+            />
+
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+              <span className="text-xs text-slate-500">
+                {csvSpreadsheetText.trim() ? `${csvSpreadsheetText.trim().split('\n').length} row(s) entered` : '0 rows'}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkSpreadsheetModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!csvSpreadsheetText.trim()) return;
+                    const lines = csvSpreadsheetText.trim().split('\n');
+                    const newItems: LibrarySong[] = [];
+                    const today = new Date().toISOString().split('T')[0];
+
+                    lines.forEach((line, idx) => {
+                      if (idx === 0 && line.toLowerCase().includes('title')) return;
+                      const parts = line.split(',').map(p => p.trim().replace(/^["']|["']$/g, ''));
+                      if (parts.length >= 2 && parts[0] && parts[1]) {
+                        const title = parts[0];
+                        const composer = parts[1];
+                        const language = (parts[2] || 'Kiswahili') as any;
+                        const catStr = parts[3] || 'kuingia';
+                        const cats = catStr.split('|').map(c => c.trim().toLowerCase());
+                        const voices = (parts[4] || 'SATB') as any;
+                        const sharingStatus = (parts[5] || 'Public domain') as any;
+                        const permissionBy = parts[6] || undefined;
+                        const permissionDate = parts[7] || undefined;
+
+                        newItems.push({
+                          id: `lib-csv-${Date.now()}-${idx}`,
+                          title,
+                          composer,
+                          language,
+                          categories: cats.length > 0 ? cats : ['kuingia'],
+                          voices,
+                          sharingStatus: (['Public domain', 'Shared with permission', 'Link only'].includes(sharingStatus) ? sharingStatus : 'Public domain'),
+                          permissionGivenBy: permissionBy,
+                          permissionDate: permissionDate,
+                          downloadCount: 0,
+                          addedDate: today,
+                          solfaNotes: true
+                        });
+                      }
+                    });
+
+                    if (newItems.length > 0) {
+                      bulkImportLibrarySongs(newItems);
+                      setSuccessMessage(`Successfully imported ${newItems.length} songs from spreadsheet!`);
+                      setShowBulkSpreadsheetModal(false);
+                      setCsvSpreadsheetText('');
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-xs font-bold cursor-pointer"
+                >
+                  Import All Songs
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

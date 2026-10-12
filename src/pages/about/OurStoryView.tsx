@@ -48,7 +48,7 @@ export const OurStoryView: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-            {lang === 'sw' ? 'Historia ya Kwaya ya Mtakatifu Monika' : 'Heritage & History of St. Monica Choir'}
+            {lang === 'sw' ? 'Historia ya Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'Heritage & History of St. Monica Third Mass Choir'}
           </h1>
           <ChoirLogo size={60} interactive={true} className="shrink-0 self-start sm:self-center" />
         </div>
@@ -77,8 +77,8 @@ export const OurStoryView: React.FC = () => {
           </h2>
           <p>
             {lang === 'sw'
-              ? 'Kwaya ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa Kuu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.'
-              : 'St. Monica Catholic Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday High Mass. Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.'}
+              ? 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.'
+              : 'St. Monica Third Mass Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass (the parish 3rd Mass). Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.'}
           </p>
           <p>
             {lang === 'sw'

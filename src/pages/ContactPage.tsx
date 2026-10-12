@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { Send, CheckCircle2, ExternalLink, MessageCircle } from 'lucide-react';
+import { Send, CheckCircle2, ExternalLink, MessageCircle, MapPin, Navigation, Copy, Check } from 'lucide-react';
 import { CHOIR_STATS } from '../data/choirContent';
 
 export const ContactPage: React.FC = () => {
@@ -19,6 +19,13 @@ export const ContactPage: React.FC = () => {
   const [submittedName, setSubmittedName] = useState('');
   const [sent, setSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedCoord, setCopiedCoord] = useState(false);
+
+  const handleCopyCoord = () => {
+    navigator.clipboard?.writeText(CHOIR_STATS.coordinatesDisplay || '-0.284525, 36.094012');
+    setCopiedCoord(true);
+    setTimeout(() => setCopiedCoord(false), 2200);
+  };
 
   const validatePhone = (num: string): boolean => {
     const cleaned = num.replace(/[\s\-\(\)]/g, '');
@@ -409,33 +416,104 @@ export const ContactPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Embedded Google Map */}
-          <div className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] overflow-hidden">
-            <div className="p-4 bg-[#FCFAF7] border-b border-[#0C2340]/10 flex items-center justify-between">
-              <span className="text-[14px] font-semibold text-[#0C2340]">
-                St. Monica Catholic Church, Section 58
-              </span>
-              <a
-                href={CHOIR_STATS.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[14px] font-semibold text-[#1058A8] hover:underline flex items-center gap-1 font-source"
-              >
-                <span>{lang === 'sw' ? 'Fungua kwenye Ramani' : 'Open in Maps'}</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+          {/* Embedded Parish Map & Direct Google Maps Navigation */}
+          <div className="bg-[#FCFAF7] border border-[#0C2340]/15 rounded-[14px] overflow-hidden shadow-xs">
+            <div className="p-4 bg-white border-b border-[#0C2340]/10 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-[#1058A8] shrink-0" />
+                  <span className="text-[15px] font-bold text-[#0C2340]">
+                    St. Monica's Catholic Church, Section 58
+                  </span>
+                </div>
+                <span className="text-xs text-slate-500 font-source block mt-0.5 ml-5.5">
+                  Nakuru, Kenya · Catholic Diocese of Nakuru
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={CHOIR_STATS.mapsDirectionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#0C2340]/15 text-[#0C2340] hover:bg-slate-50 transition-colors flex items-center gap-1 font-source"
+                  title="Get Driving / Walking Directions"
+                >
+                  <Navigation className="w-3.5 h-3.5 text-[#1058A8]" />
+                  <span>{lang === 'sw' ? 'Maelekezo' : 'Directions'}</span>
+                </a>
+                <a
+                  href={CHOIR_STATS.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1058A8] text-white hover:bg-[#0C2340] transition-colors flex items-center gap-1 font-source shadow-xs"
+                  title="Open Location in Google Maps app or web"
+                >
+                  <span>{lang === 'sw' ? 'Fungua Google Maps' : 'Open in Google Maps'}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
 
-            <div className="w-full h-56 sm:h-64 bg-slate-100">
+            {/* Live Interactive Google Map with Pin at exact church coordinates */}
+            <div className="w-full h-64 sm:h-72 bg-slate-100 relative group">
               <iframe
-                title="St. Monica Catholic Church Section 58 Nakuru Map"
-                src="https://maps.google.com/maps?q=St.+Monica+Catholic+Church+Section+58+Nakuru&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                title="Google Maps - St. Monica Catholic Church Section 58 Nakuru"
+                src="https://maps.google.com/maps?q=-0.2845249,36.0940117&hl=en&z=16&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
+              <a
+                href={CHOIR_STATS.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-3 right-3 bg-white/95 hover:bg-white text-[#0C2340] hover:text-[#1058A8] text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md border border-[#0C2340]/15 flex items-center gap-1.5 transition-all z-10"
+                title="Open St. Monica's Catholic Church on Google Maps"
+              >
+                <MapPin className="w-3.5 h-3.5 text-[#EA4335]" />
+                <span>Google Maps</span>
+                <ExternalLink className="w-3 h-3 text-slate-400" />
+              </a>
+            </div>
+
+            {/* Parish Coordinates & Quick Link Footnote */}
+            <div className="p-3.5 bg-[#FAF8F5] border-t border-[#0C2340]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-700 font-source">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-slate-800">GPS:</span>
+                <span className="font-mono text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200 text-[11px]">
+                  {CHOIR_STATS.coordinatesDisplay}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCoord}
+                  className="text-slate-600 hover:text-[#1058A8] flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer"
+                  title="Copy GPS coordinates"
+                >
+                  {copiedCoord ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700 font-semibold">{lang === 'sw' ? 'Imenakiliwa!' : 'Copied!'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{lang === 'sw' ? 'Nakili' : 'Copy'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <a
+                href={CHOIR_STATS.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1058A8] hover:text-[#0C2340] font-semibold hover:underline inline-flex items-center gap-1"
+              >
+                <span>maps.app.goo.gl/qd9c7QUumHUnUGXc6</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
           </div>
 

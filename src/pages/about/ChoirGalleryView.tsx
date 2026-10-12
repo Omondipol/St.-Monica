@@ -35,8 +35,8 @@ export const ChoirGalleryView: React.FC = () => {
             </h1>
             <p className="text-[17px] text-slate-700 font-source mt-2 max-w-2xl leading-relaxed">
               {lang === 'sw'
-                ? 'Waimbaji wote arobaini na nane wa Kwaya ya Mtakatifu Monika wakiwa katika sare za kiliturujia, mazoezi na huduma ya Misa Takatifu.'
-                : 'The unified forty-eight choristers of St. Monica Catholic Choir in liturgical vestments, sacred rehearsals, and Holy Mass ministry.'}
+                ? 'Waimbaji wote arobaini na nane wa Kwaya ya Misa ya Tatu ya Mtakatifu Monika wakiwa katika sare za kiliturujia, mazoezi na huduma ya Misa Takatifu.'
+                : 'The unified forty-eight choristers of St. Monica Third Mass Choir in liturgical vestments, sacred rehearsals, and Holy Mass ministry.'}
             </p>
           </div>
           <ChoirLogo size={60} interactive={true} className="shrink-0 self-start sm:self-center" />

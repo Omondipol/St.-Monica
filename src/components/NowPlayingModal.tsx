@@ -21,6 +21,7 @@ import { SongCoverArt } from './SongCoverArt';
 import { RealAudioWaveform } from './RealAudioWaveform';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
+import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 export const NowPlayingModal: React.FC = () => {
@@ -162,8 +163,9 @@ export const NowPlayingModal: React.FC = () => {
         {/* TOP HEADER & TABS BAR */}
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 border-b border-[#0C2340]/10 bg-[#FAF8F5] sticky top-0 z-20 shrink-0">
           
-          {/* Left: Player Window Title */}
+          {/* Left: Player Window Title with Choir Logo */}
           <div className="flex items-center gap-2">
+            <ChoirLogo size={28} className="shrink-0" interactive={true} />
             <span className="font-eb-garamond font-semibold text-base sm:text-lg text-[#0C2340]">
               {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
             </span>
@@ -245,6 +247,12 @@ export const NowPlayingModal: React.FC = () => {
                 
                 {/* Title and composer on one block, with Ordinary Time · Meditation directly under title */}
                 <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5 pb-0.5">
+                    <ChoirLogo size={22} className="shrink-0" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1058A8] font-source">
+                      St. Monica Third Mass Choir · Nakuru
+                    </span>
+                  </div>
                   <h2 className="font-eb-garamond text-xl sm:text-2xl font-semibold text-[#0C2340] leading-tight truncate">
                     {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
                   </h2>

@@ -22,6 +22,7 @@ import { ChoirGalleryView } from './pages/about/ChoirGalleryView';
 
 import { AlbumsView } from './pages/music/AlbumsView';
 import { MusicPage } from './pages/MusicPage';
+import { MaktabaYaNotiPage } from './pages/MaktabaYaNotiPage';
 
 import { ShopPage } from './pages/ShopPage';
 import { EventsPage } from './pages/EventsPage';
@@ -35,7 +36,14 @@ function ChoirApp() {
     }
     return 'home';
   });
+  const [navKey, setNavKey] = useState<number>(Date.now());
   const { lang } = useChoir();
+
+  const handleNavigate = (route: string) => {
+    setCurrentRoute(route);
+    setNavKey(Date.now());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   React.useEffect(() => {
     const handleHash = () => {
@@ -54,13 +62,13 @@ function ChoirApp() {
       {/* Grouped Header with Top Utility Ribbon & Dark Bar */}
       <ChoirHeader
         currentRoute={currentRoute}
-        setCurrentRoute={setCurrentRoute}
+        setCurrentRoute={handleNavigate}
       />
 
       {/* Main Content Rendered by Route: ample bottom spacing so minimized bubble or player never covers content */}
       <main className={`flex-1 w-full pb-32 sm:pb-36 ${currentRoute === 'home' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
         {currentRoute === 'home' && (
-          <HomePage onNavigate={(r) => setCurrentRoute(r)} />
+          <HomePage onNavigate={handleNavigate} />
         )}
 
         {/* About Sub-routes */}
@@ -84,6 +92,12 @@ function ChoirApp() {
         {currentRoute === 'music-albums' && (
           <AlbumsView />
         )}
+        {currentRoute === 'music-library' && (
+          <MaktabaYaNotiPage 
+            key={`library-${navKey}`}
+            onNavigateMusicPaid={() => handleNavigate('shop')} 
+          />
+        )}
         {(currentRoute === 'music-repertoire' || currentRoute === 'music-planner' || currentRoute === 'music-notation') && (
           <MusicPage />
         )}
@@ -99,15 +113,12 @@ function ChoirApp() {
           <ContactPage />
         )}
         {currentRoute === 'admin' && (
-          <AdminPage onNavigateHome={() => setCurrentRoute('home')} />
+          <AdminPage onNavigateHome={() => handleNavigate('home')} />
         )}
       </main>
 
       {/* Modern Deep Navy Footer */}
-      <ChoirFooter onNavigate={(r) => {
-        setCurrentRoute(r);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }} />
+      <ChoirFooter onNavigate={handleNavigate} />
 
       {/* Global Interactive Modals & Player */}
       <YouTubeAudioHost currentRoute={currentRoute} />

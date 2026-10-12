@@ -90,10 +90,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           {/* COLUMN 1: The Choir Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <ChoirLogo size={46} interactive={true} className="shrink-0" />
+              <ChoirLogo size={64} interactive={true} className="shrink-0" />
               <div>
                 <h4 className="font-fraunces text-lg font-bold text-white leading-snug">
-                  {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
+                  {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
                 </h4>
                 <span className="text-xs text-[#7EC8F0] block mt-0.5">
                   Section 58 Parish · CDDN Nakuru
@@ -233,7 +233,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             <div className={`space-y-3 text-sm text-slate-300 ${mobileContactOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
-                <span className="block text-white font-medium">St. Monica Catholic Church</span>
+                <span className="block text-white font-medium">St. Monica's Catholic Church</span>
                 <span className="text-slate-300 text-xs block">{CHOIR_STATS.churchAddress}</span>
                 <a 
                   href={CHOIR_STATS.mapsUrl}
@@ -241,7 +241,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-[#7EC8F0] hover:text-white font-semibold transition-colors mt-1"
                 >
-                  <span>View on Google Maps</span>
+                  <span>{lang === 'sw' ? 'Fungua kwenye Google Maps' : 'View on Google Maps'}</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>

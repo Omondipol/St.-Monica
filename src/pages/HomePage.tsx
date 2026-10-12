@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { CHOIR_STATS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, Song } from '../data/choirContent';
 import { 
@@ -13,13 +13,69 @@ import {
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 
+import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
+import heroSlide2Faces from '../assets/images/hero_slide_2_faces.jpg';
+import heroSlide3Director from '../assets/images/hero_slide_3_director.jpg';
+import heroSlide4Scores from '../assets/images/hero_slide_4_scores.jpg';
+import heroSlide5Church from '../assets/images/hero_slide_5_church.jpg';
+
+import heroSlide1Portrait from '../assets/images/hero_slide_1_portrait.jpg';
+import heroSlide2Portrait from '../assets/images/hero_slide_2_portrait.jpg';
+import heroSlide3Portrait from '../assets/images/hero_slide_3_portrait.jpg';
 import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+
 import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import choirmasterImg from '../assets/images/choirmaster_director_1791446339605.jpg';
 import scorePreviewMachozi from '../assets/images/score_preview_machozi_1791446357129.jpg';
 import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372899.jpg';
 import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
 import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
+
+const DESKTOP_HERO_SLIDES = [
+  {
+    src: heroSlide1Mass,
+    alt: "Full choir shot at Mass altar in St. Monica Catholic Church, Section 58",
+    description: "Full Choir at Sunday High Mass"
+  },
+  {
+    src: heroSlide2Faces,
+    alt: "Close-up of singers' faces singing liturgical praises",
+    description: "Singers in Sacred Song"
+  },
+  {
+    src: heroSlide3Director,
+    alt: "The choirmaster directing the four vocal sections",
+    description: "Choirmaster Directing"
+  },
+  {
+    src: heroSlide4Scores,
+    alt: "Liturgical music hymnal and choral scores",
+    description: "Sacred Scores & Hymnal"
+  },
+  {
+    src: heroSlide5Church,
+    alt: "The church sanctuary and congregation gathered in worship",
+    description: "Church Sanctuary & Parish"
+  }
+];
+
+const MOBILE_HERO_SLIDES = [
+  {
+    src: heroSlide1Portrait,
+    alt: "Full choir shot at Mass altar",
+    description: "Full Choir at Mass"
+  },
+  {
+    src: heroSlide2Portrait,
+    alt: "Close-up of singers' faces",
+    description: "Choristers Singing"
+  },
+  {
+    src: heroSlide3Portrait,
+    alt: "The choirmaster directing",
+    description: "Choirmaster Directing"
+  }
+];
 
 interface HomePageProps {
   onNavigate: (route: string) => void;
@@ -32,10 +88,70 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     currentSong, 
     isPlaying, 
     playSong, 
-    togglePlay,
+    togglePlay, 
     addToCart, 
     lang 
   } = useChoir();
+
+  // Part 3: Rotating hero background slideshow (5 photos on desktop, 3 on mobile)
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 640;
+    }
+    return false;
+  });
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    return false;
+  });
+
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mql.addEventListener('change', handleMotionChange);
+    return () => mql.removeEventListener('change', handleMotionChange);
+  }, []);
+
+  const activeSlides = isMobile ? MOBILE_HERO_SLIDES : DESKTOP_HERO_SLIDES;
+
+  // Preload remaining photos in the background after the first photo mounts
+  useEffect(() => {
+    activeSlides.slice(1).forEach(slide => {
+      const img = new Image();
+      img.src = slide.src;
+    });
+  }, [isMobile]);
+
+  // Keep index within bounds if switching mobile/desktop
+  useEffect(() => {
+    if (currentSlideIndex >= activeSlides.length) {
+      setCurrentSlideIndex(0);
+    }
+  }, [activeSlides.length, currentSlideIndex]);
+
+  // 7-second auto advance, pause on hover, stop on prefers-reduced-motion
+  useEffect(() => {
+    if (prefersReducedMotion || isHovered) return;
+    const interval = setInterval(() => {
+      setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [activeSlides.length, isHovered, prefersReducedMotion]);
 
   const getScoreImage = (id: string) => {
     if (id.includes('machozi')) return scorePreviewMachozi;
@@ -57,28 +173,51 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="w-full space-y-0">
       
-      {/* 1. HERO SECTION: Lightened overlay so singers' faces are clearly visible */}
-      <section id="home-hero-section" className="relative min-h-[75vh] sm:min-h-[82vh] flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]">
-        <img
-          src={choirHeroImg}
-          alt="St. Monica Catholic Choir"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          referrerPolicy="no-referrer"
-        />
+      {/* 1. HERO SECTION: 5-Photo rotating crossfade slideshow (7s interval, 1.5s crossfade, 4% zoom, pause on hover) */}
+      <section 
+        id="home-hero-section" 
+        className="relative min-h-[75vh] sm:min-h-[82vh] flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Background Slides: Absolute stacked layers with 1.5s crossfade and subtle 4% zoom */}
+        {activeSlides.map((slide, index) => {
+          const isActive = index === currentSlideIndex;
+          return (
+            <div
+              key={slide.src}
+              className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${
+                isActive ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
+              }`}
+              aria-hidden={!isActive}
+            >
+              <img
+                src={slide.src}
+                alt={slide.alt}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                className={`w-full h-full object-cover object-center ${
+                  !prefersReducedMotion && isActive
+                    ? 'scale-[1.04] transition-transform duration-[7000ms] ease-out'
+                    : 'scale-100'
+                }`}
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          );
+        })}
 
-        {/* Soft dark gradient fading to clear by the middle of the photo (50%) so singers' faces remain totally clear */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/60 via-30% to-transparent to-50%" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/85 via-transparent to-transparent sm:hidden" />
+        {/* Soft dark gradient on the left so headline and buttons are always easy to read */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/60 via-30% to-transparent to-50% z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/85 via-transparent to-transparent sm:hidden z-10 pointer-events-none" />
 
-        <div className="relative z-10 w-full sm:max-w-[60%] lg:max-w-[55%] text-left space-y-3 sm:space-y-4 pb-4 sm:pb-8">
+        {/* Hero Content (kept exactly where it is) */}
+        <div className="relative z-20 w-full sm:max-w-[65%] lg:max-w-[60%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12">
           <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm">
             {lang === 'sw' ? 'Kuunganisha mioyo kupitia muziki mtakatifu' : 'Uniting hearts through sacred music'}
           </h1>
 
-          <p className="font-source text-base sm:text-lg lg:text-xl text-white/95 font-medium leading-relaxed">
-            {lang === 'sw'
-              ? 'Kwaya ya Misa ya 3 · St. Monica Section 58'
-              : 'St. Monica Section 58 3rd mass choir'}
+          <p className="font-source text-sm sm:text-base md:text-lg text-white/95 font-medium tracking-wide">
+            {lang === 'sw' ? 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)' : 'St. Monica Third Mass Choir (Section 58, Nakuru)'}
           </p>
 
           {/* Action buttons: Single strong button, quiet YouTube link, outlined gallery */}
@@ -127,6 +266,33 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <ExternalLink className="w-3.5 h-3.5 text-white/70" />
             </a>
           </div>
+        </div>
+
+        {/* Small Tappable Dots at Bottom Left (5 dots on desktop, 3 on phones) */}
+        <div 
+          className="absolute bottom-4 sm:bottom-6 left-6 sm:left-12 lg:left-16 z-30 flex items-center gap-2"
+          role="tablist"
+          aria-label={lang === 'sw' ? 'Picha za mandhari ya kwaya' : 'Choir hero photo slides'}
+        >
+          {activeSlides.map((slide, idx) => {
+            const isDotActive = idx === currentSlideIndex;
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setCurrentSlideIndex(idx)}
+                role="tab"
+                aria-selected={isDotActive}
+                className={`transition-all duration-300 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7EC8F0] ${
+                  isDotActive
+                    ? 'w-7 h-2.5 bg-[#7EC8F0] shadow-md shadow-sky-950/40'
+                    : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/80'
+                }`}
+                aria-label={`Photo ${idx + 1} of ${activeSlides.length}: ${slide.description}`}
+                title={slide.description}
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -523,21 +689,35 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </li>
               </ul>
 
-              <div className="pt-2 text-xs text-slate-700 font-source space-y-2">
+              <div className="pt-2 text-xs text-slate-700 font-source space-y-2.5">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
-                  <span>{CHOIR_STATS.churchAddress}</span>
+                  <div>
+                    <span className="font-semibold text-slate-900 block">St. Monica's Catholic Church</span>
+                    <span className="text-slate-600 block mt-0.5">{CHOIR_STATS.churchAddress}</span>
+                  </div>
                 </div>
 
-                <a
-                  href={CHOIR_STATS.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1058A8] hover:underline pt-1"
-                >
-                  <span>{lang === 'sw' ? 'Fungua Ramani ya Google' : 'Open in Google Maps'}</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <a
+                    href={CHOIR_STATS.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1058A8] hover:underline"
+                  >
+                    <span>{lang === 'sw' ? 'Fungua kwenye Google Maps' : 'Open in Google Maps'}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                  <span className="text-slate-300">·</span>
+                  <a
+                    href={CHOIR_STATS.mapsDirectionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-[#1058A8] hover:underline"
+                  >
+                    <span>{lang === 'sw' ? 'Maelekezo' : 'Directions'}</span>
+                  </a>
+                </div>
               </div>
             </div>
 

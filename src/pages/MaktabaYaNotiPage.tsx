@@ -1,0 +1,1039 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { useChoir } from '../context/ChoirContext';
+import { 
+  LIBRARY_CATEGORIES, 
+  LibrarySong 
+} from '../data/libraryData';
+import { 
+  Search, 
+  FileText, 
+  Volume2, 
+  Download, 
+  ExternalLink, 
+  ChevronRight, 
+  ArrowLeft, 
+  Music, 
+  Check, 
+  Copy,
+  Play,
+  Pause
+} from 'lucide-react';
+import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
+import { CHOIR_STATS } from '../data/choirContent';
+import scorePreviewSheet from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
+
+interface MaktabaYaNotiPageProps {
+  initialCategoryId?: string;
+  onNavigateMusicPaid?: () => void;
+}
+
+export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({ 
+  initialCategoryId,
+  onNavigateMusicPaid 
+}) => {
+  const { lang, librarySongs, incrementDownloadCount } = useChoir();
+
+  // Navigation states
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCategoryId || null);
+  const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
+
+  // Reset navigation state on fresh visit so visitor starts cleanly on front page
+  useEffect(() => {
+    if (!initialCategoryId) {
+      setSelectedCategoryId(null);
+      setSelectedSongId(null);
+      setGlobalSearch('');
+    }
+  }, [initialCategoryId]);
+
+  // Search and filter states
+  const [globalSearch, setGlobalSearch] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
+  const [selectedVoices, setSelectedVoices] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'title' | 'newest'>('title');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const PAGE_SIZE = 20;
+
+  // Audio preview playback state for library song detail
+  const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(false);
+
+  // Composer permissions modal state
+  const [isComposerModalOpen, setIsComposerModalOpen] = useState<boolean>(false);
+  const [copiedTemplate, setCopiedTemplate] = useState<boolean>(false);
+
+  // Active Category & Active Song helpers
+  const currentCategory = useMemo(() => {
+    if (!selectedCategoryId) return null;
+    return LIBRARY_CATEGORIES.find(c => c.id === selectedCategoryId) || null;
+  }, [selectedCategoryId]);
+
+  const currentSong = useMemo(() => {
+    if (!selectedSongId) return null;
+    return librarySongs.find(s => s.id === selectedSongId) || null;
+  }, [selectedSongId, librarySongs]);
+
+  // Guaranteed category for breadcrumb trail on song detail pages
+  const breadcrumbCategory = useMemo(() => {
+    if (currentCategory) return currentCategory;
+    if (currentSong && currentSong.categories && currentSong.categories.length > 0) {
+      return LIBRARY_CATEGORIES.find(c => c.id === currentSong.categories[0]) || null;
+    }
+    return null;
+  }, [currentCategory, currentSong]);
+
+  // Filtered Songs within active category or global search
+  const filteredSongs = useMemo(() => {
+    return librarySongs.filter(song => {
+      // Category filter (if inside a category and no global search term overrides it)
+      if (selectedCategoryId && !song.categories.includes(selectedCategoryId)) {
+        return false;
+      }
+
+      // Search term filter
+      if (globalSearch.trim()) {
+        const query = globalSearch.toLowerCase().trim();
+        const matchesTitle = song.title.toLowerCase().includes(query) || (song.titleSwahili && song.titleSwahili.toLowerCase().includes(query));
+        const matchesComposer = song.composer.toLowerCase().includes(query);
+        const matchesLyrics = song.lyrics && song.lyrics.toLowerCase().includes(query);
+        const matchesCategory = song.categories.some(catId => {
+          const cat = LIBRARY_CATEGORIES.find(c => c.id === catId);
+          return cat && (cat.nameSw.toLowerCase().includes(query) || cat.nameEn.toLowerCase().includes(query));
+        });
+        if (!matchesTitle && !matchesComposer && !matchesLyrics && !matchesCategory) {
+          return false;
+        }
+      }
+
+      // Language filter
+      if (selectedLanguage !== 'all' && song.language !== selectedLanguage) {
+        return false;
+      }
+
+      // Voices filter
+      if (selectedVoices !== 'all' && song.voices !== selectedVoices) {
+        return false;
+      }
+
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === 'newest') {
+        return (b.addedDate || '').localeCompare(a.addedDate || '');
+      }
+      return a.title.localeCompare(b.title);
+    });
+  }, [librarySongs, selectedCategoryId, globalSearch, selectedLanguage, selectedVoices, sortBy]);
+
+  // Paginated songs for fast mobile performance
+  const totalPages = Math.ceil(filteredSongs.length / PAGE_SIZE) || 1;
+  const paginatedSongs = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredSongs.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredSongs, currentPage]);
+
+  // Song count per category (exact dynamic count)
+  const categoryCounts = useMemo(() => {
+    const counts: { [catId: string]: number } = {};
+    LIBRARY_CATEGORIES.forEach(c => {
+      counts[c.id] = librarySongs.filter(s => s.categories.includes(c.id)).length;
+    });
+    return counts;
+  }, [librarySongs]);
+
+  // Handle song selection
+  const handleSelectSong = (song: LibrarySong) => {
+    setSelectedSongId(song.id);
+    setIsPlayingPreview(false);
+    window.scrollTo({ top: 160, behavior: 'smooth' });
+  };
+
+  // Handle PDF Download
+  const handleDownloadPdf = (song: LibrarySong) => {
+    incrementDownloadCount(song.id);
+    const content = `%PDF-1.4\n% St. Monica Catholic Choir Nakuru - Maktaba ya Noti\nTitle: ${song.title}\nComposer: ${song.composer}\nVoices: ${song.voices}\nStatus: ${song.sharingStatus}\n\nLyrics / Notes:\n${song.lyrics || 'Sacred Catholic Score Sheet'}`;
+    const blob = new Blob([content], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${song.title.replace(/\s+/g, '_')}_StMonicaChoir.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Copy Composer Permission Template
+  const handleCopyTemplate = () => {
+    const template = `Hello [name]. We are St. Monica Catholic Choir in Nakuru. We are building a free library of Catholic song scores for choirs across Kenya. May we share your score of [song title], with your name as composer, as a free PDF download on our site? You can ask us to remove it at any time. Thank you and God bless.`;
+    navigator.clipboard?.writeText(template);
+    setCopiedTemplate(true);
+    setTimeout(() => setCopiedTemplate(false), 2500);
+  };
+
+  // 16 Custom Line Drawings for Categories (56px, strokeWidth 1.6, site single blue #1058A8)
+  const renderCategoryLineDrawing = (categoryId: string) => {
+    const strokeColor = "#1058A8";
+    const strokeW = "1.6";
+
+    switch (categoryId) {
+      case 'kuingia': // an open church door
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 48V16a16 16 0 0 1 32 0v32M8 48h40" />
+            <path d="M20 48V20a8 8 0 0 1 8-8v36" />
+            <circle cx="25" cy="33" r="1.5" fill={strokeColor} />
+          </svg>
+        );
+      case 'matoleo': // a basket of bread
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 26h28l-4 20H18L14 26z" />
+            <path d="M14 26c0-9 6-16 14-16s14 7 14 16" />
+            <path d="M18 26c2-4 6-6 10-6s8 2 10 6" />
+            <path d="M16 34h24M17 40h22" strokeDasharray="3 2" />
+          </svg>
+        );
+      case 'komunyo': // a chalice with a host
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 22c0 9 5 15 12 15s12-6 12-15H16z" />
+            <path d="M28 37v9M20 46h16" />
+            <circle cx="28" cy="14" r="6" />
+            <path d="M28 11v6M25 14h6" />
+          </svg>
+        );
+      case 'tafakari': // a lit candle
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <rect x="22" y="22" width="12" height="26" rx="1.5" />
+            <path d="M28 22v-4" />
+            <path d="M28 11c-3 3-2 5 0 7 2-2 3-4 0-7z" fill={strokeColor} fillOpacity="0.15" />
+            <path d="M16 48h24" />
+          </svg>
+        );
+      case 'kutoka': // a path leading to a rising sun
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 48l12-22h8l12 22M28 26v22" strokeDasharray="3 3" />
+            <path d="M18 20a10 10 0 0 1 20 0" />
+            <path d="M28 8v3M19 11l2 2M37 11l-2 2M14 20h3M39 20h3" />
+          </svg>
+        );
+      case 'majilio': // a wreath with four candles
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <ellipse cx="28" cy="36" rx="18" ry="8" />
+            <ellipse cx="28" cy="36" rx="12" ry="5" />
+            <line x1="16" y1="34" x2="16" y2="22" /><line x1="16" y1="20" x2="16" y2="17" />
+            <line x1="24" y1="31" x2="24" y2="18" /><line x1="24" y1="16" x2="24" y2="13" />
+            <line x1="32" y1="31" x2="32" y2="18" /><line x1="32" y1="16" x2="32" y2="13" />
+            <line x1="40" y1="34" x2="40" y2="22" /><line x1="40" y1="20" x2="40" y2="17" />
+          </svg>
+        );
+      case 'noeli': // a star over a manger
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M28 8l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" />
+            <path d="M16 32l12 6 12-6-4 12H20l-4-12z" />
+            <path d="M20 44l-4 6M36 44l4 6" />
+            <path d="M24 34c2-2 6-2 8 0" />
+          </svg>
+        );
+      case 'kwaresima': // a bowl of ashes
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 28c0 10 6 16 14 16s14-6 14-16H14z" />
+            <path d="M10 28h36M20 44h16" />
+            <path d="M20 28c2-4 4-6 8-6s6 2 8 6" />
+            <path d="M28 14v6M25 17h6" />
+          </svg>
+        );
+      case 'pasaka': // an empty tomb with sunrise
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 46c0-16 8-26 26-26s10 4 10 26M6 46h44" />
+            <ellipse cx="28" cy="36" rx="8" ry="10" />
+            <path d="M38 18a8 8 0 0 1 8 0M42 12v3M48 14l-2 2" />
+          </svg>
+        );
+      case 'bikira-maria': // a rose
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="28" cy="22" r="6" />
+            <path d="M28 16c4 0 7 3 7 7s-3 7-7 7-7-3-7-7" />
+            <path d="M24 19c2-2 6-2 8 1" />
+            <path d="M28 30v18" />
+            <path d="M28 36c4 0 8 2 8 5-4 1-8-1-8-5z" />
+            <path d="M28 41c-4 0-8 2-8 5 4 1 8-1 8-5z" />
+          </svg>
+        );
+      case 'zaburi': // a harp
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 46h24M18 46V14c8-3 18 2 20 8v24" />
+            <line x1="23" y1="16" x2="23" y2="46" />
+            <line x1="28" y1="18" x2="28" y2="46" />
+            <line x1="33" y1="20" x2="33" y2="46" />
+          </svg>
+        );
+      case 'shukrani': // a sheaf of wheat
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M28 48V20" />
+            <path d="M28 20c-5-4-8-2-6 4 3 0 5-2 6-4z" />
+            <path d="M28 20c5-4 8-2 6 4-3 0-5-2-6-4z" />
+            <path d="M28 28c-6-4-9-2-7 4 3 0 6-2 7-4z" />
+            <path d="M28 28c6-4 9-2 7 4-3 0-6-2-7-4z" />
+            <path d="M28 36c-5-3-8-1-6 3 2 0 5-1 6-3z" />
+            <path d="M28 36c5-3 8-1 6 3-2 0-5-1-6-3z" />
+            <path d="M24 40h8" />
+          </svg>
+        );
+      case 'ndoa': // two rings
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="22" cy="28" r="11" />
+            <circle cx="34" cy="28" r="11" />
+            <path d="M28 20a11 11 0 0 1 0 16" />
+          </svg>
+        );
+      case 'ubatizo': // a shell with water drops
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 26c0 10 6 18 14 18s14-8 14-18c0-8-6-12-14-12s-14 4-14 12z" />
+            <path d="M28 14v30M23 16l4 27M33 16l-4 27M18 22l8 21M38 22l-8 21" />
+            <path d="M28 47c-1 2-2 3-2 4a2 2 0 0 0 4 0c0-1-1-2-2-4z" fill={strokeColor} />
+          </svg>
+        );
+      case 'mazishi': // a dove
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 34c4-1 10-2 14-6 5-5 9-14 9-14s2 4 1 8c4-2 7-6 8-8 0 4-2 8-5 11l8 1c-4 2-8 3-12 3-5 5-10 8-17 7 2-2 3-4 3-6-3 1-6 2-9 4z" />
+            <circle cx="32" cy="18" r="1" fill={strokeColor} />
+          </svg>
+        );
+      case 'roho-mtakatifu': // a dove with flames
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 36c4-1 9-2 13-5 4-4 8-12 8-12s2 3 1 7c3-2 6-5 7-7 0 3-2 7-4 9l7 1c-3 2-7 3-10 3-4 4-8 6-14 6 1-2 2-3 2-5-3 1-5 2-7 3z" />
+            <path d="M28 8c-2 2-1 4 0 5 1-1 2-3 0-5z" fill={strokeColor} />
+            <path d="M24 10c-1.5 1.5-1 3 0 4 1-1 1.5-2.5 0-4z" fill={strokeColor} />
+            <path d="M32 10c-1.5 1.5-1 3 0 4 1-1 1.5-2.5 0-4z" fill={strokeColor} />
+          </svg>
+        );
+      default:
+        return (
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="28" y1="8" x2="28" y2="48" />
+            <line x1="16" y1="20" x2="40" y2="20" />
+          </svg>
+        );
+    }
+  };
+
+  return (
+    <div className="w-full bg-[#FAF8F5] text-[#0C2340] min-h-screen font-source">
+      
+      {/* Top of Library: Full-width slim band (~160px tall) with deep navy background and thin woven strip along bottom edge */}
+      <section className="bg-[#0C2340] text-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-[160px]">
+        {/* Thin woven strip along the bottom edge */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <AfricanGeometricBorder />
+        </div>
+
+        <div className="max-w-6xl mx-auto space-y-3.5 relative z-10 pb-2">
+          
+          {/* Breadcrumb Navigation on the Band */}
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-white/70 font-medium">
+            {!selectedCategoryId && !selectedSongId && !globalSearch ? (
+              /* Library home page: Show ONLY "Maktaba ya Noti" with NO other steps and NO back link */
+              <span className="text-[#FAF8F5] font-bold">Maktaba ya Noti</span>
+            ) : (
+              <>
+                <button 
+                  onClick={() => {
+                    setSelectedCategoryId(null);
+                    setSelectedSongId(null);
+                    setGlobalSearch('');
+                  }}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  Maktaba ya Noti
+                </button>
+                {breadcrumbCategory && (
+                  <>
+                    <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+                    <button 
+                      onClick={() => {
+                        setSelectedSongId(null);
+                        setSelectedCategoryId(breadcrumbCategory.id);
+                      }}
+                      className={`hover:text-white transition-colors cursor-pointer ${!currentSong ? 'text-[#FAF8F5] font-bold' : ''}`}
+                    >
+                      {lang === 'sw' ? breadcrumbCategory.nameSw : breadcrumbCategory.nameEn}
+                    </button>
+                  </>
+                )}
+                {currentSong && (
+                  <>
+                    <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+                    <span className="text-[#FAF8F5] font-bold truncate max-w-[200px]">
+                      {currentSong.title}
+                    </span>
+                  </>
+                )}
+              </>
+            )}
+          </nav>
+
+          {/* Title, Subtitle, Choir Voice, and Paid Scores text link */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+              <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-bold text-[#FAF8F5] tracking-tight leading-tight">
+                Maktaba ya Noti
+              </h1>
+              <p className="font-source text-sm sm:text-base text-white/80 mt-0.5">
+                Free Sheet Music Library
+              </p>
+              <p className="font-source text-xs sm:text-sm text-sky-200/90 mt-1">
+                Noti za bure kwa kwaya zote. Free scores for every choir.
+              </p>
+            </div>
+
+            {/* Plain blue text link at the right of the band: Noti za Kuuza (Scores for sale) */}
+            {onNavigateMusicPaid && (
+              <button
+                onClick={onNavigateMusicPaid}
+                className="text-[#7EC8F0] hover:text-white transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1 cursor-pointer self-start sm:self-auto py-1"
+              >
+                <span>{lang === 'sw' ? 'Noti za Kuuza' : 'Scores for sale'}</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Search Box on the Band, beneath the title */}
+          <div className="pt-1 max-w-2xl">
+            <div className="relative">
+              <Search className="w-4.5 h-4.5 text-[#1058A8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={globalSearch}
+                onChange={(e) => {
+                  setGlobalSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder={lang === 'sw' ? 'Tafuta wimbo, jina au mtunzi' : 'Search by song, composer or words'}
+                className="w-full bg-[#FAF8F5] text-[#0C2340] border border-white/20 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7EC8F0] shadow-sm font-source"
+              />
+              {globalSearch && (
+                <button
+                  onClick={() => setGlobalSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 hover:text-[#0C2340] px-2 py-0.5 rounded bg-slate-200/60 cursor-pointer"
+                >
+                  {lang === 'sw' ? 'Futa' : 'Clear'}
+                </button>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* BODY CONTENT BY STATE:
+          1. Song Detail View (if selectedSongId is set)
+          2. Category Song List (if selectedCategoryId is set or search active)
+          3. Categories Front Door Grid (default)
+      */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+
+        {/* =========================================================================
+            STATE 1: SINGLE SONG DETAIL VIEW
+            ========================================================================= */}
+        {currentSong ? (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Main Song Showcase Card */}
+            <div className="bg-white border border-[#0C2340]/15 rounded-2xl p-6 sm:p-10 shadow-sm space-y-8">
+              
+              {/* Header: Title, Composer, Sharing Status Badge */}
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-[#0C2340]/10">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Sharing Status Label using single site blue or neutral */}
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-[#1058A8] border border-slate-200">
+                      <span>{currentSong.sharingStatus}</span>
+                    </span>
+
+                    {/* Language & Voicing Badges */}
+                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                      {currentSong.language}
+                    </span>
+                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                      {currentSong.voices}
+                    </span>
+                    {currentSong.solfaNotes && (
+                      <span className="bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 px-2.5 py-1 rounded-full text-xs font-semibold">
+                        Tonic Sol-fa
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="font-eb-garamond text-3xl sm:text-4xl font-bold text-[#0C2340] tracking-tight">
+                    {currentSong.title}
+                  </h2>
+                  <p className="text-base text-slate-700 font-medium">
+                    {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-[#0C2340] font-semibold">{currentSong.composer}</strong>
+                  </p>
+                  {currentSong.season && (
+                    <p className="text-xs text-slate-500">
+                      {lang === 'sw' ? 'Kipindi cha Liturujia:' : 'Liturgical Season:'} {currentSong.season}
+                    </p>
+                  )}
+                </div>
+
+                {/* Top Action Buttons: Download PDF (where permitted) / Find This Song (Link Only) */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {currentSong.sharingStatus !== 'Link only' ? (
+                    <button
+                      onClick={() => handleDownloadPdf(currentSong)}
+                      className="px-5 py-3 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>{lang === 'sw' ? 'Pakua Noti (PDF)' : 'Download PDF'}</span>
+                    </button>
+                  ) : (
+                    <a
+                      href={currentSong.externalSourceUrl || 'https://swahilimusicnotes.com'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-5 py-3 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all"
+                    >
+                      <span>{lang === 'sw' ? 'Tafuta Wimbo Huu' : 'Find this song'}</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Two Column Grid: Left Score Preview, Right Lyrics and Audio */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                
+                {/* Left: Score Sheet Preview */}
+                <div className="md:col-span-5 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                    {lang === 'sw' ? 'Kielelezo cha Noti (Score Preview)' : 'Score Preview'}
+                  </span>
+                  
+                  <div className="rounded-xl overflow-hidden border border-[#0C2340]/15 bg-[#FAF8F5] shadow-xs group">
+                    <img 
+                      src={scorePreviewSheet} 
+                      alt={`Score preview for ${currentSong.title}`} 
+                      className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="p-3 bg-white border-t border-[#0C2340]/10 flex items-center justify-between text-xs text-slate-600">
+                      <span>SATB Vocal Score</span>
+                      <span className="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded">PDF 850 KB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Lyrics and Audio Player */}
+                <div className="md:col-span-7 space-y-6">
+                  
+                  {/* Optional Audio Player */}
+                  {currentSong.hasAudio && (
+                    <div className="p-4 bg-[#EAF4FB] border border-[#1058A8]/20 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Volume2 className="w-4 h-4 text-[#1058A8]" />
+                          <span className="text-xs font-bold text-[#1058A8]">
+                            {lang === 'sw' ? 'Sikiliza Sauti (Ina sauti)' : 'Audio Preview Available'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-600">0:45 Preview</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setIsPlayingPreview(prev => !prev)}
+                          className="w-10 h-10 rounded-full bg-[#1058A8] text-white flex items-center justify-center hover:bg-[#0C2340] transition-colors cursor-pointer shrink-0 shadow-sm"
+                          aria-label={isPlayingPreview ? 'Pause audio' : 'Play audio'}
+                        >
+                          {isPlayingPreview ? (
+                            <Pause className="w-4 h-4 fill-current" />
+                          ) : (
+                            <Play className="w-4 h-4 fill-current ml-0.5" />
+                          )}
+                        </button>
+                        <div className="flex-1">
+                          <div className="h-2 bg-white/70 rounded-full overflow-hidden">
+                            <div className={`h-full bg-[#1058A8] rounded-full ${isPlayingPreview ? 'animate-pulse w-3/4' : 'w-1/4'}`} />
+                          </div>
+                          <span className="text-[11px] text-slate-600 block mt-1">
+                            {isPlayingPreview 
+                              ? (lang === 'sw' ? 'Inacheza kielelezo cha sauti...' : 'Playing sample recording...') 
+                              : (lang === 'sw' ? 'Gusa kucheza sauti ya kielelezo' : 'Tap to listen to sample')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Lyrics / Stanzas */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                      {lang === 'sw' ? 'Mashairi na Maneno ya Wimbo' : 'Hymn Lyrics & Text'}
+                    </span>
+                    <div className="p-5 rounded-xl bg-[#FAF8F5] border border-[#0C2340]/10 font-serif whitespace-pre-line text-sm sm:text-base leading-relaxed text-[#0C2340] max-h-96 overflow-y-auto">
+                      {currentSong.lyrics || (lang === 'sw' ? 'Maneno yanathibitishwa na kwaya.' : 'Lyrics currently being indexed.')}
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* Related Songs from the same category */}
+            <div className="space-y-4 pt-4">
+              <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                {lang === 'sw' ? 'Nyimbo Zinazofanana Kwenye Kategoria Hii' : 'Related Songs in this Category'}
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {librarySongs
+                  .filter(s => s.id !== currentSong.id && s.categories.some(c => currentSong.categories.includes(c)))
+                  .slice(0, 3)
+                  .map(relSong => (
+                    <button
+                      key={relSong.id}
+                      onClick={() => handleSelectSong(relSong)}
+                      className="p-4 rounded-xl bg-white border border-[#0C2340]/10 hover:border-[#1058A8] hover:shadow-md transition-all text-left space-y-2 group cursor-pointer"
+                    >
+                      <strong className="font-eb-garamond text-lg font-bold text-[#0C2340] group-hover:text-[#1058A8] transition-colors block leading-tight">
+                        {relSong.title}
+                      </strong>
+                      <span className="text-xs text-slate-600 block truncate">
+                        {relSong.composer}
+                      </span>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <span>{relSong.voices}</span>
+                        <span>·</span>
+                        <span>{relSong.language}</span>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+          </div>
+        ) : selectedCategoryId || globalSearch ? (
+          
+          /* =========================================================================
+             STATE 2: CATEGORY SONG LIST (PRINTED INDEX LAYOUT)
+             ========================================================================= */
+          <div className="space-y-6 animate-fadeIn">
+            
+            {/* Header banner of current category */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#0C2340]/15">
+              <div>
+                <button
+                  onClick={() => {
+                    setSelectedCategoryId(null);
+                    setGlobalSearch('');
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#1058A8] hover:text-[#0C2340] mb-2 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>{lang === 'sw' ? 'Rudi Kwenye Kategoria Zote' : 'All Categories'}</span>
+                </button>
+
+                <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+                  {currentCategory ? (lang === 'sw' ? currentCategory.nameSw : currentCategory.nameEn) : (lang === 'sw' ? 'Matokeo ya Utafutaji' : 'Search Results')}
+                </h2>
+                {currentCategory && (
+                  <p className="text-xs text-slate-600 font-source mt-0.5">
+                    {lang === 'sw' ? currentCategory.descriptionSw : currentCategory.descriptionEn}
+                  </p>
+                )}
+              </div>
+
+              {/* Number of Songs found count badge */}
+              <div className="text-xs text-slate-600 font-medium bg-white px-3 py-1.5 rounded-lg border border-[#0C2340]/10 self-start sm:self-auto">
+                {lang === 'sw' 
+                  ? `Nyimbo ${filteredSongs.length}` 
+                  : `${filteredSongs.length} songs`}
+              </div>
+            </div>
+
+            {/* Filter Controls: Language, Voices, Sort */}
+            <div className="bg-white p-4 rounded-xl border border-[#0C2340]/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Language Filter */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Lugha:' : 'Language:'}</span>
+                  <select
+                    value={selectedLanguage}
+                    onChange={(e) => {
+                      setSelectedLanguage(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="bg-[#FAF8F5] border border-slate-300 rounded-lg px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                  >
+                    <option value="all">{lang === 'sw' ? 'Lugha zote' : 'All languages'}</option>
+                    <option value="Kiswahili">Kiswahili</option>
+                    <option value="English">English</option>
+                    <option value="Latin">Latin</option>
+                    <option value="Kikuyu">Kikuyu</option>
+                    <option value="Dholuo">Dholuo</option>
+                    <option value="Kalenjin">Kalenjin</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Voices Filter */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Sauti:' : 'Voices:'}</span>
+                  <select
+                    value={selectedVoices}
+                    onChange={(e) => {
+                      setSelectedVoices(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="bg-[#FAF8F5] border border-slate-300 rounded-lg px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                  >
+                    <option value="all">{lang === 'sw' ? 'Sauti zote' : 'All voicings'}</option>
+                    <option value="SATB">SATB</option>
+                    <option value="Unison">Unison</option>
+                    <option value="Solo">Solo</option>
+                    <option value="SSAA">SSAA</option>
+                    <option value="TTBB">TTBB</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Sort Order */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Panga kwa:' : 'Sort by:'}</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-[#FAF8F5] border border-slate-300 rounded-lg px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                >
+                  <option value="title">{lang === 'sw' ? 'Kichwa cha Wimbo (A-Z)' : 'Title (A-Z)'}</option>
+                  <option value="newest">{lang === 'sw' ? 'Iliyoongezwa Hivi Karibuni' : 'Newest'}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Printed Index Table Layout */}
+            {paginatedSongs.length > 0 ? (
+              <div className="bg-white rounded-2xl border border-[#0C2340]/15 overflow-hidden shadow-xs">
+                <div className="divide-y divide-[#0C2340]/10">
+                  {paginatedSongs.map((song, idx) => (
+                    <div
+                      key={song.id}
+                      onClick={() => handleSelectSong(song)}
+                      className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#FAF8F5] transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                        <span className="text-xs font-mono font-semibold text-slate-400 w-6 text-right shrink-0 pt-1 sm:pt-0">
+                          {((currentPage - 1) * PAGE_SIZE + idx + 1).toString().padStart(2, '0')}
+                        </span>
+                        
+                        <div className="min-w-0 space-y-1">
+                          <strong className="font-eb-garamond text-lg sm:text-xl font-bold text-[#0C2340] group-hover:text-[#1058A8] transition-colors block leading-tight">
+                            {song.title}
+                          </strong>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                            <span className="font-medium text-slate-700">{song.composer}</span>
+                            <span>·</span>
+                            <span>{song.voices}</span>
+                            <span>·</span>
+                            <span>{song.language}</span>
+                            {song.solfaNotes && (
+                              <>
+                                <span>·</span>
+                                <span className="text-[#1058A8] font-semibold">Sol-fa</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center pl-10 sm:pl-0">
+                        <span className="inline-flex items-center gap-1 text-xs text-[#1058A8] font-bold">
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>PDF</span>
+                        </span>
+
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                          {song.sharingStatus}
+                        </span>
+
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#1058A8] group-hover:translate-x-0.5 transition-all" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="p-12 text-center bg-white rounded-xl border border-[#0C2340]/10 space-y-3">
+                <Music className="w-10 h-10 text-slate-400 mx-auto" />
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                  {lang === 'sw' ? 'Hakuna nyimbo hapa bado. Jaribu kategoria nyingine.' : 'No songs here yet. Try another.'}
+                </h3>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto">
+                  {lang === 'sw'
+                    ? 'Mkusanyiko huu unaongezwa polepole kufuata kanuni za haki miliki.'
+                    : 'We are steadily growing our library with verified permissions and public domain scores.'}
+                </p>
+                <button
+                  onClick={() => {
+                    setSelectedLanguage('all');
+                    setSelectedVoices('all');
+                    setGlobalSearch('');
+                  }}
+                  className="mt-2 text-xs font-bold text-[#1058A8] hover:underline cursor-pointer"
+                >
+                  {lang === 'sw' ? 'Ondoa vichungi vyote' : 'Reset filters'}
+                </button>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-[#0C2340]/10 pt-4 text-xs text-slate-600">
+                <span>
+                  {lang === 'sw' ? `Ukurasa wa ${currentPage} kati ya ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 disabled:opacity-40 hover:bg-white transition-colors cursor-pointer"
+                  >
+                    {lang === 'sw' ? 'Iliyotangulia' : 'Previous'}
+                  </button>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 disabled:opacity-40 hover:bg-white transition-colors cursor-pointer"
+                  >
+                    {lang === 'sw' ? 'Inayofuata' : 'Next'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        ) : (
+
+          /* =========================================================================
+             STATE 3: CATEGORIES FRONT DOOR GRID (Fix 4 & Fix 5)
+             Printed Contents Page Design:
+             - Cream card with thin 1px warm grey border
+             - Custom Line Drawing at top left (56px square, site blue #1058A8)
+             - 16px space between drawing and title
+             - Swahili name in serif font at 24px, English beneath it
+             - Number of songs joined to name by thin dotted line: "Nyimbo 4"
+             - No grey pills
+             - 2px lift on hover + thin blue underline under title
+             - 4 cards per row laptops, 2 on phones, 24px gap
+             ========================================================================= */
+          <div className="space-y-8 animate-fadeIn">
+            
+            {/* Introductory Guidance on Safe Library Practices */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#0C2340]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+              <div className="space-y-1">
+                <span className="font-eb-garamond text-lg font-bold text-[#0C2340] block">
+                  {lang === 'sw' ? 'Kuhusu Maktaba Hii ya Bure' : 'About this Free Sheet Music Library'}
+                </span>
+                <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+                  {lang === 'sw'
+                    ? 'Hapa tunashiriki nyimbo zilizoko katika miliki ya umma (Public Domain) na zile zilizotolewa kwa idhini ya watunzi wao. Nyimbo nyingine zimewekwa kwa kiungo cha asili bila kupakuliwa.'
+                    : 'We share public domain hymns and scores released with verified composer permissions. Modern arrangements are listed with direct legal source links.'}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsComposerModalOpen(true)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#EAF4FB] text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer whitespace-nowrap self-start sm:self-auto border border-[#1058A8]/20"
+              >
+                {lang === 'sw' ? 'Wewe ni Mtunzi? Wasiliana Nasi' : 'Are you a composer?'}
+              </button>
+            </div>
+
+            {/* 16 Liturgical Categories Grid (4 cards per row laptops, 2 on phones, 24px gap) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {LIBRARY_CATEGORIES.map(category => {
+                const count = categoryCounts[category.id] || 0;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      setSelectedCategoryId(category.id);
+                      setCurrentPage(1);
+                      window.scrollTo({ top: 160, behavior: 'smooth' });
+                    }}
+                    className="p-5 sm:p-6 rounded-2xl bg-[#FAF8F5] border border-[#0C2340]/15 hover:-translate-y-0.5 hover:shadow-md transition-all text-left flex flex-col justify-between group cursor-pointer"
+                  >
+                    <div>
+                      {/* Line drawing at top left, 56px square, site blue */}
+                      <div className="w-14 h-14 shrink-0 flex items-center justify-center">
+                        {renderCategoryLineDrawing(category.id)}
+                      </div>
+
+                      {/* Title: 16px below icon, Swahili in serif font at 24px, English beneath it */}
+                      <div className="mt-4">
+                        <strong className="font-eb-garamond text-[24px] font-bold text-[#0C2340] group-hover:underline decoration-[#1058A8] decoration-1 underline-offset-4 transition-all block leading-tight">
+                          {category.nameSw}
+                        </strong>
+                        <span className="text-xs sm:text-sm text-slate-500 font-source block mt-1">
+                          {category.nameEn}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom: Number of songs joined to the name by a thin dotted line */}
+                    <div className="flex items-baseline w-full mt-6 text-xs sm:text-sm text-slate-600 font-source">
+                      <span className="shrink-0 font-medium">
+                        {lang === 'sw' ? 'Nyimbo' : 'Songs'}
+                      </span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-slate-300" />
+                      <span className="font-bold text-[#0C2340] shrink-0 text-sm">
+                        {count}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+          </div>
+        )}
+
+        {/* =========================================================================
+            BOTTOM COMPOSER PERMISSION & TAKEDOWN CONTACT (Verified Real Address)
+            ========================================================================= */}
+        <section className="pt-8 border-t border-[#0C2340]/15">
+          <div className="p-6 rounded-2xl bg-white border border-[#0C2340]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <strong className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] block">
+                {lang === 'sw' 
+                  ? 'Je, wewe ni mtunzi au mpangaji wa muziki?' 
+                  : 'Are you a composer or arranger?'}
+              </strong>
+              <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                {lang === 'sw'
+                  ? 'Ili kushiriki kazi yako na kwaya kote nchini au kuomba tuondoe noti yako, tuandikie kupitia barua pepe au WhatsApp. Tunajibu ndani ya siku tatu.'
+                  : 'To share your work or ask us to remove it, write to us. We respect creators and reply within three days.'}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setIsComposerModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-xs font-bold transition-all cursor-pointer whitespace-nowrap self-start sm:self-auto shadow-sm"
+            >
+              {lang === 'sw' ? 'Wasiliana na Kwaya' : 'Contact Choir Music Team'}
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      {/* =========================================================================
+          COMPOSER PERMISSION & TAKEDOWN MODAL
+          ========================================================================= */}
+      {isComposerModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/75 backdrop-blur-xs animate-fadeIn"
+          onClick={() => setIsComposerModalOpen(false)}
+        >
+          <div 
+            className="bg-[#FAF8F5] text-[#0C2340] rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 relative text-left space-y-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1058A8] block">
+                {lang === 'sw' ? 'Uhusiano na Watunzi' : 'Composer Relations & Copyright'}
+              </span>
+              <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340] mt-1">
+                {lang === 'sw' ? 'Kushiriki au Kuondoa Noti' : 'Share or Request Removal of Scores'}
+              </h3>
+            </div>
+
+            <p className="text-xs text-slate-700 leading-relaxed">
+              {lang === 'sw'
+                ? 'Kwaya ya Mtakatifu Monika (Section 58, Nakuru) inatambua na kuheshimu jasho na kazi ya kila mtunzi wa nyimbo za Kanisa Katoliki. Hatupakii noti bila uhakika wa haki miliki au idhini ya wazi.'
+                : 'St. Monica Catholic Choir (Section 58, Nakuru) deeply respects composers and copyright laws. We only host public domain scores or music shared with explicit written consent.'}
+            </p>
+
+            {/* Ready-to-Send Permission Message Template */}
+            <div className="p-3.5 bg-white border border-[#0C2340]/15 rounded-xl space-y-2">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                <span>{lang === 'sw' ? 'Ujumbe wa Kuomba Idhini (WhatsApp/Barua Pepe):' : 'Standard Permission Request Message:'}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyTemplate}
+                  className="text-[#1058A8] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedTemplate ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-slate-600 font-mono italic p-2 bg-slate-50 rounded border border-slate-200">
+                "Hello [name]. We are St. Monica Catholic Choir in Nakuru. We are building a free library of Catholic song scores for choirs across Kenya. May we share your score of [song title], with your name as composer, as a free PDF download on our site? You can ask us to remove it at any time. Thank you and God bless."
+              </p>
+            </div>
+
+            {/* Direct Contact Buttons with Real Working Address */}
+            <div className="space-y-2 text-xs">
+              <span className="font-bold text-[#0C2340] block">
+                {lang === 'sw' ? 'Njia za Haraka za Mawasiliano:' : 'Direct Contact Channels:'}
+              </span>
+              
+              <div className="flex flex-col sm:flex-row gap-2">
+                <a
+                  href={`mailto:${CHOIR_STATS.email}?subject=Maktaba%20ya%20Noti%20-%20Composer%20Request`}
+                  className="flex-1 p-2.5 rounded-xl bg-white border border-slate-300 hover:border-[#1058A8] text-center font-semibold text-[#0C2340] hover:text-[#1058A8] transition-colors"
+                >
+                  Email: {CHOIR_STATS.email}
+                </a>
+
+                <a
+                  href={CHOIR_STATS.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 p-2.5 rounded-xl bg-[#1058A8] text-white hover:bg-[#0C2340] text-center font-bold transition-colors"
+                >
+                  WhatsApp: +254 722 845 291
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setIsComposerModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold cursor-pointer"
+              >
+                {lang === 'sw' ? 'Funga' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};

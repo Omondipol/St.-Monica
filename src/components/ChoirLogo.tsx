@@ -1,312 +1,448 @@
 import React, { useState } from 'react';
-import sealImg from '../assets/images/st_monica_choir_seal_1791360974646.jpg';
 import { useChoir } from '../context/ChoirContext';
+import { Music, Download, Check } from 'lucide-react';
 
-interface ChoirLogoProps {
+export interface ChoirLogoProps {
   size?: number;
   className?: string;
   showText?: boolean;
-  variant?: 'image' | 'vector' | 'badge';
+  variant?: 'image' | 'vector' | 'badge' | 'simplified' | 'full';
   interactive?: boolean;
+  title?: string;
 }
 
 /**
- * High-definition Choir Logo & Seal Component for Kwaya ya Mtakatifu Monika (SEC 58 Nakuru).
- * Features high-resolution official crest image rendering with an ultra-precise vector SVG fallback,
- * dignified gold & royal blue heraldry, and crisp Catholic choral seal typography.
+ * Official Church Choir Emblem of St. Monica Third Mass Choir
+ * Catholic Church · Section 58 · Diocese of Nakuru
+ *
+ * Designed for High-Readability Without Zooming & Zero Edge Clipping:
+ * 1. Bright Gold Outer Ring (~4px thick rendered at 72px)
+ * 2. Warm Cream Centre (#FAF8F5)
+ * 3. Sacred Musical Centerpiece enlarged to fill ~70% of the circle:
+ *    - Descending Holy Spirit Dove radiating golden rays of grace
+ *    - Holy Latin Cross in deep Marian Navy intertwined with sculpted Treble Clef
+ *    - Open Sacred Liturgical Hymnal at base with crimson ribbon
+ *    - Dynamic 5-line staff waves with floating choral notes
+ * 4. Full Variant: Circular Marian navy ring with high-contrast bold lettering & balanced stars
  */
-export const ChoirLogo: React.FC<ChoirLogoProps> = ({ 
-  size = 48, 
-  className = '', 
-  showText = false,
-  variant = 'badge',
-  interactive = false
+export const BrightChoirLogoSvg: React.FC<{ 
+  size?: number; 
+  className?: string;
+  variant?: 'simplified' | 'full' | 'vector' | 'badge' | 'image';
+}> = ({
+  size = 72,
+  className = '',
+  variant = 'full'
 }) => {
-  const { lang } = useChoir();
-  const [imageError, setImageError] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  // If variant is 'full' or 'badge', show the full seal with the outer text ring
+  const isFullSeal = variant === 'full' || variant === 'badge';
 
-  // Precision-crafted SVG vector seal
-  const vectorSvg = (
+  return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 200 200"
+      viewBox="-10 -10 260 260"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0 block select-none"
-      aria-label="Kwaya ya Mtakatifu Monika, SEC 58 Nakuru Official Seal"
+      className={`shrink-0 block select-none overflow-visible ${className}`}
+      aria-label="Official Logo of St. Monica Third Mass Choir Section 58 Nakuru"
       shapeRendering="geometricPrecision"
       textRendering="geometricPrecision"
     >
       <defs>
-        {/* Radial subtle sacred gold glow */}
-        <radialGradient id="sacredCenterGlow" cx="50%" cy="46%" r="50%">
-          <stop offset="0%" stopColor="#FFFDF7" />
-          <stop offset="65%" stopColor="#FDF8EC" />
-          <stop offset="100%" stopColor="#F5E8C8" />
+        {/* Bright Liturgical Gold Gradient */}
+        <linearGradient id="brightGoldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FDE68A" />
+          <stop offset="35%" stopColor="#F59E0B" />
+          <stop offset="70%" stopColor="#D97706" />
+          <stop offset="100%" stopColor="#B45309" />
+        </linearGradient>
+
+        {/* Warm Cream Sanctuary Center */}
+        <radialGradient id="creamSanctuary" cx="50%" cy="40%" r="65%">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="70%" stopColor="#FAF8F5" />
+          <stop offset="100%" stopColor="#F5EFE6" />
         </radialGradient>
 
-        {/* Royal Blue Metallic Gradient */}
-        <linearGradient id="royalBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#0B3C73" />
-          <stop offset="50%" stopColor="#0E4E96" />
-          <stop offset="100%" stopColor="#072B54" />
-        </linearGradient>
+        {/* Deep Marian Royal Navy Ring Band (Full Seal) */}
+        <radialGradient id="marianNavyBand" cx="50%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#10325D" />
+          <stop offset="60%" stopColor="#0A1D37" />
+          <stop offset="100%" stopColor="#030A14" />
+        </radialGradient>
 
-        {/* Marian Azure & Silver Liturgical Gradient (Sticking to Cathedral Royal Blue theme) */}
-        <linearGradient id="azureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#7EC8F0" />
-          <stop offset="50%" stopColor="#38BDF8" />
-          <stop offset="100%" stopColor="#0E56A6" />
-        </linearGradient>
+        {/* Radiant Divine Halo around Cross & Dove */}
+        <radialGradient id="holyGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.45" />
+          <stop offset="60%" stopColor="#BAE6FD" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+        </radialGradient>
 
-        {/* Top Text Arc: Clockwise over 12 o'clock (R = 76) */}
-        <path
-          id="sealTopArc"
-          d="M 28,88 A 76,76 0 0,1 172,88"
-          fill="none"
-        />
+        {/* Deep Drop Shadow for Text Clarity in Full Seal */}
+        <filter id="crispTextShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1.4" stdDeviation="0.9" floodColor="#000000" floodOpacity="0.9" />
+        </filter>
 
-        {/* 
-          Bottom Text Arc: Counter-clockwise along bottom (R = 78)
-          Spans from (38, 134) through 6 o'clock (100, 178) to (162, 134)
-          baseline at 78 keeps font-size 11 well clear of inner ring (R = 64)
-        */}
-        <path
-          id="sealBottomArc"
-          d="M 38,136 A 78,78 0 0,0 162,136"
-          fill="none"
-        />
+        {/* Top Text Arc (Radius 94, plenty of breathing room, zero left clipping) */}
+        <path id="crestTopArc" d="M 26,120 A 94,94 0 0,1 214,120" fill="none" />
+        {/* Bottom Text Arc */}
+        <path id="crestBottomArc" d="M 28,120 A 92,92 0 0,0 212,120" fill="none" />
+
+        {/* Clip path for inner circle */}
+        <clipPath id="innerCreamClip">
+          <circle cx="120" cy="120" r="102" />
+        </clipPath>
       </defs>
 
-      {/* Outer Marian Azure Border Rim */}
-      <circle cx="100" cy="100" r="98" fill="url(#azureGrad)" />
-      
-      {/* Outer Blue Band Ring */}
-      <circle cx="100" cy="100" r="95" fill="url(#royalBlueGrad)" />
+      {isFullSeal ? (
+        /* ========================================================
+           FULL SEAL VARIANT: With Outer Navy Band & Arc Text
+           ======================================================== */
+        <g id="fullSealGroup">
+          {/* Outer Ring & Marian Navy Band (R=108, leaving 6px margin so zero clipping) */}
+          <circle cx="120" cy="120" r="110" fill="url(#marianNavyBand)" stroke="url(#brightGoldRing)" strokeWidth="8" />
+          <circle cx="120" cy="120" r="105" stroke="#38BDF8" strokeWidth="1.2" opacity="0.9" fill="none" />
+          <circle cx="120" cy="120" r="74" stroke="url(#brightGoldRing)" strokeWidth="3" fill="#FAF8F5" />
 
-      {/* Inner Rim dividing text band from center */}
-      <circle cx="100" cy="100" r="64" fill="url(#azureGrad)" stroke="#0E56A6" strokeWidth="0.8" />
-      
-      {/* Center Sacred Sanctuary Medallion */}
-      <circle cx="100" cy="100" r="62" fill="url(#sacredCenterGlow)" />
+          {/* Top Arc Text */}
+          <text
+            fill="#FFFFFF"
+            stroke="#FFFFFF"
+            strokeWidth="0.4"
+            paintOrder="stroke fill"
+            fontSize="15"
+            fontWeight="900"
+            fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+            letterSpacing="1.2"
+            filter="url(#crispTextShadow)"
+          >
+            <textPath href="#crestTopArc" startOffset="50%" textAnchor="middle">
+              ST. MONICA THIRD MASS CHOIR
+            </textPath>
+          </text>
 
-      {/* TOP TEXT: KWAYA YA MTAKATIFU MONICA (Crisp Pure White Lettering) */}
-      <text
-        fill="#FFFFFF"
-        stroke="#072B54"
-        strokeWidth="0.5"
-        fontSize="11.8"
-        fontWeight="800"
-        fontFamily="'Fraunces', 'Cinzel', 'Times New Roman', Georgia, serif"
-        letterSpacing="1.2"
-      >
-        <textPath href="#sealTopArc" startOffset="50%" textAnchor="middle">
-          KWAYA YA MTAKATIFU MONICA
-        </textPath>
-      </text>
+          {/* Left Choral Star Accent (balanced below top arc) */}
+          <g transform="translate(24, 137)">
+            <polygon points="5,0 6.5,3.8 10.5,3.8 7.3,6.3 8.5,10 5,7.5 1.5,10 2.7,6.3 -0.5,3.8 3.5,3.8" fill="#F59E0B" />
+            <circle cx="5" cy="5" r="1.3" fill="#FFFFFF" />
+          </g>
 
-      {/* Left Star (9 o'clock) */}
-      <polygon
-        points="22,98 24.5,103 30,103.5 25.8,107 27.2,112.5 22,109.5 16.8,112.5 18.2,107 14,103.5 19.5,103"
-        fill="url(#azureGrad)"
-        stroke="#FFFFFF"
-        strokeWidth="0.6"
-      />
+          {/* Right Choral Star Accent (balanced below top arc) */}
+          <g transform="translate(206, 137)">
+            <polygon points="5,0 6.5,3.8 10.5,3.8 7.3,6.3 8.5,10 5,7.5 1.5,10 2.7,6.3 -0.5,3.8 3.5,3.8" fill="#F59E0B" />
+            <circle cx="5" cy="5" r="1.3" fill="#FFFFFF" />
+          </g>
 
-      {/* Right Star (3 o'clock) */}
-      <polygon
-        points="178,98 180.5,103 186,103.5 181.8,107 183.2,112.5 178,109.5 172.8,112.5 174.2,107 170,103.5 175.5,103"
-        fill="url(#azureGrad)"
-        stroke="#FFFFFF"
-        strokeWidth="0.6"
-      />
+          {/* Bottom Arc Text: "SECTION 58 · NAKURU" */}
+          <text
+            fill="#38BDF8"
+            stroke="#38BDF8"
+            strokeWidth="0.3"
+            paintOrder="stroke fill"
+            fontSize="13"
+            fontWeight="850"
+            fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+            letterSpacing="2.0"
+            filter="url(#crispTextShadow)"
+          >
+            <textPath href="#crestBottomArc" startOffset="50%" textAnchor="middle">
+              SECTION 58 · NAKURU
+            </textPath>
+          </text>
+        </g>
+      ) : (
+        /* ========================================================
+           SIMPLIFIED HEADER / MINI-PLAYER EMBLEM:
+           - Bright Gold Ring (~4px thick rendered)
+           - Warm Cream Centre (#FAF8F5)
+           - Enlarged Symbol Filling ~70% of the Circle (Holds up at small sizes)
+           - Zero Left Edge Cutoff (R=108 with 6px margin inside 240x240 box)
+           ======================================================== */
+        <g id="simplifiedLogoMark">
+          {/* Outer 4px Bright Gold Ring & Warm Cream Center */}
+          <circle
+            cx="120"
+            cy="120"
+            r="108"
+            fill="url(#creamSanctuary)"
+            stroke="url(#brightGoldRing)"
+            strokeWidth="14"
+          />
+          {/* Inner Delicate Gold Rim Accent */}
+          <circle
+            cx="120"
+            cy="120"
+            r="100.5"
+            stroke="#D97706"
+            strokeWidth="1.5"
+            fill="none"
+            opacity="0.65"
+          />
+        </g>
+      )}
 
-      {/* BOTTOM TEXT: SEC 58 NAKURU */}
-      <text
-        fill="#7EC8F0"
-        fontSize="13.2"
-        fontWeight="800"
-        fontFamily="'Source Sans 3', 'Arial', sans-serif"
-        letterSpacing="2.8"
-      >
-        <textPath href="#sealBottomArc" startOffset="50%" textAnchor="middle">
-          SEC 58 · NAKURU
-        </textPath>
-      </text>
+      {/* ========================================================
+          CENTRAL SACRED HARMONIC EMBLEM (Filling ~70% of the circle)
+          Faith & Sacred Choral Song United:
+          Cross + Treble Clef + Holy Spirit Dove + Open Hymnal
+          ======================================================== */}
+      <g id="sacredHarmonicCenter" transform={isFullSeal ? "translate(120, 120) scale(0.68) translate(-120, -120)" : ""}>
+        
+        {/* Soft Divine Halo behind the Cross */}
+        <circle cx="120" cy="98" r="54" fill="url(#holyGlow)" />
 
-      {/* =================================================================
-          CENTER ARTWORK: ST. MONICA VEILED PROFILE + TREBLE CLEF + PIANO KEYS
-          ================================================================= */}
-      <g id="center-crest-art">
-        {/* Subtle celestial radiant rays behind the patroness */}
-        <path d="M 100,50 L 100,42 M 85,54 L 80,48 M 115,54 L 120,48 M 72,67 L 65,63 M 128,67 L 135,63" 
-              stroke="#7EC8F0" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
-
-        {/* 1. St. Monica Profile with Reverent Prayer Veil (Marian Navy & Azure) */}
-        {/* Veil mantle silhouette */}
+        {/* Church Sanctuary Arch Outline */}
         <path
-          d="M 98,46
-             C 91,52 82,60 76,68
-             C 71,74 69,82 69,89
-             C 69,96 72,104 76,112
-             C 80,120 84,126 86,128
-             C 83,123 79,114 77,105
-             C 75,97 75,90 77,84
-             C 79,78 84,70 91,62
-             C 95,57 98,52 98,46 Z"
-          fill="#0B3C73"
-        />
-
-        {/* Face and Serene Forehead Profile */}
-        <path
-          d="M 92,60
-             C 88,64 85,69 84,75
-             C 83,78 81,80 81,82
-             C 81,84 83,85 83,87
-             C 83,89 80,90 80,93
-             C 80,96 83,98 84,101
-             C 86,106 90,111 93,115
-             C 90,109 88,102 88,96
-             C 88,91 89,86 91,81
-             C 93,75 96,69 98,64
-             C 95,62 93,61 92,60 Z"
-          fill="#104F96"
-        />
-
-        {/* Marian Azure Nimbus / Veil Border Accent */}
-        <path
-          d="M 99,45 C 91,52 80,63 75,72 C 70,80 68,90 68,98"
-          stroke="url(#azureGrad)"
-          strokeWidth="1.6"
-          strokeLinecap="round"
+          d="M 76,192 L 76,104 C 76,72 164,72 164,104 L 164,192"
+          stroke="#93C5FD"
+          strokeWidth="1.2"
           fill="none"
+          opacity="0.45"
+          strokeDasharray="4 3"
         />
 
-        {/* 2. Classical Treble Clef in Radiant Marian Azure & Navy */}
-        {/* Clef Upper Loop */}
-        <path
-          d="M 107,46
-             C 104,56 109,68 115,77
-             C 119,83 122,90 120,97
-             C 118,104 112,108 106,107
-             C 101,105 99,100 102,94
-             C 104,90 109,90 111,93
-             C 113,96 111,100 108,100"
-          stroke="#072B54"
-          strokeWidth="3.2"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <path
-          d="M 107,46
-             C 104,56 109,68 115,77
-             C 119,83 122,90 120,97
-             C 118,104 112,108 106,107
-             C 101,105 99,100 102,94
-             C 104,90 109,90 111,93
-             C 113,96 111,100 108,100"
-          stroke="url(#azureGrad)"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          fill="none"
-        />
+        {/* Dynamic 5-Line Musical Staff Waves (Polyphony of Praise) */}
+        <g opacity="0.4" stroke="#0284C7" strokeWidth="1.2" fill="none">
+          <path d="M 44,142 C 72,118 108,148 144,124 C 166,110 182,116 196,124" />
+          <path d="M 44,146 C 72,122 108,152 144,128 C 166,114 182,120 196,128" />
+          <path d="M 44,150 C 72,126 108,156 144,132 C 166,118 182,124 196,132" />
+          <path d="M 44,154 C 72,130 108,160 144,136 C 166,122 182,128 196,136" />
+          <path d="M 44,158 C 72,134 108,164 144,140 C 166,126 182,132 196,140" />
+        </g>
 
-        {/* Clef Main Spine descending to bottom curl */}
-        <path
-          d="M 107,46
-             C 111,43 115,48 116,54
-             C 119,65 116,77 111,88
-             C 106,99 101,109 102,120
-             C 103,130 109,137 104,144
-             C 100,149 93,147 92,141
-             C 91,135 97,133 100,137"
-          stroke="#072B54"
-          strokeWidth="3.2"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <path
-          d="M 107,46
-             C 111,43 115,48 116,54
-             C 119,65 116,77 111,88
-             C 106,99 101,109 102,120
-             C 103,130 109,137 104,144
-             C 100,149 93,147 92,141
-             C 91,135 97,133 100,137"
-          stroke="url(#azureGrad)"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          fill="none"
-        />
-        {/* Clef Terminal Dot */}
-        <circle cx="94" cy="141" r="4.2" fill="url(#azureGrad)" stroke="#072B54" strokeWidth="1" />
+        {/* Floating Musical Eighth Notes */}
+        <g transform="translate(62, 94)">
+          <ellipse cx="6" cy="14" rx="3.6" ry="2.8" fill="#1058A8" transform="rotate(-25 6 14)" />
+          <line x1="9" y1="13" x2="9" y2="1.5" stroke="#1058A8" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M 9,1.5 C 13.5,3.5 16,5.5 17.5,9" stroke="#1058A8" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          <circle cx="18" cy="5" r="1.3" fill="#38BDF8" />
+        </g>
 
-        {/* 3. Grand Piano Keyboard Ribbon with Dimensional Keys */}
-        {/* White keys ribbon base fill */}
-        <path
-          d="M 94,68 C 88,86 82,106 83,124 C 84,133 94,140 114,141 L 119,139 C 104,136 97,128 97,114 C 96,96 102,78 104,66 Z"
-          fill="#FFFFFF"
-          stroke="#072B54"
-          strokeWidth="1.4"
-        />
+        <g transform="translate(154, 88)">
+          <ellipse cx="4" cy="15" rx="3.4" ry="2.6" fill="#1058A8" transform="rotate(-25 4 15)" />
+          <ellipse cx="14" cy="12" rx="3.4" ry="2.6" fill="#1058A8" transform="rotate(-25 14 12)" />
+          <line x1="6.5" y1="14" x2="6.5" y2="3" stroke="#1058A8" strokeWidth="1.8" />
+          <line x1="16.5" y1="11" x2="16.5" y2="0" stroke="#1058A8" strokeWidth="1.8" />
+          <line x1="6.5" y1="3" x2="16.5" y2="0" stroke="#1058A8" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="19" cy="-2" r="1.3" fill="#38BDF8" />
+        </g>
 
-        {/* Individual Key Dividers */}
-        <line x1="94" y1="72" x2="103" y2="70" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="91" y1="78" x2="104" y2="76" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="88" y1="84" x2="106" y2="83" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="86" y1="90" x2="107" y2="90" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="84" y1="96" x2="107" y2="97" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="83" y1="102" x2="105" y2="104" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="83" y1="108" x2="103" y2="110" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="84" y1="114" x2="103" y2="116" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="86" y1="120" x2="105" y2="122" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="89" y1="126" x2="107" y2="127" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="93" y1="131" x2="110" y2="132" stroke="#072B54" strokeWidth="1.8" />
-        <line x1="98" y1="135" x2="113" y2="136" stroke="#072B54" strokeWidth="1.8" />
+        {/* MASTERPIECE CENTERPIECE: HOLY CROSS & TREBLE CLEF INTERTWINED */}
+        <g id="crossAndClefUnity">
+          {/* Subtle White Aura for Contrast on Cream */}
+          <rect x="113" y="60" width="14" height="96" rx="4" fill="#FFFFFF" opacity="0.9" />
+          <rect x="94" y="80" width="52" height="14" rx="4" fill="#FFFFFF" opacity="0.9" />
 
-        {/* Raised Ebony / Black Keys */}
-        <line x1="92" y1="75" x2="98" y2="74" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
-        <line x1="89" y1="81" x2="96" y2="80" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
-        <line x1="85" y1="93" x2="94" y2="94" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
-        <line x1="84" y1="99" x2="93" y2="100" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
-        <line x1="83" y1="105" x2="92" y2="107" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
-        <line x1="85" y1="117" x2="93" y2="119" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
-        <line x1="88" y1="123" x2="96" y2="125" stroke="#072B54" strokeWidth="3.2" strokeLinecap="square" />
+          {/* Holy Cross Vertical Beam (Deep Marian Navy #0C2340) */}
+          <rect
+            x="115"
+            y="62"
+            width="10"
+            height="92"
+            rx="2.5"
+            fill="#0C2340"
+            stroke="#F59E0B"
+            strokeWidth="1.2"
+          />
+          {/* Holy Cross Horizontal Beam */}
+          <rect
+            x="96"
+            y="82"
+            width="48"
+            height="10"
+            rx="2.5"
+            fill="#0C2340"
+            stroke="#F59E0B"
+            strokeWidth="1.2"
+          />
 
-        {/* 4. Delicate floating choral notes */}
-        {/* Quaver Note at top right */}
-        <circle cx="128" cy="62" r="2.8" fill="url(#azureGrad)" />
-        <path d="M 130,62 L 130,50 C 133,52 136,53 138,51" stroke="#0B3C73" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+          {/* Central Golden Cross Intersection Diamond */}
+          <polygon
+            points="120,81 126,87 120,93 114,87"
+            fill="#FDE68A"
+            stroke="#D97706"
+            strokeWidth="1"
+          />
 
-        {/* Semiquaver Note at upper left */}
-        <circle cx="70" cy="60" r="2.6" fill="url(#azureGrad)" />
-        <path d="M 72,60 L 72,49 C 75,51 77,52 79,50" stroke="#0B3C73" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          {/* Sculpted Treble Clef Intertwined Around Cross */}
+          {/* High-visibility white backdrop outline */}
+          <path
+            d="M 120,52
+               C 123,52 129,60 129,70
+               C 129,80 123,87 118,92
+               L 112,98
+               C 101,108 97,121 101,133
+               C 106,143 117,147 127,144
+               C 137,141 143,131 143,121
+               C 143,110 135,103 125,103
+               C 114,103 107,112 108,122
+               C 109,129 114,133 120,132
+               C 125,131 127,126 126,121
+               C 125,117 121,116 118,118
+               M 120,52
+               L 120,152
+               C 120,157 117,161 113,161
+               C 109,161 107,157 108,153
+               C 109,150 112,148 115,149"
+            stroke="#FFFFFF"
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            opacity="0.95"
+          />
+
+          {/* Royal Blue Treble Clef (#1058A8) */}
+          <path
+            d="M 120,52
+               C 123,52 129,60 129,70
+               C 129,80 123,87 118,92
+               L 112,98
+               C 101,108 97,121 101,133
+               C 106,143 117,147 127,144
+               C 137,141 143,131 143,121
+               C 143,110 135,103 125,103
+               C 114,103 107,112 108,122
+               C 109,129 114,133 120,132
+               C 125,131 127,126 126,121
+               C 125,117 121,116 118,118
+               M 120,52
+               L 120,152
+               C 120,157 117,161 113,161
+               C 109,161 107,157 108,153
+               C 109,150 112,148 115,149"
+            stroke="#1058A8"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+
+          {/* Treble Clef Terminal Pearl Dot at base */}
+          <circle cx="114" cy="153" r="3.2" fill="#0C2340" stroke="#F59E0B" strokeWidth="1" />
+        </g>
+
+        {/* DESCENDING HOLY SPIRIT DOVE AT APEX */}
+        <g id="holySpiritDoveApex" transform="translate(120, 50)">
+          {/* Golden halo around Dove */}
+          <ellipse cx="0" cy="0" rx="14" ry="10" fill="#FEF08A" opacity="0.6" />
+          
+          {/* White Dove Body & Wings */}
+          <path
+            d="M 0,-8
+               C -4,-12 -14,-13 -22,-9
+               C -18,-5 -12,-3 -6,-2
+               C -10,3 -13,8 -14,12
+               C -9,10 -4,7 0,4
+               C 4,7 9,10 14,12
+               C 13,8 10,3 6,-2
+               C 12,-3 18,-5 22,-9
+               C 14,-13 4,-12 0,-8 Z"
+            fill="#FFFFFF"
+            stroke="#0C2340"
+            strokeWidth="1.2"
+          />
+
+          {/* Dove Tail & Olive Branch of Peace */}
+          <path d="M 0,4 L 0,11" stroke="#0C2340" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M -2,8 C -4,7 -5,5 -5,4" stroke="#15803D" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+          <path d="M 2,8 C 4,7 5,5 5,4" stroke="#15803D" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        </g>
+
+        {/* THE OPEN SACRED HYMNAL (PSALTER / CANTATE DOMINO) */}
+        <g id="openSacredHymnal">
+          {/* Hymnal Leather Cover Base */}
+          <path
+            d="M 84,166
+               C 100,160 114,162 120,165
+               C 126,162 140,160 156,166
+               L 154,183
+               C 138,178 126,179 120,182
+               C 114,179 102,178 86,183 Z"
+            fill="#0A1D37"
+            stroke="#D97706"
+            strokeWidth="1.2"
+          />
+
+          {/* Left Page (Crisp Parchment White) */}
+          <path
+            d="M 86,165
+               C 100,160 112,161 119.5,164.5
+               L 119.5,180
+               C 112,177 100,176.5 87,181 Z"
+            fill="#FFFFFF"
+            stroke="#CBD5E1"
+            strokeWidth="0.8"
+          />
+
+          {/* Right Page (Crisp Parchment White) */}
+          <path
+            d="M 120.5,164.5
+               C 128,161 140,160 154,165
+               L 153,181
+               C 140,176.5 128,177 120.5,180 Z"
+            fill="#FFFFFF"
+            stroke="#CBD5E1"
+            strokeWidth="0.8"
+          />
+
+          {/* Liturgical Red Ribbon Bookmark */}
+          <path
+            d="M 119,164.5
+               L 118,187
+               L 120,184
+               L 122,187
+               L 121,164.5 Z"
+            fill="#DC2626"
+          />
+
+          {/* Musical Staves on Left Page */}
+          <line x1="91" y1="169" x2="114" y2="168" stroke="#1058A8" strokeWidth="0.9" opacity="0.8" />
+          <line x1="92" y1="172" x2="115" y2="171" stroke="#1058A8" strokeWidth="0.9" opacity="0.8" />
+          <line x1="93" y1="175" x2="114" y2="174" stroke="#1058A8" strokeWidth="0.9" opacity="0.8" />
+
+          {/* Musical Staves on Right Page */}
+          <line x1="126" y1="168" x2="149" y2="169" stroke="#1058A8" strokeWidth="0.9" opacity="0.8" />
+          <line x1="125" y1="171" x2="148" y2="172" stroke="#1058A8" strokeWidth="0.9" opacity="0.8" />
+          <line x1="126" y1="174" x2="147" y2="175" stroke="#1058A8" strokeWidth="0.9" opacity="0.8" />
+
+          {/* Small Note on Left Page */}
+          <circle cx="96" cy="168.5" r="1.1" fill="#1058A8" />
+          <line x1="97" y1="168.5" x2="97" y2="166" stroke="#1058A8" strokeWidth="0.8" />
+          {/* Small Note on Right Page */}
+          <circle cx="144" cy="169.5" r="1.1" fill="#1058A8" />
+          <line x1="145" y1="169.5" x2="145" y2="167" stroke="#1058A8" strokeWidth="0.8" />
+        </g>
       </g>
     </svg>
   );
+};
 
-  // The primary visual element: High-Resolution Photographic Seal with Vector Fallback
+// Simplified alias for backwards compatibility
+export const SimplifiedLogoMark = BrightChoirLogoSvg;
+
+export const ChoirLogo: React.FC<ChoirLogoProps> = ({ 
+  size = 72, 
+  className = '', 
+  showText = false,
+  variant = 'full',
+  interactive = false,
+  title = "St. Monica Third Mass Choir Section 58 Nakuru Official Logo"
+}) => {
+  const { lang } = useChoir();
+  const [showModal, setShowModal] = useState(false);
+
+  // The Primary Logo: Sacred heraldic church choir emblem with bright gold ring, cream centre, and enlarged ~70% symbol
   const logoContent = (
     <div 
       style={{ width: size, height: size }}
-      className={`relative rounded-full select-none shrink-0 overflow-hidden shadow-md ring-2 ring-[#7EC8F0]/70 hover:ring-[#38BDF8] transition-all bg-white flex items-center justify-center ${className}`}
+      className={`relative shrink-0 flex items-center justify-center rounded-full shadow-[0_2px_12px_rgba(0,0,0,0.18)] hover:scale-105 transition-all duration-200 select-none ${interactive ? 'cursor-pointer' : ''} ${className}`}
       onClick={interactive ? () => setShowModal(true) : undefined}
       role={interactive ? "button" : undefined}
-      title="Official Seal: Kwaya ya Mtakatifu Monika, SEC 58 Nakuru"
+      title={title}
     >
-      {!imageError ? (
-        <img
-          src={sealImg}
-          alt="Kwaya ya Mtakatifu Monika, SEC 58 Nakuru Official Seal"
-          className="w-full h-full object-cover rounded-full"
-          loading="eager"
-          onError={() => setImageError(true)}
-        />
-      ) : (
-        vectorSvg
-      )}
+      <BrightChoirLogoSvg size={size} variant={variant} />
     </div>
   );
 
@@ -327,10 +463,10 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
         {logoContent}
         <div className="flex flex-col text-left justify-center min-w-0">
           <span className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] leading-tight tracking-tight">
-            {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
+            {lang === 'sw' ? 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
           </span>
           <span className="text-[11px] font-semibold text-[#1058A8] font-source mt-0.5">
-            {lang === 'sw' ? 'Jimbo Katoliki la Nakuru' : 'Catholic Diocese of Nakuru'}
+            {lang === 'sw' ? 'Section 58 · Jimbo Katoliki la Nakuru' : 'Section 58 · Catholic Diocese of Nakuru'}
           </span>
         </div>
       </div>
@@ -344,71 +480,120 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
 // Modal for inspecting the official Choir crest in high resolution with heraldic details
 const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { lang } = useChoir();
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [crestTab, setCrestTab] = useState<'simplified' | 'full'>('simplified');
+
+  // Allow downloading the vector crest SVG as an official emblem asset
+  const handleDownloadCrest = () => {
+    try {
+      const svgElement = document.getElementById('official-highres-choir-crest')?.querySelector('svg');
+      if (!svgElement) return;
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = svgUrl;
+      downloadLink.download = `st-monica-third-mass-choir-${crestTab}-emblem.svg`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(svgUrl);
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 3000);
+    } catch {
+      // Fallback
+    }
+  };
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/75 backdrop-blur-xs animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1D37]/80 backdrop-blur-md animate-in fade-in duration-200 select-none"
       onClick={onClose}
     >
       <div 
-        className="bg-[#FAF8F5] text-[#0C2340] rounded-[12px] max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 relative text-left"
+        className="bg-[#FAF8F5] text-[#0C2340] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 relative text-left"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-[#0C2340] p-2 rounded-full cursor-pointer transition-colors"
+          className="absolute top-4 right-4 text-slate-400 hover:text-[#0C2340] p-2 rounded-full cursor-pointer transition-colors text-lg"
           aria-label={lang === 'sw' ? 'Funga' : 'Close'}
         >
           ✕
         </button>
 
         <div className="flex flex-col items-center text-center space-y-4">
-          <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden shadow-xl ring-4 ring-[#1058A8] bg-white p-1">
-            <img 
-              src={sealImg} 
-              alt={lang === 'sw' ? 'Ngao Rasmi ya Kwaya ya Mtakatifu Monika' : 'Official Seal of St. Monica Catholic Choir'} 
-              className="w-full h-full object-cover rounded-full"
-            />
+          {/* High-Resolution Crest Preview */}
+          <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full shadow-2xl flex items-center justify-center relative p-1">
+            <div id="official-highres-choir-crest" className="w-full h-full flex items-center justify-center">
+              <BrightChoirLogoSvg size={240} variant={crestTab} />
+            </div>
           </div>
 
-          <div>
+          {/* Toggle between Simplified and Full Seal in modal */}
+          <div className="flex items-center gap-2 bg-slate-200/70 p-1 rounded-xl text-xs font-semibold">
+            <button
+              onClick={() => setCrestTab('simplified')}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                crestTab === 'simplified' ? 'bg-white text-[#0C2340] shadow-xs' : 'text-slate-600 hover:text-[#0C2340]'
+              }`}
+            >
+              {lang === 'sw' ? 'Nembo Rahisi (Dhahabu)' : 'Simplified Mark (Gold)'}
+            </button>
+            <button
+              onClick={() => setCrestTab('full')}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                crestTab === 'full' ? 'bg-white text-[#0C2340] shadow-xs' : 'text-slate-600 hover:text-[#0C2340]'
+              }`}
+            >
+              {lang === 'sw' ? 'Muhuri Kamili (Mviringo)' : 'Full Seal (Circular)'}
+            </button>
+          </div>
+
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-sky-900 border border-sky-200 text-[11px] font-bold tracking-wide uppercase font-source">
+              <Music className="w-3.5 h-3.5 text-[#1058A8]" />
+              <span>{lang === 'sw' ? 'Nembo Rasmi ya Kwaya' : 'Official Church Choir Emblem'}</span>
+            </div>
             <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
-              {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
+              {lang === 'sw' ? 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
             </h3>
-            <p className="text-xs font-semibold text-[#1058A8] mt-1 font-source">
-              {lang === 'sw' ? 'Jimbo Katoliki la Nakuru · Kenya' : 'Catholic Diocese of Nakuru · Kenya'}
-            </p>
+            <span className="text-xs font-semibold text-[#1058A8] font-source tracking-wide uppercase block">
+              Section 58 · Catholic Diocese of Nakuru
+            </span>
           </div>
 
-          <div className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-4 text-xs text-[#0C2340]/90 text-left space-y-2 leading-relaxed font-source">
-            <p className="font-bold text-[#0C2340]">
-              {lang === 'sw' ? 'Alama na Maana ya Ngao ya Kwaya:' : 'Choir Seal & Heraldry Meaning:'}
-            </p>
-            <ul className="list-disc pl-4 space-y-1">
-              {lang === 'sw' ? (
+          <p className="text-xs text-slate-600 font-source leading-relaxed max-w-sm">
+            {lang === 'sw'
+              ? 'Msalaba Mtakatifu umeunganishwa na Alama ya Treble Clef, Njiwa wa Roho Mtakatifu akishusha neema, na Kitabu cha Sala chenye noti zinazopaa kumtukuza Mungu.'
+              : 'Sacred choral emblem uniting the Holy Cross of Christ with the Treble Clef, the Dove of the Holy Spirit radiating divine inspiration, and the Open Liturgical Hymnal.'}
+          </p>
+
+          <div className="flex items-center gap-3 w-full pt-1">
+            <button
+              onClick={handleDownloadCrest}
+              className="flex-1 py-2.5 px-4 bg-[#1058A8] hover:bg-[#0E56A6] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md font-source flex items-center justify-center gap-1.5"
+            >
+              {downloadSuccess ? (
                 <>
-                  <li><strong>Mtakatifu Monika:</strong> Mama mwenye sala isiyokoma na uvumilivu wa kiliturujia, somo wa kiroho wa waimbaji.</li>
-                  <li><strong>Ufunguo wa Muziki:</strong> Uongozi wa sauti nne za SATB kwa heshima ya Altare na Misa Takatifu.</li>
-                  <li><strong>Kinanda cha Piano:</strong> Ala za kiliturujia zinazosindikiza maombi na sifa za Kanisa Katoliki.</li>
-                  <li><strong>Nyota Mbili:</strong> Mshikamano, nidhamu na utume wa kwaya katika Jimbo Katoliki la Nakuru.</li>
+                  <Check className="w-4 h-4 text-white" />
+                  <span>{lang === 'sw' ? 'Imepakuliwa!' : 'Saved SVG!'}</span>
                 </>
               ) : (
                 <>
-                  <li><strong>Saint Monica:</strong> Mother of unceasing prayer and liturgical patience, our spiritual patroness and guide.</li>
-                  <li><strong>Treble Clef & Clefs:</strong> The four SATB vocal parts raised in dignity for Holy Mass and sacred liturgy.</li>
-                  <li><strong>Piano Keyboard:</strong> Liturgical instruments accompanying the sacred praise and prayer of the Church.</li>
-                  <li><strong>Two Stars:</strong> Unity, discipline, and fellowship across our liturgical ministry in Nakuru Diocese.</li>
+                  <Download className="w-4 h-4 text-white" />
+                  <span>{lang === 'sw' ? 'Pakua Nembo (SVG)' : 'Download Logo (SVG)'}</span>
                 </>
               )}
-            </ul>
-          </div>
+            </button>
 
-          <button
-            onClick={onClose}
-            className="w-full py-2.5 bg-[#1058A8] hover:bg-[#0E56A6] text-white font-semibold rounded-[12px] text-sm transition-colors cursor-pointer font-source"
-          >
-            {lang === 'sw' ? 'Funga' : 'Close'}
-          </button>
+            <button
+              onClick={onClose}
+              className="py-2.5 px-5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-sm font-source"
+            >
+              {lang === 'sw' ? 'Funga' : 'Close'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

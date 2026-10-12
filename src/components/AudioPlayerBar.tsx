@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Play, Pause, ChevronUp, ChevronDown } from 'lucide-react';
-import { SongCoverArt } from './SongCoverArt';
 import { RealAudioWaveform } from './RealAudioWaveform';
+import { ChoirLogo } from './ChoirLogo';
+import { SongCoverArt } from './SongCoverArt';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 const STORAGE_KEY_COLLAPSED = 'st_monica_player_collapsed';
@@ -110,10 +111,9 @@ export const AudioPlayerBar: React.FC = () => {
           role="button"
           aria-label={lang === 'sw' ? 'Panua kichezaji' : 'Expand player'}
         >
-          {/* Song Cover Thumbnail */}
-          <div className="absolute inset-0.5 rounded-full overflow-hidden">
-            <SongCoverArt song={currentSong} size="thumbnail" className="w-full h-full object-cover scale-110" />
-            <div className="absolute inset-0 bg-[#0C2340]/45 group-hover:bg-[#0C2340]/25 transition-colors" />
+          {/* Bright Choir Logo in Collapsed Mini Bubble */}
+          <div className="absolute inset-0.5 rounded-full overflow-hidden flex items-center justify-center">
+            <ChoirLogo size={44} />
           </div>
 
           {/* SVG Thin Progress Ring in Site's Single Blue */}
@@ -179,12 +179,26 @@ export const AudioPlayerBar: React.FC = () => {
         {/* DESKTOP LAYOUT: Every item vertically centred on one line with equal spacing */}
         <div className="hidden sm:flex items-center justify-between gap-4 w-full">
           
-          {/* 1. Left: Cover Thumbnail + 16px Title + Light Composer */}
+          {/* 1. Left: Clean Cover Thumbnail (Zero logo badge overlap) + Title + Composer */}
           <div 
             onClick={() => setIsNowPlayingExpanded(true)}
-            className="flex items-center gap-3 min-w-0 max-w-xs cursor-pointer group shrink-0"
+            className="flex items-center gap-3.5 min-w-0 max-w-sm cursor-pointer group shrink-0"
+            title={`${currentSong.title} — ${currentSong.composer}`}
           >
-            <SongCoverArt song={currentSong} size="thumbnail" className="w-10 h-10 rounded-lg shrink-0" />
+            {/* Cover Thumbnail with Choir Logo Badge sitting on cover thumbnail as it was */}
+            <div className="relative shrink-0">
+              <SongCoverArt 
+                song={currentSong} 
+                size="thumbnail" 
+                className="w-11 h-11 rounded-lg shrink-0 group-hover:scale-105 transition-transform" 
+              />
+              <div 
+                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#0C2340] border border-white/50 shadow-md flex items-center justify-center overflow-hidden pointer-events-none"
+                title="St. Monica Third Mass Choir"
+              >
+                <ChoirLogo size={18} variant="full" />
+              </div>
+            </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[16px] font-semibold text-white group-hover:text-sky-200 transition-colors truncate leading-tight">
                 {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
@@ -270,10 +284,20 @@ export const AudioPlayerBar: React.FC = () => {
           onClick={() => setIsNowPlayingExpanded(true)}
           className="flex sm:hidden items-center justify-between gap-3 cursor-pointer"
         >
-          {/* Cover & Title */}
+          {/* Cover Thumbnail & Title with Logo Badge as it was */}
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div id="mobile-mini-player-slot" className="w-10 h-10 rounded-lg overflow-hidden shrink-0 relative">
-              <SongCoverArt song={currentSong} size="thumbnail" className="w-10 h-10 shrink-0" />
+            <div className="relative shrink-0">
+              <SongCoverArt 
+                song={currentSong} 
+                size="thumbnail" 
+                className="w-10 h-10 rounded-lg shrink-0" 
+              />
+              <div 
+                className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-[#0C2340] border border-white/50 shadow-sm flex items-center justify-center overflow-hidden pointer-events-none"
+                title="St. Monica Third Mass Choir"
+              >
+                <ChoirLogo size={16} variant="full" />
+              </div>
             </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[15px] font-semibold text-white truncate leading-tight">

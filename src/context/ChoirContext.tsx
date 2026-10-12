@@ -16,6 +16,7 @@ import {
   INITIAL_EVENTS,
   CHOIR_STATS
 } from '../data/choirContent';
+import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
 
 export interface CartItem {
   product: ProductItem;
@@ -133,6 +134,7 @@ interface ChoirContextType {
   groupPhotosList: ChoirGroupPhoto[];
   productsList: ProductItem[];
   eventsList: EventItem[];
+  librarySongs: LibrarySong[];
 
   // Admin CRUD Functions
   addSong: (song: Omit<Song, 'id'>) => void;
@@ -149,6 +151,13 @@ interface ChoirContextType {
 
   addGroupPhoto: (photo: Omit<ChoirGroupPhoto, 'id'>) => void;
   deleteGroupPhoto: (id: string) => void;
+
+  // Maktaba ya Noti Library CRUD Functions
+  addLibrarySong: (song: Omit<LibrarySong, 'id' | 'downloadCount' | 'addedDate'>) => void;
+  updateLibrarySong: (id: string, updated: Partial<LibrarySong>) => void;
+  deleteLibrarySong: (id: string) => void;
+  bulkImportLibrarySongs: (newSongs: LibrarySong[]) => void;
+  incrementDownloadCount: (id: string) => void;
 
   resetToDefaults: () => void;
   exportDataJson: () => string;
@@ -180,7 +189,8 @@ const STORAGE_KEYS = {
   PHOTOS: 'st_monica_photos_data_v5',
   PRODUCTS: 'st_monica_products_data_v5',
   CART: 'st_monica_cart_data_v5',
-  LANG: 'st_monica_choir_lang_choice'
+  LANG: 'st_monica_choir_lang_choice',
+  LIBRARY: 'st_monica_library_data_v1'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -322,6 +332,25 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [productsList]);
 
   const [eventsList] = useState<EventItem[]>(INITIAL_EVENTS);
+
+  // 7b. Maktaba ya Noti (Free Sheet Music Library)
+  const [librarySongs, setLibrarySongs] = useState<LibrarySong[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.LIBRARY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_LIBRARY_SONGS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(librarySongs));
+    } catch (e) {
+      // ignore
+    }
+  }, [librarySongs]);
 
   // 8. REAL AUDIBLE HTML5 AUDIO PLAYBACK ENGINE
   const [currentSong, setCurrentSong] = useState<Song>(() => songs[0] || INITIAL_SONGS_CATALOG[0]);
@@ -901,6 +930,38 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setGroupPhotosList(prev => prev.filter(p => p.id !== id));
   };
 
+  // Maktaba ya Noti Library CRUD Functions
+  const addLibrarySong = (newSong: Omit<LibrarySong, 'id' | 'downloadCount' | 'addedDate'>) => {
+    const id = `lib-${Date.now()}`;
+    const song: LibrarySong = {
+      ...newSong,
+      id,
+      downloadCount: 0,
+      addedDate: new Date().toISOString().split('T')[0]
+    };
+    setLibrarySongs(prev => [song, ...prev]);
+  };
+
+  const updateLibrarySong = (id: string, updated: Partial<LibrarySong>) => {
+    setLibrarySongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+  };
+
+  const deleteLibrarySong = (id: string) => {
+    setLibrarySongs(prev => prev.filter(s => s.id !== id));
+  };
+
+  const bulkImportLibrarySongs = (newSongs: LibrarySong[]) => {
+    setLibrarySongs(prev => {
+      const existingIds = new Set(prev.map(s => s.id));
+      const additions = newSongs.filter(s => !existingIds.has(s.id));
+      return [...additions, ...prev];
+    });
+  };
+
+  const incrementDownloadCount = (id: string) => {
+    setLibrarySongs(prev => prev.map(s => s.id === id ? { ...s, downloadCount: (s.downloadCount || 0) + 1 } : s));
+  };
+
   const resetToDefaults = () => {
     try {
       localStorage.removeItem(STORAGE_KEYS.SONGS);
@@ -908,6 +969,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.removeItem(STORAGE_KEYS.LEADERS);
       localStorage.removeItem(STORAGE_KEYS.PHOTOS);
       localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
+      localStorage.removeItem(STORAGE_KEYS.LIBRARY);
     } catch (e) {
       // ignore
     }
@@ -917,6 +979,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLeadersList(INITIAL_LEADERS);
     setGroupPhotosList(INITIAL_GROUP_PHOTOS);
     setProductsList(INITIAL_PRODUCTS);
+    setLibrarySongs(INITIAL_LIBRARY_SONGS);
   };
 
   const exportDataJson = (): string => {
@@ -928,7 +991,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       sheetMusicList,
       leadersList,
       groupPhotosList,
-      productsList
+      productsList,
+      librarySongs
     };
     return JSON.stringify(backup, null, 2);
   };
@@ -951,6 +1015,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       if (data.productsList && Array.isArray(data.productsList)) {
         setProductsList(data.productsList);
+      }
+      if (data.librarySongs && Array.isArray(data.librarySongs)) {
+        setLibrarySongs(data.librarySongs);
       }
       return true;
     } catch (err) {
@@ -1051,6 +1118,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         groupPhotosList,
         productsList,
         eventsList,
+        librarySongs,
 
         addSong,
         updateSong,
@@ -1066,6 +1134,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         addGroupPhoto,
         deleteGroupPhoto,
+
+        addLibrarySong,
+        updateLibrarySong,
+        deleteLibrarySong,
+        bulkImportLibrarySongs,
+        incrementDownloadCount,
 
         resetToDefaults,
         exportDataJson,
@@ -1160,6 +1234,7 @@ export const useChoir = (): ChoirContextType => {
       groupPhotosList: INITIAL_GROUP_PHOTOS,
       productsList: INITIAL_PRODUCTS,
       eventsList: INITIAL_EVENTS,
+      librarySongs: INITIAL_LIBRARY_SONGS,
       addSong: () => {},
       updateSong: () => {},
       deleteSong: () => {},
@@ -1171,6 +1246,11 @@ export const useChoir = (): ChoirContextType => {
       deleteLeader: () => {},
       addGroupPhoto: () => {},
       deleteGroupPhoto: () => {},
+      addLibrarySong: () => {},
+      updateLibrarySong: () => {},
+      deleteLibrarySong: () => {},
+      bulkImportLibrarySongs: () => {},
+      incrementDownloadCount: () => {},
       resetToDefaults: () => {},
       exportDataJson: () => '[]',
       importDataJson: () => false

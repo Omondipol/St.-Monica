@@ -27,8 +27,8 @@ export const LeadershipView: React.FC = () => {
             </h1>
             <p className="text-[17px] text-[#0C2340]/80 font-source mt-2 max-w-2xl leading-relaxed">
               {lang === 'sw'
-                ? 'Utambuzi rasmi wa walimu wa muziki mtakatifu, mpiga kinanda mkuu, na maafisa wa kamati kuu wanaosimamia Kwaya ya Mtakatifu Monika.'
-                : 'Official recognition of the sacred music choirmasters, principal organist, and executive officers directing St. Monica Catholic Choir.'}
+                ? 'Utambuzi rasmi wa walimu wa muziki mtakatifu, mpiga kinanda mkuu, na maafisa wa kamati kuu wanaosimamia Kwaya ya Misa ya Tatu ya Mtakatifu Monika.'
+                : 'Official recognition of the sacred music choirmasters, principal organist, and executive officers directing St. Monica Third Mass Choir.'}
             </p>
           </div>
           <ChoirLogo size={60} interactive={true} className="shrink-0 self-start sm:self-center" />
