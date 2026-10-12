@@ -38,6 +38,11 @@ const DESKTOP_HERO_SLIDES = [
     description: "Full Choir at Sunday High Mass"
   },
   {
+    src: heroSlide5Church,
+    alt: "St. Monica's Catholic Church sanctuary and altar, Section 58 Nakuru",
+    description: "Parish Sanctuary & Church"
+  },
+  {
     src: heroSlide2Faces,
     alt: "Close-up of singers' faces singing liturgical praises",
     description: "Singers in Sacred Song"
@@ -46,16 +51,6 @@ const DESKTOP_HERO_SLIDES = [
     src: heroSlide3Director,
     alt: "The choirmaster directing the four vocal sections",
     description: "Choirmaster Directing"
-  },
-  {
-    src: heroSlide4Scores,
-    alt: "Liturgical music hymnal and choral scores",
-    description: "Sacred Scores & Hymnal"
-  },
-  {
-    src: heroSlide5Church,
-    alt: "The church sanctuary and congregation gathered in worship",
-    description: "Church Sanctuary & Parish"
   }
 ];
 
@@ -64,6 +59,11 @@ const MOBILE_HERO_SLIDES = [
     src: heroSlide1Portrait,
     alt: "Full choir shot at Mass altar",
     description: "Full Choir at Mass"
+  },
+  {
+    src: heroSlide5Church,
+    alt: "St. Monica's Catholic Church sanctuary",
+    description: "Parish Church"
   },
   {
     src: heroSlide2Portrait,
@@ -144,12 +144,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     }
   }, [activeSlides.length, currentSlideIndex]);
 
-  // 7-second auto advance, pause on hover, stop on prefers-reduced-motion
+  // 5.5-second auto advance, pause on hover, stop on prefers-reduced-motion
   useEffect(() => {
     if (prefersReducedMotion || isHovered) return;
     const interval = setInterval(() => {
       setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
-    }, 7000);
+    }, 5500);
     return () => clearInterval(interval);
   }, [activeSlides.length, isHovered, prefersReducedMotion]);
 
@@ -180,24 +180,25 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Background Slides: Absolute stacked layers with 1.5s crossfade and subtle 4% zoom */}
+        {/* Background Slides: Absolute stacked layers with smooth 1000ms crossfade and continuous Ken Burns zooming */}
         {activeSlides.map((slide, index) => {
           const isActive = index === currentSlideIndex;
           return (
             <div
               key={slide.src}
-              className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${
+              className={`absolute inset-0 transition-opacity duration-[1000ms] ease-in-out overflow-hidden ${
                 isActive ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
               }`}
               aria-hidden={!isActive}
             >
               <img
+                key={isActive ? `active-${slide.src}-${currentSlideIndex}` : `inactive-${slide.src}`}
                 src={slide.src}
                 alt={slide.alt}
                 loading={index === 0 ? 'eager' : 'lazy'}
-                className={`w-full h-full object-cover object-center ${
+                className={`w-full h-full object-cover object-center contrast-[1.05] brightness-[1.01] will-change-transform ${
                   !prefersReducedMotion && isActive
-                    ? 'scale-[1.04] transition-transform duration-[7000ms] ease-out'
+                    ? 'animate-ken-burns'
                     : 'scale-100'
                 }`}
                 referrerPolicy="no-referrer"
@@ -206,9 +207,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           );
         })}
 
-        {/* Soft dark gradient on the left so headline and buttons are always easy to read */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/60 via-30% to-transparent to-50% z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/85 via-transparent to-transparent sm:hidden z-10 pointer-events-none" />
+        {/* Strong dark gradient on the left so headline and buttons are always crystal clear against every photo */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 via-40% to-transparent to-75% z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/90 via-[#0C2340]/40 to-transparent sm:hidden z-10 pointer-events-none" />
 
         {/* Hero Content (kept exactly where it is) */}
         <div className="relative z-20 w-full sm:max-w-[65%] lg:max-w-[60%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12">

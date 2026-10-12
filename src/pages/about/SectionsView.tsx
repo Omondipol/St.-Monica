@@ -2,36 +2,40 @@ import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { VOICE_SECTIONS_DATA, SONGS_CATALOG } from '../../data/choirContent';
 import { Play, Pause } from 'lucide-react';
+import { AboutNavTabs } from '../../components/AboutNavTabs';
+import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 
-export const SectionsView: React.FC = () => {
+interface SectionsViewProps {
+  onNavigate?: (route: string) => void;
+}
+
+export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {} }) => {
   const { lang, currentSong, isPlaying, playSong } = useChoir();
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto">
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8 space-y-4">
-        <span className="text-[14px] font-semibold text-[#1058A8] font-source block">
-          {lang === 'sw' ? 'Muundo wa sauti nne (SATB)' : 'Ensemble voicing · Four-part SATB'}
-        </span>
-
-        <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-          {lang === 'sw' ? 'Sauti Nne za Kwaya ya Mtakatifu Monika' : 'The Four Voices of St. Monica Choir'}
-        </h1>
-
-        <p className="text-[17px] text-[#0C2340]/80 font-source leading-relaxed max-w-3xl">
-          {lang === 'sw'
-            ? 'Upatanisho wa kwaya unajengwa kwa sauti nne za nidhamu: Soprano, Alto, Tenor, na Bass. Kila sauti inafanya mazoezi chini ya uelekezi wa walimu kabla ya kuungana kwa pamoja madhabahuni.'
-            : 'Sacred polyphony is grounded in four disciplined sections: Soprano, Alto, Tenor, and Bass. Each section rehearses with dedicated vocal coaches before uniting as one voice before the altar.'}
-        </p>
-
-        {/* 5-line music-stave divider */}
-        <div className="stave-divider my-4 max-w-md">
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Page Title Banner (Matching Music Section Slim Banner) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <div className="absolute inset-0 bg-[#0C2340]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 to-[#1058A8]/40" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Muundo wa Sauti Nne' : 'SATB Voicing'}
+          </span>
+          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+            {lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}
+          </h1>
+          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+            {lang === 'sw'
+              ? 'Soprano, Alto, Tenor, na Bass zikiungana katika sala takatifu ya kiliturujia.'
+              : 'Soprano, Alto, Tenor, and Bass united in sacred four-part liturgical praise.'}
+          </p>
         </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
+
+      {/* Unified Section Navigation Tabs */}
+      <AboutNavTabs currentTab="about-sections" onNavigate={onNavigate} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {VOICE_SECTIONS_DATA.map((sec, idx) => {
@@ -40,36 +44,36 @@ export const SectionsView: React.FC = () => {
           return (
             <div
               key={idx}
-              className="p-6 sm:p-8 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] space-y-4 flex flex-col justify-between"
+              className="p-6 sm:p-8 bg-white/95 border border-[#0C2340]/10 rounded-2xl space-y-4 flex flex-col justify-between hover:border-[#1058A8]/30 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[14px] font-source font-semibold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-1 rounded-[12px]">
+                  <span className="text-xs font-source font-semibold text-[#1058A8] bg-[#EAF4FB] px-3 py-1 rounded-xl">
                     Range: {sec.range}
                   </span>
-                  <span className="text-[14px] font-semibold text-[#0C2340]/70 tabular-nums">
+                  <span className="text-xs font-semibold text-[#0C2340]/70 tabular-nums">
                     {sec.membersCount} {lang === 'sw' ? 'Waimbaji' : 'Choristers'}
                   </span>
                 </div>
 
-                <h3 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
+                <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
                   {lang === 'sw' ? sec.name : sec.nameEn}
                 </h3>
 
-                <p className="text-[17px] text-[#0C2340]/80 font-source leading-relaxed pt-1">
+                <p className="text-sm text-[#0C2340]/80 font-source leading-relaxed pt-1">
                   {lang === 'sw' ? sec.descriptionSw : sec.description}
                 </p>
               </div>
 
               {/* Audio Demo Button */}
               <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-between">
-                <span className="text-[14px] text-[#0C2340]/70 font-source truncate mr-2">
+                <span className="text-xs text-[#0C2340]/70 font-source truncate mr-2">
                   {sec.sampleClip}
                 </span>
 
                 <button
                   onClick={() => playSong(sampleSong)}
-                  className={`px-4 py-2 text-[14px] font-bold rounded-[12px] flex items-center gap-1.5 cursor-pointer transition-colors shrink-0 ${
+                  className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shrink-0 shadow-xs ${
                     isThisPlaying
                       ? 'bg-[#1058A8] text-white'
                       : 'bg-[#EAF4FB] text-[#0C2340] hover:bg-[#1058A8] hover:text-white'

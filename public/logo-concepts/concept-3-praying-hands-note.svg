@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- St. Monica Third Mass Choir - Concept 3: Praying Hands with Note -->
+  <!-- Flat two-colour artwork: Deep Navy #0C2340 and Bright Orange #F59E0B -->
+  <!-- Shape 1: Left Praying Hand (sweeping geometric arc, stroke > 40 units) -->
+  <path d="M 148 436 C 148 316 198 184 252 86 C 258 75 272 78 270 92 C 242 188 206 312 206 436 C 206 450 148 450 148 436 Z" fill="#0C2340"/>
+  
+  <!-- Shape 2: Right Praying Hand (asymmetrical human clasp, slightly offset) -->
+  <path d="M 364 436 C 364 322 316 196 264 96 C 258 84 244 87 246 101 C 272 194 306 316 306 436 C 306 450 364 450 364 436 Z" fill="#0C2340"/>
+  
+  <!-- Shape 3: Central Resonant Singing Note (cradled in the hands of prayer) -->
+  <circle cx="256" cy="300" r="50" fill="#F59E0B"/>
+  
+  <!-- Shape 4: Ascending Prayer Stem (thickness 36 units) -->
+  <rect x="238" y="160" width="36" height="110" rx="14" fill="#F59E0B"/>
+  
+  <!-- Shape 5: Cross Finial above hands -->
+  <rect x="226" y="44" width="60" height="34" rx="8" fill="#0C2340"/>
+</svg>

@@ -28,11 +28,13 @@ import { ShopPage } from './pages/ShopPage';
 import { EventsPage } from './pages/EventsPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
+import { LogoConceptsPage } from './pages/LogoConceptsPage';
 
 function ChoirApp() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#admin') {
-      return 'admin';
+    if (typeof window !== 'undefined') {
+      if (window.location.hash === '#admin') return 'admin';
+      if (window.location.hash === '#logo-concepts') return 'logo-concepts';
     }
     return 'home';
   });
@@ -49,6 +51,9 @@ function ChoirApp() {
     const handleHash = () => {
       if (window.location.hash === '#admin') {
         setCurrentRoute('admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (window.location.hash === '#logo-concepts') {
+        setCurrentRoute('logo-concepts');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
@@ -73,33 +78,34 @@ function ChoirApp() {
 
         {/* About Sub-routes */}
         {currentRoute === 'about-story' && (
-          <OurStoryView />
+          <OurStoryView onNavigate={handleNavigate} />
         )}
         {currentRoute === 'about-patron' && (
-          <PatronView />
+          <PatronView onNavigate={handleNavigate} />
         )}
         {(currentRoute === 'about-gallery' || currentRoute === 'about-portraits') && (
-          <ChoirGalleryView />
+          <ChoirGalleryView onNavigate={handleNavigate} />
         )}
         {currentRoute === 'about-leadership' && (
-          <LeadershipView />
+          <LeadershipView onNavigate={handleNavigate} />
         )}
         {currentRoute === 'about-sections' && (
-          <SectionsView />
+          <SectionsView onNavigate={handleNavigate} />
         )}
 
         {/* Music Sub-routes */}
         {currentRoute === 'music-albums' && (
-          <AlbumsView />
+          <AlbumsView onNavigate={handleNavigate} />
         )}
         {currentRoute === 'music-library' && (
           <MaktabaYaNotiPage 
             key={`library-${navKey}`}
-            onNavigateMusicPaid={() => handleNavigate('shop')} 
+            onNavigateMusicPaid={() => handleNavigate('shop')}
+            onNavigate={handleNavigate}
           />
         )}
         {(currentRoute === 'music-repertoire' || currentRoute === 'music-planner' || currentRoute === 'music-notation') && (
-          <MusicPage />
+          <MusicPage onNavigate={handleNavigate} />
         )}
 
         {/* Store, Events, Contact, Admin */}
@@ -114,6 +120,9 @@ function ChoirApp() {
         )}
         {currentRoute === 'admin' && (
           <AdminPage onNavigateHome={() => handleNavigate('home')} />
+        )}
+        {currentRoute === 'logo-concepts' && (
+          <LogoConceptsPage onBackToSite={() => handleNavigate('home')} />
         )}
       </main>
 

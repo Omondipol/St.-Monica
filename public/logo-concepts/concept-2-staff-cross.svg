@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- St. Monica Third Mass Choir - Concept 2: Cross with Staff Line Arms -->
+  <!-- Flat two-colour artwork: Deep Navy #0C2340 and Bright Orange #F59E0B -->
+  <!-- Shape 1: Solid Central Cross Spine (thickness 42 units) -->
+  <rect x="235" y="44" width="42" height="424" rx="14" fill="#0C2340"/>
+  
+  <!-- Shape 2: Top Staff Bar (thickness 34 units, rhythmic length 272) -->
+  <rect x="120" y="146" width="272" height="34" rx="12" fill="#0C2340"/>
+  
+  <!-- Shape 3: Middle Staff Crossbeam (thickness 38 units, length 360) -->
+  <rect x="76" y="206" width="360" height="38" rx="12" fill="#0C2340"/>
+  
+  <!-- Shape 4: Bottom Staff Bar (thickness 34 units, rhythmic length 240) -->
+  <rect x="136" y="270" width="240" height="34" rx="12" fill="#0C2340"/>
+  
+  <!-- Shape 5: Liturgical Singing Note Head (diameter 82 units, bright orange accent) -->
+  <circle cx="340" cy="207" r="41" fill="#F59E0B"/>
+</svg>

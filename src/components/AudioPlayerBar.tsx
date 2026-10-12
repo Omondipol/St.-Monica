@@ -179,25 +179,19 @@ export const AudioPlayerBar: React.FC = () => {
         {/* DESKTOP LAYOUT: Every item vertically centred on one line with equal spacing */}
         <div className="hidden sm:flex items-center justify-between gap-4 w-full">
           
-          {/* 1. Left: Clean Cover Thumbnail (Zero logo badge overlap) + Title + Composer */}
+          {/* 1. Left: Circular Official Logo Mark (Replaces photo thumbnail, zero badge overlay) + Title + Composer */}
           <div 
             onClick={() => setIsNowPlayingExpanded(true)}
             className="flex items-center gap-3.5 min-w-0 max-w-sm cursor-pointer group shrink-0"
             title={`${currentSong.title} — ${currentSong.composer}`}
           >
-            {/* Cover Thumbnail with Choir Logo Badge sitting on cover thumbnail as it was */}
-            <div className="relative shrink-0">
-              <SongCoverArt 
-                song={currentSong} 
-                size="thumbnail" 
-                className="w-11 h-11 rounded-lg shrink-0 group-hover:scale-105 transition-transform" 
+            {/* Circular Logo Mark */}
+            <div className="relative shrink-0 w-11 h-11 rounded-full bg-[#FAF8F5] border border-white/20 shadow-sm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+              <img 
+                src="/logo/logo-player-circle.svg" 
+                alt="St. Monica Third Mass Choir" 
+                className="w-full h-full object-contain"
               />
-              <div 
-                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#0C2340] border border-white/50 shadow-md flex items-center justify-center overflow-hidden pointer-events-none"
-                title="St. Monica Third Mass Choir"
-              >
-                <ChoirLogo size={18} variant="full" />
-              </div>
             </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[16px] font-semibold text-white group-hover:text-sky-200 transition-colors truncate leading-tight">
@@ -284,20 +278,14 @@ export const AudioPlayerBar: React.FC = () => {
           onClick={() => setIsNowPlayingExpanded(true)}
           className="flex sm:hidden items-center justify-between gap-3 cursor-pointer"
         >
-          {/* Cover Thumbnail & Title with Logo Badge as it was */}
+          {/* Circular Logo Mark & Title (Zero badge overlay) */}
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="relative shrink-0">
-              <SongCoverArt 
-                song={currentSong} 
-                size="thumbnail" 
-                className="w-10 h-10 rounded-lg shrink-0" 
+            <div className="relative shrink-0 w-10 h-10 rounded-full bg-[#FAF8F5] border border-white/20 shadow-xs flex items-center justify-center overflow-hidden">
+              <img 
+                src="/logo/logo-player-circle.svg" 
+                alt="St. Monica Third Mass Choir" 
+                className="w-full h-full object-contain"
               />
-              <div 
-                className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-[#0C2340] border border-white/50 shadow-sm flex items-center justify-center overflow-hidden pointer-events-none"
-                title="St. Monica Third Mass Choir"
-              >
-                <ChoirLogo size={16} variant="full" />
-              </div>
             </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[15px] font-semibold text-white truncate leading-tight">

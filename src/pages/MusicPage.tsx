@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
+import { MusicNavTabs } from '../components/MusicNavTabs';
 
 import choirBannerImg from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
 import choirSingingMomentImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
@@ -61,7 +62,11 @@ const MASS_GROUPS: MassGroup[] = [
   }
 ];
 
-export const MusicPage: React.FC = () => {
+interface MusicPageProps {
+  onNavigate?: (route: string) => void;
+}
+
+export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) => {
   const { 
     songs,
     sheetMusicList,
@@ -150,10 +155,10 @@ export const MusicPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 sm:space-y-10 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto">
       
       {/* ================= STEP 1 & 2: SLIM BANNER (160px) WITH QUIET YOUTUBE LINK ================= */}
-      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-sm select-none">
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         {/* Real choir cover photo background */}
         <img 
           src={choirBannerImg} 
@@ -166,12 +171,11 @@ export const MusicPage: React.FC = () => {
 
         {/* Text content inside slim banner */}
         <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Muziki Mtakatifu' : 'Sacred Choral Music'}
+          </span>
           <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
-            {lang === 'sw' ? (
-              <span>Nyimbo Zetu <span className="font-normal text-white/80 text-xl sm:text-2xl">· Our Songs</span></span>
-            ) : (
-              <span>Our Songs <span className="font-normal text-white/80 text-xl sm:text-2xl">· Nyimbo Zetu</span></span>
-            )}
+            {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
           </h1>
 
           <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
@@ -198,11 +202,15 @@ export const MusicPage: React.FC = () => {
             </a>
           </div>
         </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
+
+      {/* Unified Music Section Navigation Tabs */}
+      <MusicNavTabs currentTab="music-repertoire" onNavigate={onNavigate} />
 
       {/* ================= STEP 3: "WIMBO WA WIKI" (SONG OF THE WEEK) FEATURE ================= */}
       {songOfTheWeek && songOfTheWeekNote && (
-        <section className="bg-[#FAF8F5] border border-[#0C2340]/15 rounded-2xl p-5 sm:p-6 shadow-2xs space-y-4">
+        <section className="bg-white/95 border border-[#0C2340]/10 rounded-2xl p-5 sm:p-6 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-4">
           <div className="flex items-center justify-between border-b border-[#0C2340]/10 pb-2.5">
             <div>
               <span className="font-eb-garamond text-lg sm:text-xl font-bold text-[#0C2340] block leading-tight">
@@ -212,14 +220,14 @@ export const MusicPage: React.FC = () => {
                 {lang === 'sw' ? 'Uteuzi wa wimbo kwa ajili ya Misa' : 'Song of the Week'}
               </span>
             </div>
-            <span className="text-[11px] font-semibold text-[#1058A8] bg-[#1058A8]/10 px-2.5 py-0.5 rounded-full font-source">
+            <span className="text-[11px] font-semibold text-[#1058A8] bg-[#1058A8]/10 px-3 py-1 rounded-full font-source">
               {lang === 'sw' ? songOfTheWeek.partOfMassSwahili : songOfTheWeek.partOfMass}
             </span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             {/* Song cover photo without burned-in text */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] shadow-2xs">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] shadow-sm">
               <img
                 src={getCleanSongCover(songOfTheWeek)}
                 alt={songOfTheWeek.title}
@@ -284,28 +292,28 @@ export const MusicPage: React.FC = () => {
         </section>
       )}
 
-      {/* ================= STEP 7: PLAIN TEXT TABS (Sentence case with thin blue underline) ================= */}
-      <div className="flex items-center gap-8 border-b border-[#0C2340]/15 pb-px">
+      {/* ================= STEP 7: UNIFIED SUB-TABS (Songs vs Sheet Music) ================= */}
+      <div className="bg-white/90 backdrop-blur-sm border border-[#0C2340]/10 rounded-2xl p-1.5 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] flex items-center gap-2">
         <button
           onClick={() => setActiveTab('songs')}
-          className={`pb-2.5 text-sm sm:text-base font-source cursor-pointer transition-all ${
+          className={`px-4 py-2 text-xs sm:text-sm font-source font-semibold rounded-xl cursor-pointer transition-all ${
             activeTab === 'songs'
-              ? 'border-b-2 border-[#1058A8] text-[#1058A8] font-bold'
-              : 'border-b-2 border-transparent text-slate-600 hover:text-[#0C2340] font-medium'
+              ? 'bg-[#1058A8] text-white shadow-xs'
+              : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
           }`}
         >
-          {lang === 'sw' ? `Nyimbo (${songs.length})` : `Choir songs (${songs.length})`}
+          {lang === 'sw' ? `Nyimbo za Kwaya (${songs.length})` : `Choir Songs (${songs.length})`}
         </button>
 
         <button
           onClick={() => setActiveTab('sheet_music')}
-          className={`pb-2.5 text-sm sm:text-base font-source cursor-pointer transition-all ${
+          className={`px-4 py-2 text-xs sm:text-sm font-source font-semibold rounded-xl cursor-pointer transition-all ${
             activeTab === 'sheet_music'
-              ? 'border-b-2 border-[#1058A8] text-[#1058A8] font-bold'
-              : 'border-b-2 border-transparent text-slate-600 hover:text-[#0C2340] font-medium'
+              ? 'bg-[#1058A8] text-white shadow-xs'
+              : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
           }`}
         >
-          {lang === 'sw' ? `Noti (${sheetMusicList.length})` : `Sheet music for sale (${sheetMusicList.length})`}
+          {lang === 'sw' ? `Noti za Kuuza (${sheetMusicList.length})` : `Sheet Music for Sale (${sheetMusicList.length})`}
         </button>
       </div>
 
@@ -319,7 +327,7 @@ export const MusicPage: React.FC = () => {
             placeholder={lang === 'sw' ? "Tafuta wimbo au mtunzi..." : "Search song title or composer..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-[#0C2340]/20 rounded-xl focus:outline-none focus:border-[#1058A8] bg-white text-[#0C2340] placeholder:text-slate-400 font-source shadow-2xs transition-colors"
+            className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-[#0C2340]/15 rounded-xl focus:outline-none focus:border-[#1058A8] bg-white text-[#0C2340] placeholder:text-slate-400 font-source shadow-xs transition-colors"
           />
         </div>
 
@@ -332,7 +340,7 @@ export const MusicPage: React.FC = () => {
             <select
               value={filterSelection}
               onChange={(e) => setFilterSelection(e.target.value)}
-              className="px-3 py-2 bg-white text-[#0C2340] border border-[#0C2340]/20 rounded-xl text-xs sm:text-sm font-source focus:outline-none focus:border-[#1058A8] cursor-pointer shadow-2xs"
+              className="px-3 py-2 bg-white text-[#0C2340] border border-[#0C2340]/15 rounded-xl text-xs sm:text-sm font-source focus:outline-none focus:border-[#1058A8] cursor-pointer shadow-xs"
             >
               <option value="all">{lang === 'sw' ? 'Nyimbo zote' : 'All songs'}</option>
               <optgroup label={lang === 'sw' ? 'Sehemu ya Misa' : 'Mass parts'}>
@@ -364,7 +372,7 @@ export const MusicPage: React.FC = () => {
       {activeTab === 'songs' && (
         <div className="space-y-8">
           {filteredSongs.length === 0 ? (
-            <div className="p-10 text-center bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-1">
+            <div className="p-10 text-center bg-white/95 rounded-2xl border border-[#0C2340]/10 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-1">
               <p className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {lang === 'sw' ? 'Hakuna nyimbo hapa bado. Jaribu nyingine.' : 'No songs here yet. Try another.'}
               </p>
@@ -385,10 +393,10 @@ export const MusicPage: React.FC = () => {
               return (
                 <section 
                   key={group.id} 
-                  className="bg-[#FAF8F5] border border-[#0C2340]/15 rounded-2xl overflow-hidden shadow-2xs"
+                  className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
                 >
                   {/* Group Heading: Swahili in serif font, English beneath, thin woven border strip */}
-                  <div className="px-5 pt-4 pb-2.5 bg-[#FAF8F5]">
+                  <div className="px-6 pt-5 pb-3 bg-white">
                     <div className="flex items-baseline justify-between">
                       <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
                         {group.nameSw}
@@ -398,7 +406,7 @@ export const MusicPage: React.FC = () => {
                       </span>
                     </div>
                     {/* Thin woven border strip under each heading */}
-                    <div className="mt-2 -mx-5">
+                    <div className="mt-2.5 -mx-6">
                       <AfricanGeometricBorder />
                     </div>
                   </div>
@@ -603,7 +611,7 @@ export const MusicPage: React.FC = () => {
           {filteredSheetMusic.map((item) => (
             <div
               key={item.id}
-              className="p-5 bg-[#FAF8F5] border border-[#0C2340]/15 rounded-2xl hover:border-[#1058A8] transition-all shadow-2xs flex flex-col justify-between space-y-3"
+              className="p-5 bg-white/95 border border-[#0C2340]/10 rounded-2xl hover:border-[#1058A8] shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all flex flex-col justify-between space-y-3"
             >
               <div className="space-y-3">
                 {/* Score Preview Image */}

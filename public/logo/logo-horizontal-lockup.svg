@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
+  <!-- St. Monica Third Mass Choir - Horizontal Lockup -->
+  <!-- Mark on Left -->
+  <g transform="translate(30, 20) scale(0.56)">
+    <path d="M 196 448 C 112 448 48 382 48 296 C 48 206 138 116 230 46 C 242 37 258 46 254 62 C 238 128 214 204 214 266 C 214 286 218 304 228 318 C 240 334 256 342 278 342 C 322 342 358 312 368 268 C 374 242 384 192 390 148 L 444 148 C 434 218 420 300 408 348 C 392 410 334 448 266 448 C 240 448 216 448 196 448 Z" fill="#F59E0B"/>
+    <path d="M 284 84 C 284 73 293 64 304 64 L 334 64 C 345 64 354 73 354 84 L 354 372 C 354 383 345 392 334 392 L 304 392 C 293 392 284 383 284 372 Z" fill="#0C2340"/>
+    <path d="M 232 144 C 232 133 241 124 252 124 L 386 124 C 397 124 406 133 406 144 L 406 174 C 406 185 397 194 386 194 L 252 194 C 241 194 232 185 232 174 Z" fill="#0C2340"/>
+    <path d="M 172 386 C 136 386 108 354 108 312 C 108 262 148 208 184 162 C 188 157 196 160 195 166 C 187 202 178 244 178 278 C 178 304 186 322 196 338 C 197 340 197 343 195 345 C 190 366 182 386 172 386 Z" fill="#0C2340"/>
+    <circle cx="319" cy="406" r="32" fill="#0C2340"/>
+  </g>
+  <!-- Choir Title in EB Garamond Semi-Bold -->
+  <text x="320" y="142" font-family="'EB Garamond', Garamond, 'Georgia', serif" font-size="64" font-weight="600" fill="#0C2340" letter-spacing="-0.5">
+    St. Monica Third Mass Choir
+  </text>
+  <!-- Official Tagline -->
+  <text x="324" y="204" font-family="'Source Sans 3', -apple-system, sans-serif" font-size="28" font-weight="600" fill="#1058A8" letter-spacing="1">
+    Section 58 · Catholic Diocese of Nakuru
+  </text>
+</svg>

@@ -243,15 +243,15 @@ export const SupportChoirModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-3 sm:py-3 bg-[#0C2340]/50 animate-in fade-in duration-200 select-none overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-start sm:pt-14 sm:pb-8 justify-center p-0 sm:p-3 bg-[#0C2340]/50 animate-in fade-in duration-200 select-none overflow-y-auto"
       onClick={closeSupportModal}
       role="dialog"
       aria-modal="true"
       aria-labelledby="support-form-heading"
     >
-      {/* SONG-BOOK CONTAINER: Warm cream paper, navy text, fits 1366x600 laptop screen without scrolling */}
+      {/* SONG-BOOK CONTAINER: Warm cream paper, navy text, anchored at top so it grows downward without jumping */}
       <div 
-        className="relative w-full max-w-lg bg-[#FAF8F5] text-[#0C2340] rounded-t-3xl sm:rounded-2xl border border-[#0C2340]/15 shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[530px] overflow-hidden transition-all duration-200"
+        className="relative w-full max-w-lg bg-[#FAF8F5] text-[#0C2340] rounded-t-3xl sm:rounded-2xl border border-[#0C2340]/15 shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[580px] overflow-hidden transition-all duration-200"
         onClick={e => e.stopPropagation()}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -276,42 +276,41 @@ export const SupportChoirModal: React.FC = () => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* INNER SCROLLABLE BODY WITH THIN CREAM/NAVY SCROLLBAR (NEVER WHITE) */}
-        <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto scrollbar-thin [scrollbar-color:rgba(12,35,64,0.30)_#FAF8F5] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#FAF8F5] [&::-webkit-scrollbar-thumb]:bg-[#0C2340]/30 [&::-webkit-scrollbar-thumb]:rounded-full">
+        {/* INNER SCROLLABLE BODY WITH THIN CREAM/NAVY SCROLLBAR */}
+        <div className="flex-1 p-4 sm:p-5 overflow-y-auto scrollbar-thin [scrollbar-color:rgba(12,35,64,0.30)_#FAF8F5] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#FAF8F5] [&::-webkit-scrollbar-thumb]:bg-[#0C2340]/30 [&::-webkit-scrollbar-thumb]:rounded-full">
 
           {/* ================= STEP 1: AMOUNT & PURPOSE ================= */}
           {modalState === 'form' && formStep === 1 && (
-            <form onSubmit={handleStep1Continue} className="space-y-2.5">
+            <form onSubmit={handleStep1Continue} className="space-y-3">
               
               {/* Header: Compact Choir Photo & Heading */}
-              <div className="flex items-center gap-2.5 pr-12">
+              <div className="flex items-center gap-3 pr-14">
                 {/* Real rehearsal / Mass photo of the choir */}
                 <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-[#1058A8]/20 shadow-2xs bg-[#EFECE6]">
                   <img 
                     src={choirSingingImg} 
                     alt="St. Monica Choir" 
                     className="w-full h-full object-cover" 
+                    loading="lazy"
                   />
                 </div>
 
                 <div className="min-w-0">
                   <h3 id="support-form-heading" className="font-eb-garamond text-lg sm:text-xl font-bold text-[#0C2340] leading-tight">
-                    {lang === 'sw' ? 'Imba nasi, kwa namna yako' : 'Sing with us, in your own way'}
+                    {lang === 'sw' ? 'Imba nasi, kwa namna yako.' : 'Sing with us, in your own way.'}
                   </h3>
                 </div>
               </div>
 
-              {/* Shortened note from choir: 3 lines at most, serif italic with sign-off */}
-              <div className="space-y-0.5 pr-2">
-                <p className="font-eb-garamond italic text-[14px] text-[#0C2340] leading-snug">
+              {/* Choir's note: 16px in dark navy, in the serif italic, with exact sign-off in the same size, 12px space before amount cards */}
+              <div className="space-y-1 mb-3">
+                <p className="font-eb-garamond italic text-[16px] text-[#0C2340] leading-snug">
                   {lang === 'sw'
                     ? 'Tunarekodi uimbaji wetu St. Monica ili waumini popote walipo waweze kusali kupitia muziki. Kila mchango unatusaidia kupata noti na kurekodi Misa ya Jumapili.'
                     : 'We record our singing at St. Monica so parishioners near and far can pray with the music. Every gift helps us buy sheet music and record Sunday Mass.'}
                 </p>
-                <p className="font-eb-garamond italic text-[14px] text-[#0C2340] leading-snug font-semibold">
-                  {lang === 'sw'
-                    ? 'Asante sana na Mungu akubariki. — Wanakwaya wa St. Monica'
-                    : 'Thank you very much and may God bless you. — St. Monica Choir'}
+                <p className="font-eb-garamond italic text-[16px] text-[#0C2340] leading-snug font-semibold">
+                  Asante sana na Mungu akubariki. — St. Monica Choir
                 </p>
               </div>
 
@@ -325,8 +324,8 @@ export const SupportChoirModal: React.FC = () => {
                 </div>
               )}
 
-              {/* Amount Cards: reduced gap, 5 words or fewer per line, 13px body font */}
-              <div className="space-y-1">
+              {/* Amount Cards: write the amount only, selected has 2px blue border and light blue fill */}
+              <div className="space-y-1 pt-1">
                 <label className="block text-xs font-semibold text-[#0C2340] font-source">
                   {lang === 'sw' ? 'Chagua kiasi cha mchango (KES):' : 'Select your gift amount (KES):'}
                 </label>
@@ -357,7 +356,7 @@ export const SupportChoirModal: React.FC = () => {
                   })}
 
                   {/* Custom Amount Field: clean number input only */}
-                  <div className={`col-span-1 sm:col-span-1 flex items-center px-3 py-1.5 rounded-xl border transition-all min-h-[44px] bg-white ${
+                  <div className={`col-span-1 sm:col-span-1 flex flex-col justify-center px-3 py-1.5 rounded-xl border transition-all min-h-[44px] bg-white ${
                     customAmount
                       ? 'border-2 border-[#1058A8] bg-[#E8F1FC]'
                       : 'border-[#0C2340]/15 hover:border-[#0C2340]/30'
@@ -378,6 +377,11 @@ export const SupportChoirModal: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {/* Helper text under Other amount: Minimum KES 100 */}
+                <p className="text-[11px] text-slate-500 font-source pt-0.5">
+                  {lang === 'sw' ? 'Kiwango cha chini: KES 100' : 'Minimum KES 100'}
+                </p>
 
                 {amountError && (
                   <p className="text-[#0C2340] text-xs flex items-center gap-1 font-source pt-0.5 font-semibold">
@@ -442,8 +446,8 @@ export const SupportChoirModal: React.FC = () => {
           {modalState === 'form' && formStep === 2 && (
             <form onSubmit={handleStep2Pay} className="space-y-3">
               
-              {/* Back navigation & Amount summary bar: pr-14 ensures amount and purpose have 16px+ space from close X */}
-              <div className="flex items-center justify-between border-b border-[#0C2340]/10 pb-2.5 pr-14">
+              {/* Back navigation & Amount summary bar: pr-20 ensures amount and purpose have at least 16px clearance from the 44px close X */}
+              <div className="flex items-center justify-between border-b border-[#0C2340]/10 pb-2.5 pr-20">
                 <button
                   type="button"
                   onClick={() => setFormStep(1)}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- St. Monica Third Mass Choir - Concept 4: Simplified Dove (Holy Spirit) -->
+  <!-- Flat two-colour artwork: Deep Navy #0C2340 and Bright Orange #F59E0B -->
+  <!-- Shape 1: Dove Head and Descending Body (thickness > 44 units) -->
+  <path d="M 256 124 C 276 124 290 144 286 172 L 274 316 C 270 348 242 348 238 316 L 226 172 C 222 144 236 124 256 124 Z" fill="#0C2340"/>
+  
+  <!-- Shape 2: Left Sweeping Wing (bold blade, 46 units thick) -->
+  <path d="M 232 196 C 172 172 104 122 84 60 C 114 62 176 102 222 168 Z" fill="#0C2340"/>
+  
+  <!-- Shape 3: Right Sweeping Wing (living flight asymmetry, 46 units thick) -->
+  <path d="M 280 196 C 340 172 408 122 428 60 C 398 62 336 102 290 168 Z" fill="#0C2340"/>
+  
+  <!-- Shape 4: Choral Tail Plume (three-point fan tail) -->
+  <path d="M 236 332 L 204 424 C 220 436 292 436 308 424 L 276 332 Z" fill="#0C2340"/>
+  
+  <!-- Shape 5: Golden Musical Grace / Song Droplet at Beak -->
+  <circle cx="256" cy="72" r="34" fill="#F59E0B"/>
+</svg>

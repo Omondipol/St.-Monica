@@ -88,6 +88,33 @@ body::before {
   animation: slowZoom 20s ease-in-out infinite alternate;
 }
 
+/* Continuous Ken Burns zoom animation for home carousel */
+@keyframes kenburnsZoom {
+  0% {
+    transform: scale(1.0);
+  }
+  100% {
+    transform: scale(1.18);
+  }
+}
+
+.animate-ken-burns {
+  animation: kenburnsZoom 6.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform;
+}
+
+/* Tactile border shadow utility for elegant, non-sharp container boxes */
+.box-border-shadow {
+  box-shadow: 0 4px 20px -2px rgba(12, 35, 64, 0.08), 0 2px 6px -1px rgba(12, 35, 64, 0.04);
+}
+
+.box-border-shadow-hover {
+  transition: all 0.25s ease-out;
+}
+.box-border-shadow-hover:hover {
+  box-shadow: 0 8px 26px -2px rgba(12, 35, 64, 0.12), 0 4px 10px -2px rgba(12, 35, 64, 0.06);
+}
+
 .stave-line {
   height: 1px;
   width: 100%;

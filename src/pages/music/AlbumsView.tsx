@@ -1,55 +1,47 @@
 import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
-import { INITIAL_ALBUMS, YOUTUBE_CHANNEL_URL } from '../../data/choirContent';
+import { INITIAL_ALBUMS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../../data/choirContent';
 import { Play, ShoppingBag, ExternalLink } from 'lucide-react';
 import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
 import albumCoverImg from '../../assets/images/st_monica_choir_cover_1791450290430.jpg';
+import { MusicNavTabs } from '../../components/MusicNavTabs';
+import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 
-export const AlbumsView: React.FC = () => {
+interface AlbumsViewProps {
+  onNavigate?: (route: string) => void;
+}
+
+export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} }) => {
   const { lang, formatPrice, addToCart, playSong, songs } = useChoir();
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto">
-      {/* Header Banner */}
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8 space-y-4">
-        <span className="text-[14px] font-semibold text-[#1058A8] font-source block">
-          {lang === 'sw' ? 'Albamu ya kwaya' : 'Choir album'}
-        </span>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-              {lang === 'sw' ? 'Albamu ya Kwaya ya Mtakatifu Monika' : 'Album by St. Monica Catholic Choir'}
-            </h1>
-            <p className="text-[17px] text-[#0C2340]/80 font-source mt-2 max-w-2xl leading-relaxed">
-              {lang === 'sw'
-                ? 'Toleo la kwanza rasmi la studio kutoka Kwaya ya Mtakatifu Monika Nakuru, likiwa na nyimbo nne za kiliturujia za sauti nne (SATB).'
-                : 'The official master studio recording from St. Monica Catholic Choir Nakuru, featuring four authentic four-part SATB liturgical releases.'}
-            </p>
-          </div>
-
-          {/* YouTube link in site blue */}
-          <a
-            href={YOUTUBE_CHANNEL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2.5 text-[14px] font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-[12px] flex items-center gap-2 transition-colors self-start sm:self-center font-source cursor-pointer"
-          >
-            <RealYouTubeIcon size={18} variant="badge" />
-            <span>{lang === 'sw' ? 'Tazama kwenye YouTube' : 'Watch on YouTube'}</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Page Title Banner (Matching About and Music Section Slim Banner) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img 
+          src={albumCoverImg} 
+          alt="St. Monica Catholic Choir Album" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Albamu Yetu Rasmi' : 'Official Choir Album'}
+          </span>
+          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+            {lang === 'sw' ? 'Albamu ya Kwaya ya Mtakatifu Monika' : 'Album by St. Monica Catholic Choir'}
+          </h1>
+          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+            {lang === 'sw'
+              ? 'Toleo la kwanza rasmi la studio kutoka Kwaya ya Mtakatifu Monika Nakuru, sauti nne (SATB).'
+              : 'The official master studio recording from St. Monica Catholic Choir Nakuru, four-part SATB.'}
+          </p>
         </div>
-
-        {/* 5-line music-stave divider */}
-        <div className="stave-divider my-4 max-w-md">
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-        </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
+
+      {/* Unified Music Section Navigation Tabs */}
+      <MusicNavTabs currentTab="music-albums" onNavigate={onNavigate} />
 
       {/* Album Card */}
       <div className="space-y-8">
@@ -62,10 +54,10 @@ export const AlbumsView: React.FC = () => {
           return (
             <div
               key={album.id}
-              className="p-6 sm:p-8 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+              className="p-6 sm:p-8 bg-white/95 border border-[#0C2340]/10 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
             >
               {/* Album Cover Art */}
-              <div className="lg:col-span-5 aspect-square rounded-[12px] bg-[#EAF4FB] border border-[#7EC8F0]/30 overflow-hidden">
+              <div className="lg:col-span-5 aspect-square rounded-2xl bg-[#EAF4FB] border border-[#7EC8F0]/30 overflow-hidden shadow-sm">
                 <img
                   src={albumCoverImg}
                   alt={album.title}
@@ -79,12 +71,12 @@ export const AlbumsView: React.FC = () => {
                   <span className="text-[14px] font-source font-semibold text-[#1058A8]">
                     {album.trackCount} {lang === 'sw' ? 'Nyimbo' : 'Tracks'} · {album.releaseYear}
                   </span>
-                  <h3 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
+                  <h3 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
                     {album.title}
                   </h3>
                 </div>
 
-                <p className="text-[17px] text-[#0C2340]/80 font-source leading-relaxed">
+                <p className="text-[16px] text-[#0C2340]/80 font-source leading-relaxed">
                   {lang === 'sw' ? album.descriptionSw : album.description}
                 </p>
 
@@ -95,17 +87,17 @@ export const AlbumsView: React.FC = () => {
                   </span>
                   <div className="space-y-2">
                     {matchingSongs.map((s, idx) => (
-                      <div key={s.id} className="flex items-center justify-between text-[14px] p-2.5 rounded-[12px] bg-[#FAF8F5] hover:bg-[#EAF4FB] transition-colors font-source">
+                      <div key={s.id} className="flex items-center justify-between text-[14px] p-2.5 rounded-xl bg-[#FAF8F5] hover:bg-[#EAF4FB] transition-colors font-source border border-[#0C2340]/5 shadow-2xs">
                         <div className="flex items-center gap-2.5 min-w-0">
                           <button
                             onClick={() => playSong(s)}
-                            className="w-7 h-7 rounded-full bg-white text-[#1058A8] border border-[#1058A8]/30 flex items-center justify-center cursor-pointer hover:bg-[#1058A8] hover:text-white shrink-0 transition-colors"
+                            className="w-7 h-7 rounded-full bg-white text-[#1058A8] border border-[#1058A8]/30 flex items-center justify-center cursor-pointer hover:bg-[#1058A8] hover:text-white shrink-0 transition-colors shadow-2xs"
                             aria-label={`Play ${s.title}`}
                           >
                             <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                           </button>
                           <span className="font-semibold text-[#0C2340] truncate">
-                            <span className="text-slate-400 mr-2 font-fraunces">{idx + 1}.</span>
+                            <span className="text-slate-400 mr-2 font-eb-garamond font-bold">{idx + 1}.</span>
                             {lang === 'sw' ? s.titleSwahili : s.title}
                           </span>
                         </div>
@@ -118,7 +110,7 @@ export const AlbumsView: React.FC = () => {
                 <div className="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[#0C2340]/10">
                   <div className="flex items-center gap-2">
                     <span className="text-[14px] text-[#0C2340]/70 font-source">{lang === 'sw' ? 'Bei ya Albamu (MP3):' : 'Album Download Price:'}</span>
-                    <span className="tabular-nums text-xl font-bold font-fraunces text-[#1058A8]">
+                    <span className="tabular-nums text-2xl font-bold font-eb-garamond text-[#1058A8]">
                       {formatPrice(album.priceKes)}
                     </span>
                   </div>
@@ -138,7 +130,7 @@ export const AlbumsView: React.FC = () => {
                         downloadable: true
                       });
                     }}
-                    className="px-5 py-2.5 text-[14px] font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-[12px] transition-all cursor-pointer flex items-center gap-2 font-source"
+                    className="px-5 py-2.5 text-[14px] font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all cursor-pointer flex items-center gap-2 font-source shadow-sm active:scale-95"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     <span>{lang === 'sw' ? 'Ongeza kwenye agizo' : 'Add to order'}</span>

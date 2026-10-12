@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- St. Monica Third Mass Choir - Concept 5: SM Monogram with Cross -->
+  <!-- Flat two-colour artwork: Deep Navy #0C2340 and Bright Orange #F59E0B -->
+  <!-- Shape 1: Latin Cross Vertical Shaft (thickness 36 units) -->
+  <rect x="238" y="38" width="36" height="114" rx="8" fill="#F59E0B"/>
+  
+  <!-- Shape 2: Latin Cross Horizontal Arm (thickness 36 units) -->
+  <rect x="194" y="66" width="124" height="36" rx="8" fill="#F59E0B"/>
+  
+  <!-- Shape 3: Letter 'S' Serif Outline (robust 40-unit stroke width, classical serif ball terminal) -->
+  <path d="M 198 200 C 198 175 178 160 148 160 C 114 160 88 182 88 214 C 88 268 184 274 184 340 C 184 378 152 402 114 402 C 78 402 54 376 54 344 L 92 344 C 92 360 102 370 118 370 C 136 370 146 358 146 342 C 146 294 50 286 50 216 C 50 162 90 128 144 128 C 196 128 236 158 236 200 Z" fill="#0C2340"/>
+  
+  <!-- Shape 4: Letter 'M' Serif Outline (intertwined with S, bold upright pillars) -->
+  <path d="M 230 400 L 230 186 L 272 186 L 330 312 L 388 186 L 430 186 L 430 400 L 392 400 L 392 248 L 344 354 L 316 354 L 268 248 L 268 400 Z" fill="#0C2340"/>
+  
+  <!-- Shape 5: Liturgical Accent Dot / St. Monica Third Mass note drop -->
+  <circle cx="430" cy="144" r="22" fill="#F59E0B"/>
+</svg>

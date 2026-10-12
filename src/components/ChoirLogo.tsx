@@ -419,8 +419,55 @@ export const BrightChoirLogoSvg: React.FC<{
   );
 };
 
+// Official simplified mark of St. Monica Third Mass Choir
+export const SimplifiedChoirMarkSvg: React.FC<{
+  size?: number;
+  className?: string;
+  theme?: 'color' | 'white' | 'navy';
+}> = ({ size = 64, className = '', theme = 'color' }) => {
+  const fgNavy = theme === 'white' ? '#FFFFFF' : '#0C2340';
+  const fgOrange = '#F59E0B';
+  const fgInner = theme === 'white' ? '#0C2340' : (theme === 'navy' ? '#FAF8F5' : '#0C2340');
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 512 512"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`shrink-0 block select-none ${className}`}
+      aria-label="Official Mark of St. Monica Third Mass Choir"
+      shapeRendering="geometricPrecision"
+    >
+      {/* Outer Sacred Teardrop Note Head of St. Monica */}
+      <path
+        d="M 196 448 C 112 448 48 382 48 296 C 48 206 138 116 230 46 C 242 37 258 46 254 62 C 238 128 214 204 214 266 C 214 286 218 304 228 318 C 240 334 256 342 278 342 C 322 342 358 312 368 268 C 374 242 384 192 390 148 L 444 148 C 434 218 420 300 408 348 C 392 410 334 448 266 448 C 240 448 216 448 196 448 Z"
+        fill={theme === 'white' ? '#FFFFFF' : (theme === 'navy' ? '#0C2340' : fgOrange)}
+      />
+      {/* Note Stem & Latin Cross Vertical Shaft */}
+      <path
+        d="M 284 84 C 284 73 293 64 304 64 L 334 64 C 345 64 354 73 354 84 L 354 372 C 354 383 345 392 334 392 L 304 392 C 293 392 284 383 284 372 Z"
+        fill={fgNavy}
+      />
+      {/* Latin Cross Horizontal Arm */}
+      <path
+        d="M 232 144 C 232 133 241 124 252 124 L 386 124 C 397 124 406 133 406 144 L 406 174 C 406 185 397 194 386 194 L 252 194 C 241 194 232 185 232 174 Z"
+        fill={fgNavy}
+      />
+      {/* Resonant Inner Tear Aperture */}
+      <path
+        d="M 172 386 C 136 386 108 354 108 312 C 108 262 148 208 184 162 C 188 157 196 160 195 166 C 187 202 178 244 178 278 C 178 304 186 322 196 338 C 197 340 197 343 195 345 C 190 366 182 386 172 386 Z"
+        fill={fgInner}
+      />
+      {/* Singing Note Accent */}
+      <circle cx="319" cy="406" r="32" fill={fgNavy} />
+    </svg>
+  );
+};
+
 // Simplified alias for backwards compatibility
-export const SimplifiedLogoMark = BrightChoirLogoSvg;
+export const SimplifiedLogoMark = SimplifiedChoirMarkSvg;
 
 export const ChoirLogo: React.FC<ChoirLogoProps> = ({ 
   size = 72, 
@@ -433,8 +480,19 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
   const { lang } = useChoir();
   const [showModal, setShowModal] = useState(false);
 
-  // The Primary Logo: Sacred heraldic church choir emblem with bright gold ring, cream centre, and enlarged ~70% symbol
-  const logoContent = (
+  const isSimplified = variant === 'simplified';
+
+  const logoContent = isSimplified ? (
+    <div 
+      style={{ width: size, height: size }}
+      className={`relative shrink-0 flex items-center justify-center select-none ${interactive ? 'cursor-pointer' : ''} ${className}`}
+      onClick={interactive ? () => setShowModal(true) : undefined}
+      role={interactive ? "button" : undefined}
+      title={title}
+    >
+      <SimplifiedChoirMarkSvg size={size} />
+    </div>
+  ) : (
     <div 
       style={{ width: size, height: size }}
       className={`relative shrink-0 flex items-center justify-center rounded-full shadow-[0_2px_12px_rgba(0,0,0,0.18)] hover:scale-105 transition-all duration-200 select-none ${interactive ? 'cursor-pointer' : ''} ${className}`}

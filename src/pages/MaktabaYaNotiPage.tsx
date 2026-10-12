@@ -19,17 +19,20 @@ import {
   Pause
 } from 'lucide-react';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
+import { MusicNavTabs } from '../components/MusicNavTabs';
 import { CHOIR_STATS } from '../data/choirContent';
 import scorePreviewSheet from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 
 interface MaktabaYaNotiPageProps {
   initialCategoryId?: string;
   onNavigateMusicPaid?: () => void;
+  onNavigate?: (route: string) => void;
 }
 
 export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({ 
   initialCategoryId,
-  onNavigateMusicPaid 
+  onNavigateMusicPaid,
+  onNavigate = () => {}
 }) => {
   const { lang, librarySongs, incrementDownloadCount } = useChoir();
 
@@ -149,7 +152,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   // Handle PDF Download
   const handleDownloadPdf = (song: LibrarySong) => {
     incrementDownloadCount(song.id);
-    const content = `%PDF-1.4\n% St. Monica Catholic Choir Nakuru - Maktaba ya Noti\nTitle: ${song.title}\nComposer: ${song.composer}\nVoices: ${song.voices}\nStatus: ${song.sharingStatus}\n\nLyrics / Notes:\n${song.lyrics || 'Sacred Catholic Score Sheet'}`;
+    const content = `%PDF-1.4\n% St. Monica Catholic Choir Nakuru - ${lang === 'sw' ? 'Maktaba ya Noti' : 'Sheet Music Library'}\nTitle: ${song.title}\nComposer: ${song.composer}\nVoices: ${song.voices}\nStatus: ${song.sharingStatus}\n\nLyrics / Notes:\n${song.lyrics || 'Sacred Catholic Score Sheet'}`;
     const blob = new Blob([content], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -345,8 +348,10 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
           {/* Breadcrumb Navigation on the Band */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-white/70 font-medium">
             {!selectedCategoryId && !selectedSongId && !globalSearch ? (
-              /* Library home page: Show ONLY "Maktaba ya Noti" with NO other steps and NO back link */
-              <span className="text-[#FAF8F5] font-bold">Maktaba ya Noti</span>
+              /* Library home page: Respect language toggle */
+              <span className="text-[#FAF8F5] font-bold">
+                {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
+              </span>
             ) : (
               <>
                 <button 
@@ -357,7 +362,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                   }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Maktaba ya Noti
+                  {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
                 </button>
                 {breadcrumbCategory && (
                   <>
@@ -389,13 +394,17 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-bold text-[#FAF8F5] tracking-tight leading-tight">
-                Maktaba ya Noti
+                {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
               </h1>
               <p className="font-source text-sm sm:text-base text-white/80 mt-0.5">
-                Free Sheet Music Library
+                {lang === 'sw' 
+                  ? 'Noti za bure kwa kwaya zote za Kikatoliki' 
+                  : 'Sacred choral scores and Catholic hymnody'}
               </p>
               <p className="font-source text-xs sm:text-sm text-sky-200/90 mt-1">
-                Noti za bure kwa kwaya zote. Free scores for every choir.
+                {lang === 'sw' 
+                  ? 'Noti za bure kwa kila kwaya' 
+                  : 'Free liturgical scores for every choir'}
               </p>
             </div>
 
@@ -444,7 +453,10 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
           2. Category Song List (if selectedCategoryId is set or search active)
           3. Categories Front Door Grid (default)
       */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
+        
+        {/* Unified Music Section Navigation Tabs */}
+        <MusicNavTabs currentTab="music-library" onNavigate={onNavigate} />
 
         {/* =========================================================================
             STATE 1: SINGLE SONG DETAIL VIEW
@@ -457,35 +469,26 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
               {/* Header: Title, Composer, Sharing Status Badge */}
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-[#0C2340]/10">
                 <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Sharing Status Label using single site blue or neutral */}
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-[#1058A8] border border-slate-200">
-                      <span>{currentSong.sharingStatus}</span>
-                    </span>
-
-                    {/* Language & Voicing Badges */}
-                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      {currentSong.language}
-                    </span>
-                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      {currentSong.voices}
-                    </span>
-                    {currentSong.solfaNotes && (
-                      <span className="bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 px-2.5 py-1 rounded-full text-xs font-semibold">
-                        Tonic Sol-fa
-                      </span>
-                    )}
+                  <div className="space-y-1">
+                    {/* Sentence-case text separated by a middle dot */}
+                    <p className="text-sm text-slate-700 font-source font-medium">
+                      {currentSong.composer} · {currentSong.voices} · {currentSong.language}{currentSong.solfaNotes ? ' · Tonic Sol-fa' : ''}
+                    </p>
+                    {/* Sharing status as one plain line under the title */}
+                    <p className="text-xs text-slate-500 font-source">
+                      {currentSong.sharingStatus}
+                    </p>
                   </div>
 
                   <h2 className="font-eb-garamond text-3xl sm:text-4xl font-bold text-[#0C2340] tracking-tight">
                     {currentSong.title}
                   </h2>
-                  <p className="text-base text-slate-700 font-medium">
+                  <p className="text-base text-slate-700 font-medium font-source">
                     {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-[#0C2340] font-semibold">{currentSong.composer}</strong>
                   </p>
                   {currentSong.season && (
-                    <p className="text-xs text-slate-500">
-                      {lang === 'sw' ? 'Kipindi cha Liturujia:' : 'Liturgical Season:'} {currentSong.season}
+                    <p className="text-xs text-slate-500 font-source">
+                      {lang === 'sw' ? 'Kipindi cha liturujia:' : 'Liturgical season:'} {currentSong.season}
                     </p>
                   )}
                 </div>
@@ -517,46 +520,47 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
               {/* Two Column Grid: Left Score Preview, Right Lyrics and Audio */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                 
-                {/* Left: Score Sheet Preview */}
-                <div className="md:col-span-5 space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                    {lang === 'sw' ? 'Kielelezo cha Noti (Score Preview)' : 'Score Preview'}
-                  </span>
-                  
-                  <div className="rounded-xl overflow-hidden border border-[#0C2340]/15 bg-[#FAF8F5] shadow-xs group">
-                    <img 
-                      src={scorePreviewSheet} 
-                      alt={`Score preview for ${currentSong.title}`} 
-                      className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    <div className="p-3 bg-white border-t border-[#0C2340]/10 flex items-center justify-between text-xs text-slate-600">
-                      <span>SATB Vocal Score</span>
-                      <span className="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded">PDF 850 KB</span>
+                {/* Left: Score Sheet Preview - only if song has real PDF preview or previewImage */}
+                {(currentSong.previewImage || currentSong.pdfUrl) && (
+                  <div className="md:col-span-5 space-y-2">
+                    <span className="text-sm font-semibold text-slate-700 block font-source">
+                      {lang === 'sw' ? 'Kielelezo cha noti' : 'Score preview'}
+                    </span>
+                    
+                    <div className="rounded-xl overflow-hidden border border-[#0C2340]/15 bg-[#FAF8F5] shadow-xs">
+                      <img 
+                        src={currentSong.previewImage || scorePreviewSheet} 
+                        alt={`Score preview for ${currentSong.title}`} 
+                        className="w-full h-auto object-cover" 
+                        loading="lazy"
+                      />
+                      <div className="p-2.5 bg-white border-t border-[#0C2340]/10 flex items-center justify-between text-xs text-slate-600 font-source">
+                        <span>{currentSong.voices} Vocal Score</span>
+                        <span className="text-[11px] bg-slate-100 px-2 py-0.5 rounded tabular-nums">PDF</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Right: Lyrics and Audio Player */}
-                <div className="md:col-span-7 space-y-6">
+                <div className={`${(currentSong.previewImage || currentSong.pdfUrl) ? 'md:col-span-7' : 'md:col-span-12'} space-y-6`}>
                   
-                  {/* Optional Audio Player */}
-                  {currentSong.hasAudio && (
-                    <div className="p-4 bg-[#EAF4FB] border border-[#1058A8]/20 rounded-xl space-y-3">
+                  {/* Optional Audio Player: only shown if real uploaded audio file exists */}
+                  {currentSong.audioUrl && (
+                    <div className="p-4 bg-transparent border border-[#0C2340]/15 rounded-xl space-y-2.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Volume2 className="w-4 h-4 text-[#1058A8]" />
-                          <span className="text-xs font-bold text-[#1058A8]">
-                            {lang === 'sw' ? 'Sikiliza Sauti (Ina sauti)' : 'Audio Preview Available'}
+                          <span className="text-xs font-semibold text-[#0C2340] font-source">
+                            {lang === 'sw' ? 'Sauti ya kielelezo' : 'Audio recording'}
                           </span>
                         </div>
-                        <span className="text-xs text-slate-600">0:45 Preview</span>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setIsPlayingPreview(prev => !prev)}
-                          className="w-10 h-10 rounded-full bg-[#1058A8] text-white flex items-center justify-center hover:bg-[#0C2340] transition-colors cursor-pointer shrink-0 shadow-sm"
+                          className="w-10 h-10 rounded-full bg-[#1058A8] text-white flex items-center justify-center hover:bg-[#0C2340] transition-colors cursor-pointer shrink-0 shadow-xs"
                           aria-label={isPlayingPreview ? 'Pause audio' : 'Play audio'}
                         >
                           {isPlayingPreview ? (
@@ -566,13 +570,13 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                           )}
                         </button>
                         <div className="flex-1">
-                          <div className="h-2 bg-white/70 rounded-full overflow-hidden">
-                            <div className={`h-full bg-[#1058A8] rounded-full ${isPlayingPreview ? 'animate-pulse w-3/4' : 'w-1/4'}`} />
+                          <div className="h-2 bg-[#0C2340]/10 rounded-full overflow-hidden">
+                            <div className={`h-full bg-[#1058A8] rounded-full transition-all duration-300 ${isPlayingPreview ? 'w-1/2' : 'w-0'}`} />
                           </div>
-                          <span className="text-[11px] text-slate-600 block mt-1">
+                          <span className="text-[11px] text-slate-600 block mt-1 font-source">
                             {isPlayingPreview 
-                              ? (lang === 'sw' ? 'Inacheza kielelezo cha sauti...' : 'Playing sample recording...') 
-                              : (lang === 'sw' ? 'Gusa kucheza sauti ya kielelezo' : 'Tap to listen to sample')}
+                              ? (lang === 'sw' ? 'Inacheza...' : 'Playing...') 
+                              : (lang === 'sw' ? 'Gusa kusikiliza' : 'Tap to listen')}
                           </span>
                         </div>
                       </div>
@@ -581,8 +585,8 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
 
                   {/* Lyrics / Stanzas */}
                   <div className="space-y-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                      {lang === 'sw' ? 'Mashairi na Maneno ya Wimbo' : 'Hymn Lyrics & Text'}
+                    <span className="text-sm font-semibold text-slate-700 block font-source">
+                      {lang === 'sw' ? 'Maneno' : 'Lyrics'}
                     </span>
                     <div className="p-5 rounded-xl bg-[#FAF8F5] border border-[#0C2340]/10 font-serif whitespace-pre-line text-sm sm:text-base leading-relaxed text-[#0C2340] max-h-96 overflow-y-auto">
                       {currentSong.lyrics || (lang === 'sw' ? 'Maneno yanathibitishwa na kwaya.' : 'Lyrics currently being indexed.')}
@@ -853,7 +857,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                 <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
                   {lang === 'sw'
                     ? 'Hapa tunashiriki nyimbo zilizoko katika miliki ya umma (Public Domain) na zile zilizotolewa kwa idhini ya watunzi wao. Nyimbo nyingine zimewekwa kwa kiungo cha asili bila kupakuliwa.'
-                    : 'We share public domain hymns and scores released with verified composer permissions. Modern arrangements are listed with direct legal source links.'}
+                    : 'We share public domain sacred songs and scores released with verified composer permissions. Modern arrangements are listed with direct legal source links.'}
                 </p>
               </div>
 
@@ -877,7 +881,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                       setCurrentPage(1);
                       window.scrollTo({ top: 160, behavior: 'smooth' });
                     }}
-                    className="p-5 sm:p-6 rounded-2xl bg-[#FAF8F5] border border-[#0C2340]/15 hover:-translate-y-0.5 hover:shadow-md transition-all text-left flex flex-col justify-between group cursor-pointer"
+                    className="p-5 sm:p-6 rounded-2xl bg-white/95 border border-[#0C2340]/10 hover:-translate-y-0.5 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] hover:shadow-lg transition-all text-left flex flex-col justify-between group cursor-pointer"
                   >
                     <div>
                       {/* Line drawing at top left, 56px square, site blue */}
@@ -885,14 +889,11 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                         {renderCategoryLineDrawing(category.id)}
                       </div>
 
-                      {/* Title: 16px below icon, Swahili in serif font at 24px, English beneath it */}
+                      {/* Title: 16px below icon, single language in serif font at 24px following language toggle */}
                       <div className="mt-4">
                         <strong className="font-eb-garamond text-[24px] font-bold text-[#0C2340] group-hover:underline decoration-[#1058A8] decoration-1 underline-offset-4 transition-all block leading-tight">
-                          {category.nameSw}
+                          {lang === 'sw' ? category.nameSw : category.nameEn}
                         </strong>
-                        <span className="text-xs sm:text-sm text-slate-500 font-source block mt-1">
-                          {category.nameEn}
-                        </span>
                       </div>
                     </div>
 

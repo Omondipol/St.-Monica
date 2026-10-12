@@ -3,8 +3,14 @@ import { useChoir } from '../../context/ChoirContext';
 import { CHOIR_STATS } from '../../data/choirContent';
 import churchImg from '../../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import { ChoirLogo } from '../../components/ChoirLogo';
+import { AboutNavTabs } from '../../components/AboutNavTabs';
+import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 
-export const OurStoryView: React.FC = () => {
+interface OurStoryViewProps {
+  onNavigate?: (route: string) => void;
+}
+
+export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {} }) => {
   const { lang } = useChoir();
 
   const timeline = [
@@ -39,40 +45,38 @@ export const OurStoryView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto">
-      {/* Page Title Banner */}
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8 space-y-4">
-        <span className="text-[14px] font-semibold text-[#1058A8] font-source block">
-          {lang === 'sw' ? 'Historia na utume wetu' : 'Our history & sacred mission'}
-        </span>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-            {lang === 'sw' ? 'Historia ya Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'Heritage & History of St. Monica Third Mass Choir'}
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Page Title Banner (Matching Music Section Slim Banner) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img 
+          src={churchImg} 
+          alt="St. Monica Catholic Church, Nakuru" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Historia na Utume Wetu' : 'Our Story & Heritage'}
+          </span>
+          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+            {lang === 'sw' ? 'Historia ya Kwaya' : 'Heritage & History'}
           </h1>
-          <ChoirLogo size={60} interactive={true} className="shrink-0 self-start sm:self-center" />
+          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+            {lang === 'sw'
+              ? 'Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya inayotumikia altare ya Mungu kila juma.'
+              : 'Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.'}
+          </p>
         </div>
-
-        <p className="text-[17px] text-[#0C2340]/80 font-source leading-relaxed max-w-3xl">
-          {lang === 'sw'
-            ? 'Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya ya waimbaji zaidi ya hamsini wanaotumikia altare ya Mungu kila juma kwa unyenyekevu na nidhamu ya kiliturujia.'
-            : 'From fourteen pioneer choristers in 2012 to a vibrant ensemble of over fifty dedicated singers serving the Catholic Diocese of Nakuru with liturgical rigor and authentic devotion.'}
-        </p>
-
-        {/* 5-line music-stave divider */}
-        <div className="stave-divider my-4 max-w-md">
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-        </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
 
+      {/* Unified Section Navigation Tabs */}
+      <AboutNavTabs currentTab="about-story" onNavigate={onNavigate} />
+
       {/* Two-Column Story and Photo */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <div className="lg:col-span-7 space-y-4 text-[17px] text-[#0C2340]/80 font-source leading-relaxed">
-          <h2 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/90 border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
+        <div className="lg:col-span-7 space-y-4 text-[16px] text-[#0C2340]/85 font-source leading-relaxed">
+          <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
             {lang === 'sw' ? 'Mizizi Yetu Katika Parokia ya Mtakatifu Monika' : 'Our Roots in St. Monica Parish, Nakuru'}
           </h2>
           <p>
@@ -87,22 +91,22 @@ export const OurStoryView: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#0C2340]/10 text-center">
-            <div className="p-3 bg-[#FCFAF7] rounded-[12px] border border-[#0C2340]/10">
-              <span className="font-fraunces text-[28px] font-bold text-[#1058A8] block tabular-nums">{CHOIR_STATS.membersCount}</span>
-              <p className="text-[14px] text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Waimbaji (SATB)' : 'Active Choristers'}</p>
+            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs">
+              <span className="font-eb-garamond text-2xl font-bold text-[#1058A8] block tabular-nums">{CHOIR_STATS.membersCount}</span>
+              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Waimbaji (SATB)' : 'Active Choristers'}</p>
             </div>
-            <div className="p-3 bg-[#FCFAF7] rounded-[12px] border border-[#0C2340]/10">
-              <span className="font-fraunces text-[28px] font-bold text-[#0C2340] block tabular-nums">{CHOIR_STATS.yearsServing}</span>
-              <p className="text-[14px] text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}</p>
+            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs">
+              <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] block tabular-nums">{CHOIR_STATS.yearsServing}</span>
+              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}</p>
             </div>
-            <div className="p-3 bg-[#FCFAF7] rounded-[12px] border border-[#0C2340]/10">
-              <span className="font-fraunces text-[28px] font-bold text-[#1058A8] block tabular-nums">{CHOIR_STATS.repertoireCount}</span>
-              <p className="text-[14px] text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}</p>
+            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs">
+              <span className="font-eb-garamond text-2xl font-bold text-[#1058A8] block tabular-nums">{CHOIR_STATS.repertoireCount}</span>
+              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}</p>
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-5 aspect-4/3 rounded-[12px] overflow-hidden border border-[#0C2340]/10">
+        <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-sm">
           <img
             src={churchImg}
             alt="St. Monica Parish Church"
@@ -113,8 +117,8 @@ export const OurStoryView: React.FC = () => {
       </div>
 
       {/* Historical Milestones Timeline */}
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8 space-y-6">
-        <h2 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
+      <section className="bg-white border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
+        <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
           {lang === 'sw' ? 'Hatua Muhimu za Safari Yetu (2012 — Leo)' : 'Our Journey & Milestones (2012 — Present)'}
         </h2>
 
@@ -123,14 +127,14 @@ export const OurStoryView: React.FC = () => {
             <div key={idx} className="relative space-y-1">
               <div className="absolute -left-[25px] sm:-left-[33px] top-1 w-4 h-4 rounded-full bg-[#1058A8] border-4 border-[#FAF8F5]" />
               <div className="flex items-center gap-2">
-                <span className="text-[14px] font-semibold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full font-source tabular-nums">
+                <span className="text-xs font-semibold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full font-source tabular-nums">
                   {item.year}
                 </span>
-                <h3 className="font-fraunces text-[22px] font-bold text-[#0C2340]">
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                   {item.title}
                 </h3>
               </div>
-              <p className="text-[17px] text-[#0C2340]/75 font-source leading-relaxed">
+              <p className="text-sm text-[#0C2340]/80 font-source leading-relaxed">
                 {item.desc}
               </p>
             </div>

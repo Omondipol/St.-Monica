@@ -2,44 +2,47 @@ import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import hymnalImg from '../../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { ChoirLogo } from '../../components/ChoirLogo';
+import { AboutNavTabs } from '../../components/AboutNavTabs';
+import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 
-export const PatronView: React.FC = () => {
+interface PatronViewProps {
+  onNavigate?: (route: string) => void;
+}
+
+export const PatronView: React.FC<PatronViewProps> = ({ onNavigate = () => {} }) => {
   const { lang } = useChoir();
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto">
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8 space-y-4">
-        <span className="text-[14px] font-semibold text-[#1058A8] font-source block">
-          {lang === 'sw' ? 'Somo wetu wa kiroho · Mtakatifu Monika' : 'Our spiritual patroness · Saint Monica'}
-        </span>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-            {lang === 'sw' 
-              ? 'Mtakatifu Monika: Kielelezo cha Sala Isiyokoma' 
-              : 'Saint Monica: Exemplar of Unceasing Prayer'}
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Page Title Banner (Matching Music Section Slim Banner) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img 
+          src={hymnalImg} 
+          alt="Saint Monica Choral Hymnal" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Msimamizi wa Kiroho' : 'Patron Saint'}
+          </span>
+          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+            {lang === 'sw' ? 'Mtakatifu Monika' : 'Saint Monica'}
           </h1>
-          <ChoirLogo size={64} className="ring-2 ring-[#7EC8F0] shrink-0 self-start sm:self-center" interactive={true} />
+          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+            {lang === 'sw'
+              ? 'Mama wa machozi na sala isiyokoma · Sikukuu: 27 Agosti.'
+              : 'Mother of tears & unceasing prayer · Feast Day: August 27.'}
+          </p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-3 text-[14px] font-semibold text-[#1058A8] font-source">
-          <span>{lang === 'sw' ? 'Sikukuu ya Somo: Tarehe 27 Agosti' : 'Feast Day: August 27'}</span>
-          <span aria-hidden="true">·</span>
-          <span>{lang === 'sw' ? 'Mama wa Mtakatifu Augustino' : 'Mother of St. Augustine of Hippo'}</span>
-        </div>
-
-        {/* 5-line music-stave divider */}
-        <div className="stave-divider my-4 max-w-md">
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-          <div className="stave-line" />
-        </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8">
-        <div className="lg:col-span-5 aspect-4/3 rounded-[12px] overflow-hidden border border-[#0C2340]/10">
+      {/* Unified Section Navigation Tabs */}
+      <AboutNavTabs currentTab="about-patron" onNavigate={onNavigate} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/90 border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
+        <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-sm">
           <img
             src={hymnalImg}
             alt="Saint Monica Choral Song Scores"
@@ -48,8 +51,8 @@ export const PatronView: React.FC = () => {
           />
         </div>
 
-        <div className="lg:col-span-7 space-y-4 text-[17px] text-[#0C2340]/85 font-source leading-relaxed">
-          <h2 className="font-fraunces text-[28px] font-bold text-[#0C2340]">
+        <div className="lg:col-span-7 space-y-4 text-[16px] text-[#0C2340]/85 font-source leading-relaxed">
+          <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
             {lang === 'sw' 
               ? 'Kwanini Mtakatifu Monika ni Somo Wetu?' 
               : 'Why St. Monica is Our Heavenly Patroness'}
@@ -66,7 +69,7 @@ export const PatronView: React.FC = () => {
               <p>
                 Kwa kwaya yetu, Mtakatifu Monika anatufundisha kwamba <strong>uimbaji ni sala ya machozi, imani, na matumaini</strong>. Tunapopanda madhabahuni kuimba, tunaleta maombi ya familia zetu, wagonjwa, na waamini wote mbele ya Mungu.
               </p>
-              <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 font-fraunces text-[15px] italic text-[#1058A8]">
+              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 font-eb-garamond text-[17px] italic text-[#1058A8] leading-relaxed shadow-xs">
                 "Ee Mtakatifu Monika, mama mwenye huruma na maombezi yasiyoshindwa, utuombee waimbaji wako wa SEC 58 ili kila wimbo tunaouimba uwe njia ya kuokoa roho na kuleta amani mioyoni mwa watu."
               </div>
             </>
@@ -81,7 +84,7 @@ export const PatronView: React.FC = () => {
               <p>
                 For our choir, Saint Monica embodies our foundational belief that <strong>sacred singing is prayer transmuted into sound</strong>. As Saint Augustine famously wrote, <em>"Qui cantat, bis orat"</em> (He who sings, prays twice). Whenever we minister before the altar, we carry the petitions of our parish and diocese.
               </p>
-              <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 font-fraunces text-[15px] italic text-[#1058A8]">
+              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 font-eb-garamond text-[17px] italic text-[#1058A8] leading-relaxed shadow-xs">
                 "O Saint Monica, merciful mother of steadfast intercession, pray for your choristers at St. Monica Parish, that every chord and cadence we offer may draw souls closer to Christ."
               </div>
             </>
