@@ -30,8 +30,8 @@ export const MusicNavTabs: React.FC<MusicNavTabsProps> = ({ currentTab, onNaviga
     {
       id: 'music-library',
       aliases: ['music-library'],
-      labelSw: 'Maktaba ya Noti',
-      labelEn: 'Free Scores',
+      labelSw: 'Libraryy',
+      labelEn: 'Libraryy',
       icon: FileText,
       badge: '28'
     },

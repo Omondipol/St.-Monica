@@ -88,7 +88,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
           <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#0C2340]/10 text-xs font-source">
             <div className="p-3 bg-[#EAF4FB] rounded-xl border border-[#7EC8F0]/30 shadow-xs">
               <span className="font-semibold text-[#1058A8] block">{lang === 'sw' ? 'Misa za Jumapili:' : 'Sunday Liturgies:'}</span>
-              <span className="text-[#0C2340]/80 mt-0.5 block tabular-nums">Sunday High Mass (9:00 AM)</span>
+              <span className="text-[#0C2340]/80 mt-0.5 block tabular-nums">Third Mass / High Mass (10:00 AM)</span>
             </div>
             <div className="p-3 bg-[#EAF4FB] rounded-xl border border-[#7EC8F0]/30 shadow-xs">
               <span className="font-semibold text-[#1058A8] block">{lang === 'sw' ? 'Mavazi:' : 'Vestments:'}</span>

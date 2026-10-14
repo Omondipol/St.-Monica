@@ -16,7 +16,9 @@ import {
   Check, 
   Copy,
   Play,
-  Pause
+  Pause,
+  LayoutGrid,
+  ListFilter
 } from 'lucide-react';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
@@ -55,6 +57,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   const [selectedVoices, setSelectedVoices] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'title' | 'newest'>('title');
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
   const PAGE_SIZE = 20;
 
   // Audio preview playback state for library song detail
@@ -334,137 +337,68 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#FAF8F5] text-[#0C2340] min-h-screen font-source">
+    <div className="space-y-8 max-w-6xl mx-auto font-source">
       
-      {/* Top of Library: Full-width slim band (~160px tall) with deep navy background and thin woven strip along bottom edge */}
-      <section className="bg-[#0C2340] text-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-[160px]">
-        {/* Thin woven strip along the bottom edge */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <AfricanGeometricBorder />
-        </div>
-
-        <div className="max-w-6xl mx-auto space-y-3.5 relative z-10 pb-2">
-          
-          {/* Breadcrumb Navigation on the Band */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-white/70 font-medium">
-            {!selectedCategoryId && !selectedSongId && !globalSearch ? (
-              /* Library home page: Respect language toggle */
-              <span className="text-[#FAF8F5] font-bold">
-                {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
-              </span>
-            ) : (
-              <>
-                <button 
-                  onClick={() => {
-                    setSelectedCategoryId(null);
-                    setSelectedSongId(null);
-                    setGlobalSearch('');
-                  }}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
-                </button>
-                {breadcrumbCategory && (
-                  <>
-                    <ChevronRight className="w-3.5 h-3.5 text-white/40" />
-                    <button 
-                      onClick={() => {
-                        setSelectedSongId(null);
-                        setSelectedCategoryId(breadcrumbCategory.id);
-                      }}
-                      className={`hover:text-white transition-colors cursor-pointer ${!currentSong ? 'text-[#FAF8F5] font-bold' : ''}`}
-                    >
-                      {lang === 'sw' ? breadcrumbCategory.nameSw : breadcrumbCategory.nameEn}
-                    </button>
-                  </>
-                )}
-                {currentSong && (
-                  <>
-                    <ChevronRight className="w-3.5 h-3.5 text-white/40" />
-                    <span className="text-[#FAF8F5] font-bold truncate max-w-[200px]">
-                      {currentSong.title}
-                    </span>
-                  </>
-                )}
-              </>
-            )}
-          </nav>
-
-          {/* Title, Subtitle, Choir Voice, and Paid Scores text link */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div>
-              <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-bold text-[#FAF8F5] tracking-tight leading-tight">
-                {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
-              </h1>
-              <p className="font-source text-sm sm:text-base text-white/80 mt-0.5">
-                {lang === 'sw' 
-                  ? 'Noti za bure kwa kwaya zote za Kikatoliki' 
-                  : 'Sacred choral scores and Catholic hymnody'}
-              </p>
-              <p className="font-source text-xs sm:text-sm text-sky-200/90 mt-1">
-                {lang === 'sw' 
-                  ? 'Noti za bure kwa kila kwaya' 
-                  : 'Free liturgical scores for every choir'}
-              </p>
-            </div>
-
-            {/* Plain blue text link at the right of the band: Noti za Kuuza (Scores for sale) */}
+      {/* 1. Slim Hero Banner (Matching Music & About Sections) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img 
+          src={scorePreviewSheet} 
+          alt="Libraryy - St. Monica Catholic Choir" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Mkusanyiko wa Noti za Bure' : 'Free Catholic Sheet Music'}
+          </span>
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+            <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+              Libraryy
+            </h1>
             {onNavigateMusicPaid && (
               <button
                 onClick={onNavigateMusicPaid}
-                className="text-[#7EC8F0] hover:text-white transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1 cursor-pointer self-start sm:self-auto py-1"
+                className="text-[#7EC8F0] hover:text-white transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
               >
-                <span>{lang === 'sw' ? 'Noti za Kuuza' : 'Scores for sale'}</span>
+                <span>{lang === 'sw' ? 'Noti za Kwaya (Duka)' : 'Music Store (Scores for sale)'}</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
-
-          {/* Search Box on the Band, beneath the title */}
-          <div className="pt-1 max-w-2xl">
-            <div className="relative">
-              <Search className="w-4.5 h-4.5 text-[#1058A8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={globalSearch}
-                onChange={(e) => {
-                  setGlobalSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder={lang === 'sw' ? 'Tafuta wimbo, jina au mtunzi' : 'Search by song, composer or words'}
-                className="w-full bg-[#FAF8F5] text-[#0C2340] border border-white/20 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7EC8F0] shadow-sm font-source"
-              />
-              {globalSearch && (
-                <button
-                  onClick={() => setGlobalSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 hover:text-[#0C2340] px-2 py-0.5 rounded bg-slate-200/60 cursor-pointer"
-                >
-                  {lang === 'sw' ? 'Futa' : 'Clear'}
-                </button>
-              )}
-            </div>
-          </div>
-
+          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+            {lang === 'sw'
+              ? 'Noti za bure kwa kila kwaya — Tonic Sol-fa na Staff Notation.'
+              : 'Free Catholic sheet music for choirs — Tonic Sol-fa and Staff notation.'}
+          </p>
         </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
+
+      {/* 2. Unified Music Section Navigation Tabs */}
+      <MusicNavTabs currentTab="music-library" onNavigate={onNavigate} />
 
       {/* BODY CONTENT BY STATE:
           1. Song Detail View (if selectedSongId is set)
-          2. Category Song List (if selectedCategoryId is set or search active)
-          3. Categories Front Door Grid (default)
+          2. Complete Songs Catalog with Category Selector & Options
       */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
-        
-        {/* Unified Music Section Navigation Tabs */}
-        <MusicNavTabs currentTab="music-library" onNavigate={onNavigate} />
+      <div className="space-y-8">
 
         {/* =========================================================================
             STATE 1: SINGLE SONG DETAIL VIEW
             ========================================================================= */}
         {currentSong ? (
-          <div className="space-y-8 animate-fadeIn">
+          <div className="space-y-6 animate-fadeIn">
+            {/* Back to songs list button */}
+            <button
+              onClick={() => setSelectedSongId(null)}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1058A8] hover:text-[#0C2340] cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-[#0C2340]/10 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{lang === 'sw' ? 'Rudi Kwenye Nyimbo Zote (Libraryy)' : 'Back to All Libraryy Songs'}</span>
+            </button>
+
             {/* Main Song Showcase Card */}
-            <div className="bg-white border border-[#0C2340]/15 rounded-2xl p-6 sm:p-10 shadow-sm space-y-8">
+            <div className="bg-white border border-[#0C2340]/15 rounded-2xl p-6 sm:p-10 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-8">
               
               {/* Header: Title, Composer, Sharing Status Badge */}
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-[#0C2340]/10">
@@ -520,7 +454,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
               {/* Two Column Grid: Left Score Preview, Right Lyrics and Audio */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                 
-                {/* Left: Score Sheet Preview - only if song has real PDF preview or previewImage */}
+                {/* Left: Score Sheet Preview */}
                 {(currentSong.previewImage || currentSong.pdfUrl) && (
                   <div className="md:col-span-5 space-y-2">
                     <span className="text-sm font-semibold text-slate-700 block font-source">
@@ -545,7 +479,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                 {/* Right: Lyrics and Audio Player */}
                 <div className={`${(currentSong.previewImage || currentSong.pdfUrl) ? 'md:col-span-7' : 'md:col-span-12'} space-y-6`}>
                   
-                  {/* Optional Audio Player: only shown if real uploaded audio file exists */}
+                  {/* Optional Audio Player */}
                   {currentSong.audioUrl && (
                     <div className="p-4 bg-transparent border border-[#0C2340]/15 rounded-xl space-y-2.5">
                       <div className="flex items-center justify-between">
@@ -613,7 +547,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                     <button
                       key={relSong.id}
                       onClick={() => handleSelectSong(relSong)}
-                      className="p-4 rounded-xl bg-white border border-[#0C2340]/10 hover:border-[#1058A8] hover:shadow-md transition-all text-left space-y-2 group cursor-pointer"
+                      className="p-4 rounded-2xl bg-white border border-[#0C2340]/10 hover:border-[#1058A8] shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] hover:shadow-md transition-all text-left space-y-2 group cursor-pointer"
                     >
                       <strong className="font-eb-garamond text-lg font-bold text-[#0C2340] group-hover:text-[#1058A8] transition-colors block leading-tight">
                         {relSong.title}
@@ -632,285 +566,441 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
             </div>
 
           </div>
-        ) : selectedCategoryId || globalSearch ? (
+        ) : (
           
           /* =========================================================================
-             STATE 2: CATEGORY SONG LIST (PRINTED INDEX LAYOUT)
+             STATE 2: COMPLETE SONGS CATALOG WITH CATEGORY SELECTION OPTIONS
+             Lists all songs by default and lets the user choose between categories!
              ========================================================================= */
           <div className="space-y-6 animate-fadeIn">
             
-            {/* Header banner of current category */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#0C2340]/15">
-              <div>
+            {/* Interactive Category Filter Pills Bar */}
+            <div className="bg-white/95 border border-[#0C2340]/10 rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  {lang === 'sw' ? 'Chagua Kategoria:' : 'Choose Category:'}
+                </span>
+
+                {/* View Mode Toggle: Song List vs Category Cards */}
+                <div className="flex items-center gap-1 bg-[#FAF8F5] p-1 rounded-xl border border-[#0C2340]/10">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      viewMode === 'list'
+                        ? 'bg-[#1058A8] text-white shadow-xs'
+                        : 'text-slate-600 hover:text-[#0C2340]'
+                    }`}
+                  >
+                    <ListFilter className="w-3.5 h-3.5" />
+                    <span>{lang === 'sw' ? 'Orodha ya Nyimbo' : 'All Songs List'}</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('cards')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      viewMode === 'cards'
+                        ? 'bg-[#1058A8] text-white shadow-xs'
+                        : 'text-slate-600 hover:text-[#0C2340]'
+                    }`}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>{lang === 'sw' ? 'Kadi za Kategoria' : 'Category Cards'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Pills Slider / Wrap */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {/* All Songs Pill */}
                 <button
                   onClick={() => {
                     setSelectedCategoryId(null);
-                    setGlobalSearch('');
+                    setCurrentPage(1);
                   }}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#1058A8] hover:text-[#0C2340] mb-2 cursor-pointer"
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                    !selectedCategoryId
+                      ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                      : 'bg-[#FAF8F5] text-slate-700 border-[#0C2340]/10 hover:border-[#1058A8]/50 hover:bg-white'
+                  }`}
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>{lang === 'sw' ? 'Rudi Kwenye Kategoria Zote' : 'All Categories'}</span>
+                  <span>{lang === 'sw' ? 'Nyimbo Zote' : 'All Songs'}</span>
+                  <span className={`ml-1.5 text-[11px] px-1.5 py-0.2 rounded-full ${
+                    !selectedCategoryId ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {librarySongs.length}
+                  </span>
                 </button>
 
-                <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                  {currentCategory ? (lang === 'sw' ? currentCategory.nameSw : currentCategory.nameEn) : (lang === 'sw' ? 'Matokeo ya Utafutaji' : 'Search Results')}
-                </h2>
-                {currentCategory && (
-                  <p className="text-xs text-slate-600 font-source mt-0.5">
-                    {lang === 'sw' ? currentCategory.descriptionSw : currentCategory.descriptionEn}
-                  </p>
-                )}
-              </div>
-
-              {/* Number of Songs found count badge */}
-              <div className="text-xs text-slate-600 font-medium bg-white px-3 py-1.5 rounded-lg border border-[#0C2340]/10 self-start sm:self-auto">
-                {lang === 'sw' 
-                  ? `Nyimbo ${filteredSongs.length}` 
-                  : `${filteredSongs.length} songs`}
-              </div>
-            </div>
-
-            {/* Filter Controls: Language, Voices, Sort */}
-            <div className="bg-white p-4 rounded-xl border border-[#0C2340]/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Language Filter */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Lugha:' : 'Language:'}</span>
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => {
-                      setSelectedLanguage(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="bg-[#FAF8F5] border border-slate-300 rounded-lg px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
-                  >
-                    <option value="all">{lang === 'sw' ? 'Lugha zote' : 'All languages'}</option>
-                    <option value="Kiswahili">Kiswahili</option>
-                    <option value="English">English</option>
-                    <option value="Latin">Latin</option>
-                    <option value="Kikuyu">Kikuyu</option>
-                    <option value="Dholuo">Dholuo</option>
-                    <option value="Kalenjin">Kalenjin</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                {/* Voices Filter */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Sauti:' : 'Voices:'}</span>
-                  <select
-                    value={selectedVoices}
-                    onChange={(e) => {
-                      setSelectedVoices(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="bg-[#FAF8F5] border border-slate-300 rounded-lg px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
-                  >
-                    <option value="all">{lang === 'sw' ? 'Sauti zote' : 'All voicings'}</option>
-                    <option value="SATB">SATB</option>
-                    <option value="Unison">Unison</option>
-                    <option value="Solo">Solo</option>
-                    <option value="SSAA">SSAA</option>
-                    <option value="TTBB">TTBB</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Sort Order */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Panga kwa:' : 'Sort by:'}</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-[#FAF8F5] border border-slate-300 rounded-lg px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
-                >
-                  <option value="title">{lang === 'sw' ? 'Kichwa cha Wimbo (A-Z)' : 'Title (A-Z)'}</option>
-                  <option value="newest">{lang === 'sw' ? 'Iliyoongezwa Hivi Karibuni' : 'Newest'}</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Printed Index Table Layout */}
-            {paginatedSongs.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-[#0C2340]/15 overflow-hidden shadow-xs">
-                <div className="divide-y divide-[#0C2340]/10">
-                  {paginatedSongs.map((song, idx) => (
-                    <div
-                      key={song.id}
-                      onClick={() => handleSelectSong(song)}
-                      className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#FAF8F5] transition-colors cursor-pointer group"
+                {/* Individual Categories */}
+                {LIBRARY_CATEGORIES.map(category => {
+                  const isSelected = selectedCategoryId === category.id;
+                  const count = categoryCounts[category.id] || 0;
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        setSelectedCategoryId(category.id);
+                        setCurrentPage(1);
+                        if (viewMode === 'cards') setViewMode('list');
+                      }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                        isSelected
+                          ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                          : 'bg-[#FAF8F5] text-slate-700 border-[#0C2340]/10 hover:border-[#1058A8]/50 hover:bg-white'
+                      }`}
                     >
-                      <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-                        <span className="text-xs font-mono font-semibold text-slate-400 w-6 text-right shrink-0 pt-1 sm:pt-0">
-                          {((currentPage - 1) * PAGE_SIZE + idx + 1).toString().padStart(2, '0')}
-                        </span>
-                        
-                        <div className="min-w-0 space-y-1">
-                          <strong className="font-eb-garamond text-lg sm:text-xl font-bold text-[#0C2340] group-hover:text-[#1058A8] transition-colors block leading-tight">
-                            {song.title}
-                          </strong>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-                            <span className="font-medium text-slate-700">{song.composer}</span>
-                            <span>·</span>
-                            <span>{song.voices}</span>
-                            <span>·</span>
-                            <span>{song.language}</span>
-                            {song.solfaNotes && (
-                              <>
-                                <span>·</span>
-                                <span className="text-[#1058A8] font-semibold">Sol-fa</span>
-                              </>
-                            )}
+                      <span>{lang === 'sw' ? category.nameSw : category.nameEn}</span>
+                      <span className={`ml-1.5 text-[11px] px-1.5 py-0.2 rounded-full ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* If in Category Cards Mode: Show Category Grid */}
+            {viewMode === 'cards' ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+                      {lang === 'sw' ? 'Chagua Kategoria ya Liturujia' : 'Choose a Liturgical Category'}
+                    </h2>
+                    <p className="text-xs text-slate-600 font-source mt-0.5">
+                      {lang === 'sw' ? 'Gusa kategoria yoyote kuona nyimbo zake zote' : 'Tap any category to view its scores'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className="text-xs font-semibold text-[#1058A8] hover:underline cursor-pointer"
+                  >
+                    {lang === 'sw' ? 'Tazama Nyimbo Zote Kama Orodha' : 'View all songs as a list'} →
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                  {LIBRARY_CATEGORIES.map(category => {
+                    const count = categoryCounts[category.id] || 0;
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => {
+                          setSelectedCategoryId(category.id);
+                          setViewMode('list');
+                          setCurrentPage(1);
+                        }}
+                        className="p-5 sm:p-6 rounded-2xl bg-white border border-[#0C2340]/10 hover:-translate-y-0.5 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] hover:shadow-lg transition-all text-left flex flex-col justify-between group cursor-pointer"
+                      >
+                        <div>
+                          <div className="w-14 h-14 shrink-0 flex items-center justify-center">
+                            {renderCategoryLineDrawing(category.id)}
+                          </div>
+                          <div className="mt-4">
+                            <strong className="font-eb-garamond text-[22px] sm:text-[24px] font-bold text-[#0C2340] group-hover:underline decoration-[#1058A8] decoration-1 underline-offset-4 transition-all block leading-tight">
+                              {lang === 'sw' ? category.nameSw : category.nameEn}
+                            </strong>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center pl-10 sm:pl-0">
-                        <span className="inline-flex items-center gap-1 text-xs text-[#1058A8] font-bold">
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>PDF</span>
-                        </span>
-
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                          {song.sharingStatus}
-                        </span>
-
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#1058A8] group-hover:translate-x-0.5 transition-all" />
-                      </div>
-                    </div>
-                  ))}
+                        <div className="flex items-baseline w-full mt-6 text-xs sm:text-sm text-slate-600 font-source">
+                          <span className="shrink-0 font-medium">
+                            {lang === 'sw' ? 'Nyimbo' : 'Songs'}
+                          </span>
+                          <span className="flex-1 mx-2 border-b border-dotted border-slate-300" />
+                          <span className="font-bold text-[#0C2340] shrink-0 text-sm">
+                            {count}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center bg-white rounded-xl border border-[#0C2340]/10 space-y-3">
-                <Music className="w-10 h-10 text-slate-400 mx-auto" />
-                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                  {lang === 'sw' ? 'Hakuna nyimbo hapa bado. Jaribu kategoria nyingine.' : 'No songs here yet. Try another.'}
-                </h3>
-                <p className="text-xs text-slate-600 max-w-sm mx-auto">
-                  {lang === 'sw'
-                    ? 'Mkusanyiko huu unaongezwa polepole kufuata kanuni za haki miliki.'
-                    : 'We are steadily growing our library with verified permissions and public domain scores.'}
-                </p>
-                <button
-                  onClick={() => {
-                    setSelectedLanguage('all');
-                    setSelectedVoices('all');
-                    setGlobalSearch('');
-                  }}
-                  className="mt-2 text-xs font-bold text-[#1058A8] hover:underline cursor-pointer"
-                >
-                  {lang === 'sw' ? 'Ondoa vichungi vyote' : 'Reset filters'}
-                </button>
-              </div>
-            )}
+              /* Songs List View (Default) */
+              <div className="space-y-6">
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-[#0C2340]/10 pt-4 text-xs text-slate-600">
-                <span>
-                  {lang === 'sw' ? `Ukurasa wa ${currentPage} kati ya ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    className="px-3 py-1.5 rounded-lg border border-slate-300 disabled:opacity-40 hover:bg-white transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Iliyotangulia' : 'Previous'}
-                  </button>
-                  <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    className="px-3 py-1.5 rounded-lg border border-slate-300 disabled:opacity-40 hover:bg-white transition-colors cursor-pointer"
-                  >
-                    {lang === 'sw' ? 'Inayofuata' : 'Next'}
-                  </button>
+                {/* Search & Filters Controls Box */}
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#0C2340]/10 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-4">
+                  {/* Search Bar */}
+                  <div className="relative">
+                    <Search className="w-4.5 h-4.5 text-[#1058A8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={globalSearch}
+                      onChange={(e) => {
+                        setGlobalSearch(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      placeholder={lang === 'sw' ? 'Tafuta wimbo, jina au mtunzi...' : 'Search by song title, composer or words...'}
+                      className="w-full bg-[#FAF8F5] text-[#0C2340] border border-[#0C2340]/15 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1058A8]/30 shadow-xs font-source"
+                    />
+                    {globalSearch && (
+                      <button
+                        onClick={() => setGlobalSearch('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 hover:text-[#0C2340] px-2 py-0.5 rounded bg-slate-200/60 cursor-pointer"
+                      >
+                        {lang === 'sw' ? 'Futa' : 'Clear'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filter Selectors Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Category Quick Select */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Kategoria:' : 'Category:'}</span>
+                        <select
+                          value={selectedCategoryId || 'all'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSelectedCategoryId(val === 'all' ? null : val);
+                            setCurrentPage(1);
+                          }}
+                          className="bg-[#FAF8F5] border border-slate-300 rounded-xl px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                        >
+                          <option value="all">{lang === 'sw' ? `Nyimbo Zote (${librarySongs.length})` : `All Songs (${librarySongs.length})`}</option>
+                          {LIBRARY_CATEGORIES.map(c => (
+                            <option key={c.id} value={c.id}>
+                              {lang === 'sw' ? c.nameSw : c.nameEn} ({categoryCounts[c.id] || 0})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Language Filter */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Lugha:' : 'Language:'}</span>
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => {
+                            setSelectedLanguage(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="bg-[#FAF8F5] border border-slate-300 rounded-xl px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                        >
+                          <option value="all">{lang === 'sw' ? 'Lugha zote' : 'All languages'}</option>
+                          <option value="Kiswahili">Kiswahili</option>
+                          <option value="English">English</option>
+                          <option value="Latin">Latin</option>
+                          <option value="Kikuyu">Kikuyu</option>
+                          <option value="Dholuo">Dholuo</option>
+                          <option value="Kalenjin">Kalenjin</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      {/* Voices Filter */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Sauti:' : 'Voices:'}</span>
+                        <select
+                          value={selectedVoices}
+                          onChange={(e) => {
+                            setSelectedVoices(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="bg-[#FAF8F5] border border-slate-300 rounded-xl px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                        >
+                          <option value="all">{lang === 'sw' ? 'Sauti zote' : 'All voicings'}</option>
+                          <option value="SATB">SATB</option>
+                          <option value="Unison">Unison</option>
+                          <option value="Solo">Solo</option>
+                          <option value="SSAA">SSAA</option>
+                          <option value="TTBB">TTBB</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Sort Order */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-500 font-semibold">{lang === 'sw' ? 'Panga kwa:' : 'Sort by:'}</span>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                        className="bg-[#FAF8F5] border border-slate-300 rounded-xl px-2.5 py-1.5 text-[#0C2340] focus:ring-1 focus:ring-[#1058A8] outline-none"
+                      >
+                        <option value="title">{lang === 'sw' ? 'Kichwa cha Wimbo (A-Z)' : 'Title (A-Z)'}</option>
+                        <option value="newest">{lang === 'sw' ? 'Iliyoongezwa Hivi Karibuni' : 'Newest'}</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Section Header: Category Name & Count */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#0C2340]/10">
+                  <div>
+                    <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+                      {currentCategory 
+                        ? (lang === 'sw' ? currentCategory.nameSw : currentCategory.nameEn)
+                        : (globalSearch ? (lang === 'sw' ? 'Matokeo ya Utafutaji' : 'Search Results') : (lang === 'sw' ? 'Nyimbo Zote za Maktaba' : 'All Libraryy Songs'))}
+                    </h2>
+                    {currentCategory && (
+                      <p className="text-xs text-slate-600 font-source mt-0.5">
+                        {lang === 'sw' ? currentCategory.descriptionSw : currentCategory.descriptionEn}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    {(selectedCategoryId || globalSearch || selectedLanguage !== 'all' || selectedVoices !== 'all') && (
+                      <button
+                        onClick={() => {
+                          setSelectedCategoryId(null);
+                          setGlobalSearch('');
+                          setSelectedLanguage('all');
+                          setSelectedVoices('all');
+                          setCurrentPage(1);
+                        }}
+                        className="text-xs font-semibold text-[#1058A8] hover:underline cursor-pointer"
+                      >
+                        {lang === 'sw' ? 'Ondoa vichungi' : 'Clear filters'}
+                      </button>
+                    )}
+                    <span className="text-xs text-slate-600 font-semibold bg-white px-3 py-1.5 rounded-xl border border-[#0C2340]/10 shadow-xs">
+                      {lang === 'sw' ? `Nyimbo ${filteredSongs.length}` : `${filteredSongs.length} songs`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Printed Index Table Layout with Smooth Curves and Subtle Shadow */}
+                {paginatedSongs.length > 0 ? (
+                  <div className="bg-white rounded-2xl border border-[#0C2340]/15 overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
+                    <div className="divide-y divide-[#0C2340]/10">
+                      {paginatedSongs.map((song, idx) => (
+                        <div
+                          key={song.id}
+                          onClick={() => handleSelectSong(song)}
+                          className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#FAF8F5] transition-colors cursor-pointer group"
+                        >
+                          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                            <span className="text-xs font-mono font-semibold text-slate-400 w-6 text-right shrink-0 pt-1 sm:pt-0">
+                              {((currentPage - 1) * PAGE_SIZE + idx + 1).toString().padStart(2, '0')}
+                            </span>
+                            
+                            <div className="min-w-0 space-y-1">
+                              <strong className="font-eb-garamond text-lg sm:text-xl font-bold text-[#0C2340] group-hover:text-[#1058A8] transition-colors block leading-tight">
+                                {song.title}
+                              </strong>
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                                <span className="font-medium text-slate-700">{song.composer}</span>
+                                <span>·</span>
+                                <span>{song.voices}</span>
+                                <span>·</span>
+                                <span>{song.language}</span>
+                                {song.solfaNotes && (
+                                  <>
+                                    <span>·</span>
+                                    <span className="text-[#1058A8] font-semibold">Sol-fa</span>
+                                  </>
+                                )}
+                                {song.categories && song.categories.length > 0 && (
+                                  <>
+                                    <span>·</span>
+                                    {song.categories.map(catId => {
+                                      const cat = LIBRARY_CATEGORIES.find(c => c.id === catId);
+                                      if (!cat) return null;
+                                      return (
+                                        <span 
+                                          key={catId}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedCategoryId(cat.id);
+                                            setCurrentPage(1);
+                                          }}
+                                          className="text-[11px] font-semibold text-[#1058A8] bg-[#1058A8]/8 hover:bg-[#1058A8]/15 px-2 py-0.5 rounded-md transition-colors"
+                                          title={`Filter by ${lang === 'sw' ? cat.nameSw : cat.nameEn}`}
+                                        >
+                                          {lang === 'sw' ? cat.nameSw : cat.nameEn}
+                                        </span>
+                                      );
+                                    })}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center pl-10 sm:pl-0">
+                            {/* Download PDF Quick Action */}
+                            {song.sharingStatus !== 'Link only' && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownloadPdf(song);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1058A8]/10 hover:bg-[#1058A8] text-[#1058A8] hover:text-white text-xs font-bold transition-all cursor-pointer"
+                                title="Download PDF score"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>PDF</span>
+                              </button>
+                            )}
+
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                              {song.sharingStatus}
+                            </span>
+
+                            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#1058A8] group-hover:translate-x-0.5 transition-all" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-12 text-center bg-white rounded-2xl border border-[#0C2340]/10 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-3">
+                    <Music className="w-10 h-10 text-slate-400 mx-auto" />
+                    <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                      {lang === 'sw' ? 'Hakuna nyimbo zinazolingana. Jaribu kategoria nyingine.' : 'No matching songs found. Try another category.'}
+                    </h3>
+                    <p className="text-xs text-slate-600 max-w-sm mx-auto">
+                      {lang === 'sw'
+                        ? 'Mkusanyiko huu unaongezwa polepole kufuata kanuni za haki miliki.'
+                        : 'We are steadily growing our library with verified permissions and public domain scores.'}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSelectedCategoryId(null);
+                        setSelectedLanguage('all');
+                        setSelectedVoices('all');
+                        setGlobalSearch('');
+                      }}
+                      className="mt-2 text-xs font-bold text-[#1058A8] hover:underline cursor-pointer"
+                    >
+                      {lang === 'sw' ? 'Ondoa vichungi vyote na onyesha nyimbo zote' : 'Reset all filters & show all songs'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-[#0C2340]/10 pt-4 text-xs text-slate-600">
+                    <span>
+                      {lang === 'sw' ? `Ukurasa wa ${currentPage} kati ya ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        className="px-3.5 py-1.5 rounded-xl border border-slate-300 disabled:opacity-40 hover:bg-white transition-colors cursor-pointer"
+                      >
+                        {lang === 'sw' ? 'Iliyotangulia' : 'Previous'}
+                      </button>
+                      <button
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        className="px-3.5 py-1.5 rounded-xl border border-slate-300 disabled:opacity-40 hover:bg-white transition-colors cursor-pointer"
+                      >
+                        {lang === 'sw' ? 'Inayofuata' : 'Next'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
-
-          </div>
-        ) : (
-
-          /* =========================================================================
-             STATE 3: CATEGORIES FRONT DOOR GRID (Fix 4 & Fix 5)
-             Printed Contents Page Design:
-             - Cream card with thin 1px warm grey border
-             - Custom Line Drawing at top left (56px square, site blue #1058A8)
-             - 16px space between drawing and title
-             - Swahili name in serif font at 24px, English beneath it
-             - Number of songs joined to name by thin dotted line: "Nyimbo 4"
-             - No grey pills
-             - 2px lift on hover + thin blue underline under title
-             - 4 cards per row laptops, 2 on phones, 24px gap
-             ========================================================================= */
-          <div className="space-y-8 animate-fadeIn">
-            
-            {/* Introductory Guidance on Safe Library Practices */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#0C2340]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-              <div className="space-y-1">
-                <span className="font-eb-garamond text-lg font-bold text-[#0C2340] block">
-                  {lang === 'sw' ? 'Kuhusu Maktaba Hii ya Bure' : 'About this Free Sheet Music Library'}
-                </span>
-                <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-                  {lang === 'sw'
-                    ? 'Hapa tunashiriki nyimbo zilizoko katika miliki ya umma (Public Domain) na zile zilizotolewa kwa idhini ya watunzi wao. Nyimbo nyingine zimewekwa kwa kiungo cha asili bila kupakuliwa.'
-                    : 'We share public domain sacred songs and scores released with verified composer permissions. Modern arrangements are listed with direct legal source links.'}
-                </p>
-              </div>
-
-              <button
-                onClick={() => setIsComposerModalOpen(true)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#EAF4FB] text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer whitespace-nowrap self-start sm:self-auto border border-[#1058A8]/20"
-              >
-                {lang === 'sw' ? 'Wewe ni Mtunzi? Wasiliana Nasi' : 'Are you a composer?'}
-              </button>
-            </div>
-
-            {/* 16 Liturgical Categories Grid (4 cards per row laptops, 2 on phones, 24px gap) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {LIBRARY_CATEGORIES.map(category => {
-                const count = categoryCounts[category.id] || 0;
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      setSelectedCategoryId(category.id);
-                      setCurrentPage(1);
-                      window.scrollTo({ top: 160, behavior: 'smooth' });
-                    }}
-                    className="p-5 sm:p-6 rounded-2xl bg-white/95 border border-[#0C2340]/10 hover:-translate-y-0.5 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] hover:shadow-lg transition-all text-left flex flex-col justify-between group cursor-pointer"
-                  >
-                    <div>
-                      {/* Line drawing at top left, 56px square, site blue */}
-                      <div className="w-14 h-14 shrink-0 flex items-center justify-center">
-                        {renderCategoryLineDrawing(category.id)}
-                      </div>
-
-                      {/* Title: 16px below icon, single language in serif font at 24px following language toggle */}
-                      <div className="mt-4">
-                        <strong className="font-eb-garamond text-[24px] font-bold text-[#0C2340] group-hover:underline decoration-[#1058A8] decoration-1 underline-offset-4 transition-all block leading-tight">
-                          {lang === 'sw' ? category.nameSw : category.nameEn}
-                        </strong>
-                      </div>
-                    </div>
-
-                    {/* Bottom: Number of songs joined to the name by a thin dotted line */}
-                    <div className="flex items-baseline w-full mt-6 text-xs sm:text-sm text-slate-600 font-source">
-                      <span className="shrink-0 font-medium">
-                        {lang === 'sw' ? 'Nyimbo' : 'Songs'}
-                      </span>
-                      <span className="flex-1 mx-2 border-b border-dotted border-slate-300" />
-                      <span className="font-bold text-[#0C2340] shrink-0 text-sm">
-                        {count}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
 
           </div>
         )}
@@ -918,8 +1008,8 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
         {/* =========================================================================
             BOTTOM COMPOSER PERMISSION & TAKEDOWN CONTACT (Verified Real Address)
             ========================================================================= */}
-        <section className="pt-8 border-t border-[#0C2340]/15">
-          <div className="p-6 rounded-2xl bg-white border border-[#0C2340]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <section className="pt-4 border-t border-[#0C2340]/15">
+          <div className="p-6 rounded-2xl bg-white border border-[#0C2340]/15 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <strong className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] block">
                 {lang === 'sw' 

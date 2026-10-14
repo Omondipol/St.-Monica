@@ -12,7 +12,7 @@ interface AlbumsViewProps {
 }
 
 export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, formatPrice, addToCart, playSong, songs } = useChoir();
+  const { lang, formatPrice, addToCart, playSong, songs, openSupportModal } = useChoir();
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -107,34 +107,40 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} })
                   </div>
                 </div>
 
+                {/* User Request: Do NOT sell the album. Provide link to view all on YouTube or option to support the choir to download directly */}
                 <div className="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[#0C2340]/10">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] text-[#0C2340]/70 font-source">{lang === 'sw' ? 'Bei ya Albamu (MP3):' : 'Album Download Price:'}</span>
-                    <span className="tabular-nums text-2xl font-bold font-eb-garamond text-[#1058A8]">
-                      {formatPrice(album.priceKes)}
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-slate-500 font-source uppercase tracking-wider">
+                      {lang === 'sw' ? 'Muziki Bure & Sadaka ya Hiari' : 'Free Listening & Voluntary Support'}
+                    </span>
+                    <span className="text-sm font-medium text-[#0C2340] font-source">
+                      {lang === 'sw' 
+                        ? 'Tazama yote bure YouTube au saidia kwaya yetu kupakua'
+                        : 'Watch completely free on YouTube or support our choir to download'}
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      addToCart({
-                        id: `alb-${album.id}`,
-                        name: album.title,
-                        nameSw: album.title,
-                        type: 'digital_album',
-                        priceKes: album.priceKes,
-                        priceUsd: 4.00,
-                        description: album.description,
-                        descriptionSw: album.descriptionSw,
-                        image: 'choir_singing_moment',
-                        downloadable: true
-                      });
-                    }}
-                    className="px-5 py-2.5 text-[14px] font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all cursor-pointer flex items-center gap-2 font-source shadow-sm active:scale-95"
-                  >
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>{lang === 'sw' ? 'Ongeza kwenye agizo' : 'Add to order'}</span>
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Link to automatically view all on YouTube */}
+                    <a
+                      href={album.youtubePlaylistUrl || YOUTUBE_CHANNEL_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#CC0000] hover:bg-[#B30000] rounded-xl transition-all cursor-pointer flex items-center gap-2 font-source shadow-sm hover:shadow-md"
+                    >
+                      <RealYouTubeIcon size={18} variant="badge" />
+                      <span>{lang === 'sw' ? 'Tazama Yote YouTube' : 'Watch All on YouTube'}</span>
+                      <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                    </a>
+
+                    {/* Support choir to download directly */}
+                    <button
+                      onClick={() => openSupportModal(album.title)}
+                      className="px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all cursor-pointer flex items-center gap-2 font-source shadow-sm active:scale-95"
+                    >
+                      <span>{lang === 'sw' ? 'Pakua Albamu (Saidia Kwaya)' : 'Download Album (Support Choir)'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

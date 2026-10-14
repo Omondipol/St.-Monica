@@ -52,18 +52,21 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
     inStock: true
   }));
 
-  const standardProducts: DisplayProduct[] = productsList.map((p: ProductItem) => ({
-    ...p,
-    composer: p.id === 'prod-sheet-bundle' ? 'St. Monica Catholic Choir Nakuru' : undefined,
-    isBundle: p.id === 'prod-sheet-bundle'
-  }));
+  // Only include sheet music products and sheet music bundles (no recordings/CDs/USBs)
+  const bundleProducts: DisplayProduct[] = productsList
+    .filter(p => p.type === 'sheet_music' || p.id === 'prod-sheet-bundle')
+    .map((p: ProductItem) => ({
+      ...p,
+      composer: 'St. Monica Catholic Choir Nakuru',
+      isBundle: true
+    }));
 
-  const allDisplayItems: DisplayProduct[] = [...sheetMusicProducts, ...standardProducts];
+  const allDisplayItems: DisplayProduct[] = [...sheetMusicProducts, ...bundleProducts];
 
   const filteredProducts = allDisplayItems.filter((p) => {
     if (filterType === 'all') return true;
-    if (filterType === 'sheet_music') return p.type === 'sheet_music';
-    if (filterType === 'recordings') return p.type === 'digital_album' || p.type === 'usb' || p.type === 'physical_cd';
+    if (filterType === 'sheet_music') return !p.isBundle;
+    if (filterType === 'recordings') return p.isBundle; // Repurposed tab for complete bundles
     return true;
   });
 
@@ -79,15 +82,15 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
         <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
           <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
-            {lang === 'sw' ? 'Duka Rasmi la Noti' : 'Scores & Music Store'}
+            {lang === 'sw' ? 'Duka Rasmi la Noti' : 'Official Scores Store'}
           </span>
           <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
-            {lang === 'sw' ? 'Noti za Kwaya na Albamu' : 'Choir Scores & Studio Recordings'}
+            {lang === 'sw' ? 'Noti za Kwaya' : 'Choir Sheet Music Scores'}
           </h1>
           <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
             {lang === 'sw'
               ? 'Noti za sauti nne (SATB) zenye solfa na stafu kwa muundo wa PDF kusaidia kwaya yako.'
-              : 'Official SATB vocal scores with tonic sol-fa and staff notation for your church choir.'}
+              : 'Official SATB vocal scores with tonic sol-fa and staff notation for church choirs.'}
           </p>
         </div>
         <AfricanGeometricBorder className="relative z-10" />
@@ -106,7 +109,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
               : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
           }`}
         >
-          {lang === 'sw' ? 'Zote (All)' : 'All Items'}
+          {lang === 'sw' ? 'Noti Zote' : 'All Scores'}
         </button>
         <button
           onClick={() => setFilterType('sheet_music')}
@@ -116,7 +119,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
               : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
           }`}
         >
-          <span>{lang === 'sw' ? 'Noti za Nyimbo' : 'Sheet Music Scores'}</span>
+          <span>{lang === 'sw' ? 'Nyimbo Moja Moja' : 'Individual Songs'}</span>
         </button>
         <button
           onClick={() => setFilterType('recordings')}
@@ -126,7 +129,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
               : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
           }`}
         >
-          <span>{lang === 'sw' ? 'Albamu na USB' : 'Albums & USB Cards'}</span>
+          <span>{lang === 'sw' ? 'Mkusanyiko Kamili (Bundle)' : 'Complete Bundles'}</span>
         </button>
       </div>
 

@@ -9,7 +9,8 @@ export const YouTubePlayerModal: React.FC = () => {
     currentSong, 
     isYoutubeModalOpen, 
     setIsYoutubeModalOpen, 
-    lang 
+    lang,
+    openSupportModal
   } = useChoir();
 
   if (!isYoutubeModalOpen || !currentSong) return null;
@@ -98,22 +99,34 @@ export const YouTubePlayerModal: React.FC = () => {
           )}
         </div>
 
-        {/* Footer info */}
+        {/* Footer info & Download Video Support Action */}
         <div className="px-5 py-3 bg-[#0B1526] border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-white/70">
-          <span className="font-source">
-            {lang === 'sw'
-              ? `Wimbo rasmi wa Kwaya ya Mtakatifu Monika, Nakuru.`
-              : `Official release from St. Monica Catholic Choir, Nakuru.`}
-          </span>
-          <a
-            href={YOUTUBE_CHANNEL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#7EC8F0] hover:underline font-bold inline-flex items-center gap-1"
+          <div className="flex items-center gap-3">
+            <span className="font-source">
+              {lang === 'sw'
+                ? `Wimbo rasmi wa Kwaya ya Misa ya Tatu, Nakuru.`
+                : `Official release from St. Monica Third Mass Choir, Nakuru.`}
+            </span>
+            <a
+              href={YOUTUBE_CHANNEL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#7EC8F0] hover:underline font-bold inline-flex items-center gap-1"
+            >
+              <span>{YOUTUBE_CHANNEL_HANDLE}</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+
+          <button
+            onClick={() => {
+              setIsYoutubeModalOpen(false);
+              openSupportModal(currentSong.title);
+            }}
+            className="px-3.5 py-1.5 rounded-lg bg-[#1058A8] hover:bg-[#0E56A6] text-white font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm ml-auto"
           >
-            <span>{YOUTUBE_CHANNEL_HANDLE}</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
+            <span>{lang === 'sw' ? 'Pakua Video (Saidia Kwaya)' : 'Download Video (Support Choir)'}</span>
+          </button>
         </div>
       </div>
     </div>

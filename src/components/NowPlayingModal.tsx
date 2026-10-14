@@ -165,7 +165,7 @@ export const NowPlayingModal: React.FC = () => {
           
           {/* Left: Player Window Title with Choir Logo */}
           <div className="flex items-center gap-2">
-            <ChoirLogo size={28} className="shrink-0" interactive={true} />
+            <ChoirLogo size={28} variant="simplified" className="shrink-0" interactive={true} />
             <span className="font-eb-garamond font-semibold text-base sm:text-lg text-[#0C2340]">
               {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
             </span>
@@ -248,7 +248,7 @@ export const NowPlayingModal: React.FC = () => {
                 {/* Title and composer on one block, with Ordinary Time · Meditation directly under title */}
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5 pb-0.5">
-                    <ChoirLogo size={22} className="shrink-0" />
+                    <ChoirLogo size={22} variant="simplified" className="shrink-0" />
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#1058A8] font-source">
                       St. Monica Third Mass Choir · Nakuru
                     </span>

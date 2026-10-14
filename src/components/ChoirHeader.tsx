@@ -510,7 +510,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                   </span>
                 </button>
 
-                {/* Sheet Music Library: strictly follows language toggle, FREE chip removed */}
+                {/* Libraryy */}
                 <button
                   onClick={() => {
                     navigateTo('music-library');
@@ -521,7 +521,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                   }`}
                 >
                   <span className="font-eb-garamond text-[17px] font-semibold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
-                    {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
+                    Libraryy
                   </span>
                   <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
                     {lang === 'sw' ? 'Noti za bure za Kikatoliki' : 'Free downloadable Catholic scores'}
@@ -595,7 +595,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
-                <ChoirLogo size={44} variant="full" />
+                <ChoirLogo size={44} variant="simplified" />
                 <div>
                   <h3 className="font-fraunces text-base font-bold text-white">
                     {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
@@ -690,7 +690,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                     </button>
                     <button onClick={() => navigateTo('music-library')} className="w-full min-h-[48px] text-left p-2.5 rounded-lg hover:bg-white/10 block bg-white/5 border border-white/10">
                       <strong className="font-eb-garamond text-base block text-white">
-                        {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
+                        Libraryy
                       </strong>
                       <span className="text-xs text-white/70 block mt-0.5">
                         {lang === 'sw' ? 'Noti za bure za Kikatoliki' : 'Free Catholic scores'}

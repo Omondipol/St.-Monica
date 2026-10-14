@@ -424,9 +424,23 @@ export const SimplifiedChoirMarkSvg: React.FC<{
   size?: number;
   className?: string;
   theme?: 'color' | 'white' | 'navy';
-}> = ({ size = 64, className = '', theme = 'color' }) => {
-  const fgNavy = theme === 'white' ? '#FFFFFF' : '#0C2340';
-  const fgOrange = '#F59E0B';
+  crossColor?: string;
+  crossStroke?: string;
+}> = ({ 
+  size = 64, 
+  className = '', 
+  theme = 'color',
+  crossColor,
+  crossStroke
+}) => {
+  // Master cross fill & stroke designed with Liturgical Sacred White (#FFFFFF) and Deep Navy (#0C2340) outline
+  // to match the official theme (Navy #0C2340, Amber Gold #F59E0B, Cream/White #FAF8F5/#FFFFFF)
+  // Highly visible across dark header (#1C1E24), dark navy footer (#0C2340), and light surfaces
+  const isColorTheme = theme === 'color';
+  const fillCross = crossColor || (theme === 'white' ? '#FFFFFF' : (theme === 'navy' ? '#0C2340' : '#FFFFFF'));
+  const strokeCross = crossStroke !== undefined ? crossStroke : (isColorTheme ? '#0C2340' : undefined);
+  const strokeW = strokeCross ? 6 : 0;
+  const fgTeardrop = theme === 'white' ? '#FFFFFF' : (theme === 'navy' ? '#0C2340' : '#F59E0B');
   const fgInner = theme === 'white' ? '#0C2340' : (theme === 'navy' ? '#FAF8F5' : '#0C2340');
 
   return (
@@ -443,25 +457,56 @@ export const SimplifiedChoirMarkSvg: React.FC<{
       {/* Outer Sacred Teardrop Note Head of St. Monica */}
       <path
         d="M 196 448 C 112 448 48 382 48 296 C 48 206 138 116 230 46 C 242 37 258 46 254 62 C 238 128 214 204 214 266 C 214 286 218 304 228 318 C 240 334 256 342 278 342 C 322 342 358 312 368 268 C 374 242 384 192 390 148 L 444 148 C 434 218 420 300 408 348 C 392 410 334 448 266 448 C 240 448 216 448 196 448 Z"
-        fill={theme === 'white' ? '#FFFFFF' : (theme === 'navy' ? '#0C2340' : fgOrange)}
+        fill={fgTeardrop}
       />
-      {/* Note Stem & Latin Cross Vertical Shaft */}
+
+      {/* Note Stem & Latin Cross Vertical Shaft (High-contrast cross visible on dark header & footer) */}
       <path
         d="M 284 84 C 284 73 293 64 304 64 L 334 64 C 345 64 354 73 354 84 L 354 372 C 354 383 345 392 334 392 L 304 392 C 293 392 284 383 284 372 Z"
-        fill={fgNavy}
+        fill={fillCross}
+        stroke={strokeCross}
+        strokeWidth={strokeW}
+        strokeLinejoin="round"
+        paintOrder="stroke fill"
       />
+
       {/* Latin Cross Horizontal Arm */}
       <path
         d="M 232 144 C 232 133 241 124 252 124 L 386 124 C 397 124 406 133 406 144 L 406 174 C 406 185 397 194 386 194 L 252 194 C 241 194 232 185 232 174 Z"
-        fill={fgNavy}
+        fill={fillCross}
+        stroke={strokeCross}
+        strokeWidth={strokeW}
+        strokeLinejoin="round"
+        paintOrder="stroke fill"
       />
+
+      {/* Central Seamless Fill Patch (eliminates internal stroke lines at the cross intersection) */}
+      {isColorTheme && (
+        <rect
+          x="284"
+          y="124"
+          width="70"
+          height="50"
+          fill={fillCross}
+        />
+      )}
+
       {/* Resonant Inner Tear Aperture */}
       <path
         d="M 172 386 C 136 386 108 354 108 312 C 108 262 148 208 184 162 C 188 157 196 160 195 166 C 187 202 178 244 178 278 C 178 304 186 322 196 338 C 197 340 197 343 195 345 C 190 366 182 386 172 386 Z"
         fill={fgInner}
       />
+
       {/* Singing Note Accent */}
-      <circle cx="319" cy="406" r="32" fill={fgNavy} />
+      <circle 
+        cx="319" 
+        cy="406" 
+        r="32" 
+        fill={fillCross} 
+        stroke={strokeCross} 
+        strokeWidth={strokeW} 
+        paintOrder="stroke fill" 
+      />
     </svg>
   );
 };
@@ -473,7 +518,7 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
   size = 72, 
   className = '', 
   showText = false,
-  variant = 'full',
+  variant = 'simplified',
   interactive = false,
   title = "St. Monica Third Mass Choir Section 58 Nakuru Official Logo"
 }) => {
@@ -582,9 +627,13 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         <div className="flex flex-col items-center text-center space-y-4">
           {/* High-Resolution Crest Preview */}
-          <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full shadow-2xl flex items-center justify-center relative p-1">
+          <div className="w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center relative p-1">
             <div id="official-highres-choir-crest" className="w-full h-full flex items-center justify-center">
-              <BrightChoirLogoSvg size={240} variant={crestTab} />
+              {crestTab === 'simplified' ? (
+                <SimplifiedChoirMarkSvg size={210} />
+              ) : (
+                <BrightChoirLogoSvg size={240} variant="full" />
+              )}
             </div>
           </div>
 
@@ -596,7 +645,7 @@ const CrestInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 crestTab === 'simplified' ? 'bg-white text-[#0C2340] shadow-xs' : 'text-slate-600 hover:text-[#0C2340]'
               }`}
             >
-              {lang === 'sw' ? 'Nembo Rahisi (Dhahabu)' : 'Simplified Mark (Gold)'}
+              {lang === 'sw' ? 'Nembo Rasmi (Alama)' : 'Official Choir Mark'}
             </button>
             <button
               onClick={() => setCrestTab('full')}

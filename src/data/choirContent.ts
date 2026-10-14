@@ -148,9 +148,8 @@ export const CHOIR_STATS = {
   patronSaint: "Saint Monica (Mtakatifu Monika)",
   feastDay: "27 August",
   feastDaySw: "27 Agosti",
-  youtubeHandle: "@KwayayaMtakatifuMonicaSection5",
-  massTimesSunday: "7:00 AM (Dawn), 9:00 AM (Sunday High Mass) & 11:00 AM (Youth)",
-  massTimesSundaySw: "Saa 1:00 Asubuhi, Saa 3:00 Asubuhi (Sunday High Mass) & Saa 5:00 Asubuhi",
+  massTimesSunday: "7:00 AM (Dawn), 8:30 AM (2nd Mass), 10:00 AM (Third Mass / High Mass - St. Monica Third Mass Choir) & 11:30 AM (Youth)",
+  massTimesSundaySw: "Saa 1:00 Asubuhi (Alfajiri), Saa 2:30 Asubuhi, Saa 4:00 Asubuhi (Misa ya Tatu Kuu - Kwaya ya Misa ya Tatu) & Saa 5:30 Asubuhi (Vijana)",
   rehearsalSchedule: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
   rehearsalScheduleSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
 };
@@ -546,16 +545,16 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 export const INITIAL_EVENTS: EventItem[] = [
   {
     id: "evt-sunday-mass",
-    title: "Sunday High Mass",
-    titleSw: "Misa Kuu ya Jumapili",
+    title: "Third Mass (Sunday High Mass)",
+    titleSw: "Misa ya Tatu (Misa Kuu ya Jumapili)",
     dateDay: "Sun",
     dateMonth: "Every",
     fullDate: "Kila Jumapili / Every Sunday",
-    time: "9:00 AM - 10:45 AM",
+    time: "10:00 AM - 11:45 AM",
     venue: "St. Monica Catholic Church, Section 58",
     city: "Nakuru, Kenya",
-    description: "Our principal liturgical assignment: solemn four-part SATB polyphony, hymns, psalms, and sacred praise songs for the Holy Eucharist.",
-    descriptionSw: "Utume wetu mkuu wa kiliturujia: kuongoza Misa Kuu kwa sauti nne (SATB), nyimbo za sifa na tafakari mbele ya Altare Takatifu.",
+    description: "Our principal liturgical assignment: leading the 10:00 AM Third Mass in solemn four-part SATB polyphony, hymns, psalms, and sacred praise songs for the Holy Eucharist.",
+    descriptionSw: "Utume wetu mkuu wa kiliturujia: kuongoza Misa ya Tatu (Saa 4:00 Asubuhi) kwa sauti nne (SATB), nyimbo za sifa na tafakari mbele ya Altare Takatifu.",
     category: "Liturgical Mass",
     entryType: "Sunday Liturgy",
     isUpcoming: true

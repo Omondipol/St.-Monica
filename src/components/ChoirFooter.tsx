@@ -90,7 +90,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           {/* COLUMN 1: The Choir Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <ChoirLogo size={64} interactive={true} className="shrink-0" />
+              <ChoirLogo size={64} variant="simplified" interactive={true} className="shrink-0" />
               <div>
                 <h4 className="font-fraunces text-lg font-bold text-white leading-snug">
                   {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
@@ -207,8 +207,8 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             <div className={`space-y-3 text-sm text-slate-300 ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
-                <strong className="text-white block font-medium">Sunday High Mass</strong>
-                <span className="text-slate-300 text-xs tabular-nums">9:00 AM (Section 58 Sanctuary)</span>
+                <strong className="text-white block font-medium">Third Mass (Sunday High Mass)</strong>
+                <span className="text-slate-300 text-xs tabular-nums">10:00 AM (Section 58 Sanctuary)</span>
               </div>
               <div>
                 <strong className="text-white block font-medium">Choir Rehearsals</strong>

@@ -2,6 +2,8 @@ import React from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { INITIAL_EVENTS, EventItem, CHOIR_STATS } from '../data/choirContent';
 import { RotateCw, ExternalLink, CalendarPlus } from 'lucide-react';
+import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
+import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 
 export const EventsPage: React.FC = () => {
   const { lang, eventsList } = useChoir();
@@ -39,21 +41,28 @@ export const EventsPage: React.FC = () => {
 
   return (
     <div className="space-y-10 max-w-6xl mx-auto">
-      {/* Header */}
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8 space-y-4">
-        <span className="text-[14px] font-semibold text-[#1058A8] font-source block">
-          {lang === 'sw' ? 'Kalenda ya liturujia na ibada' : 'Liturgical calendar & celebrations'}
-        </span>
-
-        <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-          {lang === 'sw' ? 'Matukio na Kalenda ya Ibada' : 'Liturgical Celebrations & Events'}
-        </h1>
-
-        <p className="text-[17px] text-slate-700 font-source leading-relaxed max-w-3xl">
-          {lang === 'sw'
-            ? 'Ungana nasi katika Sunday High Mass (Saa 3:00 Asubuhi), mazoezi ya kwaya (Jumatano na Ijumaa Saa 11:30 Jioni – Saa 1:30 Usiku), na Sikukuu ya Somo: Mtakatifu Monika (27 Agosti 2027).'
-            : 'Join our choir in prayerful worship during Sunday High Mass (9:00 AM), weekly choir rehearsals (Wednesdays & Fridays, 5:30 PM – 7:30 PM), and the Feast of Saint Monica (27 August 2027).'}
-        </p>
+      {/* Header Banner (Matching Music & About Sections) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img 
+          src={churchImg} 
+          alt="St. Monica Catholic Church, Nakuru" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Kalenda ya Liturujia na Ibada' : 'Liturgical Calendar & Celebrations'}
+          </span>
+          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+            {lang === 'sw' ? 'Matukio na Kalenda ya Ibada' : 'Liturgical Celebrations & Events'}
+          </h1>
+          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+            {lang === 'sw'
+              ? 'Misa ya Tatu (Sunday High Mass) Saa 4:00 Asubuhi (10:00 AM), mazoezi ya kwaya, na sikukuu za liturujia.'
+              : 'Sunday High Mass (Third Mass) at 10:00 AM, weekly rehearsals, and upcoming parish feast days.'}
+          </p>
+        </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
 
       {/* 1. UPCOMING & RECURRING LITURGICAL EVENTS */}
@@ -163,23 +172,29 @@ export const EventsPage: React.FC = () => {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-[14px] font-source">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[14px] font-source">
           <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
             <span className="text-[13px] font-semibold text-slate-500 block">Mass 1</span>
             <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">7:00 AM (Dawn Liturgy)</strong>
-            <p className="text-slate-600 text-[14px]">Solemn morning Eucharistic prayer for parishioners.</p>
-          </div>
-
-          <div className="p-4 bg-[#EAF4FB] rounded-[12px] border border-[#1058A8]/30 space-y-1">
-            <span className="text-[13px] font-semibold text-[#1058A8] block">Mass 2 · Choir Ministry</span>
-            <strong className="text-base font-bold text-[#1058A8] block font-fraunces tabular-nums">9:00 AM (Choir High Mass)</strong>
-            <p className="text-slate-700 text-[14px] font-medium">St. Monica Catholic Choir leads four-part SATB liturgy.</p>
+            <p className="text-slate-600 text-xs">Solemn morning Eucharistic prayer for early parishioners.</p>
           </div>
 
           <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
-            <span className="text-[13px] font-semibold text-slate-500 block">Mass 3</span>
-            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">11:00 AM (Youth Liturgy)</strong>
-            <p className="text-slate-600 text-[14px]">Midday parish liturgy with youth and children ministry.</p>
+            <span className="text-[13px] font-semibold text-slate-500 block">Mass 2</span>
+            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">8:30 AM (Morning Liturgy)</strong>
+            <p className="text-slate-600 text-xs">Morning parish Eucharistic liturgy with congregational hymns.</p>
+          </div>
+
+          <div className="p-4 bg-[#EAF4FB] rounded-[12px] border border-[#1058A8]/40 space-y-1 shadow-sm">
+            <span className="text-[13px] font-bold text-[#1058A8] block">Mass 3 · Main Choir Ministry</span>
+            <strong className="text-base font-bold text-[#1058A8] block font-fraunces tabular-nums">10:00 AM (Third Mass / High Mass)</strong>
+            <p className="text-slate-700 text-xs font-medium">St. Monica Third Mass Choir leads solemn four-part SATB liturgy.</p>
+          </div>
+
+          <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
+            <span className="text-[13px] font-semibold text-slate-500 block">Mass 4</span>
+            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">11:30 AM (Youth Liturgy)</strong>
+            <p className="text-slate-600 text-xs">Midday parish liturgy with youth and children ministry.</p>
           </div>
         </div>
       </section>

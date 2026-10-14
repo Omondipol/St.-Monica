@@ -9,7 +9,8 @@ import {
   MoreVertical,
   FileText,
   Share2,
-  ExternalLink
+  ExternalLink,
+  Download
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
@@ -77,7 +78,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
     setIsLyricsOpen, 
     addToCart, 
     formatPrice, 
-    lang 
+    lang,
+    openSupportModal
   } = useChoir();
 
   const [activeTab, setActiveTab] = useState<'songs' | 'sheet_music'>('songs');
@@ -575,6 +577,19 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                                   >
                                     <FileText className="w-3.5 h-3.5 text-[#1058A8]" />
                                     <span>{lang === 'sw' ? 'Soma Maneno' : 'Read Lyrics'}</span>
+                                  </button>
+
+                                  {/* Download Video (Support Choir) */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      openSupportModal(song.title);
+                                      setOpenRowMenuId(null);
+                                    }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer border-t border-[#0C2340]/10"
+                                  >
+                                    <Download className="w-3.5 h-3.5 text-[#1058A8]" />
+                                    <span>{lang === 'sw' ? 'Pakua Video (Saidia Kwaya)' : 'Download Video (Support)'}</span>
                                   </button>
 
                                   {/* Share link */}

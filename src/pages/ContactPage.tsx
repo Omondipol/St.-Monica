@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Send, CheckCircle2, ExternalLink, MessageCircle, MapPin, Navigation, Copy, Check } from 'lucide-react';
 import { CHOIR_STATS } from '../data/choirContent';
+import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
+import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 
 export const ContactPage: React.FC = () => {
   const { lang } = useChoir();
@@ -95,17 +97,23 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       
-      {/* 1. Header Banner */}
-      <section className="bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div>
-            <span className="text-[14px] font-semibold text-[#1058A8] font-source block mb-1">
-              {lang === 'sw' ? 'Wasiliana nasi' : 'Get in touch'}
+      {/* 1. Header Banner (Matching Music & About Sections) */}
+      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img 
+          src={churchImg} 
+          alt="St. Monica Catholic Church, Nakuru" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
+        <div className="relative z-10 h-full flex items-center justify-between px-6 sm:px-10 text-white gap-4">
+          <div className="space-y-1 sm:space-y-1.5 max-w-xl">
+            <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+              {lang === 'sw' ? 'Wasiliana Nasi' : 'Get in Touch'}
             </span>
-            <h1 className="font-fraunces text-[28px] sm:text-[40px] font-bold text-[#0C2340] leading-tight">
-              {lang === 'sw' ? 'Wasiliana na Kwaya ya Mtakatifu Monika' : 'Contact St. Monica Catholic Choir'}
+            <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+              {lang === 'sw' ? 'Wasiliana na Kwaya' : 'Contact St. Monica Choir'}
             </h1>
-            <p className="text-[17px] text-slate-700 font-source mt-2 leading-relaxed">
+            <p className="font-source text-xs sm:text-sm text-slate-200 leading-snug">
               {lang === 'sw'
                 ? 'Tuma ujumbe wako au wasiliana moja kwa moja kupitia WhatsApp au simu.'
                 : 'Send a message or reach out directly via WhatsApp or phone call.'}
@@ -116,19 +124,20 @@ export const ContactPage: React.FC = () => {
             href={CHOIR_STATS.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="self-start sm:self-center px-5 py-3 rounded-[12px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-[14px] shadow-xs flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs sm:text-sm shadow-sm transition-transform active:scale-95 shrink-0"
           >
             <MessageCircle className="w-4 h-4 fill-current" />
-            <span>{lang === 'sw' ? 'Wasiliana kwa WhatsApp' : 'Chat on WhatsApp'}</span>
+            <span>WhatsApp</span>
           </a>
         </div>
+        <AfricanGeometricBorder className="relative z-10" />
       </section>
 
       {/* 2. Main 2-Column Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left Column: Send a Message Form */}
-        <div className="lg:col-span-7 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] p-6 sm:p-8">
+        <div className="lg:col-span-7 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
           {sent ? (
             <div className="p-8 text-center space-y-4 animate-in fade-in duration-200">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
@@ -337,7 +346,7 @@ export const ContactPage: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           
           {/* Parish Information Card */}
-          <div className="p-6 sm:p-7 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-[12px] space-y-5">
+          <div className="p-6 sm:p-7 bg-[#FCFAF7] border border-[#0C2340]/10 rounded-2xl shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] space-y-5">
             <h3 className="font-fraunces text-[22px] font-bold text-[#0C2340]">
               {lang === 'sw' ? 'Mawasiliano ya moja kwa moja' : 'Direct parish contacts'}
             </h3>
@@ -417,7 +426,7 @@ export const ContactPage: React.FC = () => {
           </div>
 
           {/* Embedded Parish Map & Direct Google Maps Navigation */}
-          <div className="bg-[#FCFAF7] border border-[#0C2340]/15 rounded-[14px] overflow-hidden shadow-xs">
+          <div className="bg-[#FCFAF7] border border-[#0C2340]/15 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
             <div className="p-4 bg-white border-b border-[#0C2340]/10 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-1.5">

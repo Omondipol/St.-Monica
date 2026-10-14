@@ -543,7 +543,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       {/* Top Banner & Header */}
       <div className="bg-[#0C2340] text-white rounded-3xl p-6 sm:p-8 border border-white/10 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <ChoirLogo size={58} className="ring-2 ring-[#7EC8F0] shrink-0" />
+          <ChoirLogo size={58} variant="simplified" className="shrink-0" />
           <div>
             <div className="flex items-center gap-2">
               <span className="bg-[#1058A8] text-white text-[11px] font-source px-2 py-0.5 rounded-[12px] font-semibold">

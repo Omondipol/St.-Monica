@@ -176,7 +176,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* 1. HERO SECTION: 5-Photo rotating crossfade slideshow (7s interval, 1.5s crossfade, 4% zoom, pause on hover) */}
       <section 
         id="home-hero-section" 
-        className="relative min-h-[75vh] sm:min-h-[82vh] flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]"
+        className="relative min-h-[calc(100vh-96px)] w-full flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -673,20 +673,29 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </h3>
               </div>
 
-              <ul className="space-y-3 text-sm text-slate-800 font-source">
-                <li className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10">
+              <ul className="space-y-2.5 text-sm text-slate-800 font-source">
+                <li className="flex items-center justify-between pb-1.5 border-b border-[#0C2340]/10">
                   <span>{lang === 'sw' ? 'Misa ya 1 (Asubuhi Mapema)' : '1st Mass (Dawn)'}</span>
                   <strong className="text-[#0C2340]">7:00 AM</strong>
                 </li>
-                <li className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10 bg-[#EAF4FB] p-2.5 rounded-lg">
-                  <span className="font-bold text-[#1058A8]">
-                    {lang === 'sw' ? 'Sunday High Mass' : 'Sunday High Mass'}
-                  </span>
-                  <strong className="text-[#1058A8]">9:00 AM</strong>
+                <li className="flex items-center justify-between pb-1.5 border-b border-[#0C2340]/10">
+                  <span>{lang === 'sw' ? 'Misa ya 2 (Kiswahili)' : '2nd Mass'}</span>
+                  <strong className="text-[#0C2340]">8:30 AM</strong>
                 </li>
-                <li className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10">
-                  <span>{lang === 'sw' ? 'Misa ya 3 (Vijana)' : '3rd Mass (Youth)'}</span>
-                  <strong className="text-[#0C2340]">11:00 AM</strong>
+                <li className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[#1058A8]">
+                      {lang === 'sw' ? 'Misa ya 3: Misa Kuu (Sunday High Mass)' : '3rd Mass: Sunday High Mass'}
+                    </span>
+                    <span className="text-[11px] text-[#0C2340] font-medium">
+                      {lang === 'sw' ? '★ Kwaya ya Misa ya Tatu ya Mtakatifu Monika' : '★ St. Monica Third Mass Choir (Main Choir)'}
+                    </span>
+                  </div>
+                  <strong className="text-base font-bold text-[#1058A8] ml-2">10:00 AM</strong>
+                </li>
+                <li className="flex items-center justify-between pt-1">
+                  <span>{lang === 'sw' ? 'Misa ya 4 (Vijana / Youth)' : '4th Mass (Youth)'}</span>
+                  <strong className="text-[#0C2340]">11:30 AM</strong>
                 </li>
               </ul>
 

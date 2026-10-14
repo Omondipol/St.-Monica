@@ -112,8 +112,8 @@ export const AudioPlayerBar: React.FC = () => {
           aria-label={lang === 'sw' ? 'Panua kichezaji' : 'Expand player'}
         >
           {/* Bright Choir Logo in Collapsed Mini Bubble */}
-          <div className="absolute inset-0.5 rounded-full overflow-hidden flex items-center justify-center">
-            <ChoirLogo size={44} />
+          <div className="absolute inset-0.5 rounded-full overflow-hidden flex items-center justify-center bg-[#FAF8F5]">
+            <ChoirLogo size={36} variant="simplified" />
           </div>
 
           {/* SVG Thin Progress Ring in Site's Single Blue */}
@@ -186,12 +186,8 @@ export const AudioPlayerBar: React.FC = () => {
             title={`${currentSong.title} — ${currentSong.composer}`}
           >
             {/* Circular Logo Mark */}
-            <div className="relative shrink-0 w-11 h-11 rounded-full bg-[#FAF8F5] border border-white/20 shadow-sm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
-              <img 
-                src="/logo/logo-player-circle.svg" 
-                alt="St. Monica Third Mass Choir" 
-                className="w-full h-full object-contain"
-              />
+            <div className="relative shrink-0 w-11 h-11 rounded-full bg-[#FAF8F5] border border-white/20 shadow-sm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform p-1">
+              <ChoirLogo size={36} variant="simplified" />
             </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[16px] font-semibold text-white group-hover:text-sky-200 transition-colors truncate leading-tight">
@@ -280,12 +276,8 @@ export const AudioPlayerBar: React.FC = () => {
         >
           {/* Circular Logo Mark & Title (Zero badge overlay) */}
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="relative shrink-0 w-10 h-10 rounded-full bg-[#FAF8F5] border border-white/20 shadow-xs flex items-center justify-center overflow-hidden">
-              <img 
-                src="/logo/logo-player-circle.svg" 
-                alt="St. Monica Third Mass Choir" 
-                className="w-full h-full object-contain"
-              />
+            <div className="relative shrink-0 w-10 h-10 rounded-full bg-[#FAF8F5] border border-white/20 shadow-xs flex items-center justify-center overflow-hidden p-0.5">
+              <ChoirLogo size={32} variant="simplified" />
             </div>
             <div className="min-w-0">
               <h4 className="font-eb-garamond text-[15px] font-semibold text-white truncate leading-tight">
