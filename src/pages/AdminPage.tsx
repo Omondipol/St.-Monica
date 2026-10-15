@@ -693,20 +693,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
         <div>
           <h2 className="font-fraunces text-2xl font-bold text-[#0C2340]">
-            {lang === 'sw' ? 'Tovuti ya Msimamizi' : 'Choir Admin Access'}
+            Choir Administration Access
           </h2>
-          <p className="text-sm text-slate-600 font-source mt-1">
-            {lang === 'sw' 
-              ? 'Weka nenosiri la kamati ya kwaya ili kuendelea (Trainer & Official Portal)' 
-              : 'Enter authorized choirmaster/official passcode to manage repertoire and website content.'}
+          <span className="text-xs font-semibold text-[#1058A8] block mt-0.5">
+            Tovuti ya Msimamizi wa Kwaya
+          </span>
+          <p className="text-sm text-slate-600 font-source mt-1.5">
+            Enter authorized choirmaster or official passcode to manage choir repertoire, schedules, and website content.
+          </p>
+          <p className="text-xs text-slate-400 font-source mt-0.5 italic">
+            (Weka nenosiri la kamati ya kwaya ili kuendelea)
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4 text-left">
           <div>
-            <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1">
-              {lang === 'sw' ? 'Nenosiri la Msimamizi' : 'Admin Passcode'}
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider">
+                Admin Passcode
+              </label>
+              <span className="text-[11px] text-slate-400 font-medium">
+                Nenosiri la Msimamizi
+              </span>
+            </div>
             <input
               type="password"
               value={passcode}
@@ -716,9 +725,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               autoFocus
             />
             <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
-              <span>{lang === 'sw' ? 'Nenosiri la mfumo:' : 'Default passcode:'}</span>
+              <span>System Passcode:</span>
               <code className="bg-slate-200 px-1.5 py-0.5 rounded text-[#0C2340] font-mono font-bold">sec58nakuru</code>
-              <span className="text-slate-400">({lang === 'sw' ? 'au' : 'or'} <code className="font-mono font-semibold">admin</code>)</span>
+              <span className="text-slate-400">(or <code className="font-mono font-semibold">admin</code>)</span>
             </p>
           </div>
 
@@ -731,16 +740,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           <div className="pt-2 flex flex-col gap-2">
             <button
               type="submit"
-              className="w-full py-3 text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C4685] rounded-xl transition-all shadow-md cursor-pointer"
+              className="w-full py-3 text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C4685] rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
             >
-              {lang === 'sw' ? 'Ingia Mfumo' : 'Unlock Admin Portal'}
+              <span>Unlock Admin Portal</span>
+              <span className="text-xs opacity-80 font-normal">· Ingia Mfumo</span>
             </button>
             <button
               type="button"
               onClick={onNavigateHome}
-              className="w-full py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="w-full py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer text-center"
             >
-              {lang === 'sw' ? 'Rudi Nyumbani' : 'Return to Website'}
+              Return to Website · Rudi Nyumbani
             </button>
           </div>
         </form>
@@ -766,37 +776,38 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="bg-[#1058A8] text-white text-[11px] font-source px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                Msimamizi wa Kwaya · Admin Portal
+                Choir Admin Portal · Usimamizi wa Kwaya
               </span>
               <span className="text-xs text-[#7EC8F0] font-source font-semibold">
                 Section 58 · Nakuru
               </span>
             </div>
             <h1 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-white mt-1">
-              {lang === 'sw' ? 'Usimamizi Kamili wa Tovuti ya Kwaya' : 'Choir Management & Live Content Control'}
+              Choir Management & Live Content Control
             </h1>
-            <p className="text-xs sm:text-sm text-white/80 font-source mt-0.5 max-w-2xl">
-              {lang === 'sw'
-                ? 'Hariri Mwanzo, Matangazo, Takwimu za waimbaji, Ratiba ya Misa, Nyimbo za YouTube, Noti za Maktaba, na Walimu wa Kwaya. Mabadiliko yanasasishwa papo hapo!'
-                : 'Edit homepage headlines, announcements, chorister statistics, Sunday Mass schedule, repertoire, sheet music, and choir trainers. Changes update live immediately!'}
+            <p className="text-xs sm:text-sm text-white/90 font-source mt-0.5 max-w-2xl">
+              Manage homepage headlines, notices, chorister ministry metrics, Sunday Mass schedule, repertoire, sheet music catalog, and choir leadership. All changes update live immediately across the site.
+            </p>
+            <p className="text-[11px] text-[#7EC8F0] font-source mt-0.5 italic">
+              Sehemu ya Kiswahili: Mabadiliko yote yanasasishwa mara moja kwenye mfumo na tovuti.
             </p>
 
             {/* Quick Live Metrics Counters */}
             <div className="flex flex-wrap items-center gap-2 pt-2.5 text-[11px] font-source">
-              <span className="px-2 py-0.5 bg-white/10 rounded-lg text-white/90">
-                <strong>{statsForm.membersCount}</strong> Waimbaji
+              <span className="px-2.5 py-0.5 bg-white/10 rounded-lg text-white/90">
+                <strong>{statsForm.membersCount}</strong> Choristers (Waimbaji)
               </span>
-              <span className="px-2 py-0.5 bg-white/10 rounded-lg text-white/90">
-                <strong>{statsForm.yearsServing}</strong> Miaka
+              <span className="px-2.5 py-0.5 bg-white/10 rounded-lg text-white/90">
+                <strong>{statsForm.yearsServing}</strong> Years (Miaka)
               </span>
-              <span className="px-2 py-0.5 bg-white/10 rounded-lg text-white/90">
-                <strong>{songs.length}</strong> Nyimbo
+              <span className="px-2.5 py-0.5 bg-white/10 rounded-lg text-white/90">
+                <strong>{songs.length}</strong> Hymns (Nyimbo)
               </span>
-              <span className="px-2 py-0.5 bg-white/10 rounded-lg text-white/90">
-                <strong>{librarySongs.length}</strong> Maktaba Noti
+              <span className="px-2.5 py-0.5 bg-white/10 rounded-lg text-white/90">
+                <strong>{librarySongs.length}</strong> Music Scores (Maktaba Noti)
               </span>
-              <span className="px-2 py-0.5 bg-white/10 rounded-lg text-white/90">
-                <strong>{eventsList.length}</strong> Matukio
+              <span className="px-2.5 py-0.5 bg-white/10 rounded-lg text-white/90">
+                <strong>{eventsList.length}</strong> Events (Matukio)
               </span>
             </div>
           </div>
@@ -807,7 +818,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             onClick={handleLogout}
             className="px-3.5 py-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-colors cursor-pointer"
           >
-            {lang === 'sw' ? 'Ondoka' : 'Log Out'}
+            Log Out (Ondoka)
           </button>
           <a
             href={YOUTUBE_CHANNEL_URL}
@@ -825,7 +836,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             className="px-4 py-2 text-xs font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
           >
             <Eye className="w-3.5 h-3.5 text-[#1058A8]" />
-            <span>{lang === 'sw' ? 'Tazama Tovuti' : 'View Live Website'}</span>
+            <span>View Live Website (Tazama Tovuti)</span>
           </button>
         </div>
       </div>
@@ -843,7 +854,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </div>
       )}
 
-      {/* Navigation Tabs (Smooth horizontal scrolling on mobile, elegant pill bar) */}
+      {/* Navigation Tabs (English Main with Kiswahili Secondary) */}
       <div 
         className="flex items-center gap-2 bg-white border border-[#0C2340]/10 p-2 rounded-2xl shadow-xs overflow-x-auto scrollbar-none snap-x"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -857,7 +868,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Hero & Tangazo</span>
+          <span>Hero & Notice <span className="text-[10px] opacity-75 font-normal">(Mwanzo)</span></span>
         </button>
 
         <button
@@ -869,7 +880,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Users className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Takwimu za Kwaya</span>
+          <span>Choir Statistics <span className="text-[10px] opacity-75 font-normal">(Takwimu)</span></span>
         </button>
 
         <button
@@ -881,7 +892,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Clock className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Ratiba ya Misa</span>
+          <span>Mass Schedule <span className="text-[10px] opacity-75 font-normal">(Ratiba)</span></span>
         </button>
 
         <button
@@ -893,7 +904,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Calendar className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Matukio ({eventsList.length})</span>
+          <span>Liturgical Events <span className="text-[10px] opacity-75 font-normal">({eventsList.length})</span></span>
         </button>
 
         <button
@@ -905,7 +916,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Music className="w-3.5 h-3.5" />
-          <span>Nyimbo & YouTube ({songs.length})</span>
+          <span>Repertoire & YouTube <span className="text-[10px] opacity-75 font-normal">({songs.length})</span></span>
         </button>
 
         <button
@@ -917,7 +928,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
-          <span>Noti za Kulipia ({sheetMusicList.length})</span>
+          <span>Paid Sheet Music <span className="text-[10px] opacity-75 font-normal">({sheetMusicList.length})</span></span>
         </button>
 
         <button
@@ -929,7 +940,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>Maktaba ya Noti ({librarySongs.length})</span>
+          <span>Music Library <span className="text-[10px] opacity-75 font-normal">(Maktaba: {librarySongs.length})</span></span>
         </button>
 
         <button
@@ -941,7 +952,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          <span>Walimu & Viongozi ({leadersList.length})</span>
+          <span>Leadership & Trainers <span className="text-[10px] opacity-75 font-normal">({leadersList.length})</span></span>
         </button>
 
         <button
@@ -953,7 +964,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <ImageIcon className="w-3.5 h-3.5" />
-          <span>Picha za Kwaya ({groupPhotosList.length})</span>
+          <span>Choir Gallery <span className="text-[10px] opacity-75 font-normal">({groupPhotosList.length})</span></span>
         </button>
 
         <button
@@ -965,7 +976,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Settings className="w-3.5 h-3.5" />
-          <span>Mipangilio & Backup</span>
+          <span>Settings & Backup <span className="text-[10px] opacity-75 font-normal">(Mipangilio)</span></span>
         </button>
       </div>
 
@@ -978,12 +989,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#0C2340]/10">
                 <div>
                   <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                    {lang === 'sw' ? 'Ukurasa wa Mwanzo na Matangazo' : 'Hero Section & Announcements'}
+                    Homepage Hero & Announcement Notice
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 font-source mt-1">
-                    {lang === 'sw' 
-                      ? 'Hariri kichwa kikuu cha wavuti, ujumbe wa utume, na tangazo rasmi la kwaya linaloonekana juu.' 
-                      : 'Edit home headlines, mission message, and the site announcement notice banner.'}
+                    Edit home headlines, mission message, and the site announcement notice banner. English is the primary display; Kiswahili is provided in the second section.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -993,11 +1002,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </div>
               </div>
 
-              {/* Live Preview of Hero & Notice */}
+              {/* Live Preview of Hero & Notice (Shows English Main and Kiswahili Secondary) */}
               <div className="p-4 bg-[#0C2340] text-white rounded-2xl border border-[#7EC8F0]/30 space-y-3 relative overflow-hidden">
-                <span className="text-[10px] uppercase font-bold text-[#7EC8F0] tracking-wider block font-source">
-                  Muonekano Moja kwa Moja kwenye Mwanzo (Live Hero Preview)
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-[#7EC8F0] tracking-wider block font-source">
+                    Live Hero Preview · Primary English & Kiswahili
+                  </span>
+                  <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/80">
+                    Website Synchronized
+                  </span>
+                </div>
                 
                 {heroForm.noticeEnabled && (
                   <div className={`p-2.5 rounded-xl border flex items-center gap-2 text-xs font-source ${
@@ -1008,213 +1022,250 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       : 'bg-[#1058A8]/40 border-[#7EC8F0]/40 text-white'
                   }`}>
                     <span className="px-2 py-0.5 rounded-full bg-white text-slate-900 font-bold text-[10px] uppercase shrink-0">
-                      {lang === 'sw' ? heroForm.noticeBadgeSw : heroForm.noticeBadgeEn}
+                      {heroForm.noticeBadgeEn || 'Notice'}
                     </span>
                     <span className="truncate">
-                      {lang === 'sw' ? heroForm.noticeTextSw : heroForm.noticeTextEn}
+                      {heroForm.noticeTextEn}
+                    </span>
+                    <span className="text-white/60 text-[10px] hidden sm:inline ml-auto truncate pl-2 border-l border-white/20">
+                      SW: {heroForm.noticeTextSw}
                     </span>
                   </div>
                 )}
 
                 <div className="space-y-1.5 pt-1">
                   <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white leading-tight">
-                    {lang === 'sw' ? heroForm.headlineSw : heroForm.headlineEn}
+                    {heroForm.headlineEn}
                   </h3>
                   <p className="text-xs sm:text-sm text-white/80 font-source">
-                    {lang === 'sw' ? heroForm.subheadSw : heroForm.subheadEn}
+                    {heroForm.subheadEn}
                   </p>
-                  <p className="text-[11px] text-[#7EC8F0] italic font-source pt-1">
-                    "{lang === 'sw' ? heroForm.scriptureSw : heroForm.scriptureEn}" — {heroForm.scriptureRef}
+                  <p className="text-[11px] text-[#7EC8F0] italic font-source pt-0.5">
+                    "{heroForm.scriptureEn}" — {heroForm.scriptureRef}
                   </p>
+                  <div className="pt-2 border-t border-white/10 text-[11px] text-white/70">
+                    <span className="font-semibold text-white/90">Kiswahili Companion:</span> {heroForm.headlineSw} · {heroForm.subheadSw}
+                  </div>
                 </div>
               </div>
 
               <form onSubmit={handleSaveHeroAndNotice} className="space-y-6">
-                {/* 1. Headline */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Kichwa cha Mwanzo (Kiswahili)
-                    </label>
-                    <input
-                      type="text"
-                      value={heroForm.headlineSw}
-                      onChange={e => setHeroForm(prev => ({ ...prev, headlineSw: e.target.value }))}
-                      placeholder="Kuunganisha mioyo kupitia muziki mtakatifu"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                    />
+                
+                {/* SECTION 1: ENGLISH (MAIN CONTENT) */}
+                <div className="p-5 bg-white rounded-2xl border-2 border-[#1058A8]/30 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#1058A8]"></span>
+                      <h3 className="font-bold text-sm text-[#0C2340] uppercase tracking-wider font-source">
+                        Section 1: English Content (Main)
+                      </h3>
+                    </div>
+                    <span className="text-[11px] font-bold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full">
+                      Primary Display
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Hero Headline (English)
-                    </label>
-                    <input
-                      type="text"
-                      value={heroForm.headlineEn}
-                      onChange={e => setHeroForm(prev => ({ ...prev, headlineEn: e.target.value }))}
-                      placeholder="Uniting hearts through sacred music"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                    />
-                  </div>
-                </div>
 
-                {/* 2. Subhead */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Maelezo Mafupi (Kiswahili)
-                    </label>
-                    <input
-                      type="text"
-                      value={heroForm.subheadSw}
-                      onChange={e => setHeroForm(prev => ({ ...prev, subheadSw: e.target.value }))}
-                      placeholder="Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Subtitle / Mission (English)
-                    </label>
-                    <input
-                      type="text"
-                      value={heroForm.subheadEn}
-                      onChange={e => setHeroForm(prev => ({ ...prev, subheadEn: e.target.value }))}
-                      placeholder="St. Monica Third Mass Choir (Section 58, Nakuru)"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                    />
-                  </div>
-                </div>
-
-                {/* 3. St. Augustine Quote */}
-                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-4">
-                  <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider block">
-                    Nukuu ya Kiroho / Patron Saint Quote
-                  </span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Maneno ya Nukuu (Kiswahili)
+                      <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
+                        Hero Headline (English) *
                       </label>
                       <input
                         type="text"
-                        value={heroForm.scriptureSw}
-                        onChange={e => setHeroForm(prev => ({ ...prev, scriptureSw: e.target.value }))}
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                        required
+                        value={heroForm.headlineEn}
+                        onChange={e => setHeroForm(prev => ({ ...prev, headlineEn: e.target.value }))}
+                        placeholder="Uniting hearts through sacred music"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Quote Text (English)
+                      <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
+                        Subtitle / Mission Statement (English) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={heroForm.subheadEn}
+                        onChange={e => setHeroForm(prev => ({ ...prev, subheadEn: e.target.value }))}
+                        placeholder="St. Monica Third Mass Choir (Section 58, Nakuru)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
+                        Patron Saint Spiritual Quote / Scripture (English)
                       </label>
                       <input
                         type="text"
                         value={heroForm.scriptureEn}
                         onChange={e => setHeroForm(prev => ({ ...prev, scriptureEn: e.target.value }))}
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                        placeholder="He who sings well prays twice."
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
                       />
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Mwandishi / Citation Reference
-                    </label>
-                    <input
-                      type="text"
-                      value={heroForm.scriptureRef}
-                      onChange={e => setHeroForm(prev => ({ ...prev, scriptureRef: e.target.value }))}
-                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                      <div>
+                        <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
+                          Notice Badge Label (English)
+                        </label>
+                        <input
+                          type="text"
+                          value={heroForm.noticeBadgeEn}
+                          onChange={e => setHeroForm(prev => ({ ...prev, noticeBadgeEn: e.target.value }))}
+                          placeholder="Notice"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
+                          Announcement Notice Message (English)
+                        </label>
+                        <input
+                          type="text"
+                          value={heroForm.noticeTextEn}
+                          onChange={e => setHeroForm(prev => ({ ...prev, noticeTextEn: e.target.value }))}
+                          placeholder="Choir rehearsals every Wednesday & Friday at 5:30 PM."
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* 4. Official Notice Banner Control */}
-                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider block">
-                        Tangazo Rasmi la Kwaya (Site Announcement Banner)
-                      </span>
-                      <p className="text-[11px] text-slate-500 font-source mt-0.5">
-                        Hili tangazo linaonekana mara moja chini ya picha kuu ya Mwanzo.
-                      </p>
+                {/* SECTION 2: KISWAHILI (SECOND SECTION) */}
+                <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-amber-300/60 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-amber-200">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                      <h3 className="font-bold text-sm text-[#0C2340] uppercase tracking-wider font-source">
+                        Section 2: Kiswahili Content (Second Section)
+                      </h3>
                     </div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <span className="text-xs font-bold text-slate-700">
-                        {heroForm.noticeEnabled ? 'Linaonekana (Active)' : 'Limezimwa (Off)'}
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={heroForm.noticeEnabled}
-                        onChange={e => setHeroForm(prev => ({ ...prev, noticeEnabled: e.target.checked }))}
-                        className="w-5 h-5 accent-[#1058A8] cursor-pointer"
-                      />
-                    </label>
+                    <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                      Sehemu ya Pili (Tafsiri ya Kiswahili)
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Kichwa Kikuu cha Mwanzo (Kiswahili)
+                      </label>
+                      <input
+                        type="text"
+                        value={heroForm.headlineSw}
+                        onChange={e => setHeroForm(prev => ({ ...prev, headlineSw: e.target.value }))}
+                        placeholder="Kuunganisha mioyo kupitia muziki mtakatifu"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Maelezo Mafupi ya Utume (Kiswahili)
+                      </label>
+                      <input
+                        type="text"
+                        value={heroForm.subheadSw}
+                        onChange={e => setHeroForm(prev => ({ ...prev, subheadSw: e.target.value }))}
+                        placeholder="Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Maneno ya Nukuu ya Kiroho (Kiswahili)
+                      </label>
+                      <input
+                        type="text"
+                        value={heroForm.scriptureSw}
+                        onChange={e => setHeroForm(prev => ({ ...prev, scriptureSw: e.target.value }))}
+                        placeholder="Aimbaye vizuri anasali mara mbili."
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Lebo ya Tangazo (Kiswahili)
+                        </label>
+                        <input
+                          type="text"
+                          value={heroForm.noticeBadgeSw}
+                          onChange={e => setHeroForm(prev => ({ ...prev, noticeBadgeSw: e.target.value }))}
+                          placeholder="Tangazo"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Ujumbe wa Tangazo (Kiswahili)
+                        </label>
+                        <input
+                          type="text"
+                          value={heroForm.noticeTextSw}
+                          onChange={e => setHeroForm(prev => ({ ...prev, noticeTextSw: e.target.value }))}
+                          placeholder="Mazoezi ya kwaya kila Jumatano na Ijumaa Saa 11:30 Jioni."
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 3: SHARED SETTINGS & CITATIONS */}
+                <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-4">
+                  <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
+                    Shared Notice & Citation Settings
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Aina ya Tangazo (Notice Type)
+                        Notice Type Style
                       </label>
                       <select
                         value={heroForm.noticeType}
                         onChange={e => setHeroForm(prev => ({ ...prev, noticeType: e.target.value as any }))}
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
                       >
-                        <option value="info">Taarifa ya Kawaida (Info Navy)</option>
-                        <option value="feast">Sikukuu ya Liturujia (Feast Gold)</option>
-                        <option value="urgent">Dharura / Muhimu (Urgent Red)</option>
+                        <option value="info">Info Announcement (Navy Blue)</option>
+                        <option value="feast">Liturgical Feast / Solemnity (Gold Amber)</option>
+                        <option value="urgent">Urgent Parish Notice (Rose Red)</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Lebo ya Tangazo (Kiswahili)
+                        Citation / Author Reference
                       </label>
                       <input
                         type="text"
-                        value={heroForm.noticeBadgeSw}
-                        onChange={e => setHeroForm(prev => ({ ...prev, noticeBadgeSw: e.target.value }))}
+                        value={heroForm.scriptureRef}
+                        onChange={e => setHeroForm(prev => ({ ...prev, scriptureRef: e.target.value }))}
+                        placeholder="St. Augustine of Hippo"
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Badge Label (English)
+                    <div className="flex items-center justify-between sm:justify-start sm:gap-4 pt-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={heroForm.noticeEnabled}
+                          onChange={e => setHeroForm(prev => ({ ...prev, noticeEnabled: e.target.checked }))}
+                          className="w-5 h-5 accent-[#1058A8] cursor-pointer"
+                        />
+                        <span className="text-xs font-bold text-slate-800">
+                          {heroForm.noticeEnabled ? 'Notice Active (Linaonekana)' : 'Notice Hidden (Limezimwa)'}
+                        </span>
                       </label>
-                      <input
-                        type="text"
-                        value={heroForm.noticeBadgeEn}
-                        onChange={e => setHeroForm(prev => ({ ...prev, noticeBadgeEn: e.target.value }))}
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Ujumbe wa Tangazo (Kiswahili)
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={heroForm.noticeTextSw}
-                        onChange={e => setHeroForm(prev => ({ ...prev, noticeTextSw: e.target.value }))}
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Announcement Message (English)
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={heroForm.noticeTextEn}
-                        onChange={e => setHeroForm(prev => ({ ...prev, noticeTextEn: e.target.value }))}
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                      />
                     </div>
                   </div>
                 </div>
@@ -1222,14 +1273,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 {/* Save Button */}
                 <div className="pt-2 flex items-center justify-between">
                   <span className="text-xs text-slate-500 font-source italic">
-                    Mabadiliko yatahifadhiwa papo hapo kwenye kifaa na tovuti.
+                    Changes save immediately to local storage and update live across the entire website.
                   </span>
                   <button
                     type="submit"
                     className="px-6 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Hifadhi Mwanzo & Tangazo</span>
+                    <span>Save Hero & Notice (Hifadhi Mwanzo)</span>
                   </button>
                 </div>
               </form>
@@ -1247,12 +1298,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#0C2340]/10">
                 <div>
                   <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                    {lang === 'sw' ? 'Takwimu za Utume wa Kwaya' : 'Choir Ministry Metrics & Figures'}
+                    Choir Ministry Metrics & Figures
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 font-source mt-1">
-                    {lang === 'sw' 
-                      ? 'Nambari hizi (waimbaji, miaka ya utume, na noti) zinaonekana kwenye ukurasa wa "Kuhusu Kwaya" mara mtu anapobonyeza kujua zaidi.' 
-                      : 'These core metrics (48 Choristers, 14 Years, 12 Scores) appear on the "About Choir" page when visitors click to learn more.'}
+                    These core figures appear on the "About Choir" page, homepage counters, and official documentation.
+                  </p>
+                  <p className="text-[11px] text-slate-400 font-source italic mt-0.5">
+                    (Takwimu za Utume: Waimbaji, miaka ya utume, na noti za kwaya)
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -1265,7 +1317,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               {/* Live Preview Cards */}
               <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-2">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Muonekano Moja kwa Moja kwenye "Kuhusu Kwaya" (Live Preview)
+                  Live Preview on "About Choir" Page (Muonekano Moja kwa Moja)
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-center pt-1">
                   <div className="p-3.5 bg-white rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center">
@@ -1274,9 +1326,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       {statsForm.membersCount}
                     </span>
                     <span className="text-xs font-bold text-slate-800">
-                      {lang === 'sw' ? 'Waimbaji wa Kwaya' : 'Active Choristers'}
+                      Active Choristers
                     </span>
-                    <span className="text-[10px] text-slate-500">Soprano, Alto, Tenor, Bass</span>
+                    <span className="text-[10px] text-slate-500">Waimbaji (SATB Polyphony)</span>
                   </div>
 
                   <div className="p-3.5 bg-white rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center">
@@ -1285,9 +1337,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       {statsForm.yearsServing}
                     </span>
                     <span className="text-xs font-bold text-slate-800">
-                      {lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}
+                      Years of Ministry
                     </span>
-                    <span className="text-[10px] text-slate-500">Founded in {statsForm.foundedYear}</span>
+                    <span className="text-[10px] text-slate-500">Miaka (Founded {statsForm.foundedYear})</span>
                   </div>
 
                   <div className="p-3.5 bg-white rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center">
@@ -1296,9 +1348,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       {statsForm.repertoireCount}
                     </span>
                     <span className="text-xs font-bold text-slate-800">
-                      {lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}
+                      Choral Scores
                     </span>
-                    <span className="text-[10px] text-slate-500">Liturgical Repertoire</span>
+                    <span className="text-[10px] text-slate-500">Noti za Kwaya</span>
                   </div>
                 </div>
               </div>
@@ -1307,7 +1359,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Idadi ya Waimbaji (Choristers)
+                      Active Choristers Count <span className="text-slate-400 font-normal">(Idadi ya Waimbaji)</span>
                     </label>
                     <input
                       type="number"
@@ -1320,7 +1372,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
                   <div>
                     <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Miaka ya Utume (Years)
+                      Years of Ministry <span className="text-slate-400 font-normal">(Miaka ya Utume)</span>
                     </label>
                     <input
                       type="number"
@@ -1333,7 +1385,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
                   <div>
                     <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Noti Zilizohifadhiwa (Scores)
+                      Choral Scores in Catalog <span className="text-slate-400 font-normal">(Noti Zilizohifadhiwa)</span>
                     </label>
                     <input
                       type="number"
@@ -1348,7 +1400,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                      Mwaka wa Kuanzishwa (Founded Year)
+                      Year Founded <span className="text-slate-400 font-normal">(Mwaka wa Kuanzishwa)</span>
                     </label>
                     <input
                       type="number"
@@ -1374,14 +1426,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
                 <div className="pt-2 flex items-center justify-between">
                   <span className="text-xs text-slate-500 font-source italic">
-                    Takwimu zitasasishwa mara moja kwenye "Kuhusu Kwaya" na tovuti yote.
+                    Statistics update live in the About page and across the website.
                   </span>
                   <button
                     type="submit"
                     className="px-6 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Hifadhi Takwimu za Kwaya</span>
+                    <span>Save Choir Statistics (Hifadhi Takwimu)</span>
                   </button>
                 </div>
               </form>
@@ -1399,149 +1451,256 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#0C2340]/10">
                 <div>
                   <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                    {lang === 'sw' ? 'Ratiba ya Misa na Mazoezi ya Kwaya' : 'Sunday Mass & Rehearsal Schedule'}
+                    Sunday Mass Times & Rehearsal Schedule
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 font-source mt-1">
-                    {lang === 'sw' 
-                      ? 'Badilisha masaa ya Misa za Jumapili na siku za mazoezi ya kwaya kwenye ukumbi wa parokia.' 
-                      : 'Update Sunday Mass times and weekly choir rehearsal hours displayed on the homepage.'}
+                    Configure Sunday Eucharistic liturgies and weekly choir practice schedules displayed on the homepage.
+                  </p>
+                  <p className="text-[11px] text-slate-400 font-source italic mt-0.5">
+                    (Ratiba ya Misa za Jumapili na Mazoezi ya Kwaya)
                   </p>
                 </div>
               </div>
 
-              <form onSubmit={handleSaveSchedule} className="space-y-5">
-                {/* Mass 1 & 2 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-3">
-                    <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                      Misa ya 1 (Alfajiri / Dawn)
-                    </span>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={scheduleForm.mass1Title}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass1Title: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                        placeholder="Jina la Misa"
-                      />
-                      <input
-                        type="text"
-                        value={scheduleForm.mass1Time}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass1Time: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-bold"
-                        placeholder="7:00 AM"
-                      />
+              <form onSubmit={handleSaveSchedule} className="space-y-6">
+                
+                {/* Section 1: Sunday Mass Times */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#1058A8]"></span>
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#0C2340] font-source">
+                      Section 1: Sunday Eucharistic Liturgies (Misa za Jumapili)
+                    </h3>
+                  </div>
+
+                  {/* Mass 1 & Mass 2 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-white rounded-2xl border border-[#0C2340]/15 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">
+                          1st Mass (Dawn Liturgy · Alfajiri)
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass1Title}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1Title: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
+                          placeholder="1st Mass (Dawn)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass1Time}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1Time: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-bold"
+                          placeholder="7:00 AM"
+                        />
+                      </div>
+                      <div className="space-y-2 pt-1 border-t border-slate-100">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass1Desc}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1Desc: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
+                          placeholder="Description (English Main)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass1DescSw}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1DescSw: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/50 text-slate-700"
+                          placeholder="Maelezo (Kiswahili Second Section)"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white rounded-2xl border border-[#0C2340]/15 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">
+                          2nd Mass (Morning Liturgy · Asubuhi)
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass2Title}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2Title: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
+                          placeholder="2nd Mass (Morning)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass2Time}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2Time: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-bold"
+                          placeholder="8:30 AM"
+                        />
+                      </div>
+                      <div className="space-y-2 pt-1 border-t border-slate-100">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass2Desc}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2Desc: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
+                          placeholder="Description (English Main)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass2DescSw}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2DescSw: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/50 text-slate-700"
+                          placeholder="Maelezo (Kiswahili Second Section)"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-3">
-                    <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                      Misa ya 2 (Asubuhi / Morning)
-                    </span>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={scheduleForm.mass2Title}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass2Title: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                        placeholder="Jina la Misa"
-                      />
-                      <input
-                        type="text"
-                        value={scheduleForm.mass2Time}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass2Time: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-bold"
-                        placeholder="8:30 AM"
-                      />
+                  {/* Mass 3 (St. Monica Choir High Mass - Highlighted) & Mass 4 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-[#EAF4FB] rounded-2xl border-2 border-[#1058A8]/40 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider block">
+                          ★ 3rd Mass: Sunday High Mass (St. Monica Choir)
+                        </span>
+                        <span className="text-[10px] bg-[#1058A8] text-white font-bold px-2 py-0.5 rounded-full">
+                          Main Choir Liturgy
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass3Title}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3Title: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                          placeholder="3rd Mass (Sunday High Mass)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass3Time}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3Time: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-bold text-[#1058A8]"
+                          placeholder="10:00 AM"
+                        />
+                      </div>
+                      <div className="space-y-2 pt-1 border-t border-[#1058A8]/20">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass3Desc}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3Desc: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
+                          placeholder="Description (English Main)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass3DescSw}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3DescSw: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/70 text-slate-700"
+                          placeholder="Maelezo (Kiswahili Second Section)"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white rounded-2xl border border-[#0C2340]/15 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
+                          4th Mass (Youth & Children Liturgy)
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass4Title}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4Title: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
+                          placeholder="4th Mass (Youth)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass4Time}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4Time: e.target.value }))}
+                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-bold"
+                          placeholder="11:30 AM"
+                        />
+                      </div>
+                      <div className="space-y-2 pt-1 border-t border-slate-100">
+                        <input
+                          type="text"
+                          value={scheduleForm.mass4Desc}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4Desc: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
+                          placeholder="Description (English Main)"
+                        />
+                        <input
+                          type="text"
+                          value={scheduleForm.mass4DescSw}
+                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4DescSw: e.target.value }))}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/50 text-slate-700"
+                          placeholder="Maelezo (Kiswahili Second Section)"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Mass 3 (St. Monica Choir High Mass - Highlighted) & Mass 4 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-[#EAF4FB] rounded-2xl border border-[#1058A8]/30 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider block">
-                        ★ Misa ya 3 (Misa Kuu ya Mt. Monika)
-                      </span>
-                      <span className="text-[10px] bg-[#1058A8] text-white font-bold px-2 py-0.5 rounded-full">
-                        Main Choir
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={scheduleForm.mass3Title}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass3Title: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                        placeholder="3rd Mass: Sunday High Mass"
-                      />
-                      <input
-                        type="text"
-                        value={scheduleForm.mass3Time}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass3Time: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-bold text-[#1058A8]"
-                        placeholder="10:00 AM"
-                      />
-                    </div>
+                {/* Section 2: Rehearsal Days */}
+                <div className="p-5 bg-white rounded-2xl border border-[#0C2340]/15 space-y-4 shadow-xs">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#0C2340] font-source">
+                      Section 2: Choir Rehearsal Hours (Mazoezi ya Kwaya)
+                    </h3>
                   </div>
 
-                  <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-3">
-                    <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                      Misa ya 4 (Vijana / Youth Mass)
-                    </span>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider">
+                          Rehearsal Schedule (English - Main) *
+                        </label>
+                        <span className="text-[11px] font-bold text-[#1058A8] bg-[#EAF4FB] px-2 py-0.5 rounded">
+                          Primary
+                        </span>
+                      </div>
                       <input
                         type="text"
-                        value={scheduleForm.mass4Title}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass4Title: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                        placeholder="Jina la Misa"
-                      />
-                      <input
-                        type="text"
-                        value={scheduleForm.mass4Time}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, mass4Time: e.target.value }))}
-                        className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-bold"
-                        placeholder="11:30 AM"
+                        value={scheduleForm.rehearsals}
+                        onChange={e => setScheduleForm(prev => ({ ...prev, rehearsals: e.target.value }))}
+                        placeholder="Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-medium"
                       />
                     </div>
-                  </div>
-                </div>
 
-                {/* Rehearsal Days */}
-                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-3">
-                  <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                    Mazoezi ya Kwaya (Rehearsal Hours)
-                  </span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      value={scheduleForm.rehearsalsSw}
-                      onChange={e => setScheduleForm(prev => ({ ...prev, rehearsalsSw: e.target.value }))}
-                      placeholder="Jumatano na Ijumaa: Saa 11:30 Jioni..."
-                      className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                    />
-                    <input
-                      type="text"
-                      value={scheduleForm.rehearsals}
-                      onChange={e => setScheduleForm(prev => ({ ...prev, rehearsals: e.target.value }))}
-                      placeholder="Wednesdays & Fridays: 5:30 PM..."
-                      className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                    />
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          Ratiba ya Mazoezi (Kiswahili - Second Section)
+                        </label>
+                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                          Sehemu ya Pili
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={scheduleForm.rehearsalsSw}
+                        onChange={e => setScheduleForm(prev => ({ ...prev, rehearsalsSw: e.target.value }))}
+                        placeholder="Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="pt-2 flex items-center justify-between">
                   <span className="text-xs text-slate-500 font-source italic">
-                    Ratiba hii inasasishwa papo hapo kwenye ukurasa wa Mwanzo.
+                    Schedule updates live on the website homepage immediately.
                   </span>
                   <button
                     type="submit"
                     className="px-6 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Hifadhi Ratiba ya Misa</span>
+                    <span>Save Mass Schedule (Hifadhi Ratiba)</span>
                   </button>
                 </div>
               </form>
@@ -1556,12 +1715,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                {lang === 'sw' ? 'Kalenda ya Matukio ya Kwaya' : 'Choir Liturgical Events Calendar'}
+                Choir Liturgical Events Calendar
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                {lang === 'sw' 
-                  ? 'Simamia sikukuu za parokia, matamasha ya kijimbo, na matukio ya kwaya yanayoonekana kwenye tovuti.' 
-                  : 'Manage parish feast days, diocesan music festivals, and choir retreats on the events page.'}
+                Manage parish feast days, diocesan music festivals, and choir retreats displayed on the public events page.
+              </p>
+              <p className="text-[11px] text-slate-400 font-source italic mt-0.5">
+                (Kalenda ya Matukio ya Kwaya: Sikukuu, Matamasha, na Misa za Sherehe)
               </p>
             </div>
             <button
@@ -1569,7 +1729,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
-              <span>{lang === 'sw' ? 'Ongeza Tukio Jipya' : 'Add New Event'}</span>
+              <span>Add New Event (Ongeza Tukio)</span>
             </button>
           </div>
 
@@ -1585,9 +1745,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       {evt.fullDate}
                     </span>
                   </div>
-                  <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340]">
-                    {lang === 'sw' ? evt.titleSw : evt.title}
-                  </h3>
+                  <div>
+                    <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340]">
+                      {evt.title}
+                    </h3>
+                    {evt.titleSw && evt.titleSw !== evt.title && (
+                      <span className="text-xs text-slate-500 italic block font-source mt-0.5">
+                        {evt.titleSw}
+                      </span>
+                    )}
+                  </div>
                   <div className="space-y-1 text-xs text-slate-600 font-source">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-[#1058A8]" />
@@ -1599,8 +1766,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     </div>
                   </div>
                   <p className="text-xs text-slate-700 font-source line-clamp-2">
-                    {lang === 'sw' ? evt.descriptionSw : evt.description}
+                    {evt.description || evt.descriptionSw}
                   </p>
+                  {evt.descriptionSw && evt.description && evt.descriptionSw !== evt.description && (
+                    <p className="text-[11px] text-slate-500 font-source italic line-clamp-1 border-t border-slate-100 pt-1">
+                      SW: {evt.descriptionSw}
+                    </p>
+                  )}
                 </div>
 
                 <div className="pt-3 border-t border-[#0C2340]/10 flex items-center justify-between">
