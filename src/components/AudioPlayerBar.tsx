@@ -4,6 +4,7 @@ import { Play, Pause, ChevronUp, ChevronDown } from 'lucide-react';
 import { RealAudioWaveform } from './RealAudioWaveform';
 import { ChoirLogo } from './ChoirLogo';
 import { SongCoverArt } from './SongCoverArt';
+import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 
 const STORAGE_KEY_COLLAPSED = 'st_monica_player_collapsed';
@@ -19,7 +20,8 @@ export const AudioPlayerBar: React.FC = () => {
     formatTime,
     audioError,
     lang,
-    isPlayerMinimized
+    isPlayerMinimized,
+    openVideoModal
   } = useChoir();
 
   // Remember visitor's choice or scroll-driven state
@@ -269,7 +271,7 @@ export const AudioPlayerBar: React.FC = () => {
 
         </div>
 
-        {/* MOBILE SLIM BAR VIEW (Phones): Cover, Title 16px, Waveform/Time, Play Button, Expand Arrow */}
+        {/* MOBILE SLIM BAR VIEW (Phones): Cover, Title 15px, Time/Status, Play Button, Expand Arrow */}
         <div 
           onClick={() => setIsNowPlayingExpanded(true)}
           className="flex sm:hidden items-center justify-between gap-3 cursor-pointer"

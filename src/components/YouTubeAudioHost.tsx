@@ -86,8 +86,12 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
               playerRef.current = event.target;
               registerYouTubePlayer(event.target);
               setIsPlayerReady(true);
-              // Set initial volume
+              // Set initial volume & un-mute so actual choir voices stream clearly
+              event.target.unMute();
               event.target.setVolume(isMuted ? 0 : Math.round(volume * 100));
+              if (isPlaying) {
+                event.target.playVideo();
+              }
             },
             onStateChange: (event: any) => {
               if (isCancelled) return;
@@ -95,7 +99,7 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
               const isEndedState = event.data === 0 || (window.YT?.PlayerState && event.data === window.YT.PlayerState.ENDED);
 
               if (isPlayingState) {
-                // Video is actively playing
+                // Video is actively playing authentic choir song
               } else if (isEndedState) {
                 // If YouTube video ends before 40s or reaches end
                 setCurrentTimeSeconds(40);
@@ -135,9 +139,54 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
     };
   }, []);
 
+  // Sync song changes immediately to YouTube player
+  const lastLoadedVideoIdRef = useRef<string>(currentSong.youtubeId || '');
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player || !isPlayerReady) return;
+
+    const targetId = currentSong.youtubeId || 'syOCKFbVS-8';
+    if (lastLoadedVideoIdRef.current !== targetId) {
+      lastLoadedVideoIdRef.current = targetId;
+      try {
+        if (isPlaying) {
+          player.loadVideoById({
+            videoId: targetId,
+            startSeconds: 0
+          });
+          player.unMute();
+          player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          player.playVideo();
+        } else {
+          player.cueVideoById({
+            videoId: targetId,
+            startSeconds: 0
+          });
+        }
+      } catch (err) {
+        console.warn('Error syncing video ID:', err);
+      }
+    }
+  }, [currentSong.youtubeId, isPlayerReady, isPlaying, isMuted, volume]);
+
+  // Sync isPlaying state to YouTube player
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player || !isPlayerReady) return;
+    try {
+      if (isPlaying) {
+        player.unMute();
+        player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+        player.playVideo();
+      } else {
+        player.pauseVideo();
+      }
+    } catch (_) {}
+  }, [isPlaying, isPlayerReady, isMuted, volume]);
+
   // Update position of the player container:
   // 1. In expanded hymnal 'listen' tab: anchor directly over #yt-expanded-player-slot in the left column.
-  // 2. On phones: dock inside mini player as #mobile-mini-player-slot.
+  // 2. On phones: compact floating preview or docked inside modal.
   // 3. On desktop main screen: stays on one side (RIGHT SIDE) 16px above mini player,
   //    and when user scrolls down, becomes see-through (transparent with hover reveal).
   const updatePosition = useCallback(() => {
@@ -165,24 +214,6 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
       }
     }
     setSlotRect(null);
-
-    // On mobile when not expanded, check mobile mini player slot
-    if (!isNowPlayingExpanded && mobile) {
-      const mSlot = document.getElementById('mobile-mini-player-slot');
-      if (mSlot) {
-        const mr = mSlot.getBoundingClientRect();
-        if (mr.width > 0 && mr.height > 0) {
-          setMobileSlotRect({
-            top: mr.top,
-            left: mr.left,
-            width: mr.width,
-            height: mr.height
-          });
-          return;
-        }
-      }
-    }
-    setMobileSlotRect(null);
   }, [isNowPlayingExpanded, hymnalTab]);
 
   useEffect(() => {
@@ -198,23 +229,16 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
     };
   }, [updatePosition]);
 
-  // Fix 2: Hide floating video card whenever any window is open:
-  // - Our Songs player window (isNowPlayingExpanded)
-  // - post-preview popup (isIntroCutoffOpen)
-  // - Support form (isSupportModalOpen)
-  // - Cart (isCartOpen)
-  // - Menu (isMenuOpen)
-  // - Full video modal (isYoutubeModalOpen)
-  const isAnyWindowOrMenuOpen = isNowPlayingExpanded || isIntroCutoffOpen || isSupportModalOpen || isCartOpen || isMenuOpen || isYoutubeModalOpen;
+  // Windows / dialogs that take full overlay priority:
+  const isBlockingModalOpen = isIntroCutoffOpen || isSupportModalOpen || isCartOpen || isMenuOpen || isYoutubeModalOpen;
 
   const isDockedInModal = isNowPlayingExpanded && hymnalTab === 'listen' && slotRect !== null;
-  const isDockedInMobile = !isNowPlayingExpanded && isMobile && mobileSlotRect !== null && isPlaying && !isAnyWindowOrMenuOpen;
 
-  // Remove the YouTube screen anytime it's on pause and return when played
-  const shouldShowFloating = !isAnyWindowOrMenuOpen && !isMobile && isPlaying;
+  // Floating video visibility: show when playing and full modal / blocking dialogs are not open
+  const shouldShowFloating = !isNowPlayingExpanded && !isBlockingModalOpen && isPlaying;
 
-  // User instruction: only see thru when i scroll down if not let the video just be solid youtube video screen
-  const isSeeThrough = isScrolledDown;
+  // Transparent see-through on scroll down (desktop only)
+  const isSeeThrough = isScrolledDown && !isMobile;
 
   return (
     <div
@@ -222,15 +246,13 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
       className={`fixed transition-all duration-300 ease-out select-none ${
         isDockedInModal
           ? 'z-55 pointer-events-auto shadow-lg rounded-2xl overflow-hidden border border-[#0C2340]/20 bg-black opacity-100'
-          : isAnyWindowOrMenuOpen
-            ? 'z-0 opacity-0 pointer-events-none w-1 h-1 overflow-hidden'
-            : isDockedInMobile
-              ? 'z-45 pointer-events-auto rounded-lg overflow-hidden border border-white/10 bg-black opacity-100'
-              : shouldShowFloating
-                ? `z-40 w-[320px] aspect-video rounded-2xl border border-white/20 bg-black overflow-hidden pointer-events-auto shadow-2xl transition-opacity duration-300 ${
-                    isSeeThrough ? 'opacity-30 hover:opacity-100 backdrop-blur-xs' : 'opacity-100'
-                  }`
-                : 'z-0 opacity-0 pointer-events-none w-1 h-1 overflow-hidden'
+          : shouldShowFloating
+            ? isMobile
+              ? 'z-40 w-[150px] aspect-video rounded-xl border border-white/20 bg-black overflow-hidden pointer-events-auto shadow-2xl opacity-100'
+              : `z-40 w-[320px] aspect-video rounded-2xl border border-white/20 bg-black overflow-hidden pointer-events-auto shadow-2xl transition-opacity duration-300 ${
+                  isSeeThrough ? 'opacity-30 hover:opacity-100 backdrop-blur-xs' : 'opacity-100'
+                }`
+            : 'z-0 opacity-0 pointer-events-none w-2 h-2 overflow-hidden'
       }`}
       style={
         isDockedInModal
@@ -240,30 +262,51 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
               width: `${slotRect.width}px`,
               height: `${slotRect.height}px`
             }
-          : isDockedInMobile
-            ? {
-                top: `${mobileSlotRect.top}px`,
-                left: `${mobileSlotRect.left}px`,
-                width: `${mobileSlotRect.width}px`,
-                height: `${mobileSlotRect.height}px`
-              }
-            : shouldShowFloating
+          : shouldShowFloating
+            ? isMobile
               ? {
-                  bottom: '76px', // 16px above the mini player
+                  bottom: '74px', // directly above mobile bottom bar
+                  right: '12px',
+                  width: '150px'
+                }
+              : {
+                  bottom: '76px', // 16px above desktop mini player
                   right: '24px',  // At the bottom right of the screen
                   width: '320px'
                 }
-              : {
-                  bottom: '-9999px',
-                  right: '-9999px'
-                }
+            : {
+                bottom: '0px',
+                right: '0px',
+                width: '8px',
+                height: '8px'
+              }
       }
     >
-      {/* Transparent Click Interceptor: clicking the video toggles site playback (NO tooltip on card) */}
-      <div 
-        onClick={togglePlay}
-        className="absolute inset-0 z-10 cursor-pointer"
-      />
+      {/* Click / Tap Interceptor:
+          - On mobile floating video: single tap expands full player
+          - On desktop floating video: single click toggles play, double click expands player */}
+      {shouldShowFloating && (
+        <div 
+          onClick={() => {
+            if (isMobile) {
+              setIsNowPlayingExpanded(true);
+            } else {
+              togglePlay();
+            }
+          }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            setIsNowPlayingExpanded(true);
+          }}
+          className="absolute inset-0 z-10 cursor-pointer group"
+          title={isMobile ? "Bofya kufungua kichezaji (Tap to expand)" : "Bofya kusimamisha/kucheza (Click to pause, double-click to expand)"}
+        >
+          {/* Subtle expand indicator icon in corner */}
+          <div className="absolute top-1.5 right-1.5 p-1 rounded-md bg-black/60 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Maximize2 className="w-3.5 h-3.5" />
+          </div>
+        </div>
+      )}
 
       {/* The YouTube iframe container (permanent DOM element, never unmounted) */}
       <div className="w-full h-full relative">

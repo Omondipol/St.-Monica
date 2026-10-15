@@ -13,6 +13,18 @@ export const YouTubePlayerModal: React.FC = () => {
     openSupportModal
   } = useChoir();
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsYoutubeModalOpen(false);
+      }
+    };
+    if (isYoutubeModalOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isYoutubeModalOpen, setIsYoutubeModalOpen]);
+
   if (!isYoutubeModalOpen || !currentSong) return null;
 
   const videoId = currentSong.youtubeId || (

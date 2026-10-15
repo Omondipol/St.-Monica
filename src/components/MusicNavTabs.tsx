@@ -57,7 +57,11 @@ export const MusicNavTabs: React.FC<MusicNavTabsProps> = ({ currentTab, onNaviga
           return (
             <button
               key={tab.id}
-              onClick={() => onNavigate(tab.id)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate(tab.id);
+              }}
               className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-source font-semibold flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-150 ${
                 isActive
                   ? 'bg-[#1058A8] text-white shadow-sm shadow-[#1058A8]/25'

@@ -32,9 +32,9 @@ import { LogoConceptsPage } from './pages/LogoConceptsPage';
 
 function ChoirApp() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      if (window.location.hash === '#admin') return 'admin';
-      if (window.location.hash === '#logo-concepts') return 'logo-concepts';
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const h = window.location.hash.replace(/^#/, '');
+      if (h) return h;
     }
     return 'home';
   });
@@ -42,24 +42,49 @@ function ChoirApp() {
   const { lang } = useChoir();
 
   const handleNavigate = (route: string) => {
-    setCurrentRoute(route);
+    const target = route.replace(/^#/, '');
+    setCurrentRoute(target);
     setNavKey(Date.now());
+    try {
+      if (window.location.hash !== `#${target}`) {
+        window.history.pushState(null, '', `#${target}`);
+      }
+    } catch (_) {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   React.useEffect(() => {
     const handleHash = () => {
-      if (window.location.hash === '#admin') {
-        setCurrentRoute('admin');
+      const hash = window.location.hash.replace(/^#/, '');
+      if (hash) {
+        setCurrentRoute(hash);
+        setNavKey(Date.now());
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (window.location.hash === '#logo-concepts') {
-        setCurrentRoute('logo-concepts');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setCurrentRoute('home');
       }
     };
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
+
+  // Determine active view with full alias support so navigating back and forth never breaks
+  const isHome = currentRoute === 'home' || currentRoute === '';
+  const isAboutStory = ['about-story', 'about', 'story'].includes(currentRoute);
+  const isAboutPatron = ['about-patron', 'patron'].includes(currentRoute);
+  const isAboutGallery = ['about-gallery', 'about-portraits', 'gallery'].includes(currentRoute);
+  const isAboutLeadership = ['about-leadership', 'leadership'].includes(currentRoute);
+  const isAboutSections = ['about-sections', 'sections'].includes(currentRoute);
+
+  const isMusicAlbums = ['music-albums', 'albums', 'album'].includes(currentRoute);
+  const isMusicLibrary = ['music-library', 'library', 'maktaba'].includes(currentRoute);
+  const isMusicRepertoire = ['music-repertoire', 'music', 'our-songs', 'songs', 'music-planner', 'music-notation'].includes(currentRoute);
+  
+  const isShop = ['shop', 'store'].includes(currentRoute);
+  const isEvents = ['events'].includes(currentRoute);
+  const isContact = ['contact'].includes(currentRoute);
+  const isAdmin = ['admin'].includes(currentRoute);
+  const isLogoConcepts = ['logo-concepts'].includes(currentRoute);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#0C2340] flex flex-col font-source selection:bg-[#7EC8F0]/40 selection:text-[#0C2340] w-full max-w-full overflow-x-hidden">
@@ -71,57 +96,57 @@ function ChoirApp() {
       />
 
       {/* Main Content Rendered by Route: ample bottom spacing so minimized bubble or player never covers content */}
-      <main className={`flex-1 w-full pb-32 sm:pb-36 ${currentRoute === 'home' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
-        {currentRoute === 'home' && (
+      <main className={`flex-1 w-full pb-32 sm:pb-36 ${isHome ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
+        {isHome && (
           <HomePage onNavigate={handleNavigate} />
         )}
 
         {/* About Sub-routes */}
-        {currentRoute === 'about-story' && (
+        {isAboutStory && (
           <OurStoryView onNavigate={handleNavigate} />
         )}
-        {currentRoute === 'about-patron' && (
+        {isAboutPatron && (
           <PatronView onNavigate={handleNavigate} />
         )}
-        {(currentRoute === 'about-gallery' || currentRoute === 'about-portraits') && (
+        {isAboutGallery && (
           <ChoirGalleryView onNavigate={handleNavigate} />
         )}
-        {currentRoute === 'about-leadership' && (
+        {isAboutLeadership && (
           <LeadershipView onNavigate={handleNavigate} />
         )}
-        {currentRoute === 'about-sections' && (
+        {isAboutSections && (
           <SectionsView onNavigate={handleNavigate} />
         )}
 
         {/* Music Sub-routes */}
-        {currentRoute === 'music-albums' && (
+        {isMusicAlbums && (
           <AlbumsView onNavigate={handleNavigate} />
         )}
-        {currentRoute === 'music-library' && (
+        {isMusicLibrary && (
           <MaktabaYaNotiPage 
             key={`library-${navKey}`}
             onNavigateMusicPaid={() => handleNavigate('shop')}
             onNavigate={handleNavigate}
           />
         )}
-        {(currentRoute === 'music-repertoire' || currentRoute === 'music-planner' || currentRoute === 'music-notation') && (
+        {isMusicRepertoire && (
           <MusicPage onNavigate={handleNavigate} />
         )}
 
         {/* Store, Events, Contact, Admin */}
-        {currentRoute === 'shop' && (
-          <ShopPage />
+        {isShop && (
+          <ShopPage onNavigate={handleNavigate} />
         )}
-        {currentRoute === 'events' && (
+        {isEvents && (
           <EventsPage />
         )}
-        {currentRoute === 'contact' && (
+        {isContact && (
           <ContactPage />
         )}
-        {currentRoute === 'admin' && (
+        {isAdmin && (
           <AdminPage onNavigateHome={() => handleNavigate('home')} />
         )}
-        {currentRoute === 'logo-concepts' && (
+        {isLogoConcepts && (
           <LogoConceptsPage onBackToSite={() => handleNavigate('home')} />
         )}
       </main>

@@ -12,7 +12,7 @@ interface AlbumsViewProps {
 }
 
 export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, formatPrice, addToCart, playSong, songs, openSupportModal } = useChoir();
+  const { lang, formatPrice, addToCart, playSong, songs, openSupportModal, openVideoModal } = useChoir();
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -90,6 +90,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} })
                       <div key={s.id} className="flex items-center justify-between text-[14px] p-2.5 rounded-xl bg-[#FAF8F5] hover:bg-[#EAF4FB] transition-colors font-source border border-[#0C2340]/5 shadow-2xs">
                         <div className="flex items-center gap-2.5 min-w-0">
                           <button
+                            type="button"
                             onClick={() => playSong(s)}
                             className="w-7 h-7 rounded-full bg-white text-[#1058A8] border border-[#1058A8]/30 flex items-center justify-center cursor-pointer hover:bg-[#1058A8] hover:text-white shrink-0 transition-colors shadow-2xs"
                             aria-label={`Play ${s.title}`}

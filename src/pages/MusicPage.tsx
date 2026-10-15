@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Song, SheetMusicItem, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../data/choirContent';
 import { 
@@ -10,7 +10,8 @@ import {
   FileText,
   Share2,
   ExternalLink,
-  Download
+  Download,
+  Music2
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
@@ -75,17 +76,56 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
     isPlaying, 
     playSong, 
     togglePlay,
+    setIsNowPlayingExpanded,
     setIsLyricsOpen, 
     addToCart, 
     formatPrice, 
     lang,
-    openSupportModal
+    openSupportModal,
+    openVideoModal
   } = useChoir();
 
   const [activeTab, setActiveTab] = useState<'songs' | 'sheet_music'>('songs');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSelection, setFilterSelection] = useState('all');
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
+
+  // Double-tap tracker for mobile and desktop click
+  const lastTapRef = useRef<{ id: string; time: number }>({ id: '', time: 0 });
+
+  const handleSongNameClick = (song: Song) => {
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapRef.current.time;
+
+    // If tapped twice on the same song within 450ms, pop up the mini/full player!
+    if (lastTapRef.current.id === song.id && timeSinceLastTap < 450 && timeSinceLastTap > 0) {
+      lastTapRef.current = { id: '', time: 0 };
+      if (currentSong.id !== song.id) {
+        playSong(song);
+      } else if (!isPlaying) {
+        togglePlay();
+      }
+      setIsNowPlayingExpanded(true);
+    } else {
+      // First tap: start playback or toggle
+      lastTapRef.current = { id: song.id, time: now };
+      if (currentSong.id === song.id) {
+        togglePlay();
+      } else {
+        playSong(song);
+      }
+    }
+  };
+
+  const handleSongNameDoubleClick = (song: Song, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentSong.id !== song.id) {
+      playSong(song);
+    } else if (!isPlaying) {
+      togglePlay();
+    }
+    setIsNowPlayingExpanded(true);
+  };
 
   // Close 3-dot row menus on outside click
   useEffect(() => {
@@ -229,7 +269,12 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             {/* Song cover photo without burned-in text */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] shadow-sm">
+            <div 
+              onClick={() => handleSongNameClick(songOfTheWeek)}
+              onDoubleClick={(e) => handleSongNameDoubleClick(songOfTheWeek, e)}
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] shadow-sm cursor-pointer hover:scale-102 transition-transform"
+              title={lang === 'sw' ? 'Bofya mara mbili kufungua kichezaji' : 'Double-tap to open player'}
+            >
               <img
                 src={getCleanSongCover(songOfTheWeek)}
                 alt={songOfTheWeek.title}
@@ -239,8 +284,13 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
             {/* Song details & choir's note */}
             <div className="space-y-1.5 flex-1 min-w-0">
-              <div>
-                <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
+              <div
+                onClick={() => handleSongNameClick(songOfTheWeek)}
+                onDoubleClick={(e) => handleSongNameDoubleClick(songOfTheWeek, e)}
+                className="cursor-pointer"
+                title={lang === 'sw' ? 'Bofya mara mbili kufungua kichezaji' : 'Double-tap to open player'}
+              >
+                <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight hover:text-[#1058A8] transition-colors">
                   {lang === 'sw' ? songOfTheWeek.titleSwahili : songOfTheWeek.title}
                 </h3>
                 <p className="text-xs text-slate-600 font-source">
@@ -253,9 +303,10 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                 "{songOfTheWeekNote}"
               </p>
 
-              {/* Actions: filled Play button and Read the lyrics text link */}
-              <div className="flex items-center gap-4 pt-2">
+              {/* Actions: Play button, Watch Video button, and Read the lyrics link */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
+                  type="button"
                   onClick={() => {
                     if (currentSong.id === songOfTheWeek.id) {
                       togglePlay();
@@ -279,6 +330,17 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                 </button>
 
                 <button
+                  type="button"
+                  onClick={() => openVideoModal(songOfTheWeek)}
+                  className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 active:scale-95 rounded-xl text-xs font-bold font-source flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
+                  title={lang === 'sw' ? 'Tazama video rasmi ya wimbo huu' : 'Watch official video of this song'}
+                >
+                  <RealYouTubeIcon size={15} variant="monochrome" className="text-red-600 shrink-0" />
+                  <span>{lang === 'sw' ? 'Tazama Video' : 'Watch Video'}</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => {
                     playSong(songOfTheWeek);
                     setIsLyricsOpen(true);
@@ -446,14 +508,10 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
                             {/* Small square cover photo */}
                             <div 
-                              onClick={() => {
-                                if (currentSong.id === song.id) {
-                                  togglePlay();
-                                } else {
-                                  playSong(song);
-                                }
-                              }}
-                              className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] cursor-pointer shadow-2xs relative"
+                              onClick={() => handleSongNameClick(song)}
+                              onDoubleClick={(e) => handleSongNameDoubleClick(song, e)}
+                              className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] cursor-pointer shadow-2xs relative hover:opacity-95 transition-opacity"
+                              title={lang === 'sw' ? `${song.title} — Bofya mara mbili kufungua kichezaji` : `${song.title} — Double-tap to open player`}
                             >
                               <img
                                 src={getCleanSongCover(song)}
@@ -463,17 +521,15 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                             </div>
                           </div>
 
-                          {/* Song Title & Composer */}
-                          <div className="min-w-0 max-w-xs sm:max-w-md shrink-0">
+                          {/* Song Title & Composer - Double tap pops up player */}
+                          <div 
+                            onClick={() => handleSongNameClick(song)}
+                            onDoubleClick={(e) => handleSongNameDoubleClick(song, e)}
+                            className="min-w-0 max-w-xs sm:max-w-md shrink-0 cursor-pointer"
+                            title={lang === 'sw' ? `${song.title} — Bofya mara mbili kufungua kichezaji` : `${song.title} — Double-tap to pop up player`}
+                          >
                             <h3 
-                              onClick={() => {
-                                if (currentSong.id === song.id) {
-                                  togglePlay();
-                                } else {
-                                  playSong(song);
-                                }
-                              }}
-                              className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] truncate leading-tight cursor-pointer hover:text-[#1058A8] transition-colors"
+                              className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] truncate leading-tight hover:text-[#1058A8] transition-colors"
                             >
                               {lang === 'sw' ? song.titleSwahili : song.title}
                             </h3>
@@ -520,6 +576,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
                             {/* One circular play button: slides 4px on hover */}
                             <button
+                              type="button"
                               onClick={() => {
                                 if (currentSong.id === song.id) {
                                   togglePlay();
@@ -529,6 +586,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                               }}
                               className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-[#1058A8] hover:bg-[#0E56A6] active:scale-90 text-white flex items-center justify-center shadow-2xs transition-all cursor-pointer group-hover:translate-x-1 motion-reduce:transform-none"
                               aria-label={isThisPlaying ? 'Pause song' : 'Play song'}
+                              title={isThisPlaying ? (lang === 'sw' ? 'Simamisha wimbo' : 'Pause song') : (lang === 'sw' ? 'Sikiliza wimbo' : 'Play song')}
                             >
                               {isThisPlaying ? (
                                 <Pause className="w-3.5 h-3.5 fill-current" />
@@ -537,7 +595,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                               )}
                             </button>
 
-                            {/* Small 3-dot menu at end of row: contains YouTube, Lyrics, Share */}
+                            {/* Small 3-dot menu at end of row: contains Open Player, In-app Video, YouTube, Lyrics, Share */}
                             <div className="relative row-menu-container">
                               <button
                                 type="button"
@@ -552,7 +610,35 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                               </button>
 
                               {openRowMenuId === song.id && (
-                                <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-[#0C2340]/15 py-1 z-30 text-xs font-source animate-in fade-in zoom-in-95 duration-150">
+                                <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-xl border border-[#0C2340]/15 py-1 z-30 text-xs font-source animate-in fade-in zoom-in-95 duration-150">
+                                  {/* Open Full Player / Hymnal */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (currentSong.id !== song.id) {
+                                        playSong(song);
+                                      }
+                                      setIsNowPlayingExpanded(true);
+                                      setOpenRowMenuId(null);
+                                    }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer font-medium"
+                                  >
+                                    <Music2 className="w-3.5 h-3.5 text-[#1058A8] shrink-0" />
+                                    <span>{lang === 'sw' ? 'Fungua Kichezaji Kamili' : 'Open Full Player'}</span>
+                                  </button>
+                                  {/* In-app Video Preview */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      openVideoModal(song);
+                                      setOpenRowMenuId(null);
+                                    }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer"
+                                  >
+                                    <RealYouTubeIcon size={14} variant="monochrome" className="text-red-600 shrink-0" />
+                                    <span>{lang === 'sw' ? 'Tazama Video Tovutini' : 'Preview Video in App'}</span>
+                                  </button>
+
                                   {/* YouTube link */}
                                   <a
                                     href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
@@ -561,8 +647,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                                     onClick={() => setOpenRowMenuId(null)}
                                     className="flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors"
                                   >
-                                    <RealYouTubeIcon size={14} variant="monochrome" className="text-[#1058A8]" />
-                                    <span>{lang === 'sw' ? 'Tazama YouTube' : 'Watch on YouTube'}</span>
+                                    <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>{lang === 'sw' ? 'Fungua YouTube' : 'Open in YouTube'}</span>
                                   </a>
 
                                   {/* Lyrics button */}
