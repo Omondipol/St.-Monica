@@ -34,6 +34,29 @@ export interface VoiceMixerState {
   bassVolume: number;
 }
 
+export interface HeroContent {
+  headlineEn: string;
+  headlineSw: string;
+  subheadEn: string;
+  subheadSw: string;
+  verseEn: string;
+  verseSw: string;
+  verseRef: string;
+  scriptureEn?: string;
+  scriptureSw?: string;
+  scriptureRef?: string;
+}
+
+export const INITIAL_HERO_CONTENT: HeroContent = {
+  headlineEn: "Uniting hearts through sacred music",
+  headlineSw: "Kuunganisha mioyo kupitia muziki mtakatifu",
+  subheadEn: "St. Monica Third Mass Choir (Section 58, Nakuru)",
+  subheadSw: "Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)",
+  verseEn: "Sing to the Lord a new song; sing to the Lord, all the earth.",
+  verseSw: "Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.",
+  verseRef: "Psalm 96:1 / Zaburi 96:1"
+};
+
 interface ChoirContextType {
   lang: 'en' | 'sw';
   setLang: (l: 'en' | 'sw') => void;
@@ -135,6 +158,35 @@ interface ChoirContextType {
   productsList: ProductItem[];
   eventsList: EventItem[];
   librarySongs: LibrarySong[];
+  choirStats: typeof CHOIR_STATS;
+  massSchedule: {
+    mass1Title: string;
+    mass1Time: string;
+    mass1Desc: string;
+    mass1DescSw: string;
+    mass2Title: string;
+    mass2Time: string;
+    mass2Desc: string;
+    mass2DescSw: string;
+    mass3Title: string;
+    mass3Time: string;
+    mass3Desc: string;
+    mass3DescSw: string;
+    mass4Title: string;
+    mass4Time: string;
+    mass4Desc: string;
+    mass4DescSw: string;
+    rehearsals: string;
+    rehearsalsSw: string;
+  };
+  siteNotice: {
+    enabled: boolean;
+    textEn: string;
+    textSw: string;
+    type: 'info' | 'feast' | 'urgent';
+    badgeEn?: string;
+    badgeSw?: string;
+  };
 
   // Admin CRUD Functions
   addSong: (song: Omit<Song, 'id'>) => void;
@@ -151,6 +203,16 @@ interface ChoirContextType {
 
   addGroupPhoto: (photo: Omit<ChoirGroupPhoto, 'id'>) => void;
   deleteGroupPhoto: (id: string) => void;
+
+  addEvent: (event: Omit<EventItem, 'id'>) => void;
+  updateEvent: (id: string, updated: Partial<EventItem>) => void;
+  deleteEvent: (id: string) => void;
+
+  updateChoirStats: (updated: Partial<typeof CHOIR_STATS>) => void;
+  updateMassSchedule: (updated: Partial<ChoirContextType['massSchedule']>) => void;
+  updateSiteNotice: (updated: Partial<ChoirContextType['siteNotice']>) => void;
+  heroContent: HeroContent;
+  updateHeroContent: (updated: Partial<HeroContent>) => void;
 
   // Maktaba ya Noti Library CRUD Functions
   addLibrarySong: (song: Omit<LibrarySong, 'id' | 'downloadCount' | 'addedDate'>) => void;
@@ -190,7 +252,12 @@ const STORAGE_KEYS = {
   PRODUCTS: 'st_monica_products_data_v5',
   CART: 'st_monica_cart_data_v5',
   LANG: 'st_monica_choir_lang_choice',
-  LIBRARY: 'st_monica_library_data_v1'
+  LIBRARY: 'st_monica_library_data_v1',
+  STATS: 'st_monica_stats_v5',
+  EVENTS: 'st_monica_events_v5',
+  SCHEDULE: 'st_monica_schedule_v5',
+  NOTICE: 'st_monica_notice_v5',
+  HERO: 'st_monica_hero_v5'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -331,7 +398,154 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [productsList]);
 
-  const [eventsList] = useState<EventItem[]>(INITIAL_EVENTS);
+  // 7a. Liturgical Events List
+  const [eventsList, setEventsList] = useState<EventItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.EVENTS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_EVENTS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(eventsList));
+    } catch (e) {
+      // ignore
+    }
+  }, [eventsList]);
+
+  // 7b. Choir Stats & Parish Info
+  const [choirStats, setChoirStats] = useState<typeof CHOIR_STATS>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.STATS);
+      if (saved) return { ...CHOIR_STATS, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return CHOIR_STATS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(choirStats));
+    } catch (e) {
+      // ignore
+    }
+  }, [choirStats]);
+
+  // 7c. Sunday Mass Times & Rehearsal Schedule
+  const [massSchedule, setMassSchedule] = useState<{
+    mass1Title: string;
+    mass1Time: string;
+    mass1Desc: string;
+    mass1DescSw: string;
+    mass2Title: string;
+    mass2Time: string;
+    mass2Desc: string;
+    mass2DescSw: string;
+    mass3Title: string;
+    mass3Time: string;
+    mass3Desc: string;
+    mass3DescSw: string;
+    mass4Title: string;
+    mass4Time: string;
+    mass4Desc: string;
+    mass4DescSw: string;
+    rehearsals: string;
+    rehearsalsSw: string;
+  }>(() => {
+    const defaultSchedule = {
+      mass1Title: "1st Mass (Dawn)",
+      mass1Time: "7:00 AM",
+      mass1Desc: "Solemn morning Eucharistic prayer for early parishioners.",
+      mass1DescSw: "Misa ya Asubuhi Mapema (Alfajiri) kwa sala na utulivu.",
+      mass2Title: "2nd Mass (Morning Liturgy)",
+      mass2Time: "8:30 AM",
+      mass2Desc: "Morning parish Eucharistic liturgy with congregational hymns.",
+      mass2DescSw: "Misa ya pili ya asubuhi na nyimbo za kutaniko.",
+      mass3Title: "3rd Mass (Sunday High Mass)",
+      mass3Time: "10:00 AM",
+      mass3Desc: "St. Monica Third Mass Choir leads solemn four-part SATB liturgy.",
+      mass3DescSw: "Misa Kuu ya Kwaya ya Mtakatifu Monika kwa sauti nne (SATB).",
+      mass4Title: "4th Mass (Youth Liturgy)",
+      mass4Time: "11:30 AM",
+      mass4Desc: "Midday parish liturgy with youth and children ministry.",
+      mass4DescSw: "Misa ya mchana na utume wa vijana na watoto.",
+      rehearsals: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
+      rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
+    };
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SCHEDULE);
+      if (saved) return { ...defaultSchedule, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return defaultSchedule;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(massSchedule));
+    } catch (e) {
+      // ignore
+    }
+  }, [massSchedule]);
+
+  // 7d. Site Announcement Notice
+  const [siteNotice, setSiteNotice] = useState<{
+    enabled: boolean;
+    textEn: string;
+    textSw: string;
+    type: 'info' | 'feast' | 'urgent';
+    badgeEn?: string;
+    badgeSw?: string;
+  }>(() => {
+    const defaultNotice = {
+      enabled: true,
+      textEn: "Welcome to St. Monica Third Mass Choir official website. Choir rehearsals every Wednesday & Friday at 5:30 PM.",
+      textSw: "Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika. Mazoezi ya kwaya kila Jumatano na Ijumaa Saa 11:30 Jioni.",
+      type: 'info' as const,
+      badgeEn: "Parish Notice",
+      badgeSw: "Tangazo la Kwaya"
+    };
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.NOTICE);
+      if (saved) return { ...defaultNotice, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return defaultNotice;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.NOTICE, JSON.stringify(siteNotice));
+    } catch (e) {
+      // ignore
+    }
+  }, [siteNotice]);
+
+  // 7e. Hero Section & Scripture Content
+  const [heroContent, setHeroContent] = useState<HeroContent>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.HERO);
+      if (saved) return { ...INITIAL_HERO_CONTENT, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_HERO_CONTENT;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.HERO, JSON.stringify(heroContent));
+    } catch (e) {
+      // ignore
+    }
+  }, [heroContent]);
 
   // 7b. Maktaba ya Noti (Free Sheet Music Library)
   const [librarySongs, setLibrarySongs] = useState<LibrarySong[]>(() => {
@@ -468,21 +682,70 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (_) {}
   }, []);
 
+  // Real HTML5 Audio Element for rock-solid playback across Mobile (iOS/Android) and Desktop
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const currentTimeRef = useRef<number>(0);
+
+  // Sync currentTimeRef whenever currentTimeSeconds changes externally (seeking, resetting)
+  useEffect(() => {
+    currentTimeRef.current = currentTimeSeconds;
+  }, [currentTimeSeconds]);
+
+  // Helper to resolve song audio preview URL across GitHub Pages and custom domains
+  const getSongAudioSrc = (song: Song): string => {
+    if (song.audioPreviewUrl) return song.audioPreviewUrl;
+    const base = typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL ? import.meta.env.BASE_URL : './';
+    const prefix = base.endsWith('/') ? base : `${base}/`;
+    if (song.id.includes('machozi')) return `${prefix}audio/machozi-ya-imani-preview.mp3`;
+    if (song.id.includes('maisha')) return `${prefix}audio/maisha-ya-mwanadamu-preview.mp3`;
+    if (song.id.includes('nimzima') || song.id.includes('mzima')) return `${prefix}audio/ni-mzima-preview.mp3`;
+    if (song.id.includes('jumuiya')) return `${prefix}audio/jumuiya-ndogondogo-preview.mp3`;
+    return `${prefix}audio/machozi-ya-imani-preview.mp3`;
+  };
+
+  // Initialize persistent Audio instance once with timeupdate listener
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      audio.ontimeupdate = () => {
+        if (!isNaN(audio.currentTime) && audio.currentTime > 0 && audio.currentTime < 40) {
+          currentTimeRef.current = audio.currentTime;
+          setCurrentTimeSeconds(audio.currentTime);
+        }
+      };
+      audioElementRef.current = audio;
+
+      return () => {
+        audio.pause();
+        audio.src = '';
+      };
+    }
+  }, []);
+
   const dismissIntroCutoff = (andPlay: boolean = false) => {
     setIsIntroCutoffOpen(false);
     markCutoffShownInVisit(currentSong.id);
 
     // Reset position to start so pressing play or replaying begins at 0:00 without getting stuck
-    if (currentTimeSeconds >= 39) {
-      setCurrentTimeSeconds(0);
-      setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
-      try {
-        ytPlayerRef.current?.seekTo(0, true);
-      } catch (_) {}
+    currentTimeRef.current = 0;
+    setCurrentTimeSeconds(0);
+    setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
+
+    const audio = audioElementRef.current;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.volume = isMuted ? 0 : volume;
     }
+    try {
+      ytPlayerRef.current?.seekTo(0, true);
+    } catch (_) {}
 
     if (andPlay) {
       setIsPlaying(true);
+      if (audio) {
+        audio.play().catch(err => console.warn('Audio replay catch:', err));
+      }
       try {
         ytPlayerRef.current?.seekTo(0, true);
         ytPlayerRef.current?.unMute();
@@ -514,55 +777,93 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const syncFromYouTube = (curTime: number, _dur: number, playingState: boolean) => {
+    currentTimeRef.current = curTime;
     setCurrentTimeSeconds(curTime);
     setIsPlaying(playingState);
   };
 
-  // 100ms sync loop for YouTube playback: track real seconds, 35s-40s smooth volume fade, 40s pause & support prompt
+  // Continuous 50ms sync loop: tracks real audio time, smooth volume fade at 35-40s, exact 40s cutoff popup
   useEffect(() => {
     if (!isPlaying) return;
 
+    let lastTick = performance.now();
+
     const intervalId = setInterval(() => {
-      const player = ytPlayerRef.current;
-      if (!player || typeof player.getCurrentTime !== 'function') return;
+      const now = performance.now();
+      const deltaSec = (now - lastTick) / 1000;
+      lastTick = now;
 
-      try {
-        const cur = player.getCurrentTime();
-        if (typeof cur !== 'number' || isNaN(cur)) return;
+      const audio = audioElementRef.current;
+      const yt = ytPlayerRef.current;
 
-        if (cur >= 40) {
-          player.pauseVideo();
-          player.seekTo(40, true);
-          setCurrentTimeSeconds(40);
-          setIsPlaying(false);
-          // Restore visitor's volume setting to ensure replay or next song plays at full intended volume
-          player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+      let cur = currentTimeRef.current;
 
-          if (!hasShownCutoffInVisit(currentSong.id)) {
-            markCutoffShownInVisit(currentSong.id);
-            setIsIntroCutoffOpen(true);
-          }
-        } else {
-          setCurrentTimeSeconds(cur);
-
-          // In the last 5 seconds (35s to 40s), lower the volume gradually to silence
-          if (cur >= 35) {
-            const fadeFactor = Math.max(0, (40 - cur) / 5);
-            const effVol = isMuted ? 0 : Math.round(volume * fadeFactor * 100);
-            player.setVolume(effVol);
+      // 1. Check real HTML5 Audio element
+      if (audio && !audio.paused && !isNaN(audio.currentTime) && audio.currentTime > 0) {
+        cur = audio.currentTime;
+      } else if (yt && typeof yt.getCurrentTime === 'function') {
+        // 2. Check YouTube iframe player
+        try {
+          const ytCur = yt.getCurrentTime();
+          if (typeof ytCur === 'number' && !isNaN(ytCur) && ytCur > 0) {
+            cur = ytCur;
           } else {
-            player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+            cur = Math.min(40, cur + deltaSec);
           }
+        } catch (_) {
+          cur = Math.min(40, cur + deltaSec);
         }
-      } catch (_) {}
-    }, 100);
+      } else {
+        // 3. Robust timer progression ensures playhead dot ALWAYS moves on mobile
+        cur = Math.min(40, cur + deltaSec);
+      }
+
+      if (cur >= 40) {
+        // Stop audio playback
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 40;
+          audio.volume = isMuted ? 0 : volume;
+        }
+        if (yt && typeof yt.pauseVideo === 'function') {
+          try {
+            yt.pauseVideo();
+            yt.seekTo(40, true);
+            yt.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          } catch (_) {}
+        }
+        currentTimeRef.current = 40;
+        setCurrentTimeSeconds(40);
+        setIsPlaying(false);
+
+        // Always display the 40-second cutoff popup on mobile and desktop
+        setIsIntroCutoffOpen(true);
+        markCutoffShownInVisit(currentSong.id);
+      } else {
+        currentTimeRef.current = cur;
+        setCurrentTimeSeconds(cur);
+
+        // In the last 5 seconds (35s to 40s), lower the volume gradually to silence
+        const fadeFactor = cur >= 35 ? Math.max(0, (40 - cur) / 5) : 1;
+        const effVol = isMuted ? 0 : volume * fadeFactor;
+
+        if (audio) {
+          audio.volume = 0; // Silent lock for audio context, never plays synthetic sound
+        }
+        if (yt && typeof yt.setVolume === 'function') {
+          try {
+            yt.setVolume(Math.round(effVol * 100));
+          } catch (_) {}
+        }
+      }
+    }, 50);
 
     return () => clearInterval(intervalId);
-  }, [isPlaying, volume, isMuted, currentSong.id, hasShownCutoffInVisit, markCutoffShownInVisit]);
+  }, [isPlaying, volume, isMuted, currentSong.id, markCutoffShownInVisit]);
 
   const audioProgress = Math.min(100, Math.max(0, (currentTimeSeconds / PREVIEW_DURATION) * 100));
 
-  // Real Play Song: Drives official YouTube recording of the choir
+  // Real Play Song: Starts YouTube playback for 100% authentic choir voices
   const playSong = (song: Song) => {
     setAudioError(false);
     setIsIntroCutoffOpen(false);
@@ -572,6 +873,23 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsPlaying(true);
     setIsPlayerMinimized(false);
 
+    // 1. Silent HTML5 audio element keeps browser audio focus without playing synthetic sound
+    const audio = audioElementRef.current;
+    if (audio) {
+      try {
+        const src = getSongAudioSrc(song);
+        audio.src = src;
+        audio.currentTime = 0;
+        audio.volume = 0; // Strictly 0 so authentic YouTube audio plays cleanly
+        audio.play().catch(err => {
+          console.warn('HTML5 audio play notification:', err);
+        });
+      } catch (e) {
+        console.warn('Audio element error:', e);
+      }
+    }
+
+    // 2. Play authentic YouTube choir recording
     if (ytPlayerRef.current) {
       try {
         if (typeof ytPlayerRef.current.loadVideoById === 'function') {
@@ -584,7 +902,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           ytPlayerRef.current.playVideo();
         }
       } catch (e) {
-        console.warn('YouTube playSong error:', e);
+        console.warn('YouTube playSong warning:', e);
       }
     }
   };
@@ -593,21 +911,41 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const togglePlay = () => {
     setIsPlaying(prev => {
       const next = !prev;
+      const audio = audioElementRef.current;
+
       if (next) {
         setIsPlayerMinimized(false);
+        const startSec = currentTimeSeconds >= 39.5 ? 0 : currentTimeSeconds;
         if (currentTimeSeconds >= 39.5) {
           setCurrentTimeSeconds(0);
           setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
-          try {
-            ytPlayerRef.current?.seekTo(0, true);
-          } catch (_) {}
         }
+
+        // 1. Silent HTML5 audio session maintainer
+        if (audio) {
+          const src = getSongAudioSrc(currentSong);
+          if (!audio.src || !audio.src.includes('.mp3')) {
+            audio.src = src;
+          }
+          audio.currentTime = startSec;
+          audio.volume = 0; // Strictly 0
+          audio.play().catch(err => console.warn('Audio play catch:', err));
+        }
+
+        // 2. Play authentic YouTube audio
         try {
+          if (startSec === 0) {
+            ytPlayerRef.current?.seekTo(0, true);
+          }
           ytPlayerRef.current?.unMute();
           ytPlayerRef.current?.setVolume(isMuted ? 0 : Math.round(volume * 100));
           ytPlayerRef.current?.playVideo();
         } catch (_) {}
       } else {
+        // Pause both
+        if (audio) {
+          audio.pause();
+        }
         try {
           ytPlayerRef.current?.pauseVideo();
         } catch (_) {}
@@ -647,20 +985,19 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const clamped = Math.max(0, Math.min(40, secs));
     setCurrentTimeSeconds(clamped);
     setSeekCommand({ targetSeconds: clamped, nonce: Date.now() });
+
+    const audio = audioElementRef.current;
+    if (audio) {
+      audio.currentTime = clamped;
+    }
+
     if (ytPlayerRef.current) {
       try {
         ytPlayerRef.current.seekTo(clamped, true);
         if (clamped >= 40) {
           ytPlayerRef.current.pauseVideo();
           setIsPlaying(false);
-          ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
-
-          if (!hasShownCutoffInVisit(currentSong.id)) {
-            markCutoffShownInVisit(currentSong.id);
-            setIsIntroCutoffOpen(true);
-          }
-        } else if (clamped < 35) {
-          ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          setIsIntroCutoffOpen(true);
         }
       } catch (_) {}
     }
@@ -670,6 +1007,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const setVolume = (val: number) => {
     const clamped = Math.max(0, Math.min(1, val));
     setVolumeState(clamped);
+    if (audioElementRef.current) {
+      audioElementRef.current.volume = isMuted ? 0 : clamped;
+    }
     if (ytPlayerRef.current) {
       try {
         ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(clamped * 100));
@@ -680,6 +1020,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const toggleMute = () => {
     setIsMuted(prev => {
       const next = !prev;
+      if (audioElementRef.current) {
+        audioElementRef.current.volume = next ? 0 : volume;
+      }
       if (ytPlayerRef.current) {
         try {
           if (next) {
@@ -962,6 +1305,37 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLibrarySongs(prev => prev.map(s => s.id === id ? { ...s, downloadCount: (s.downloadCount || 0) + 1 } : s));
   };
 
+  // Events CRUD
+  const addEvent = (event: Omit<EventItem, 'id'>) => {
+    const id = `evt-${Date.now()}`;
+    setEventsList(prev => [{ ...event, id }, ...prev]);
+  };
+
+  const updateEvent = (id: string, updated: Partial<EventItem>) => {
+    setEventsList(prev => prev.map(e => e.id === id ? { ...e, ...updated } : e));
+  };
+
+  const deleteEvent = (id: string) => {
+    setEventsList(prev => prev.filter(e => e.id !== id));
+  };
+
+  // Site Configuration & Stats Mutations
+  const updateChoirStats = (updated: Partial<typeof CHOIR_STATS>) => {
+    setChoirStats(prev => ({ ...prev, ...updated }));
+  };
+
+  const updateMassSchedule = (updated: Partial<ChoirContextType['massSchedule']>) => {
+    setMassSchedule(prev => ({ ...prev, ...updated }));
+  };
+
+  const updateSiteNotice = (updated: Partial<ChoirContextType['siteNotice']>) => {
+    setSiteNotice(prev => ({ ...prev, ...updated }));
+  };
+
+  const updateHeroContent = (updated: Partial<HeroContent>) => {
+    setHeroContent(prev => ({ ...prev, ...updated }));
+  };
+
   const resetToDefaults = () => {
     try {
       localStorage.removeItem(STORAGE_KEYS.SONGS);
@@ -970,6 +1344,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.removeItem(STORAGE_KEYS.PHOTOS);
       localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
       localStorage.removeItem(STORAGE_KEYS.LIBRARY);
+      localStorage.removeItem(STORAGE_KEYS.STATS);
+      localStorage.removeItem(STORAGE_KEYS.EVENTS);
+      localStorage.removeItem(STORAGE_KEYS.SCHEDULE);
+      localStorage.removeItem(STORAGE_KEYS.NOTICE);
+      localStorage.removeItem(STORAGE_KEYS.HERO);
     } catch (e) {
       // ignore
     }
@@ -980,13 +1359,21 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setGroupPhotosList(INITIAL_GROUP_PHOTOS);
     setProductsList(INITIAL_PRODUCTS);
     setLibrarySongs(INITIAL_LIBRARY_SONGS);
+    setChoirStats(CHOIR_STATS);
+    setEventsList(INITIAL_EVENTS);
+    setHeroContent(INITIAL_HERO_CONTENT);
   };
 
   const exportDataJson = (): string => {
     const backup = {
-      version: '4.0',
+      version: '5.0',
       exportDate: new Date().toISOString(),
-      parish: CHOIR_STATS.parish,
+      parish: choirStats.parish,
+      heroContent,
+      choirStats,
+      massSchedule,
+      siteNotice,
+      eventsList,
       songs,
       sheetMusicList,
       leadersList,
@@ -1000,6 +1387,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const importDataJson = (jsonStr: string): boolean => {
     try {
       const data = JSON.parse(jsonStr);
+      if (data.heroContent) setHeroContent(data.heroContent);
+      if (data.choirStats) setChoirStats(data.choirStats);
+      if (data.massSchedule) setMassSchedule(data.massSchedule);
+      if (data.siteNotice) setSiteNotice(data.siteNotice);
+      if (data.eventsList && Array.isArray(data.eventsList)) setEventsList(data.eventsList);
       if (data.songs && Array.isArray(data.songs)) {
         setSongs(data.songs);
         if (data.songs.length > 0) setCurrentSong(data.songs[0]);
@@ -1119,6 +1511,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         productsList,
         eventsList,
         librarySongs,
+        choirStats,
+        massSchedule,
+        siteNotice,
+        heroContent,
 
         addSong,
         updateSong,
@@ -1134,6 +1530,15 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         addGroupPhoto,
         deleteGroupPhoto,
+
+        addEvent,
+        updateEvent,
+        deleteEvent,
+
+        updateChoirStats,
+        updateMassSchedule,
+        updateSiteNotice,
+        updateHeroContent,
 
         addLibrarySong,
         updateLibrarySong,
@@ -1235,6 +1640,36 @@ export const useChoir = (): ChoirContextType => {
       productsList: INITIAL_PRODUCTS,
       eventsList: INITIAL_EVENTS,
       librarySongs: INITIAL_LIBRARY_SONGS,
+      choirStats: CHOIR_STATS,
+      massSchedule: {
+        mass1Title: "1st Mass (Dawn)",
+        mass1Time: "7:00 AM",
+        mass1Desc: "Solemn morning Eucharistic prayer for early parishioners.",
+        mass1DescSw: "Misa ya Asubuhi Mapema (Alfajiri) kwa sala na utulivu.",
+        mass2Title: "2nd Mass (Morning Liturgy)",
+        mass2Time: "8:30 AM",
+        mass2Desc: "Morning parish Eucharistic liturgy with congregational hymns.",
+        mass2DescSw: "Misa ya pili ya asubuhi na nyimbo za kutaniko.",
+        mass3Title: "3rd Mass (Sunday High Mass)",
+        mass3Time: "10:00 AM",
+        mass3Desc: "St. Monica Third Mass Choir leads solemn four-part SATB liturgy.",
+        mass3DescSw: "Misa Kuu ya Kwaya ya Mtakatifu Monika kwa sauti nne (SATB).",
+        mass4Title: "4th Mass (Youth Liturgy)",
+        mass4Time: "11:30 AM",
+        mass4Desc: "Midday parish liturgy with youth and children ministry.",
+        mass4DescSw: "Misa ya mchana na utume wa vijana na watoto.",
+        rehearsals: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
+        rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
+      },
+      siteNotice: {
+        enabled: true,
+        textEn: "Welcome to St. Monica Third Mass Choir official website.",
+        textSw: "Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika.",
+        type: 'info',
+        badgeEn: "Parish Notice",
+        badgeSw: "Tangazo la Kwaya"
+      },
+      heroContent: INITIAL_HERO_CONTENT,
       addSong: () => {},
       updateSong: () => {},
       deleteSong: () => {},
@@ -1246,6 +1681,13 @@ export const useChoir = (): ChoirContextType => {
       deleteLeader: () => {},
       addGroupPhoto: () => {},
       deleteGroupPhoto: () => {},
+      addEvent: () => {},
+      updateEvent: () => {},
+      deleteEvent: () => {},
+      updateChoirStats: () => {},
+      updateMassSchedule: () => {},
+      updateSiteNotice: () => {},
+      updateHeroContent: () => {},
       addLibrarySong: () => {},
       updateLibrarySong: () => {},
       deleteLibrarySong: () => {},

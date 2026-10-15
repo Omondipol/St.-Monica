@@ -5,13 +5,14 @@ import churchImg from '../../assets/images/st_monica_parish_church_nakuru_179144
 import { ChoirLogo } from '../../components/ChoirLogo';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
+import { Users, Calendar, Music } from 'lucide-react';
 
 interface OurStoryViewProps {
   onNavigate?: (route: string) => void;
 }
 
 export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang } = useChoir();
+  const { lang, choirStats } = useChoir();
 
   const timeline = [
     {
@@ -90,18 +91,54 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
               : 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.'}
           </p>
 
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#0C2340]/10 text-center">
-            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs">
-              <span className="font-eb-garamond text-2xl font-bold text-[#1058A8] block tabular-nums">{CHOIR_STATS.membersCount}</span>
-              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Waimbaji (SATB)' : 'Active Choristers'}</p>
+          <div className="pt-5 border-t border-[#0C2340]/10">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#1058A8] font-source">
+                {lang === 'sw' ? 'Muhtasari wa Utume Wetu' : 'Choir Ministry at a Glance'}
+              </h3>
+              <span className="text-[11px] text-slate-600 font-source font-medium">
+                {lang === 'sw' ? 'Misa ya Tatu · Section 58 Nakuru' : 'Third Mass · Section 58 Nakuru'}
+              </span>
             </div>
-            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs">
-              <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] block tabular-nums">{CHOIR_STATS.yearsServing}</span>
-              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}</p>
-            </div>
-            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs">
-              <span className="font-eb-garamond text-2xl font-bold text-[#1058A8] block tabular-nums">{CHOIR_STATS.repertoireCount}</span>
-              <p className="text-xs text-slate-700 font-source mt-0.5">{lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-center">
+              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
+                <Users className="w-5 h-5 text-[#1058A8] mb-1.5" />
+                <span className="font-eb-garamond text-3xl font-bold text-[#1058A8] block tabular-nums">
+                  {choirStats?.membersCount ?? CHOIR_STATS.membersCount}
+                </span>
+                <p className="text-xs font-bold text-slate-800 font-source mt-1">
+                  {lang === 'sw' ? 'Waimbaji wa Kwaya' : 'Active Choristers'}
+                </p>
+                <span className="text-[11px] text-slate-600 font-source mt-0.5">
+                  {lang === 'sw' ? 'Soprano, Alto, Tenor, Bass' : 'Four-Part SATB Harmony'}
+                </span>
+              </div>
+
+              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
+                <Calendar className="w-5 h-5 text-[#0C2340] mb-1.5" />
+                <span className="font-eb-garamond text-3xl font-bold text-[#0C2340] block tabular-nums">
+                  {choirStats?.yearsServing ?? CHOIR_STATS.yearsServing}
+                </span>
+                <p className="text-xs font-bold text-slate-800 font-source mt-1">
+                  {lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}
+                </p>
+                <span className="text-[11px] text-slate-600 font-source mt-0.5">
+                  {lang === 'sw' ? 'Kuanzia 2012 hadi sasa' : 'Founded in 2012'}
+                </span>
+              </div>
+
+              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
+                <Music className="w-5 h-5 text-[#1058A8] mb-1.5" />
+                <span className="font-eb-garamond text-3xl font-bold text-[#1058A8] block tabular-nums">
+                  {choirStats?.repertoireCount ?? CHOIR_STATS.repertoireCount}
+                </span>
+                <p className="text-xs font-bold text-slate-800 font-source mt-1">
+                  {lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}
+                </p>
+                <span className="text-[11px] text-slate-600 font-source mt-0.5">
+                  {lang === 'sw' ? 'Noti za solfa na staff' : 'Liturgical Repertoire'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

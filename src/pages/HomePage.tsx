@@ -90,7 +90,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     playSong, 
     togglePlay, 
     addToCart, 
-    lang 
+    lang,
+    heroContent,
+    choirStats,
+    massSchedule,
+    siteNotice
   } = useChoir();
 
   // Part 3: Rotating hero background slideshow (5 photos on desktop, 3 on mobile)
@@ -212,17 +216,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/90 via-[#0C2340]/40 to-transparent sm:hidden z-10 pointer-events-none" />
 
         {/* Hero Content (kept exactly where it is) */}
-        <div className="relative z-20 w-full sm:max-w-[65%] lg:max-w-[60%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12">
-          <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm">
-            {lang === 'sw' ? 'Kuunganisha mioyo kupitia muziki mtakatifu' : 'Uniting hearts through sacred music'}
+        <div className="relative z-20 w-full sm:max-w-[70%] lg:max-w-[62%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12 min-w-0">
+          <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm break-words">
+            {lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music')}
           </h1>
 
-          <p className="font-source text-sm sm:text-base md:text-lg text-white/95 font-medium tracking-wide">
-            {lang === 'sw' ? 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)' : 'St. Monica Third Mass Choir (Section 58, Nakuru)'}
+          <p className="font-source text-sm sm:text-base md:text-lg text-white/95 font-medium tracking-wide break-words">
+            {lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)')}
           </p>
 
           {/* Action buttons: Single strong button, quiet YouTube link, outlined gallery */}
-          <div className="flex flex-wrap items-center gap-4 pt-3">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 sm:pt-3">
             {/* Listen Now */}
             <button
               onClick={() => {
@@ -232,7 +236,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   playSong(featuredSong as Song);
                 }
               }}
-              className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
             >
               {isPlaying && currentSong.id === featuredSong.id ? (
                 <>
@@ -250,7 +254,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             {/* Choir Group Gallery */}
             <button
               onClick={() => onNavigate('about-gallery')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs"
+              className="inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs"
             >
               <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
             </button>
@@ -260,9 +264,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               href={YOUTUBE_CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-1.5 px-1 cursor-pointer"
             >
-              <RealYouTubeIcon size={20} variant="badge" />
+              <RealYouTubeIcon size={18} variant="badge" />
               <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
               <ExternalLink className="w-3.5 h-3.5 text-white/70" />
             </a>
@@ -297,6 +301,34 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
+      {/* Site Announcement Notice (Controlled via Admin) */}
+      {siteNotice?.enabled && (
+        <aside 
+          aria-label={lang === 'sw' ? 'Tangazo Rasmi la Kwaya' : 'Official Choir Announcement'}
+          className="bg-[#0C2340] text-white border-b border-[#7EC8F0]/30 py-2.5 px-4 sm:px-6 relative z-10"
+        >
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-source">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider shrink-0 ${
+                siteNotice.type === 'urgent' ? 'bg-rose-500 text-white' : siteNotice.type === 'feast' ? 'bg-amber-400 text-slate-900' : 'bg-[#1058A8] text-white'
+              }`}>
+                {lang === 'sw' ? (siteNotice.badgeSw || 'Tangazo') : (siteNotice.badgeEn || 'Notice')}
+              </span>
+              <p className="font-medium text-white/95 truncate">
+                {lang === 'sw' ? siteNotice.textSw : siteNotice.textEn}
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate('events')}
+              className="text-[#7EC8F0] hover:text-white font-semibold text-xs flex items-center gap-1 cursor-pointer underline shrink-0"
+            >
+              <span>{lang === 'sw' ? 'Tazama Matukio' : 'View Events'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </aside>
+      )}
+
       {/* 2. ABOUT & STORY (Warm Cream Background) */}
       <section className="bg-[#FAF8F5] py-16 sm:py-20 border-b border-[#0C2340]/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -321,50 +353,22 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   : 'Today, our choristers sing every Sunday in disciplined four-part harmony (SATB), training young parish voices in tonic sol-fa to keep liturgical tradition vibrant and alive.'}
               </p>
 
-              {/* Stat cards: plain lining numerals sitting at same height, number shown only once with label beneath */}
-              <div className="grid grid-cols-3 gap-4 pt-3">
-                <div className="p-4 bg-white rounded-xl border border-[#0C2340]/10 shadow-2xs">
-                  <span className="text-3xl sm:text-4xl font-bold font-source text-[#1058A8] block">
-                    {CHOIR_STATS.membersCount}
-                  </span>
-                  <span className="text-xs sm:text-sm font-medium text-slate-700 block mt-1">
-                    {lang === 'sw' ? 'Waimbaji wa Kwaya' : 'Active Choristers'}
-                  </span>
-                </div>
-
-                <div className="p-4 bg-white rounded-xl border border-[#0C2340]/10 shadow-2xs">
-                  <span className="text-3xl sm:text-4xl font-bold font-source text-[#0C2340] block">
-                    {CHOIR_STATS.yearsServing}
-                  </span>
-                  <span className="text-xs sm:text-sm font-medium text-slate-700 block mt-1">
-                    {lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}
-                  </span>
-                </div>
-
-                <div className="p-4 bg-white rounded-xl border border-[#0C2340]/10 shadow-2xs">
-                  <span className="text-3xl sm:text-4xl font-bold font-source text-[#1058A8] block">
-                    {CHOIR_STATS.repertoireCount}
-                  </span>
-                  <span className="text-xs sm:text-sm font-medium text-slate-700 block mt-1">
-                    {lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-2 flex items-center gap-6">
+              {/* Invitation to explore full About story and stats */}
+              <div className="pt-3 flex flex-wrap items-center gap-3.5">
                 <button
                   onClick={() => onNavigate('about-story')}
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1058A8] hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0C2340] hover:bg-[#1058A8] text-white text-sm font-semibold transition-all shadow-sm cursor-pointer group active:scale-95"
                 >
-                  <span>{lang === 'sw' ? 'Soma historia yetu yote' : 'Read our full story'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{lang === 'sw' ? 'Jifunze Zaidi Kuhusu Kwaya Yetu' : 'Learn More About Our Choir'}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
+
                 <button
                   onClick={() => onNavigate('about-leadership')}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-[#0C2340] cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl border border-[#0C2340]/15 hover:bg-white text-sm font-semibold text-slate-800 transition-colors cursor-pointer"
                 >
-                  <span>{lang === 'sw' ? 'Walimu na viongozi' : 'Choir leadership'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers & Officials'}</span>
+                  <ArrowRight className="w-4 h-4 text-slate-400" />
                 </button>
               </div>
             </div>
@@ -675,27 +679,29 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <ul className="space-y-2.5 text-sm text-slate-800 font-source">
                 <li className="flex items-center justify-between pb-1.5 border-b border-[#0C2340]/10">
-                  <span>{lang === 'sw' ? 'Misa ya 1 (Asubuhi Mapema)' : '1st Mass (Dawn)'}</span>
-                  <strong className="text-[#0C2340]">7:00 AM</strong>
+                  <span>{massSchedule?.mass1Title || (lang === 'sw' ? 'Misa ya 1 (Asubuhi Mapema)' : '1st Mass (Dawn)')}</span>
+                  <strong className="text-[#0C2340]">{massSchedule?.mass1Time || '7:00 AM'}</strong>
                 </li>
                 <li className="flex items-center justify-between pb-1.5 border-b border-[#0C2340]/10">
-                  <span>{lang === 'sw' ? 'Misa ya 2 (Kiswahili)' : '2nd Mass'}</span>
-                  <strong className="text-[#0C2340]">8:30 AM</strong>
+                  <span>{massSchedule?.mass2Title || (lang === 'sw' ? 'Misa ya 2 (Kiswahili)' : '2nd Mass')}</span>
+                  <strong className="text-[#0C2340]">{massSchedule?.mass2Time || '8:30 AM'}</strong>
                 </li>
                 <li className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20">
                   <div className="flex flex-col">
                     <span className="font-bold text-[#1058A8]">
-                      {lang === 'sw' ? 'Misa ya 3: Misa Kuu (Sunday High Mass)' : '3rd Mass: Sunday High Mass'}
+                      {massSchedule?.mass3Title || (lang === 'sw' ? 'Misa ya 3: Misa Kuu (Sunday High Mass)' : '3rd Mass: Sunday High Mass')}
                     </span>
                     <span className="text-[11px] text-[#0C2340] font-medium">
-                      {lang === 'sw' ? '★ Kwaya ya Misa ya Tatu ya Mtakatifu Monika' : '★ St. Monica Third Mass Choir (Main Choir)'}
+                      {lang === 'sw' 
+                        ? (massSchedule?.mass3DescSw || '★ Kwaya ya Misa ya Tatu ya Mtakatifu Monika')
+                        : (massSchedule?.mass3Desc || '★ St. Monica Third Mass Choir (Main Choir)')}
                     </span>
                   </div>
-                  <strong className="text-base font-bold text-[#1058A8] ml-2">10:00 AM</strong>
+                  <strong className="text-base font-bold text-[#1058A8] ml-2">{massSchedule?.mass3Time || '10:00 AM'}</strong>
                 </li>
                 <li className="flex items-center justify-between pt-1">
-                  <span>{lang === 'sw' ? 'Misa ya 4 (Vijana / Youth)' : '4th Mass (Youth)'}</span>
-                  <strong className="text-[#0C2340]">11:30 AM</strong>
+                  <span>{massSchedule?.mass4Title || (lang === 'sw' ? 'Misa ya 4 (Vijana / Youth)' : '4th Mass (Youth)')}</span>
+                  <strong className="text-[#0C2340]">{massSchedule?.mass4Time || '11:30 AM'}</strong>
                 </li>
               </ul>
 
@@ -703,14 +709,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-slate-900 block">St. Monica's Catholic Church</span>
-                    <span className="text-slate-600 block mt-0.5">{CHOIR_STATS.churchAddress}</span>
+                    <span className="font-semibold text-slate-900 block">{choirStats?.parish || "St. Monica's Catholic Church"}</span>
+                    <span className="text-slate-600 block mt-0.5">{choirStats?.churchAddress || CHOIR_STATS.churchAddress}</span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <a
-                    href={CHOIR_STATS.mapsUrl}
+                    href={choirStats?.mapsUrl || CHOIR_STATS.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1058A8] hover:underline"
@@ -720,7 +726,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   </a>
                   <span className="text-slate-300">·</span>
                   <a
-                    href={CHOIR_STATS.mapsDirectionsUrl}
+                    href={choirStats?.mapsDirectionsUrl || CHOIR_STATS.mapsDirectionsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-[#1058A8] hover:underline"

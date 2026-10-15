@@ -157,7 +157,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
                   onClick={() => onNavigate('music-library')} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
-                  {lang === 'sw' ? 'Maktaba ya Noti' : 'Free Sheet Music Library'}
+                  {lang === 'sw' ? 'Maktaba ya Noti' : 'Music Library'}
                 </button>
               </li>
               <li>

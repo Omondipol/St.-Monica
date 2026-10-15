@@ -92,16 +92,14 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
             onStateChange: (event: any) => {
               if (isCancelled) return;
               const isPlayingState = event.data === 1 || (window.YT?.PlayerState && event.data === window.YT.PlayerState.PLAYING);
-              const isPausedState = event.data === 2 || (window.YT?.PlayerState && event.data === window.YT.PlayerState.PAUSED);
               const isEndedState = event.data === 0 || (window.YT?.PlayerState && event.data === window.YT.PlayerState.ENDED);
 
               if (isPlayingState) {
-                setIsPlaying(true);
-              } else if (isPausedState) {
-                setIsPlaying(false);
+                // Video is actively playing
               } else if (isEndedState) {
-                setIsPlaying(false);
+                // If YouTube video ends before 40s or reaches end
                 setCurrentTimeSeconds(40);
+                setIsPlaying(false);
                 if (!hasShownCutoffInVisit(currentSong.id)) {
                   markCutoffShownInVisit(currentSong.id);
                   setIsIntroCutoffOpen(true);

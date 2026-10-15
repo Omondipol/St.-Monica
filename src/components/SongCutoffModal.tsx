@@ -84,7 +84,7 @@ export const SongCutoffModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:py-6 sm:px-4 bg-[#0C2340]/50 animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:py-6 sm:px-4 bg-[#0C2340]/60 backdrop-blur-xs animate-in fade-in duration-200 select-none"
       onClick={() => dismissIntroCutoff()}
       role="dialog"
       aria-modal="true"

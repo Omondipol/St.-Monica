@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { 
   LIBRARY_CATEGORIES, 
@@ -11,6 +11,7 @@ import {
   Download, 
   ExternalLink, 
   ChevronRight, 
+  ChevronLeft,
   ArrowLeft, 
   Music, 
   Check, 
@@ -18,7 +19,8 @@ import {
   Play,
   Pause,
   LayoutGrid,
-  ListFilter
+  ListFilter,
+  Sparkles
 } from 'lucide-react';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
@@ -58,7 +60,29 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   const [sortBy, setSortBy] = useState<'title' | 'newest'>('title');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  const [categoryGroup, setCategoryGroup] = useState<'all' | 'mass' | 'seasons' | 'feasts'>('all');
   const PAGE_SIZE = 20;
+
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoryScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      categoryScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  // Group definitions for creative, quick category navigation
+  const MASS_PARTS = useMemo(() => ['kuingia', 'matoleo', 'komunyo', 'tafakari', 'shukrani', 'kutoka'], []);
+  const SEASONS_PARTS = useMemo(() => ['majilio', 'noeli', 'kwaresima', 'pasaka', 'roho-mtakatifu'], []);
+  const FEASTS_PARTS = useMemo(() => ['bikira-maria', 'zaburi', 'ndoa', 'watakatifu', 'mazishi', 'ubatizo'], []);
+
+  const visibleCategories = useMemo(() => {
+    if (categoryGroup === 'mass') return LIBRARY_CATEGORIES.filter(c => MASS_PARTS.includes(c.id));
+    if (categoryGroup === 'seasons') return LIBRARY_CATEGORIES.filter(c => SEASONS_PARTS.includes(c.id));
+    if (categoryGroup === 'feasts') return LIBRARY_CATEGORIES.filter(c => FEASTS_PARTS.includes(c.id));
+    return LIBRARY_CATEGORIES;
+  }, [categoryGroup, MASS_PARTS, SEASONS_PARTS, FEASTS_PARTS]);
 
   // Audio preview playback state for library song detail
   const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(false);
@@ -343,7 +367,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
           src={scorePreviewSheet} 
-          alt="Libraryy - St. Monica Catholic Choir" 
+          alt={lang === 'sw' ? 'Maktaba ya Muziki - St. Monica Catholic Choir' : 'Music Library - St. Monica Catholic Choir'} 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
@@ -353,7 +377,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
           </span>
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
             <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
-              Libraryy
+              {lang === 'sw' ? 'Maktaba ya Muziki' : 'Music Library'}
             </h1>
             {onNavigateMusicPaid && (
               <button
@@ -394,7 +418,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1058A8] hover:text-[#0C2340] cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-[#0C2340]/10 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>{lang === 'sw' ? 'Rudi Kwenye Nyimbo Zote (Libraryy)' : 'Back to All Libraryy Songs'}</span>
+              <span>{lang === 'sw' ? 'Rudi Kwenye Nyimbo Zote (Maktaba ya Muziki)' : 'Back to All Music Library Songs'}</span>
             </button>
 
             {/* Main Song Showcase Card */}
@@ -608,55 +632,226 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                 </div>
               </div>
 
-              {/* Category Pills Slider / Wrap */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {/* All Songs Pill */}
-                <button
-                  onClick={() => {
-                    setSelectedCategoryId(null);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
-                    !selectedCategoryId
-                      ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                      : 'bg-[#FAF8F5] text-slate-700 border-[#0C2340]/10 hover:border-[#1058A8]/50 hover:bg-white'
-                  }`}
-                >
-                  <span>{lang === 'sw' ? 'Nyimbo Zote' : 'All Songs'}</span>
-                  <span className={`ml-1.5 text-[11px] px-1.5 py-0.2 rounded-full ${
-                    !selectedCategoryId ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {librarySongs.length}
-                  </span>
-                </button>
+              {/* Creative & Easy Category Scroller with Liturgical Groups & Quick Jump */}
+              <div className="relative pt-1 space-y-3">
+                {/* Liturgical Group Filter Pills + Jump Dropdown + Left/Right Carousel Scroll Buttons */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+                  
+                  {/* Liturgical Group Pills */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1058A8] font-source flex items-center gap-1 shrink-0 mr-1">
+                      <Sparkles className="w-3 h-3" />
+                      <span>{lang === 'sw' ? 'Majira:' : 'Groups:'}</span>
+                    </span>
 
-                {/* Individual Categories */}
-                {LIBRARY_CATEGORIES.map(category => {
-                  const isSelected = selectedCategoryId === category.id;
-                  const count = categoryCounts[category.id] || 0;
-                  return (
                     <button
-                      key={category.id}
-                      onClick={() => {
-                        setSelectedCategoryId(category.id);
+                      type="button"
+                      onClick={() => setCategoryGroup('all')}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        categoryGroup === 'all'
+                          ? 'bg-[#0C2340] text-white shadow-xs'
+                          : 'bg-[#FAF8F5] text-slate-700 hover:bg-slate-200 border border-[#0C2340]/10'
+                      }`}
+                    >
+                      {lang === 'sw' ? 'Zote (15)' : 'All (15)'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategoryGroup('mass')}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        categoryGroup === 'mass'
+                          ? 'bg-[#1058A8] text-white shadow-xs'
+                          : 'bg-[#FAF8F5] text-slate-700 hover:bg-slate-200 border border-[#0C2340]/10'
+                      }`}
+                    >
+                      {lang === 'sw' ? 'Sehemu za Misa (6)' : 'Mass Parts (6)'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategoryGroup('seasons')}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        categoryGroup === 'seasons'
+                          ? 'bg-[#1058A8] text-white shadow-xs'
+                          : 'bg-[#FAF8F5] text-slate-700 hover:bg-slate-200 border border-[#0C2340]/10'
+                      }`}
+                    >
+                      {lang === 'sw' ? 'Majira ya Kanisa (5)' : 'Seasons (5)'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategoryGroup('feasts')}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        categoryGroup === 'feasts'
+                          ? 'bg-[#1058A8] text-white shadow-xs'
+                          : 'bg-[#FAF8F5] text-slate-700 hover:bg-slate-200 border border-[#0C2340]/10'
+                      }`}
+                    >
+                      {lang === 'sw' ? 'Sikukuu & Sala (4)' : 'Feasts & Devotions (4)'}
+                    </button>
+                  </div>
+
+                  {/* Right: Quick Jump Select & Carousel Arrows */}
+                  <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                    {/* Instant 1-Tap Category Selector Dropdown for Phones/Laptops */}
+                    <select
+                      value={selectedCategoryId || ''}
+                      onChange={(e) => {
+                        const val = e.target.value || null;
+                        setSelectedCategoryId(val);
                         setCurrentPage(1);
                         if (viewMode === 'cards') setViewMode('list');
                       }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
-                        isSelected
-                          ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                          : 'bg-[#FAF8F5] text-slate-700 border-[#0C2340]/10 hover:border-[#1058A8]/50 hover:bg-white'
-                      }`}
+                      className="px-2.5 py-1 text-xs font-semibold text-[#0C2340] bg-white border border-[#0C2340]/20 rounded-xl shadow-2xs focus:outline-none focus:ring-1 focus:ring-[#1058A8] max-w-[170px] sm:max-w-[210px] truncate"
+                      aria-label="Direct Category Jump"
                     >
-                      <span>{lang === 'sw' ? category.nameSw : category.nameEn}</span>
-                      <span className={`ml-1.5 text-[11px] px-1.5 py-0.2 rounded-full ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                      <option value="">{lang === 'sw' ? 'Nyimbo Zote (Maktaba)' : 'All Music Library Songs'}</option>
+                      {LIBRARY_CATEGORIES.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {lang === 'sw' ? c.nameSw : c.nameEn} ({categoryCounts[c.id] || 0})
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Left / Right Carousel Scroll Buttons */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => scrollCategories('left')}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-100 text-[#0C2340] border border-[#0C2340]/15 flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-all"
+                        aria-label={lang === 'sw' ? 'Tembeza kushoto' : 'Scroll categories left'}
+                        title={lang === 'sw' ? 'Tembeza kushoto' : 'Scroll left'}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollCategories('right')}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-100 text-[#0C2340] border border-[#0C2340]/15 flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-all"
+                        aria-label={lang === 'sw' ? 'Tembeza kulia' : 'Scroll categories right'}
+                        title={lang === 'sw' ? 'Tembeza kulia' : 'Scroll right'}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Horizontal Category Carousel Track */}
+                <div 
+                  ref={categoryScrollRef}
+                  className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1 px-0.5 scroll-smooth snap-x snap-mandatory scrollbar-none"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {/* All Songs Master Card */}
+                  <button
+                    onClick={() => {
+                      setSelectedCategoryId(null);
+                      setCurrentPage(1);
+                    }}
+                    className={`snap-start shrink-0 px-4 py-2.5 rounded-2xl text-left transition-all cursor-pointer border flex items-center gap-3 shadow-xs select-none ${
+                      !selectedCategoryId
+                        ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/50'
+                        : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/12 hover:border-[#1058A8]/40 hover:bg-white'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                      !selectedCategoryId ? 'bg-white/20 text-[#7EC8F0]' : 'bg-[#EAF4FB] text-[#1058A8]'
+                    }`}>
+                      <Music className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <strong className="text-xs font-bold font-source block leading-tight">
+                          {lang === 'sw' ? 'Nyimbo Zote' : 'All Songs'}
+                        </strong>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                          !selectedCategoryId ? 'bg-[#7EC8F0] text-[#0C2340]' : 'bg-slate-200 text-slate-800'
+                        }`}>
+                          {librarySongs.length}
+                        </span>
+                      </div>
+                      <span className={`text-[10px] block mt-0.5 font-source ${
+                        !selectedCategoryId ? 'text-white/80' : 'text-slate-500'
                       }`}>
-                        {count}
+                        {lang === 'sw' ? 'Mkusanyiko kamili' : 'Full archive'}
                       </span>
+                    </div>
+                  </button>
+
+                  {/* Filtered Visible Liturgical Category Cards */}
+                  {visibleCategories.map(category => {
+                    const isSelected = selectedCategoryId === category.id;
+                    const count = categoryCounts[category.id] || 0;
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => {
+                          setSelectedCategoryId(category.id);
+                          setCurrentPage(1);
+                          if (viewMode === 'cards') setViewMode('list');
+                        }}
+                        className={`snap-start shrink-0 px-4 py-2.5 rounded-2xl text-left transition-all cursor-pointer border flex items-center gap-3 shadow-xs select-none ${
+                          isSelected
+                            ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/50'
+                            : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/12 hover:border-[#1058A8]/40 hover:bg-white'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 p-1 ${
+                          isSelected ? 'bg-white/20 text-[#7EC8F0]' : 'bg-[#EAF4FB] text-[#1058A8]'
+                        }`}>
+                          {renderCategoryLineDrawing(category.id)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <strong className="text-xs font-bold font-source block leading-tight whitespace-nowrap">
+                              {lang === 'sw' ? category.nameSw : category.nameEn}
+                            </strong>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                              isSelected ? 'bg-[#7EC8F0] text-[#0C2340]' : 'bg-slate-200 text-slate-800'
+                            }`}>
+                              {count}
+                            </span>
+                          </div>
+                          <span className={`text-[10px] block mt-0.5 font-source whitespace-nowrap ${
+                            isSelected ? 'text-white/80' : 'text-slate-500'
+                          }`}>
+                            {lang === 'sw' ? category.nameEn : category.nameSw}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Active Category Quick Bar with Reset Action */}
+                {selectedCategoryId && (
+                  <div className="mt-2.5 flex items-center justify-between bg-[#EAF4FB] text-[#0C2340] px-3.5 py-2 rounded-xl border border-[#1058A8]/20 text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-bold text-[#1058A8] shrink-0">
+                        {lang === 'sw' ? 'Kategoria uliyochagua:' : 'Active Category:'}
+                      </span>
+                      <span className="font-semibold truncate">
+                        {currentCategory ? (lang === 'sw' ? currentCategory.nameSw : currentCategory.nameEn) : ''}
+                      </span>
+                      <span className="text-slate-500 hidden sm:inline truncate">
+                        — {currentCategory ? (lang === 'sw' ? currentCategory.descriptionSw : currentCategory.descriptionEn) : ''}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setSelectedCategoryId(null);
+                        setCurrentPage(1);
+                      }}
+                      className="ml-3 shrink-0 font-bold text-[#1058A8] hover:text-[#0C2340] underline cursor-pointer text-xs"
+                    >
+                      {lang === 'sw' ? 'Onyesha Zote' : 'Show All'}
                     </button>
-                  );
-                })}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -835,7 +1030,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                     <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
                       {currentCategory 
                         ? (lang === 'sw' ? currentCategory.nameSw : currentCategory.nameEn)
-                        : (globalSearch ? (lang === 'sw' ? 'Matokeo ya Utafutaji' : 'Search Results') : (lang === 'sw' ? 'Nyimbo Zote za Maktaba' : 'All Libraryy Songs'))}
+                        : (globalSearch ? (lang === 'sw' ? 'Matokeo ya Utafutaji' : 'Search Results') : (lang === 'sw' ? 'Nyimbo Zote za Maktaba ya Muziki' : 'All Music Library Songs'))}
                     </h2>
                     {currentCategory && (
                       <p className="text-xs text-slate-600 font-source mt-0.5">

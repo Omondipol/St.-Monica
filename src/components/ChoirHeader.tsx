@@ -144,10 +144,10 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
               </div>
 
               <div className="flex flex-col min-w-0 flex-1 justify-center">
-                <span className="font-eb-garamond text-[20px] sm:text-[24px] lg:text-[27px] font-semibold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight">
+                <span className="font-eb-garamond text-[17px] sm:text-[22px] lg:text-[26px] font-semibold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight truncate">
                   {lang === 'sw' ? 'Kwaya ya Misa ya Tatu · Mt. Monika' : 'St. Monica Third Mass Choir'}
                 </span>
-                <span className="text-[11px] sm:text-[13px] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5">
+                <span className="text-[10px] sm:text-[12px] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate">
                   {lang === 'sw' ? 'Section 58 · Jimbo Katoliki la Nakuru' : 'Section 58 · Catholic Diocese of Nakuru'}
                 </span>
               </div>
@@ -510,7 +510,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                   </span>
                 </button>
 
-                {/* Libraryy */}
+                {/* Music Library */}
                 <button
                   onClick={() => {
                     navigateTo('music-library');
@@ -521,7 +521,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                   }`}
                 >
                   <span className="font-eb-garamond text-[17px] font-semibold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
-                    Libraryy
+                    {lang === 'sw' ? 'Maktaba ya Muziki' : 'Music Library'}
                   </span>
                   <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
                     {lang === 'sw' ? 'Noti za bure za Kikatoliki' : 'Free downloadable Catholic scores'}
@@ -690,7 +690,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                     </button>
                     <button onClick={() => navigateTo('music-library')} className="w-full min-h-[48px] text-left p-2.5 rounded-lg hover:bg-white/10 block bg-white/5 border border-white/10">
                       <strong className="font-eb-garamond text-base block text-white">
-                        Libraryy
+                        {lang === 'sw' ? 'Maktaba ya Muziki' : 'Music Library'}
                       </strong>
                       <span className="text-xs text-white/70 block mt-0.5">
                         {lang === 'sw' ? 'Noti za bure za Kikatoliki' : 'Free Catholic scores'}
