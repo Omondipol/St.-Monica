@@ -181,6 +181,61 @@ export const LogoConceptsPage: React.FC<{ onBackToSite?: () => void }> = ({ onBa
           )}
         </div>
 
+        {/* Official Approved Choir Seal Card */}
+        <div className="bg-[#0C1420] text-white rounded-3xl p-6 sm:p-8 border border-amber-400/30 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+            <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-black/40 p-3 border-2 border-amber-400/30 shrink-0 flex items-center justify-center shadow-2xl">
+              <img
+                src="./logo/st_monica_seal_final_transparent.png"
+                srcSet="./logo/st_monica_seal_final_transparent.png 1x, ./logo/st_monica_choir_seal.png 2x"
+                alt="Official Seal of St. Monica Choir"
+                className="w-full h-full object-contain filter drop-shadow-lg"
+              />
+            </div>
+
+            <div className="space-y-3 flex-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-semibold">
+                <span>Official Approved Choir Seal</span>
+              </div>
+              <h2 className="font-eb-garamond text-3xl sm:text-4xl font-bold text-white leading-tight">
+                Kwaya ya Mtakatifu Monica (SEC 58 Nakuru)
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
+                The authentic liturgical seal featuring Saint Monica in contemplative profile, the sacred treble clef, sweeping piano keyboard, and golden stars on an obsidian night backdrop. This is the official emblem used across all choir vestments, scores, and media.
+              </p>
+              
+              <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <a
+                  href="./logo/st_monica_choir_seal.png"
+                  download="st_monica_choir_seal.png"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs transition-all shadow-md"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Master PNG (1024px)</span>
+                </a>
+
+                <a
+                  href="./logo/st_monica_seal_recolored_256.png"
+                  download="st_monica_seal_recolored_256.png"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition-all"
+                >
+                  <Download className="w-4 h-4 text-amber-300" />
+                  <span>Download 256px PNG</span>
+                </a>
+
+                <a
+                  href="./logo/st_monica_choir_seal.svg"
+                  download="st_monica_choir_seal.svg"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition-all"
+                >
+                  <Download className="w-4 h-4 text-amber-300" />
+                  <span>Download Vector SVG</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Brand Colour Codes Box */}
         <div className="bg-white rounded-2xl p-6 border border-[#0C2340]/15 shadow-sm space-y-4">
           <div>

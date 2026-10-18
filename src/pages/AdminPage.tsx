@@ -670,7 +670,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       if (ok) {
         notify('Choir data restored successfully from backup!');
       } else {
-        alert('Invalid JSON file format. Please check the backup file.');
+        notify('Invalid JSON file format. Please check the backup file.');
       }
     };
     reader.readAsText(file);
@@ -772,7 +772,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </div>
 
         <div className="flex items-center gap-4 pt-2">
-          <ChoirLogo size={58} variant="simplified" className="shrink-0" />
+          <ChoirLogo size={80} variant="simplified" className="shrink-0 w-20 h-20" />
           <div>
             <div className="flex items-center gap-2">
               <span className="bg-[#1058A8] text-white text-[11px] font-source px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">

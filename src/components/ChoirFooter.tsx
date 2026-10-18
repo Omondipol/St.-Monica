@@ -89,8 +89,8 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           
           {/* COLUMN 1: The Choir Identity */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <ChoirLogo size={64} variant="simplified" interactive={true} className="shrink-0" />
+            <div className="flex items-center gap-4">
+              <ChoirLogo size={112} variant="simplified" interactive={true} className="shrink-0 w-26 h-26 sm:w-28 sm:h-28 drop-shadow-md" />
               <div>
                 <h4 className="font-fraunces text-lg font-bold text-white leading-snug">
                   {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}

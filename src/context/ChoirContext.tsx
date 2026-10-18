@@ -17,6 +17,7 @@ import {
   CHOIR_STATS
 } from '../data/choirContent';
 import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
+import { ChoirMember, INITIAL_MEMBERS, isMemberActive } from '../data/membersData';
 
 export interface CartItem {
   product: ProductItem;
@@ -225,6 +226,17 @@ interface ChoirContextType {
   resetToDefaults: () => void;
   exportDataJson: () => string;
   importDataJson: (jsonStr: string) => boolean;
+
+  // Choir Members & Registration (Renewable yearly, Ksh 500)
+  members: ChoirMember[];
+  activeMembers: ChoirMember[];
+  registerMember: (data: { name: string; voice: 'soprano' | 'alto' | 'tenor' | 'bass'; phone: string; email?: string; paymentReference?: string }) => ChoirMember;
+  renewMember: (id: string, paymentReference?: string) => void;
+  deleteMember: (id: string) => void;
+  isJoinModalOpen: boolean;
+  openJoinModal: (preselectedVoice?: 'soprano' | 'alto' | 'tenor' | 'bass') => void;
+  closeJoinModal: () => void;
+  preselectedVoice?: 'soprano' | 'alto' | 'tenor' | 'bass';
 }
 
 const ChoirContext = createContext<ChoirContextType | undefined>(undefined);
@@ -258,7 +270,8 @@ const STORAGE_KEYS = {
   EVENTS: 'st_monica_events_v5',
   SCHEDULE: 'st_monica_schedule_v5',
   NOTICE: 'st_monica_notice_v5',
-  HERO: 'st_monica_hero_v5'
+  HERO: 'st_monica_hero_v5',
+  MEMBERS: 'st_monica_members_v2'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -547,6 +560,91 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // ignore
     }
   }, [heroContent]);
+
+  // 7f. Choir Members (Renewable Yearly, Ksh 500)
+  const [members, setMembers] = useState<ChoirMember[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.MEMBERS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_MEMBERS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+    } catch (e) {
+      // ignore
+    }
+  }, [members]);
+
+  // Active members: only those whose 12-month registration has not expired
+  // (after 12 months, erased/excluded from active list as requested)
+  const activeMembers = members.filter(isMemberActive);
+
+  // Join Us Modal State
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState<boolean>(false);
+  const [preselectedVoice, setPreselectedVoice] = useState<'soprano' | 'alto' | 'tenor' | 'bass' | undefined>(undefined);
+
+  const openJoinModal = (voice?: 'soprano' | 'alto' | 'tenor' | 'bass') => {
+    setPreselectedVoice(voice);
+    setIsJoinModalOpen(true);
+  };
+
+  const closeJoinModal = () => {
+    setIsJoinModalOpen(false);
+  };
+
+  const registerMember = (data: { name: string; voice: 'soprano' | 'alto' | 'tenor' | 'bass'; phone: string; email?: string; paymentReference?: string }): ChoirMember => {
+    const regDate = new Date();
+    const expiryDate = new Date(regDate);
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1); // exactly 12 months
+
+    const newMem: ChoirMember = {
+      id: `mem-${data.voice.slice(0, 3)}-${Date.now()}`,
+      name: data.name.trim(),
+      voice: data.voice,
+      phone: data.phone.trim(),
+      email: data.email?.trim() || undefined,
+      role: 'Chorister',
+      registeredAt: regDate.toISOString(),
+      expiresAt: expiryDate.toISOString(),
+      renewalFeePaid: 500,
+      paymentReference: data.paymentReference || `MPESA-SMTC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      status: 'active'
+    };
+
+    setMembers(prev => [newMem, ...prev]);
+    return newMem;
+  };
+
+  const renewMember = (id: string, paymentRef?: string) => {
+    setMembers(prev => prev.map(m => {
+      if (m.id === id) {
+        const newReg = new Date();
+        const newExpiry = new Date(newReg);
+        newExpiry.setFullYear(newExpiry.getFullYear() + 1);
+        return {
+          ...m,
+          registeredAt: newReg.toISOString(),
+          expiresAt: newExpiry.toISOString(),
+          renewalFeePaid: 500,
+          paymentReference: paymentRef || `MPESA-RENEW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          status: 'active'
+        };
+      }
+      return m;
+    }));
+  };
+
+  const deleteMember = (id: string) => {
+    setMembers(prev => prev.filter(m => m.id !== id));
+  };
 
   // 7b. Maktaba ya Noti (Free Sheet Music Library)
   const [librarySongs, setLibrarySongs] = useState<LibrarySong[]>(() => {
@@ -1559,7 +1657,17 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         resetToDefaults,
         exportDataJson,
-        importDataJson
+        importDataJson,
+
+        members,
+        activeMembers,
+        registerMember,
+        renewMember,
+        deleteMember,
+        isJoinModalOpen,
+        openJoinModal,
+        closeJoinModal,
+        preselectedVoice
       }}
     >
       {children}
@@ -1707,7 +1815,16 @@ export const useChoir = (): ChoirContextType => {
       incrementDownloadCount: () => {},
       resetToDefaults: () => {},
       exportDataJson: () => '[]',
-      importDataJson: () => false
+      importDataJson: () => false,
+      members: INITIAL_MEMBERS,
+      activeMembers: INITIAL_MEMBERS,
+      registerMember: () => INITIAL_MEMBERS[0],
+      renewMember: () => {},
+      deleteMember: () => {},
+      isJoinModalOpen: false,
+      openJoinModal: () => {},
+      closeJoinModal: () => {},
+      preselectedVoice: undefined
     };
   }
   return context;

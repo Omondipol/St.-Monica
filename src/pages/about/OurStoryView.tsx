@@ -6,6 +6,7 @@ import { ChoirLogo } from '../../components/ChoirLogo';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 import { Users, Calendar, Music } from 'lucide-react';
+import { CoreValuesSection } from '../../components/CoreValuesSection';
 
 interface OurStoryViewProps {
   onNavigate?: (route: string) => void;
@@ -178,6 +179,9 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
           ))}
         </div>
       </section>
+
+      {/* Core Values Section */}
+      <CoreValuesSection lang={lang} />
     </div>
   );
 };

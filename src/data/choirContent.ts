@@ -654,3 +654,88 @@ export const VOICE_SECTIONS_DATA = [
 ];
 
 export const EVENTS_CATALOG = INITIAL_EVENTS;
+
+export interface CoreValue {
+  id: string;
+  number: number;
+  title: string;
+  titleSw: string;
+  description: string;
+  descriptionSw: string;
+  iconName: 'Cross' | 'Flame' | 'Users' | 'HandHeart' | 'HeartHandshake' | 'Award' | 'Globe' | 'Anchor';
+}
+
+export const CORE_VALUES: CoreValue[] = [
+  {
+    id: 'faith',
+    number: 1,
+    title: 'Faith',
+    titleSw: 'Imani',
+    description: 'Christ is the centre of all we sing. Our voices flow from lives rooted in prayer and the sacraments.',
+    descriptionSw: 'Kristo ndiye kiini cha yote tunayoimba. Sauti zetu zinatiririka kutoka katika maisha yaliyojikita katika sala na sakramenti.',
+    iconName: 'Cross'
+  },
+  {
+    id: 'reverence',
+    number: 2,
+    title: 'Reverence',
+    titleSw: 'Kicho na Heshima',
+    description: 'We honour the Sacred Liturgy and bring to every Mass the dignity and recollection it deserves.',
+    descriptionSw: 'Tunaheshimu Liturujia Takatifu na kuleta katika kila Misa adhama na utulivu wa sala unaostahili.',
+    iconName: 'Flame'
+  },
+  {
+    id: 'communion',
+    number: 3,
+    title: 'Communion',
+    titleSw: 'Umoja na Ushirika',
+    description: 'We are one in Christ and one with the Church, in harmony with one another, our Parish Priest and the parish family.',
+    descriptionSw: 'Sisi tu mmoja katika Kristo na Kanisa, tukiwa katika upatanisho baina yetu, Padri wetu wa Parokia na familia nzima ya waamini.',
+    iconName: 'Users'
+  },
+  {
+    id: 'humility',
+    number: 4,
+    title: 'Humility',
+    titleSw: 'Unyenyekevu',
+    description: 'We serve so that Christ may be glorified, not ourselves. Obedience to the Church guides our choices.',
+    descriptionSw: 'Tunatumikia ili Kristo atukuzwe, si sisi wenyewe. Utii kwa Kanisa huongoza maamuzi na maadili yetu yote.',
+    iconName: 'HandHeart'
+  },
+  {
+    id: 'service',
+    number: 5,
+    title: 'Service',
+    titleSw: 'Huduma ya Kujitolea',
+    description: 'We offer our gifts generously for the good of the assembly and the glory of God.',
+    descriptionSw: 'Tunatoa karama zetu kwa ukarimu mkubwa kwa manufaa ya kusanyiko la waamini na kwa utukufu wa Mwenyezi Mungu.',
+    iconName: 'HeartHandshake'
+  },
+  {
+    id: 'excellence',
+    number: 6,
+    title: 'Excellence',
+    titleSw: 'Ubora na Ubingwa',
+    description: 'Through faithful rehearsal and growth in skill, we offer God our very best, a fitting sacrifice of praise.',
+    descriptionSw: 'Kupitia mazoezi thabiti na kuendeleza ustadi wa sauti na solfa, tunamtolea Mungu kilicho bora kabisa kama dhabihu ya sifa.',
+    iconName: 'Award'
+  },
+  {
+    id: 'evangelisation',
+    number: 7,
+    title: 'Evangelisation',
+    titleSw: 'Uinjilishaji',
+    description: 'Every hymn is a chance to proclaim the Gospel and draw hearts to Jesus Christ.',
+    descriptionSw: 'Kila wimbo na tenzi ni nafasi takatifu ya kutangaza Injili na kuvuta mioyo ya watu kwa Yesu Kristo.',
+    iconName: 'Globe'
+  },
+  {
+    id: 'perseverance',
+    number: 8,
+    title: 'Perseverance',
+    titleSw: 'Ustahimilivu',
+    description: 'Like St Monica, we remain steadfast in prayer and commitment, trusting in the grace of God.',
+    descriptionSw: 'Kama Mtakatifu Monika, tunabaki imara katika sala bila kukata tamaa na kwa uthabiti, tukitumainia daima neema ya Mungu.',
+    iconName: 'Anchor'
+  }
+];

@@ -6,7 +6,7 @@ import cathedralImg from '../../assets/images/nakuru_parish_cathedral_1791356761
 import hymnalImg from '../../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { ChoirLogo } from '../../components/ChoirLogo';
 import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, UserPlus, Sparkles } from 'lucide-react';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 
@@ -15,7 +15,7 @@ interface ChoirGalleryViewProps {
 }
 
 export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, groupPhotosList } = useChoir();
+  const { lang, groupPhotosList, openJoinModal } = useChoir();
 
   const photosToDisplay = groupPhotosList && groupPhotosList.length > 0 ? groupPhotosList : INITIAL_GROUP_PHOTOS;
 
@@ -96,6 +96,41 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Join Our Choral Family Banner */}
+      <section className="p-5 sm:p-6 bg-[#0C1420] text-white rounded-2xl border border-amber-400/30 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center shrink-0">
+            <ChoirLogo size={48} variant="simplified" className="w-12 h-12" />
+          </div>
+          <div className="space-y-0.5 text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider font-source">
+                {lang === 'sw' ? 'Jiunge na Kwaya' : 'Join Our Choral Family'}
+              </span>
+              <span className="text-[10px] bg-white/10 text-slate-200 px-2 py-0.5 rounded-full font-source">
+                {lang === 'sw' ? 'Ada ya Mwaka: Kshs. 500' : 'Annual Fee: Kshs. 500'}
+              </span>
+            </div>
+            <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white">
+              {lang === 'sw' ? 'Kuwa Sehemu ya Picha Hizi na Utume Wetu' : 'Become Part of These Moments & Liturgical Praise'}
+            </h3>
+            <p className="text-xs text-slate-300 font-source max-w-xl">
+              {lang === 'sw'
+                ? 'Tunakaribisha waimbaji wote wa Soprano, Alto, Tenor na Bass. Usajili unadumu kwa miezi 12 ukiambatanishwa na ada ya Kshs. 500.'
+                : 'We warmly welcome singers across all four vocal sections. Annual 12-month registration fee is Kshs. 500.'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => openJoinModal()}
+          className="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-extrabold uppercase tracking-wider shadow-lg hover:shadow-amber-500/30 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 font-source shrink-0"
+        >
+          <UserPlus className="w-4 h-4 text-slate-950" />
+          <span>{lang === 'sw' ? 'Jiunge Nasi (Kshs. 500)' : 'Join Us (Kshs. 500)'}</span>
+        </button>
       </section>
 
       {/* Grid of Parish Moments */}

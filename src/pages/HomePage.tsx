@@ -9,9 +9,12 @@ import {
   MapPin,
   ExternalLink, 
   FileText,
-  Clock
+  Clock,
+  UserPlus,
+  Sparkles
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
+import { CoreValuesSection } from '../components/CoreValuesSection';
 
 import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
 import heroSlide2Faces from '../assets/images/hero_slide_2_faces.jpg';
@@ -94,7 +97,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     heroContent,
     choirStats,
     massSchedule,
-    siteNotice
+    siteNotice,
+    openJoinModal
   } = useChoir();
 
   // Part 3: Rotating hero background slideshow (5 photos on desktop, 3 on mobile)
@@ -215,63 +219,169 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 via-40% to-transparent to-75% z-10 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/90 via-[#0C2340]/40 to-transparent sm:hidden z-10 pointer-events-none" />
 
-        {/* Hero Content (kept exactly where it is) */}
-        <div className="relative z-20 w-full sm:max-w-[70%] lg:max-w-[62%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12 min-w-0">
-          <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm break-words">
-            {lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music')}
-          </h1>
+        {/* Hero Content (shuffles smoothly with slides, Slide 1 is default, Slide 2 has singing quote & Join Us button) */}
+        {(() => {
+          const heroSlideContents = [
+            // Slide 1 (index 0): Exactly how it is currently
+            {
+              eyebrow: null,
+              headline: lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music'),
+              author: null,
+              subhead: lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
+              type: 'default' as const
+            },
+            // Slide 2 (index 1): St. Augustine singing quote + Join Us button
+            {
+              eyebrow: lang === 'sw' ? 'Maneno ya Mtakatifu Augustino' : 'Saint Augustine on Sacred Song',
+              headline: lang === 'sw' ? '“Mwenye kuimba vizuri husali mara mbili.”' : '“He who sings prays twice.”',
+              author: lang === 'sw' ? '— Mtakatifu Augustino wa Hippo' : '— St. Augustine of Hippo',
+              subhead: lang === 'sw' 
+                ? 'Toa sauti yako kumtukuza Mungu katika Altare ya Parokia ya Mtakatifu Monika. Jiunge na familia ya kwaya leo (Ada ya mwaka: Kshs. 500).' 
+                : 'Offer your vocal gifts to glorify God before the sacred altar at St. Monica Parish. Join our liturgical choral fellowship today (Annual fee: Kshs. 500).',
+              type: 'quote-join' as const
+            },
+            // Slide 3 (index 2): Scripture Quote (Psalm 96:1) + Join Us
+            {
+              eyebrow: lang === 'sw' ? 'Neno la Zaburi 96:1' : 'Psalm 96:1 · Sacred Scripture',
+              headline: lang === 'sw' ? '“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”' : '“Sing to the Lord a new song; sing to the Lord, all the earth.”',
+              author: '— Psalm 96:1 / Zaburi 96:1',
+              subhead: lang === 'sw'
+                ? 'Uimbaji wa sauti nne (Soprano, Alto, Tenor, Bass) uliojengwa kwa nidhamu, sala, na upatanisho mtakatifu.'
+                : 'Four-part SATB polyphony grounded in liturgical discipline, unceasing prayer, and fraternal communion.',
+              type: 'quote-join' as const
+            },
+            // Slide 4 (index 3): Choral Fellowship & Altar Service
+            {
+              eyebrow: lang === 'sw' ? 'Umoja wa Kwaya' : 'Sacred Polyphony & Altar Service',
+              headline: lang === 'sw' ? '“Sauti Nne, Sala Moja Takatifu Mbele ya Altare.”' : '“Four Voices, One Sacred Harmony Before the Altar.”',
+              author: 'St. Monica Third Mass Choir · Section 58 Nakuru',
+              subhead: lang === 'sw'
+                ? 'Kutoka waimbaji 14 mwaka 2012 hadi jumuiya ya walei 48 wanaotumikia Misa Kuu ya Jumapili kila juma.'
+                : 'From 14 founding choristers in 2012 to a dedicated ensemble of 48 choristers serving Sunday High Mass.',
+              type: 'quote-join' as const
+            },
+            // Slide 5 (index 4): Welcome to all voices
+            {
+              eyebrow: lang === 'sw' ? 'Wito wa Kwaya' : 'Choir Call to Service',
+              headline: lang === 'sw' ? '“Kila sauti ni sadaka ya sifa kwa Mwenyezi Mungu.”' : '“Every vocal part is an offering of praise to the Almighty.”',
+              author: 'Soprano · Alto · Tenor · Bass',
+              subhead: lang === 'sw'
+                ? 'Je, unaimba Soprano, Alto, Tenor au Bass? Milango yetu iko wazi. Usajili wa kila mwaka ni Kshs. 500.'
+                : 'Do you sing Soprano, Alto, Tenor, or Bass? Our choir family warmly welcomes you. Annual registration is Kshs. 500.',
+              type: 'quote-join' as const
+            }
+          ];
 
-          <p className="font-source text-sm sm:text-base md:text-lg text-white/95 font-medium tracking-wide break-words">
-            {lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)')}
-          </p>
+          const currentContent = heroSlideContents[currentSlideIndex % heroSlideContents.length];
 
-          {/* Action buttons: Single strong button, quiet YouTube link, outlined gallery */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 sm:pt-3">
-            {/* Listen Now */}
-            <button
-              onClick={() => {
-                if (currentSong.id === featuredSong.id) {
-                  togglePlay();
-                } else {
-                  playSong(featuredSong as Song);
-                }
-              }}
-              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+          return (
+            <div 
+              key={currentSlideIndex} 
+              className="relative z-20 w-full sm:max-w-[70%] lg:max-w-[62%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12 min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out"
             >
-              {isPlaying && currentSong.id === featuredSong.id ? (
-                <>
-                  <Pause className="w-4 h-4 fill-current text-[#1058A8]" />
-                  <span>{lang === 'sw' ? 'Sitisha Wimbo' : 'Pause Song'}</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 fill-current text-[#1058A8] ml-0.5" />
-                  <span>{lang === 'sw' ? 'Sikiliza Sasa' : 'Listen Now'}</span>
-                </>
+              {currentContent.eyebrow && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/35 text-xs font-semibold uppercase tracking-wider font-source shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{currentContent.eyebrow}</span>
+                </div>
               )}
-            </button>
 
-            {/* Choir Group Gallery */}
-            <button
-              onClick={() => onNavigate('about-gallery')}
-              className="inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs"
-            >
-              <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
-            </button>
+              <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm break-words">
+                {currentContent.headline}
+              </h1>
 
-            {/* Official YouTube Channel */}
-            <a
-              href={YOUTUBE_CHANNEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-1.5 px-1 cursor-pointer"
-            >
-              <RealYouTubeIcon size={18} variant="badge" />
-              <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
-              <ExternalLink className="w-3.5 h-3.5 text-white/70" />
-            </a>
-          </div>
-        </div>
+              {currentContent.author && (
+                <span className="text-amber-200/95 font-eb-garamond text-base sm:text-xl font-medium block italic">
+                  {currentContent.author}
+                </span>
+              )}
+
+              <p className="font-source text-sm sm:text-base md:text-lg text-white/95 font-medium tracking-wide break-words max-w-2xl">
+                {currentContent.subhead}
+              </p>
+
+              {/* Shuffling Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 sm:pt-3">
+                {currentContent.type === 'quote-join' ? (
+                  <>
+                    {/* Primary Join Us Button with Pop-up trigger */}
+                    <button
+                      onClick={() => openJoinModal()}
+                      className="inline-flex items-center gap-2.5 px-5 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-full transition-all shadow-lg hover:shadow-amber-500/30 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source"
+                    >
+                      <UserPlus className="w-4 h-4 text-slate-950" />
+                      <span>{lang === 'sw' ? 'Jiunge Nasi (Kshs. 500)' : 'Join Us (Kshs. 500)'}</span>
+                    </button>
+
+                    {/* Voice Sections */}
+                    <button
+                      onClick={() => onNavigate('about-sections')}
+                      className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source"
+                    >
+                      <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
+                    </button>
+
+                    {/* YouTube Channel */}
+                    <a
+                      href={YOUTUBE_CHANNEL_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-1.5 px-1 cursor-pointer font-source"
+                    >
+                      <RealYouTubeIcon size={18} variant="badge" />
+                      <span>YouTube</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-white/70" />
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    {/* First Slide Default Buttons: Listen Now, Choir Gallery, YouTube */}
+                    <button
+                      onClick={() => {
+                        if (currentSong.id === featuredSong.id) {
+                          togglePlay();
+                        } else {
+                          playSong(featuredSong as Song);
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+                    >
+                      {isPlaying && currentSong.id === featuredSong.id ? (
+                        <>
+                          <Pause className="w-4 h-4 fill-current text-[#1058A8]" />
+                          <span>{lang === 'sw' ? 'Sitisha Wimbo' : 'Pause Song'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 fill-current text-[#1058A8] ml-0.5" />
+                          <span>{lang === 'sw' ? 'Sikiliza Sasa' : 'Listen Now'}</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => onNavigate('about-gallery')}
+                      className="inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs"
+                    >
+                      <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
+                    </button>
+
+                    <a
+                      href={YOUTUBE_CHANNEL_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-1.5 px-1 cursor-pointer"
+                    >
+                      <RealYouTubeIcon size={18} variant="badge" />
+                      <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-white/70" />
+                    </a>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Small Tappable Dots at Bottom Left (5 dots on desktop, 3 on phones) */}
         <div 
@@ -406,6 +516,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
+
+      {/* 2b. OUR CORE VALUES */}
+      <CoreValuesSection lang={lang} />
 
       {/* 3. OUR RECORDED SONGS */}
       <section className="bg-[#0C2340] text-white py-16 sm:py-20">

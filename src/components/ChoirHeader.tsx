@@ -126,28 +126,28 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
   return (
     <header className="sticky top-0 z-50 w-full max-w-full bg-[#1C1E24] text-white border-b border-black/40 shadow-md">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 relative">
-        <div className="flex items-center justify-between h-[96px] gap-2 sm:gap-3">
+        <div className="flex items-center justify-between h-[126px] sm:h-[138px] lg:h-[148px] gap-2 sm:gap-4">
           
-          {/* Left: Brand with Simplified Logo Mark at 64px tall (16px top and bottom in 96px header) */}
+          {/* Left: Brand with Official Seal prominent and large */}
           <div className="flex items-center min-w-0 flex-1 mr-1 sm:mr-4 pl-1 sm:pl-2">
             <button 
               onClick={() => navigateTo('home')} 
-              className="flex items-center gap-3 sm:gap-3.5 cursor-pointer text-left focus:outline-none group py-4 min-w-0 max-w-full"
+              className="flex items-center gap-3.5 sm:gap-5 cursor-pointer text-left focus:outline-none group py-1.5 min-w-0 max-w-full"
               aria-label="Home page"
             >
-              <div className="shrink-0 w-16 h-16 flex items-center justify-center">
+              <div className="shrink-0 w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 flex items-center justify-center">
                 <ChoirLogo 
-                  size={64} 
+                  size={144} 
                   variant="simplified"
-                  className="group-hover:scale-105 transition-transform" 
+                  className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 group-hover:scale-105 transition-transform drop-shadow-lg" 
                 />
               </div>
 
               <div className="flex flex-col min-w-0 flex-1 justify-center">
-                <span className="font-eb-garamond text-[17px] sm:text-[22px] lg:text-[26px] font-semibold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight truncate">
+                <span className="font-eb-garamond text-[20px] sm:text-[25px] lg:text-[28px] font-bold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight truncate">
                   {lang === 'sw' ? 'Kwaya ya Misa ya Tatu · Mt. Monika' : 'St. Monica Third Mass Choir'}
                 </span>
-                <span className="text-[10px] sm:text-[12px] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate">
+                <span className="text-[12px] sm:text-[14px] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-1 truncate">
                   {lang === 'sw' ? 'Section 58 · Jimbo Katoliki la Nakuru' : 'Section 58 · Catholic Diocese of Nakuru'}
                 </span>
               </div>
@@ -594,8 +594,8 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
           {/* Header Bar */}
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <ChoirLogo size={44} variant="simplified" />
+              <div className="flex items-center gap-3.5">
+                <ChoirLogo size={80} variant="simplified" className="w-20 h-20 sm:w-22 sm:h-22 shrink-0 drop-shadow-md" />
                 <div>
                   <h3 className="font-fraunces text-base font-bold text-white">
                     {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
