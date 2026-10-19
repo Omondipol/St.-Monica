@@ -152,9 +152,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   const touchStartXRef = useRef<number>(0);
 
-  // Measure real header height with JS into --header-h (on load and resize)
+  // Measure real heights of header, player bar, and ticker into CSS variables
+  // --header-h, --player-h, --ticker-h on load, on resize, on scroll, and when player collapses to circle
   useEffect(() => {
-    const updateHeaderHeight = () => {
+    const updateAllBarHeights = () => {
+      // 1. Header height
       const headerEl = document.getElementById('site-header') || document.querySelector('header');
       if (headerEl) {
         const height = headerEl.getBoundingClientRect().height || headerEl.offsetHeight;
@@ -162,24 +164,160 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           document.documentElement.style.setProperty('--header-h', `${Math.round(height)}px`);
         }
       }
+
+      // 2. Player bar height (0px when collapsed to circle)
+      const circleEl = document.getElementById('circle-audio-player');
+      const playerBarEl = document.getElementById('audio-player-bar');
+      if (circleEl && !playerBarEl) {
+        document.documentElement.style.setProperty('--player-h', '0px');
+      } else if (playerBarEl) {
+        const pHeight = playerBarEl.getBoundingClientRect().height || playerBarEl.offsetHeight;
+        if (pHeight > 0) {
+          document.documentElement.style.setProperty('--player-h', `${Math.round(pHeight)}px`);
+        }
+      } else {
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+        if (scrollY > 40) {
+          document.documentElement.style.setProperty('--player-h', '0px');
+        }
+      }
+
+      // 3. Ticker height
+      const tickerEl = document.getElementById('site-ticker');
+      if (tickerEl) {
+        const tHeight = tickerEl.getBoundingClientRect().height || tickerEl.offsetHeight;
+        document.documentElement.style.setProperty('--ticker-h', `${Math.round(tHeight)}px`);
+      } else {
+        document.documentElement.style.setProperty('--ticker-h', '0px');
+      }
     };
 
-    updateHeaderHeight();
+    updateAllBarHeights();
 
-    window.addEventListener('resize', updateHeaderHeight);
-    window.addEventListener('load', updateHeaderHeight);
-    window.addEventListener('orientationchange', updateHeaderHeight);
+    window.addEventListener('resize', updateAllBarHeights);
+    window.addEventListener('scroll', updateAllBarHeights, { passive: true });
+    window.addEventListener('load', updateAllBarHeights);
+    window.addEventListener('orientationchange', updateAllBarHeights);
 
     if (typeof document !== 'undefined' && 'fonts' in document) {
-      document.fonts?.ready?.then(updateHeaderHeight).catch(() => {});
+      document.fonts?.ready?.then(updateAllBarHeights).catch(() => {});
+    }
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => updateAllBarHeights());
+      const headerEl = document.getElementById('site-header');
+      if (headerEl) ro.observe(headerEl);
+      const playerBarEl = document.getElementById('audio-player-bar');
+      if (playerBarEl) ro.observe(playerBarEl);
+      const tickerEl = document.getElementById('site-ticker');
+      if (tickerEl) ro.observe(tickerEl);
     }
 
     return () => {
-      window.removeEventListener('resize', updateHeaderHeight);
-      window.removeEventListener('load', updateHeaderHeight);
-      window.removeEventListener('orientationchange', updateHeaderHeight);
+      window.removeEventListener('resize', updateAllBarHeights);
+      window.removeEventListener('scroll', updateAllBarHeights);
+      window.removeEventListener('load', updateAllBarHeights);
+      window.removeEventListener('orientationchange', updateAllBarHeights);
+      ro?.disconnect();
     };
-  }, []);
+  }, [siteNotice?.enabled]);
+
+  // Fit check (--hero-fit) per slide: measure ACTIVE slide's last button against player bar and dots top
+  // Run on load, on every slide change, on resize and after fonts load
+  // Reset --hero-fit to 1 before measuring each slide
+  useEffect(() => {
+    const runHeroFitCheck = () => {
+      const heroWrapper = document.getElementById('hero-content-wrapper');
+      if (!heroWrapper) return;
+
+      // Reset --hero-fit to 1 and clear fallback before measuring active slide
+      heroWrapper.style.setProperty('--hero-fit', '1');
+      heroWrapper.removeAttribute('data-hero-fallback');
+
+      requestAnimationFrame(() => {
+        const buttonsContainer = heroWrapper.querySelector('.hero-buttons-container');
+        if (!buttonsContainer) return;
+
+        const buttons = buttonsContainer.querySelectorAll('button, a');
+        if (buttons.length === 0) return;
+
+        const lastButton = buttons[buttons.length - 1];
+        const lastBtnRect = lastButton.getBoundingClientRect();
+
+        const playerBar = document.getElementById('audio-player-bar');
+        const playerBarTop = playerBar && playerBar.offsetHeight > 0 
+          ? playerBar.getBoundingClientRect().top 
+          : window.innerHeight;
+
+        const dotsEl = document.getElementById('hero-slide-dots');
+        const dotsTop = dotsEl 
+          ? dotsEl.getBoundingClientRect().top 
+          : (playerBarTop - 28);
+
+        // Safe zone: buttons must end at least 24px above player bar and 24px above dots
+        const safeLimit = Math.min(playerBarTop - 24, dotsTop - 24);
+
+        if (lastBtnRect.bottom > safeLimit) {
+          const contentTop = heroWrapper.getBoundingClientRect().top;
+          const totalHeight = lastBtnRect.bottom - contentTop;
+          const availableHeight = safeLimit - contentTop;
+
+          let targetFit = 1;
+          if (totalHeight > 0 && availableHeight > 0) {
+            targetFit = Math.max(0.72, Math.min(1, availableHeight / totalHeight));
+            targetFit = Math.round(targetFit * 100) / 100;
+          } else {
+            targetFit = 0.72;
+          }
+
+          heroWrapper.style.setProperty('--hero-fit', targetFit.toString());
+
+          // Re-measure after applying --hero-fit
+          requestAnimationFrame(() => {
+            const recheckRect = lastButton.getBoundingClientRect();
+            if (recheckRect.bottom > safeLimit) {
+              heroWrapper.style.setProperty('--hero-fit', '0.72');
+
+              // Fallback for slides 3 and 4 on short screens (viewport height under 680px),
+              // applied only if the text still does not fit after --hero-fit reaches 0.72
+              const isSlide3Or4 = (currentSlideIndex % 4 === 2) || (currentSlideIndex % 4 === 3);
+              if (window.innerHeight < 680 && isSlide3Or4) {
+                heroWrapper.setAttribute('data-hero-fallback', 'true');
+                // Re-evaluate fit with description hidden
+                requestAnimationFrame(() => {
+                  const fallbackRect = lastButton.getBoundingClientRect();
+                  if (fallbackRect.bottom <= safeLimit) {
+                    const newTotal = fallbackRect.bottom - contentTop;
+                    if (newTotal > 0 && availableHeight > newTotal) {
+                      const restoredFit = Math.min(1, Math.round((availableHeight / newTotal) * 100) / 100);
+                      heroWrapper.style.setProperty('--hero-fit', restoredFit.toString());
+                    }
+                  }
+                });
+              }
+            }
+          });
+        }
+      });
+    };
+
+    runHeroFitCheck();
+
+    window.addEventListener('resize', runHeroFitCheck);
+    window.addEventListener('orientationchange', runHeroFitCheck);
+    window.addEventListener('load', runHeroFitCheck);
+
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts?.ready?.then(runHeroFitCheck).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('resize', runHeroFitCheck);
+      window.removeEventListener('orientationchange', runHeroFitCheck);
+      window.removeEventListener('load', runHeroFitCheck);
+    };
+  }, [currentSlideIndex, lang]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -386,46 +524,40 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           }}
         />
 
-        {/* Hero Content Container: pushed up to appear near the header without being cut off */}
+        {/* Hero Content Container: top-anchored and reserves space for header, player, and ticker */}
         <div 
-          className="hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
-          style={{
-            minHeight: '100dvh',
-            paddingTop: 'calc(var(--header-h, 148px) + 20px)',
-            paddingBottom: 'calc(var(--player-h, 64px) + 80px)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start'
-          }}
+          id="hero-content-wrapper"
+          className="hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
         >
           {/* Inner Content: Animated on slide change, grows with content, no fixed height, no overflow:hidden */}
           <div 
+            id="hero-active-slide-content"
             key={`hero-content-${currentSlideIndex}`}
-            className="w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-3 sm:space-y-4 min-w-0 animate-hero-content"
+            className="w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-3 sm:space-y-4 min-w-0 animate-hero-content hero-inner-wrapper"
           >
             {currentContent.eyebrow && (
-              <div className="text-amber-400 font-source text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+              <div className="hero-eyebrow text-amber-400 font-source text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                 <span className="w-5 h-[1.5px] bg-amber-400 inline-block shrink-0" aria-hidden="true" />
                 <span>{currentContent.eyebrow}</span>
               </div>
             )}
 
-            <h1 className="font-eb-garamond hero-fluid-title font-bold text-white tracking-tight leading-[1.12] drop-shadow-sm break-words hero-title lg:line-clamp-3">
+            <h1 className="font-eb-garamond hero-fluid-title font-bold text-white tracking-tight leading-[1.12] drop-shadow-sm break-words hero-title">
               {currentContent.headline}
             </h1>
 
           {currentContent.author && (
-            <span className="text-amber-200/95 font-eb-garamond text-sm sm:text-lg font-medium block italic">
+            <span className="hero-attribution text-amber-200/95 font-eb-garamond text-sm sm:text-lg font-medium block italic">
               {currentContent.author}
             </span>
           )}
 
-          <p className="font-source text-xs sm:text-sm md:text-base text-white/95 font-medium tracking-wide break-words max-w-2xl leading-relaxed">
+          <p className="hero-desc font-source text-xs sm:text-sm md:text-base text-white/95 font-medium tracking-wide break-words max-w-2xl leading-relaxed">
             {currentContent.subhead}
           </p>
 
           {/* Action Buttons tailored specifically to each slide */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
+          <div className="hero-buttons-container flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
             {currentContent.type === 'mass' && (
               <>
                 <button
@@ -567,6 +699,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
       {/* 4 small dots indicator: display-only, no background, no border, no blur, no text */}
       <div 
+        id="hero-slide-dots"
         aria-hidden="true"
         className="absolute left-5 sm:left-10 lg:left-16 z-30 flex items-center gap-[8px] pointer-events-none select-none"
         style={{ bottom: 'calc(var(--player-h, 0px) + 28px)' }}
@@ -590,6 +723,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* Parish Notice Ticker: Never exceeds 44px on mobile, sits directly beneath hero */}
       {siteNotice?.enabled && (
         <aside 
+          id="site-ticker"
           aria-label={lang === 'sw' ? 'Tangazo Rasmi la Kwaya' : 'Official Choir Announcement'}
           className="bg-[#0C1420] text-white border-b border-[#7EC8F0]/30 px-4 sm:px-6 relative z-20 flex items-center max-h-[44px] h-[44px] overflow-hidden"
           style={{ height: 'var(--ticker-h, 44px)' }}

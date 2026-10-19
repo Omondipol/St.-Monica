@@ -12,6 +12,7 @@
   --header-h: 148px;
   --player-h: 64px;
   --ticker-h: 44px;
+  --hero-fit: 1;
 }
 
 @media (max-width: 1024px) {
@@ -50,27 +51,71 @@ p {
 }
 
 .hero-fluid-title {
-  font-size: clamp(2rem, 4.2vw, 3.6rem);
+  font-size: calc(clamp(1.9rem, 4vw, 3.4rem) * var(--hero-fit, 1));
   text-wrap: balance;
+  line-height: 1.12;
 }
 
-@media (min-width: 1024px) {
-  .hero-fluid-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
+.hero-content,
 .hero-content-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-top: calc(var(--header-h, 148px) + 20px);
-  padding-bottom: calc(var(--player-h, 64px) + 80px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: calc(var(--header-h, 80px) + clamp(20px, 5vh, 64px));
+  padding-bottom: calc(var(--player-h, 64px) + var(--ticker-h, 44px) + 64px);
+  box-sizing: border-box;
+}
+
+.hero-desc {
+  font-size: calc(clamp(0.82rem, 1.15vw, 1rem) * var(--hero-fit, 1));
+  line-height: calc(1.5 * var(--hero-fit, 1));
+}
+
+.hero-attribution {
+  font-size: calc(clamp(0.85rem, 1.25vw, 1.1rem) * var(--hero-fit, 1));
+  line-height: 1.25;
+}
+
+.hero-buttons-container {
+  gap: calc(12px * var(--hero-fit, 1));
+}
+
+/* Short screens: under 720px viewport height */
+@media (max-height: 720px) {
+  .hero-content,
+  .hero-content-container {
+    padding-top: calc(var(--header-h, 80px) + 16px) !important;
+  }
+
+  .hero-content h1,
+  .hero-content-container h1,
+  .hero-fluid-title {
+    font-size: calc(clamp(1.75rem, 3.4vw, 2.75rem) * var(--hero-fit, 1)) !important;
+    line-height: 1.14 !important;
+  }
+
+  .hero-buttons-container {
+    padding-top: 16px !important;
+    margin-top: 0 !important;
+    gap: 10px !important;
+  }
+}
+
+/* Fallback for slides 3 and 4 on short screens (viewport height under 680px),
+   applied only if the text still does not fit after --hero-fit reaches 0.72:
+   - Hide the description (.hero-desc) on that slide.
+   - Reduce the gap between the headline and the attribution to 6px.
+   - Keep the eyebrow, headline, attribution and ALL buttons visible. */
+.hero-content[data-hero-fallback="true"] .hero-desc,
+.hero-content-container[data-hero-fallback="true"] .hero-desc {
+  display: none !important;
+}
+
+.hero-content[data-hero-fallback="true"] .hero-attribution,
+.hero-content-container[data-hero-fallback="true"] .hero-attribution {
+  margin-top: 6px !important;
 }
 
 .song-card-title {

@@ -47,10 +47,33 @@ export const AudioPlayerBar: React.FC = () => {
 
   const shouldBeCircle = (isScrolledDown && !isManuallyExpanded) || isManuallyCollapsed;
 
+  // Measure real player bar height into --player-h and set to 0px when collapsed to circle
+  useEffect(() => {
+    const updatePlayerHeight = () => {
+      if (shouldBeCircle) {
+        document.documentElement.style.setProperty('--player-h', '0px');
+      } else {
+        const playerEl = document.getElementById('audio-player-bar');
+        const height = playerEl ? (playerEl.getBoundingClientRect().height || playerEl.offsetHeight) : (window.innerWidth < 640 ? 60 : 64);
+        if (height > 0) {
+          document.documentElement.style.setProperty('--player-h', `${Math.round(height)}px`);
+        }
+      }
+    };
+
+    updatePlayerHeight();
+    window.addEventListener('resize', updatePlayerHeight);
+    return () => {
+      window.removeEventListener('resize', updatePlayerHeight);
+      document.documentElement.style.setProperty('--player-h', '0px');
+    };
+  }, [shouldBeCircle]);
+
   // When scrolled down or manually collapsed, collapse into a small floating circle player
   if (shouldBeCircle) {
     return (
       <div 
+        id="circle-audio-player"
         className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 group duration-300"
       >
         {/* Hover pill showing song title */}
@@ -110,6 +133,7 @@ export const AudioPlayerBar: React.FC = () => {
   // Full Slim Mini Player Bar
   return (
     <aside 
+      id="audio-player-bar"
       aria-label="Choir Audio Player"
       className="fixed bottom-0 left-0 right-0 z-40 bg-[#0C2340] text-white border-t border-black/40 shadow-xl select-none min-h-[60px] sm:min-h-[64px] flex items-center transition-all duration-300"
       style={{ height: 'var(--player-h, 64px)' }}
