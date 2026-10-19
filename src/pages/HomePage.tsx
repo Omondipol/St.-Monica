@@ -181,10 +181,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="w-full space-y-0">
       
-      {/* 1. HERO SECTION: 5-Photo rotating crossfade slideshow (7s interval, 1.5s crossfade, 4% zoom, pause on hover) */}
+      {/* 1. HERO SECTION: 4-Photo rotating crossfade slideshow with synchronized words & buttons */}
       <section 
         id="home-hero-section" 
-        className="relative min-h-[calc(100vh-96px)] w-full flex flex-col justify-end p-6 sm:p-12 lg:p-16 overflow-hidden bg-[#0C2340]"
+        className="relative min-h-[540px] sm:min-h-[600px] lg:h-[calc(100vh-148px)] lg:min-h-[600px] lg:max-h-[840px] w-full flex flex-col justify-end p-5 sm:p-10 lg:p-16 pb-16 sm:pb-16 overflow-hidden bg-[#0C2340]"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -215,24 +215,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           );
         })}
 
-        {/* Strong dark gradient on the left so headline and buttons are always crystal clear against every photo */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 via-40% to-transparent to-75% z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/90 via-[#0C2340]/40 to-transparent sm:hidden z-10 pointer-events-none" />
+        {/* Professional Ambient Lighting Gradients: Ensures 100% legibility on any display size */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 via-45% to-transparent to-80% z-10 pointer-events-none hidden sm:block" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340] via-[#0C2340]/95 via-60% to-[#0C2340]/30 sm:hidden z-10 pointer-events-none" />
 
-        {/* Hero Content (shuffles smoothly with slides, Slide 1 is default, Slide 2 has singing quote & Join Us button) */}
+        {/* Hero Content (shuffles smoothly with slides, exactly 4 slides in 1:1 sync) */}
         {(() => {
           const heroSlideContents = [
-            // Slide 1 (index 0): Exactly how it is currently
+            // Slide 1 (index 0): Full choir shot at Sunday High Mass (Parish Introduction)
             {
-              eyebrow: null,
+              eyebrow: lang === 'sw' ? 'Utume wa Muziki Mtakatifu' : 'Sacred Liturgical Ministry',
               headline: lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music'),
               author: null,
               subhead: lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
               type: 'default' as const
             },
-            // Slide 2 (index 1): St. Augustine singing quote + Join Us button
+            // Slide 2 (index 1): Parish Sanctuary & Altar (St. Augustine singing quote + Join Us)
             {
-              eyebrow: lang === 'sw' ? 'Maneno ya Mtakatifu Augustino' : 'Saint Augustine on Sacred Song',
+              eyebrow: lang === 'sw' ? 'Mtakatifu Augustino wa Hippo' : 'Saint Augustine on Sacred Song',
               headline: lang === 'sw' ? '“Mwenye kuimba vizuri husali mara mbili.”' : '“He who sings prays twice.”',
               author: lang === 'sw' ? '— Mtakatifu Augustino wa Hippo' : '— St. Augustine of Hippo',
               subhead: lang === 'sw' 
@@ -240,9 +240,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 : 'Offer your vocal gifts to glorify God before the sacred altar at St. Monica Parish. Join our liturgical choral fellowship today (Annual fee: Kshs. 500).',
               type: 'quote-join' as const
             },
-            // Slide 3 (index 2): Scripture Quote (Psalm 96:1) + Join Us
+            // Slide 3 (index 2): Choristers Singing in Sacred Song (Psalm 96:1 + Join Us)
             {
-              eyebrow: lang === 'sw' ? 'Neno la Zaburi 96:1' : 'Psalm 96:1 · Sacred Scripture',
+              eyebrow: lang === 'sw' ? 'Zaburi 96:1 · Maandiko Matakatifu' : 'Psalm 96:1 · Sacred Scripture',
               headline: lang === 'sw' ? '“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”' : '“Sing to the Lord a new song; sing to the Lord, all the earth.”',
               author: '— Psalm 96:1 / Zaburi 96:1',
               subhead: lang === 'sw'
@@ -250,24 +250,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 : 'Four-part SATB polyphony grounded in liturgical discipline, unceasing prayer, and fraternal communion.',
               type: 'quote-join' as const
             },
-            // Slide 4 (index 3): Choral Fellowship & Altar Service
+            // Slide 4 (index 3): Choirmaster Directing (Fellowship & Mass Service + Join Us)
             {
-              eyebrow: lang === 'sw' ? 'Umoja wa Kwaya' : 'Sacred Polyphony & Altar Service',
+              eyebrow: lang === 'sw' ? 'Umoja wa Kwaya Altaroni' : 'Sacred Polyphony & Altar Service',
               headline: lang === 'sw' ? '“Sauti Nne, Sala Moja Takatifu Mbele ya Altare.”' : '“Four Voices, One Sacred Harmony Before the Altar.”',
               author: 'St. Monica Third Mass Choir · Section 58 Nakuru',
               subhead: lang === 'sw'
-                ? 'Kutoka waimbaji 14 mwaka 2012 hadi jumuiya ya walei 48 wanaotumikia Misa Kuu ya Jumapili kila juma.'
-                : 'From 14 founding choristers in 2012 to a dedicated ensemble of 48 choristers serving Sunday High Mass.',
-              type: 'quote-join' as const
-            },
-            // Slide 5 (index 4): Welcome to all voices
-            {
-              eyebrow: lang === 'sw' ? 'Wito wa Kwaya' : 'Choir Call to Service',
-              headline: lang === 'sw' ? '“Kila sauti ni sadaka ya sifa kwa Mwenyezi Mungu.”' : '“Every vocal part is an offering of praise to the Almighty.”',
-              author: 'Soprano · Alto · Tenor · Bass',
-              subhead: lang === 'sw'
-                ? 'Je, unaimba Soprano, Alto, Tenor au Bass? Milango yetu iko wazi. Usajili wa kila mwaka ni Kshs. 500.'
-                : 'Do you sing Soprano, Alto, Tenor, or Bass? Our choir family warmly welcomes you. Annual registration is Kshs. 500.',
+                ? 'Waimbaji arobaini na nane wanaotumikia Misa Kuu ya Jumapili kila juma kwa unyenyekevu na nidhamu ya kiliturujia.'
+                : 'Dedicated ensemble of forty-eight choristers serving Sunday High Mass each week with liturgical devotion.',
               type: 'quote-join' as const
             }
           ];
@@ -277,37 +267,37 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           return (
             <div 
               key={currentSlideIndex} 
-              className="relative z-20 w-full sm:max-w-[70%] lg:max-w-[62%] text-left space-y-3 sm:space-y-4 pb-8 sm:pb-12 min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out"
+              className="relative z-20 w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-2.5 sm:space-y-3.5 min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out"
             >
               {currentContent.eyebrow && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/35 text-xs font-semibold uppercase tracking-wider font-source shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <div className="text-amber-400 font-source text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-5 h-[1.5px] bg-amber-400/80 inline-block shrink-0" aria-hidden="true" />
                   <span>{currentContent.eyebrow}</span>
                 </div>
               )}
 
-              <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.08] drop-shadow-sm break-words">
+              <h1 className="font-eb-garamond text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.12] drop-shadow-sm break-words">
                 {currentContent.headline}
               </h1>
 
               {currentContent.author && (
-                <span className="text-amber-200/95 font-eb-garamond text-base sm:text-xl font-medium block italic">
+                <span className="text-amber-200/90 font-eb-garamond text-sm sm:text-lg font-medium block italic">
                   {currentContent.author}
                 </span>
               )}
 
-              <p className="font-source text-sm sm:text-base md:text-lg text-white/95 font-medium tracking-wide break-words max-w-2xl">
+              <p className="font-source text-xs sm:text-sm md:text-base text-white/90 font-medium tracking-wide break-words max-w-2xl leading-relaxed">
                 {currentContent.subhead}
               </p>
 
               {/* Shuffling Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 sm:pt-3">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
                 {currentContent.type === 'quote-join' ? (
                   <>
                     {/* Primary Join Us Button with Pop-up trigger */}
                     <button
                       onClick={() => openJoinModal()}
-                      className="inline-flex items-center gap-2.5 px-5 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-full transition-all shadow-lg hover:shadow-amber-500/30 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source"
+                      className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[44px]"
                     >
                       <UserPlus className="w-4 h-4 text-slate-950" />
                       <span>{lang === 'sw' ? 'Jiunge Nasi (Kshs. 500)' : 'Join Us (Kshs. 500)'}</span>
@@ -316,7 +306,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     {/* Voice Sections */}
                     <button
                       onClick={() => onNavigate('about-sections')}
-                      className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source"
+                      className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
                     >
                       <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
                     </button>
@@ -326,7 +316,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       href={YOUTUBE_CHANNEL_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-1.5 px-1 cursor-pointer font-source"
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer font-source min-h-[44px]"
                     >
                       <RealYouTubeIcon size={18} variant="badge" />
                       <span>YouTube</span>
@@ -344,7 +334,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                           playSong(featuredSong as Song);
                         }
                       }}
-                      className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+                      className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[44px]"
                     >
                       {isPlaying && currentSong.id === featuredSong.id ? (
                         <>
@@ -361,7 +351,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
                     <button
                       onClick={() => onNavigate('about-gallery')}
-                      className="inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/60 rounded-full transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs"
+                      className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs min-h-[44px]"
                     >
                       <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
                     </button>
@@ -370,7 +360,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       href={YOUTUBE_CHANNEL_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-1.5 px-1 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer min-h-[44px]"
                     >
                       <RealYouTubeIcon size={18} variant="badge" />
                       <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
@@ -383,31 +373,37 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           );
         })()}
 
-        {/* Small Tappable Dots at Bottom Left (5 dots on desktop, 3 on phones) */}
+        {/* Clean Pagination Indicator at Bottom Right: Separated from text and buttons so zero collision on any screen */}
         <div 
-          className="absolute bottom-4 sm:bottom-6 left-6 sm:left-12 lg:left-16 z-30 flex items-center gap-2"
+          className="absolute bottom-5 sm:bottom-6 right-5 sm:right-10 lg:right-16 z-30 flex items-center gap-2.5 bg-[#0C1420]/75 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-lg"
           role="tablist"
           aria-label={lang === 'sw' ? 'Picha za mandhari ya kwaya' : 'Choir hero photo slides'}
         >
-          {activeSlides.map((slide, idx) => {
-            const isDotActive = idx === currentSlideIndex;
-            return (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrentSlideIndex(idx)}
-                role="tab"
-                aria-selected={isDotActive}
-                className={`transition-all duration-300 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7EC8F0] ${
-                  isDotActive
-                    ? 'w-7 h-2.5 bg-[#7EC8F0] shadow-md shadow-sky-950/40'
-                    : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/80'
-                }`}
-                aria-label={`Photo ${idx + 1} of ${activeSlides.length}: ${slide.description}`}
-                title={slide.description}
-              />
-            );
-          })}
+          <span className="text-[11px] font-mono text-white/90 font-bold tabular-nums">
+            0{currentSlideIndex + 1} / 0{activeSlides.length}
+          </span>
+          <div className="w-[1px] h-3 bg-white/30" aria-hidden="true" />
+          <div className="flex items-center gap-1.5">
+            {activeSlides.map((slide, idx) => {
+              const isDotActive = idx === currentSlideIndex;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCurrentSlideIndex(idx)}
+                  role="tab"
+                  aria-selected={isDotActive}
+                  className={`transition-all duration-300 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7EC8F0] ${
+                    isDotActive
+                      ? 'w-5 h-2 bg-[#7EC8F0] shadow-sm'
+                      : 'w-2 h-2 bg-white/40 hover:bg-white/80'
+                  }`}
+                  aria-label={`Slide ${idx + 1} of ${activeSlides.length}: ${slide.description}`}
+                  title={slide.description}
+                />
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -415,11 +411,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {siteNotice?.enabled && (
         <aside 
           aria-label={lang === 'sw' ? 'Tangazo Rasmi la Kwaya' : 'Official Choir Announcement'}
-          className="bg-[#0C2340] text-white border-b border-[#7EC8F0]/30 py-2.5 px-4 sm:px-6 relative z-10"
+          className="bg-[#0C1420] text-white border-b border-[#7EC8F0]/30 py-2.5 px-4 sm:px-6 relative z-10"
         >
           <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-source">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider shrink-0 ${
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <span className={`px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider shrink-0 ${
                 siteNotice.type === 'urgent' ? 'bg-rose-500 text-white' : siteNotice.type === 'feast' ? 'bg-amber-400 text-slate-900' : 'bg-[#1058A8] text-white'
               }`}>
                 {lang === 'sw' ? (siteNotice.badgeSw || 'Tangazo') : (siteNotice.badgeEn || 'Notice')}
@@ -630,16 +626,19 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         />
         <div className="absolute inset-0 bg-[#0C2340]/60 backdrop-blur-[1px]" />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
-          <blockquote className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-3 sm:space-y-4">
+          <p className="text-xs uppercase tracking-widest text-[#7EC8F0] font-source font-semibold">
+            {lang === 'sw' ? 'Utume wa Muziki Mtakatifu' : 'Liturgical Calling & Praise'}
+          </p>
+          <blockquote className="font-eb-garamond text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug">
             {lang === 'sw'
-              ? '“Uimbaji wenye nidhamu altaroni ni sala mara mbili mbele ya Mungu wetu.”'
-              : '“Disciplined singing at the holy altar is prayer made twice before our God.”'}
+              ? '“Neno la Kristo na likae kwa wingi ndani yenu, mkifundishana na kuonyana kwa zaburi, na nyimbo, na tenzi za rohoni; huku mkimwimbia Mungu kwa neema mioyoni mwenu.”'
+              : '“Let the word of Christ dwell in you richly, teaching and admonishing one another in psalms and hymns and spiritual songs, singing with grace in your hearts to the Lord.”'}
           </blockquote>
-          <p className="font-source text-sm sm:text-base text-sky-200">
+          <p className="font-source text-xs sm:text-sm text-sky-200">
             {lang === 'sw'
-              ? 'Mtakatifu Augustino — Mwana wa Somo Wetu Mtakatifu Monika'
-              : 'Saint Augustine — Son of Our Patroness Saint Monica'}
+              ? '— Wakolosai 3:16 · Maandiko Matakatifu'
+              : '— Colossians 3:16 · Sacred Scripture'}
           </p>
         </div>
       </section>
