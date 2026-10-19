@@ -148,10 +148,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   });
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [isTabHidden, setIsTabHidden] = useState<boolean>(false);
-  const [isTouching, setIsTouching] = useState<boolean>(false);
 
   const touchStartXRef = useRef<number>(0);
 
@@ -226,14 +223,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     }
   }, [activeSlides.length, currentSlideIndex]);
 
-  // Autoplay every 7s. Pause on hover, focus within, hidden tab, or touch. Stop under prefers-reduced-motion.
+  // Autoplay every 7s with a crossfade, continuous loop (restart at slide 1 after slide 4).
+  // Two safeguards only: pause while the browser tab is hidden, and no autoplay under prefers-reduced-motion.
+  // Manual changes (arrow keys or swipe) update currentSlideIndex, which restarts the 7s timer.
   useEffect(() => {
-    if (prefersReducedMotion || isHovered || isFocused || isTabHidden || isTouching) return;
+    if (prefersReducedMotion || isTabHidden) return;
     const interval = setInterval(() => {
       setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
     }, 7000);
     return () => clearInterval(interval);
-  }, [activeSlides.length, isHovered, isFocused, isTabHidden, isTouching, prefersReducedMotion]);
+  }, [currentSlideIndex, activeSlides.length, isTabHidden, prefersReducedMotion]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
@@ -246,12 +245,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsTouching(true);
     touchStartXRef.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    setIsTouching(false);
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartXRef.current - touchEndX;
     if (Math.abs(diff) > 40) {
@@ -335,15 +332,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         aria-roledescription="carousel"
         aria-label={lang === 'sw' ? 'Picha za mandhari ya Kwaya ya Mtakatifu Monika' : 'St. Monica Choir Hero Carousel'}
         className="relative w-full overflow-hidden bg-[#0C2340] focus:outline-none"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Background Slides: Absolute stacked layers with smooth 800ms crossfade and Ken Burns slow zoom */}
+        {/* Background Slides: Absolute stacked layers with smooth 1000ms crossfade and Ken Burns slow zoom */}
         {activeSlides.map((slide, index) => {
           const isActive = index === currentSlideIndex;
           const focusPos = isMobile ? slide.focusMobile : slide.focus;
@@ -351,12 +344,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           return (
             <div
               key={slide.src}
-              className={`absolute inset-0 transition-opacity duration-800 ease-in-out overflow-hidden pointer-events-none ${
-                isActive ? 'opacity-100 z-0' : 'opacity-0'
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out overflow-hidden pointer-events-none ${
+                isActive ? 'opacity-100 z-0' : 'opacity-0 -z-10'
               }`}
               aria-hidden={!isActive}
             >
-              {/* Replace with a real photo of our choir / choirmaster */}
+              {/* Real liturgical choir & parish altar photography */}
               <img
                 key={`${slide.src}-${isActive ? 'active' : 'inactive'}`}
                 src={slide.src}
@@ -393,16 +386,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           }}
         />
 
-        {/* Hero Content Container: padding-top: calc(var(--header-h) + 24px); padding-bottom: calc(var(--player-h) + 24px); display:flex; flex-direction:column; justify-content:flex-end; min-height:100dvh (fallback 100vh); grows with content */}
+        {/* Hero Content Container: pushed up to appear near the header without being cut off */}
         <div 
           className="hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
           style={{
             minHeight: '100dvh',
-            paddingTop: 'calc(var(--header-h, 148px) + 24px)',
-            paddingBottom: 'calc(var(--player-h, 64px) + 24px)',
+            paddingTop: 'calc(var(--header-h, 148px) + 20px)',
+            paddingBottom: 'calc(var(--player-h, 64px) + 80px)',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'flex-end'
+            justifyContent: 'flex-start'
           }}
         >
           {/* Inner Content: Animated on slide change, grows with content, no fixed height, no overflow:hidden */}
@@ -570,6 +563,26 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* 4 small dots indicator: display-only, no background, no border, no blur, no text */}
+      <div 
+        aria-hidden="true"
+        className="absolute left-5 sm:left-10 lg:left-16 z-30 flex items-center gap-[8px] pointer-events-none select-none"
+        style={{ bottom: 'calc(var(--player-h, 0px) + 28px)' }}
+      >
+        {activeSlides.map((slide, idx) => {
+          const isActive = idx === currentSlideIndex;
+          return (
+            <span
+              key={slide.src}
+              aria-hidden="true"
+              className={`h-[6px] rounded-full transition-all duration-300 ease-in-out pointer-events-none ${
+                isActive ? 'w-[18px] bg-[#F5B800]' : 'w-[6px] bg-white/40'
+              }`}
+            />
+          );
+        })}
       </div>
 
     </section>

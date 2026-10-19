@@ -66,11 +66,11 @@ p {
 .hero-content-container {
   min-height: 100vh;
   min-height: 100dvh;
-  padding-top: calc(var(--header-h, 148px) + 24px);
-  padding-bottom: calc(var(--player-h, 64px) + 24px);
+  padding-top: calc(var(--header-h, 148px) + 20px);
+  padding-bottom: calc(var(--player-h, 64px) + 80px);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .song-card-title {

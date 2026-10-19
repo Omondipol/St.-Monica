@@ -14,9 +14,10 @@ import {
   ChevronRight, 
   CreditCard,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Music
 } from 'lucide-react';
-import { isMemberActive, getDaysUntilExpiry } from '../../data/membersData';
+import { isMemberActive } from '../../data/membersData';
 
 interface SectionsViewProps {
   onNavigate?: (route: string) => void;
@@ -39,33 +40,33 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
       name: 'Soprano',
       nameEn: 'Soprano Section',
       badge: lang === 'sw' ? 'Sauti ya Kwanza · Melodi Kuu' : 'First Voice · Melody Leadership',
-      color: 'from-amber-500 to-amber-700',
-      borderActive: 'border-amber-400 ring-2 ring-amber-300/40 bg-amber-50/50',
-      badgeBg: 'bg-amber-100 text-amber-900 border-amber-300'
+      color: 'from-[#1058A8] to-[#0C2340]',
+      borderActive: 'border-[#1058A8] ring-2 ring-[#7EC8F0]/30 bg-[#EAF4FB]/30',
+      badgeBg: 'bg-[#EAF4FB] text-[#1058A8] border-[#7EC8F0]/40'
     },
     alto: {
       name: 'Alto',
       nameEn: 'Alto Section',
       badge: lang === 'sw' ? 'Sauti ya Pili · Patanisho la Kati' : 'Second Voice · Harmonic Warmth',
-      color: 'from-sky-500 to-sky-700',
-      borderActive: 'border-sky-400 ring-2 ring-sky-300/40 bg-sky-50/50',
+      color: 'from-[#0284c7] to-[#0C2340]',
+      borderActive: 'border-[#0284c7] ring-2 ring-[#38bdf8]/30 bg-sky-50/40',
       badgeBg: 'bg-sky-100 text-sky-900 border-sky-300'
     },
     tenor: {
       name: 'Tenor',
       nameEn: 'Tenor Section',
       badge: lang === 'sw' ? 'Sauti ya Tatu · Tenor ya Juu' : 'Third Voice · Bright Counterpoint',
-      color: 'from-indigo-500 to-indigo-700',
-      borderActive: 'border-indigo-400 ring-2 ring-indigo-300/40 bg-indigo-50/50',
+      color: 'from-[#4f46e5] to-[#0C2340]',
+      borderActive: 'border-[#4f46e5] ring-2 ring-[#818cf8]/30 bg-indigo-50/40',
       badgeBg: 'bg-indigo-100 text-indigo-900 border-indigo-300'
     },
     bass: {
       name: 'Bass',
       nameEn: 'Bass Section',
       badge: lang === 'sw' ? 'Sauti ya Nne · Msingi Imara' : 'Fourth Voice · Acoustic Foundation',
-      color: 'from-blue-700 to-slate-900',
-      borderActive: 'border-blue-500 ring-2 ring-blue-300/40 bg-blue-50/50',
-      badgeBg: 'bg-blue-100 text-blue-900 border-blue-300'
+      color: 'from-[#334155] to-[#0C2340]',
+      borderActive: 'border-[#334155] ring-2 ring-[#94a3b8]/30 bg-slate-50/50',
+      badgeBg: 'bg-slate-100 text-slate-900 border-slate-300'
     }
   };
 
@@ -73,28 +74,23 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Page Title Banner */}
-      <section className="relative h-[170px] sm:h-[185px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+      {/* Page Title Banner - Clean Marian Navy & Blue */}
+      <section className="relative h-[160px] sm:h-[175px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <div className="absolute inset-0 bg-[#0C2340]" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 to-[#1058A8]/40" />
         
         <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
-              {lang === 'sw' ? 'Muundo wa Sauti Nne & Usajili' : 'SATB Voicing & Member Directory'}
-            </span>
-            <span className="text-xs bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-full font-source font-bold">
-              Ada: Kshs. 500 / {lang === 'sw' ? 'Mwaka' : 'Yr'}
-            </span>
-          </div>
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+            {lang === 'sw' ? 'Muundo wa Sauti Nne & Waimbaji' : 'SATB Voicing & Choir Directory'}
+          </span>
 
           <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
             {lang === 'sw' ? 'Sauti za Kwaya na Waimbaji' : 'Voice Sections & Choristers'}
           </h1>
           <p className="font-source text-xs sm:text-sm text-slate-200 max-w-2xl leading-snug">
             {lang === 'sw'
-              ? 'Bofya sauti yoyote kuona orodha ya waimbaji waliosajiliwa. Usajili ni halali kwa miezi 12 na unafanywa upya kila mwaka kwa Kshs. 500.'
-              : 'Click any section to inspect active choristers. Membership is renewable annually for Kshs. 500 and valid for 12 months.'}
+              ? 'Bofya sauti yoyote (Soprano, Alto, Tenor, Bass) kuona waimbaji wanaohudumia Altare ya Parokia ya Mtakatifu Monika.'
+              : 'Select any voice section (Soprano, Alto, Tenor, Bass) to inspect active choristers ministering at Sunday Mass.'}
           </p>
         </div>
         <AfricanGeometricBorder className="relative z-10" />
@@ -103,39 +99,34 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
       {/* Unified Section Navigation Tabs */}
       <AboutNavTabs currentTab="about-sections" onNavigate={onNavigate} />
 
-      {/* CALL TO ACTION BANNER: Join Us Button on Voice Section Page */}
-      <section className="p-5 sm:p-6 bg-[#0C1420] text-white rounded-2xl border border-amber-400/30 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* CALL TO ACTION BANNER: Clean Parish Styling with Goldish Join Us Button */}
+      <section className="p-5 sm:p-6 bg-[#0C2340] text-white rounded-2xl border border-[#1058A8]/30 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center shrink-0">
-            <ChoirLogo size={52} variant="simplified" className="w-12 h-12" />
+          <div className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-[#1058A8]/20 border border-[#1058A8]/30 flex items-center justify-center shrink-0">
+            <ChoirLogo size={48} variant="simplified" className="w-11 h-11" />
           </div>
           <div className="space-y-0.5 text-left">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider font-source">
-                {lang === 'sw' ? 'Wito wa Kwaya' : 'Annual Choral Calling'}
-              </span>
-              <span className="text-[10px] bg-white/10 text-slate-200 px-2 py-0.5 rounded-full font-source">
-                {lang === 'sw' ? 'Miezi 12 Halali' : '12-Month Validity'}
-              </span>
-            </div>
+            <span className="text-xs font-bold text-[#7EC8F0] uppercase tracking-wider font-source">
+              {lang === 'sw' ? 'Wito wa Kwaya' : 'Choral Ministry Calling'}
+            </span>
             <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white">
-              {lang === 'sw' ? 'Je, unatamani kujiunga na Kwaya yetu?' : 'Feel called to minister with St. Monica Choir?'}
+              {lang === 'sw' ? 'Je, unatamani kuimba nasi katika Altare ya Bwana?' : 'Feel called to minister with St. Monica Choir?'}
             </h3>
-            <p className="text-xs text-slate-300 font-source">
+            <p className="text-xs text-slate-300 font-source max-w-xl">
               {lang === 'sw'
-                ? 'Ada ya usajili wa kila mwaka ni Kshs. 500, inayolipwa mara moja kwa M-Pesa. Jina lako litaingizwa moja kwa moja kwenye orodha ya sauti yako.'
-                : 'Annual registration is Kshs. 500 payable immediately via M-Pesa. Successful applicants appear automatically in their voice directory.'}
+                ? 'Tunakaribisha waimbaji wote wenye moyo wa sala, nidhamu na upendo kwa muziki wa kiliturujia. Mazoezi hufanyika kila Jumamosi parokiani.'
+                : 'We warmly welcome singers dedicated to prayer, liturgical discipline, and sacred song. Rehearsals take place every Saturday at the parish.'}
             </p>
           </div>
         </div>
 
-        {/* Join Us Button */}
+        {/* Join Us Button - Goldish as requested, amount mentioned only inside popup */}
         <button
           onClick={() => openJoinModal(selectedVoice)}
-          className="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-extrabold uppercase tracking-wider shadow-lg hover:shadow-amber-500/30 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 font-source shrink-0"
+          className="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-extrabold uppercase tracking-wider shadow-lg hover:shadow-amber-500/25 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 font-source shrink-0"
         >
           <UserPlus className="w-4 h-4 text-slate-950" />
-          <span>{lang === 'sw' ? 'Jiunge Nasi (Kshs. 500)' : 'Join Us (Kshs. 500)'}</span>
+          <span>{lang === 'sw' ? 'Jiunge Nasi' : 'Join Us'}</span>
         </button>
       </section>
 
@@ -213,8 +204,8 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
                   }}
                   className="py-1.5 px-3.5 rounded-xl bg-[#0C2340] hover:bg-[#1058A8] text-white text-xs font-bold transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
                 >
-                  <UserPlus className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{lang === 'sw' ? `Sajili ${sec.name} (Ksh 500)` : `Register ${vKey} (Ksh 500)`}</span>
+                  <UserPlus className="w-3.5 h-3.5 text-white/90" />
+                  <span>{lang === 'sw' ? `Jiunge na ${sec.name}` : `Join ${vKey}`}</span>
                 </button>
               </div>
             </div>
@@ -230,22 +221,17 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
         {/* Section Header with Voice Selector Pill Tabs */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#0C2340]/10">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider bg-[#1058A8]/10 text-[#1058A8] px-2.5 py-0.5 rounded-full font-source">
-                {lang === 'sw' ? 'Orodha ya Waimbaji Hai' : 'Active Members Roster'}
-              </span>
-              <span className="text-xs text-slate-500 font-source">
-                {lang === 'sw' ? 'Usajili wa Miezi 12' : '12-Month Renewable'}
-              </span>
-            </div>
+            <span className="text-xs font-bold uppercase tracking-wider bg-[#1058A8]/10 text-[#1058A8] px-2.5 py-0.5 rounded-full font-source">
+              {lang === 'sw' ? 'Orodha ya Waimbaji' : 'Active Members Roster'}
+            </span>
             
             <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
               {lang === 'sw' ? `Waimbaji wa Sauti ya ${currentMeta.name}` : `${currentMeta.nameEn} — Active Choristers`}
             </h2>
             <p className="text-xs text-slate-600 font-source">
               {lang === 'sw'
-                ? `Waimbaji wote ${sectionMembers.length} waliosajiliwa kikamilifu katika sauti ya ${currentMeta.name}. Kila usajili hudumu kwa miezi 12 kisha hufutwa kiotomatiki hadi ufanywe upya.`
-                : `All ${sectionMembers.length} verified choristers in the ${currentMeta.name} section. Memberships auto-expire after 12 months for annual renewal.`}
+                ? `Waimbaji ${sectionMembers.length} wanaohudumia na kuongoza sauti ya ${currentMeta.name} katika Altare ya Parokia ya Mtakatifu Monika.`
+                : `All ${sectionMembers.length} choristers in the ${currentMeta.name} section ministering at St. Monica Parish.`}
             </p>
           </div>
 
@@ -254,8 +240,8 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
             onClick={() => openJoinModal(selectedVoice)}
             className="py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0E56A6] text-white text-xs font-bold uppercase tracking-wide font-source transition-all cursor-pointer shadow-md flex items-center justify-center gap-2 shrink-0"
           >
-            <UserPlus className="w-4 h-4 text-amber-300" />
-            <span>{lang === 'sw' ? `Sajili ${currentMeta.name} (Ksh 500)` : `Register ${currentMeta.name} (Ksh 500)`}</span>
+            <UserPlus className="w-4 h-4 text-white/90" />
+            <span>{lang === 'sw' ? `Jiunge na ${currentMeta.name}` : `Join ${currentMeta.name}`}</span>
           </button>
         </div>
 
@@ -280,7 +266,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
               >
                 <span>{meta.name}</span>
                 <span className={`text-[11px] px-2 py-0.5 rounded-full tabular-nums ${
-                  isTabActive ? 'bg-amber-400 text-slate-950 font-extrabold' : 'bg-slate-200 text-slate-700 font-semibold'
+                  isTabActive ? 'bg-[#1058A8] text-white font-bold' : 'bg-slate-200 text-slate-700 font-semibold'
                 }`}>
                   {count}
                 </span>
@@ -289,66 +275,37 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
           })}
         </div>
 
-        {/* Members Roster Table / Grid */}
+        {/* Members Roster Grid - Simple, Dignified & Presentative */}
         {sectionMembers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
-            {sectionMembers.map((member, index) => {
-              const daysLeft = getDaysUntilExpiry(member.expiresAt);
-              const monthsLeft = Math.ceil(daysLeft / 30);
-              const isNewlyRegistered = daysLeft > 350;
-
+            {sectionMembers.map((member) => {
               return (
                 <div
                   key={member.id}
-                  className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
-                    isNewlyRegistered
-                      ? 'bg-amber-50/60 border-amber-300/80 shadow-xs ring-1 ring-amber-300/30'
-                      : 'bg-[#FAF8F5] border-slate-200/80 hover:border-[#1058A8]/30'
-                  }`}
+                  className="p-4 rounded-2xl border bg-white border-[#0C2340]/10 hover:border-[#1058A8]/30 shadow-xs hover:shadow-md transition-all flex items-center justify-between gap-3.5"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold text-slate-400">
-                        #{String(index + 1).padStart(2, '0')} · {member.id}
-                      </span>
-                      {isNewlyRegistered && (
-                        <span className="text-[9px] font-extrabold uppercase bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-source">
-                          New Member
-                        </span>
-                      )}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* Dignified Initial Avatar */}
+                    <div className="w-11 h-11 rounded-full bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 flex items-center justify-center font-eb-garamond font-bold text-lg shrink-0">
+                      {member.name.charAt(0)}
                     </div>
-
-                    <h4 className="font-eb-garamond text-lg font-bold text-[#0C2340] leading-tight">
-                      {member.name}
-                    </h4>
-
-                    {member.role && (
-                      <span className="text-[11px] font-semibold text-[#1058A8] font-source block">
-                        {member.role}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-200/60 space-y-1 text-[11px] font-source">
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span>{lang === 'sw' ? 'Usajili:' : 'Registered:'}</span>
-                      <span className="font-medium text-slate-700">
-                        {new Date(member.registeredAt).toLocaleDateString(lang === 'sw' ? 'sw-KE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500">{lang === 'sw' ? 'Muda Halali:' : 'Validity:'}</span>
-                      <span className="text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded text-[10px]">
-                        {lang === 'sw' ? `Hai · miezi ${monthsLeft}` : `Active · ${monthsLeft} mos left`}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-slate-400 text-[10px]">
-                      <span>{lang === 'sw' ? 'Ada:' : 'Fee:'}</span>
-                      <span className="text-slate-600 font-medium">Ksh 500 (Paid)</span>
+                    
+                    <div className="min-w-0">
+                      <h4 className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] leading-tight truncate">
+                        {member.name}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-0.5 font-source text-xs text-slate-500">
+                        <span>{member.role || (lang === 'sw' ? 'Mwanakwaya' : 'Chorister')}</span>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-[#1058A8] font-semibold">{currentMeta.name}</span>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Clean Voice Pill */}
+                  <span className="text-[10px] font-bold uppercase bg-[#EAF4FB] text-[#1058A8] border border-[#7EC8F0]/40 px-2.5 py-1 rounded-full font-source shrink-0">
+                    {currentMeta.name}
+                  </span>
                 </div>
               );
             })}
@@ -357,33 +314,33 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
           <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-3 font-source">
             <Users className="w-8 h-8 text-slate-400 mx-auto" />
             <h4 className="text-base font-bold text-slate-700">
-              {lang === 'sw' ? 'Hakuna mwanakwaya hai kwa sasa' : 'No active members currently listed'}
+              {lang === 'sw' ? 'Hakuna mwanakwaya aliyeorodheshwa kwa sasa' : 'No choristers currently listed'}
             </h4>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               {lang === 'sw'
-                ? 'Usajili wa mwaka uliopita umeisha. Kuwa wa kwanza kusajili na kujiunga na sauti hii kwa Kshs. 500.'
-                : 'Previous registrations have completed their 12-month cycle. Be the first to register for this voice section.'}
+                ? 'Kuwa wa kwanza kujiunga na sauti hii kwa ajili ya utume wa kwaya.'
+                : 'Be the first to join this voice section and minister through sacred song.'}
             </p>
             <button
               onClick={() => openJoinModal(selectedVoice)}
               className="py-2.5 px-5 rounded-xl bg-[#1058A8] text-white text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
             >
-              {lang === 'sw' ? `Jiunge na ${currentMeta.name} Sasa (Ksh 500)` : `Join ${currentMeta.name} Now (Ksh 500)`}
+              {lang === 'sw' ? `Jiunge na ${currentMeta.name}` : `Join ${currentMeta.name}`}
             </button>
           </div>
         )}
 
-        {/* 12-Month Renewable Notice Footer */}
+        {/* Liturgical Choral Unity Note */}
         <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#0C2340]/10 flex items-start gap-3 text-xs font-source text-slate-600">
-          <Clock className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
+          <Music className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <span className="font-bold text-[#0C2340] block">
-              {lang === 'sw' ? 'Kanuni ya Uanachama wa Kila Mwaka (Miezi 12):' : 'Annual 12-Month Membership Policy:'}
+              {lang === 'sw' ? 'Umoja wa Sauti Katika Liturujia:' : 'Liturgical Choral Ministry:'}
             </span>
             <p className="leading-relaxed">
               {lang === 'sw'
-                ? 'Kila mwanakwaya anayekamilisha usajili na kulipa ada ya Kshs. 500 huonekana mara moja kwenye orodha hii ya sauti. Baada ya miezi 12 kupita, usajili unafikia kikomo na jina huondolewa hadi lifanywe upya kwa mwaka mwingine.'
-                : 'Choristers completing registration and paying the Kshs. 500 fee appear immediately on this voice roster. Following 12 months of service, memberships expire automatically until renewed for the subsequent liturgical year.'}
+                ? 'Kila sauti inashiriki kuweka pamoja sala ya kuimba ya kanisa mbele ya Altare. Mazoezi na mshikamano wa kidugu ndio msingi wa utume wetu.'
+                : 'Every voice unites to offer the sacred sung prayer of the Church before the altar. Weekly rehearsals and fraternal charity form the cornerstone of our ministry.'}
             </p>
           </div>
         </div>

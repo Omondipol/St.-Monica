@@ -172,8 +172,8 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
           <div className="space-y-6 text-left">
             {/* Header Lockup matching site style */}
             <div className="flex items-center gap-4 pb-4 border-b border-[#0C2340]/10">
-              <div className="relative shrink-0 w-14 h-14 rounded-full bg-[#0C2340] border-2 border-[#E5A93C] p-1 shadow-md flex items-center justify-center">
-                <ChoirLogo size={48} variant="simplified" className="w-12 h-12" />
+              <div className="relative shrink-0 w-13 h-13 rounded-full bg-[#0C2340] border-2 border-[#1058A8]/30 p-1 shadow-md flex items-center justify-center">
+                <ChoirLogo size={44} variant="simplified" className="w-11 h-11" />
               </div>
               <div className="min-w-0 flex-1 pr-6">
                 <span className="text-[11px] font-bold tracking-widest text-[#1058A8] uppercase font-source block">
@@ -188,25 +188,25 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
               </div>
             </div>
 
-            {/* Liturgical Membership Note Card (Navy & Gold, matching site style - NO star) */}
-            <div className="p-4 sm:p-4.5 rounded-2xl bg-[#0C2340] text-white border border-amber-400/30 shadow-md space-y-2 relative overflow-hidden">
+            {/* Registration Fee Note Card (Presented transparently upon opening the modal) */}
+            <div className="p-4 sm:p-4.5 rounded-2xl bg-[#0C2340] text-white border border-[#1058A8]/40 shadow-md space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-300 font-source uppercase tracking-wider">
-                  {lang === 'sw' ? 'Mchango wa Uanachama wa Kila Mwaka' : 'Annual Membership Contribution'}
+                <span className="text-xs font-bold text-[#7EC8F0] font-source uppercase tracking-wider">
+                  {lang === 'sw' ? 'Ada ya Usajili wa Mwaka' : 'Annual Registration Fee'}
                 </span>
-                <span className="text-sm font-bold bg-[#E5A93C] text-slate-950 px-3 py-0.5 rounded-full font-source">
+                <span className="text-sm font-bold bg-[#1058A8] text-white px-3 py-0.5 rounded-full font-source">
                   KES 500
                 </span>
               </div>
 
               <p className="text-xs text-slate-200 leading-relaxed font-source">
                 {lang === 'sw'
-                  ? 'Mchango wa uanachama wa kila mwaka (KES 500) unasaidia ununuzi wa noti za nyimbo za kiliturujia, raslimali za mazoezi, na uratibu wa sauti za kwaya.'
-                  : 'The annual membership contribution (KES 500) supports sheet music scores, rehearsal resources, and voice section coordination before the altar.'}
+                  ? 'Ada ya usajili wa kila mwaka (KES 500) inasaidia ununuzi wa vitabu vya noti, rasilimali za mazoezi, na uratibu wa sauti kabla ya kuanza utume altareni.'
+                  : 'The annual registration fee (KES 500) supports liturgical sheet music scores, practice resources, and voice section coordination before the altar.'}
               </p>
 
               <div className="flex items-center gap-2 text-[11px] text-sky-200 pt-1">
-                <Check className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <Check className="w-3.5 h-3.5 text-[#7EC8F0] shrink-0" />
                 <span>{lang === 'sw' ? 'Inalipwa kwa urahisi kupitia M-Pesa katika hatua inayofuata' : 'Payable conveniently via M-Pesa on the checkout step'}</span>
               </div>
             </div>
@@ -366,9 +366,9 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 <span className="font-bold text-[#1058A8] uppercase tracking-wide">{voice} Section</span>
               </div>
               <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
-                <span className="text-slate-500">{lang === 'sw' ? 'Muda wa Uanachama:' : 'Duration:'}</span>
-                <span className="font-semibold text-[#1058A8] bg-[#EAF4FB] px-2 py-0.5 rounded">
-                  {lang === 'sw' ? 'Miezi 12 (Inafanywa upya kila mwaka)' : '12 Months (Renewable Yearly)'}
+                <span className="text-slate-500">{lang === 'sw' ? 'Huduma / Ministry:' : 'Ministry:'}</span>
+                <span className="font-semibold text-[#1058A8]">
+                  {lang === 'sw' ? 'Misa ya Tatu, Mtakatifu Monika' : 'Sunday 3rd Mass, St. Monica'}
                 </span>
               </div>
               <div className="flex items-center justify-between pt-1">
@@ -591,24 +591,24 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Sauti Yako:' : 'Voice Section:'}</span>
-                  <span className="font-bold text-amber-300 text-sm uppercase tracking-wide">{registeredMemberData.voice}</span>
+                  <span className="font-bold text-[#7EC8F0] text-sm uppercase tracking-wide">{registeredMemberData.voice}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Namba ya Mwanakwaya:' : 'Member ID:'}</span>
-                  <span className="text-xs text-sky-200 tabular-nums">{registeredMemberData.id}</span>
+                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Parokia:' : 'Parish:'}</span>
+                  <span className="text-xs text-white">St. Monica, Section 58</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Kumalizika kwa Usajili:' : 'Valid Until:'}</span>
-                  <span className="text-xs text-emerald-300 tabular-nums">
-                    {new Date(registeredMemberData.expiresAt).toLocaleDateString(lang === 'sw' ? 'sw-KE' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Utume:' : 'Ministry:'}</span>
+                  <span className="text-xs text-emerald-300">
+                    {lang === 'sw' ? 'Misa ya Tatu (SATB)' : 'Sunday 3rd Mass (SATB)'}
                   </span>
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-300 leading-snug">
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-200 leading-snug">
                 {lang === 'sw'
-                  ? '📌 Jina lako limeongezwa moja kwa moja kwenye orodha ya waimbaji. Usajili huu unadumu kwa miezi 12 kabla ya kufanywa upya.'
-                  : '📌 Your name is now live in the active voice section roster. Registration remains active for 12 months.'}
+                  ? '📌 Hongera! Jina lako limeingizwa katika orodha ya waimbaji. Karibu katika utume wa muziki mtakatifu!'
+                  : '📌 Congratulations! Your name is now live in the active voice section roster. Welcome to St. Monica Choir ministry!'}
               </div>
             </div>
 

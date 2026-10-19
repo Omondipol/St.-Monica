@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { Play, Pause, ChevronUp, ChevronDown, Maximize2 } from 'lucide-react';
+import { Play, Pause, ChevronUp, ChevronDown } from 'lucide-react';
 import { RealAudioWaveform } from './RealAudioWaveform';
 import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
@@ -101,18 +101,6 @@ export const AudioPlayerBar: React.FC = () => {
                 <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
               )}
             </div>
-          </button>
-
-          {/* Quick expand icon pill */}
-          <button
-            onClick={() => {
-              setIsManuallyCollapsed(false);
-              setIsManuallyExpanded(true);
-            }}
-            aria-label="Expand player bar"
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#1058A8] text-white border border-white/40 flex items-center justify-center shadow-md cursor-pointer hover:bg-amber-400 hover:text-slate-950 transition-colors"
-          >
-            <Maximize2 className="w-2.5 h-2.5" />
           </button>
         </div>
       </div>
