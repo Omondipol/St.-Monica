@@ -201,7 +201,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
                     </div>
                     {prod.downloadable && (
                       <span className="text-xs text-slate-500 font-source block mt-0.5">
-                        {lang === 'sw' ? 'PDF, pakua papo hapo' : 'Instant PDF download'}
+                        {lang === 'sw' ? 'Noti ya PDF (A4) · kupitia WhatsApp / Barua pepe' : 'PDF Score (A4) · via WhatsApp / Email'}
                       </span>
                     )}
                   </div>
@@ -224,12 +224,12 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-[#0C2340]/10 text-[14px] font-source">
         <div className="p-6 bg-white/95 border border-[#0C2340]/10 rounded-2xl space-y-2 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
           <strong className="block font-bold text-[#1058A8] text-base font-eb-garamond text-lg">
-            {lang === 'sw' ? 'Kupakua Papo Hapo' : 'Instant PDF Downloads'}
+            {lang === 'sw' ? 'Uwasilishaji wa Noti (PDF)' : 'PDF Score Delivery (A4)'}
           </strong>
           <p className="text-[#0C2340]/75 leading-relaxed font-source text-xs sm:text-sm">
             {lang === 'sw'
-              ? 'Noti za kwaya (PDF) hutumwa mara moja kupitia M-Pesa, zikiwa na solfa kamili za sauti nne (SATB).'
-              : 'Digital sheet music scores are delivered instantly to your device upon M-Pesa confirmation with complete tonic sol-fa.'}
+              ? 'Noti za kwaya (PDF A4) hutumwa kwa njia ya WhatsApp na barua pepe baada ya kuthibitisha malipo ya M-Pesa, zikiwa na solfa kamili za sauti nne (SATB).'
+              : 'Digital sheet music scores (A4 PDF) are delivered directly to your WhatsApp and email upon M-Pesa confirmation with complete tonic sol-fa.'}
           </p>
         </div>
 

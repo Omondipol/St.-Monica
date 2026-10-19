@@ -174,10 +174,10 @@ interface ChoirContextType {
     mass3Time: string;
     mass3Desc: string;
     mass3DescSw: string;
-    mass4Title: string;
-    mass4Time: string;
-    mass4Desc: string;
-    mass4DescSw: string;
+    mass4Title?: string;
+    mass4Time?: string;
+    mass4Desc?: string;
+    mass4DescSw?: string;
     rehearsals: string;
     rehearsalsSw: string;
   };
@@ -464,10 +464,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     mass3Time: string;
     mass3Desc: string;
     mass3DescSw: string;
-    mass4Title: string;
-    mass4Time: string;
-    mass4Desc: string;
-    mass4DescSw: string;
+    mass4Title?: string;
+    mass4Time?: string;
+    mass4Desc?: string;
+    mass4DescSw?: string;
     rehearsals: string;
     rehearsalsSw: string;
   }>(() => {
@@ -480,14 +480,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       mass2Time: "8:30 AM",
       mass2Desc: "Morning parish Eucharistic liturgy with congregational hymns.",
       mass2DescSw: "Misa ya pili ya asubuhi na nyimbo za kutaniko.",
-      mass3Title: "3rd Mass (Sunday High Mass)",
+      mass3Title: "3rd Mass (Sunday Sung Mass)",
       mass3Time: "10:00 AM",
       mass3Desc: "St. Monica Third Mass Choir leads solemn four-part SATB liturgy.",
-      mass3DescSw: "Misa Kuu ya Kwaya ya Mtakatifu Monika kwa sauti nne (SATB).",
-      mass4Title: "4th Mass (Youth Liturgy)",
-      mass4Time: "11:30 AM",
-      mass4Desc: "Midday parish liturgy with youth and children ministry.",
-      mass4DescSw: "Misa ya mchana na utume wa vijana na watoto.",
+      mass3DescSw: "Misa ya Tatu (Misa ya Jumapili Inayoimbwa) - Kwaya ya Mtakatifu Monika.",
       rehearsals: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
       rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
     };
@@ -1770,14 +1766,10 @@ export const useChoir = (): ChoirContextType => {
         mass2Time: "8:30 AM",
         mass2Desc: "Morning parish Eucharistic liturgy with congregational hymns.",
         mass2DescSw: "Misa ya pili ya asubuhi na nyimbo za kutaniko.",
-        mass3Title: "3rd Mass (Sunday High Mass)",
+        mass3Title: "3rd Mass (Sunday Sung Mass)",
         mass3Time: "10:00 AM",
         mass3Desc: "St. Monica Third Mass Choir leads solemn four-part SATB liturgy.",
-        mass3DescSw: "Misa Kuu ya Kwaya ya Mtakatifu Monika kwa sauti nne (SATB).",
-        mass4Title: "4th Mass (Youth Liturgy)",
-        mass4Time: "11:30 AM",
-        mass4Desc: "Midday parish liturgy with youth and children ministry.",
-        mass4DescSw: "Misa ya mchana na utume wa vijana na watoto.",
+        mass3DescSw: "Misa ya Tatu (Misa ya Jumapili Inayoimbwa) - Kwaya ya Mtakatifu Monika.",
         rehearsals: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
         rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
       },

@@ -38,7 +38,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
     soprano: {
       name: 'Soprano',
       nameEn: 'Soprano Section',
-      badge: 'C4 — A5 · Melody Leadership',
+      badge: lang === 'sw' ? 'Sauti ya Kwanza · Melodi Kuu' : 'First Voice · Melody Leadership',
       color: 'from-amber-500 to-amber-700',
       borderActive: 'border-amber-400 ring-2 ring-amber-300/40 bg-amber-50/50',
       badgeBg: 'bg-amber-100 text-amber-900 border-amber-300'
@@ -46,7 +46,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
     alto: {
       name: 'Alto',
       nameEn: 'Alto Section',
-      badge: 'F3 — D5 · Harmonic Warmth',
+      badge: lang === 'sw' ? 'Sauti ya Pili · Patanisho la Kati' : 'Second Voice · Harmonic Warmth',
       color: 'from-sky-500 to-sky-700',
       borderActive: 'border-sky-400 ring-2 ring-sky-300/40 bg-sky-50/50',
       badgeBg: 'bg-sky-100 text-sky-900 border-sky-300'
@@ -54,7 +54,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
     tenor: {
       name: 'Tenor',
       nameEn: 'Tenor Section',
-      badge: 'C3 — G4 · Bright Counterpoint',
+      badge: lang === 'sw' ? 'Sauti ya Tatu · Tenor ya Juu' : 'Third Voice · Bright Counterpoint',
       color: 'from-indigo-500 to-indigo-700',
       borderActive: 'border-indigo-400 ring-2 ring-indigo-300/40 bg-indigo-50/50',
       badgeBg: 'bg-indigo-100 text-indigo-900 border-indigo-300'
@@ -62,7 +62,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
     bass: {
       name: 'Bass',
       nameEn: 'Bass Section',
-      badge: 'E2 — C4 · Acoustic Foundation',
+      badge: lang === 'sw' ? 'Sauti ya Nne · Msingi Imara' : 'Fourth Voice · Acoustic Foundation',
       color: 'from-blue-700 to-slate-900',
       borderActive: 'border-blue-500 ring-2 ring-blue-300/40 bg-blue-50/50',
       badgeBg: 'bg-blue-100 text-blue-900 border-blue-300'

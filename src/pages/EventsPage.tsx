@@ -172,7 +172,7 @@ export const EventsPage: React.FC = () => {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[14px] font-source">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-[14px] font-source">
           <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
             <span className="text-[13px] font-semibold text-slate-500 block">Mass 1</span>
             <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">7:00 AM (Dawn Liturgy)</strong>
@@ -181,20 +181,14 @@ export const EventsPage: React.FC = () => {
 
           <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
             <span className="text-[13px] font-semibold text-slate-500 block">Mass 2</span>
-            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">8:30 AM (Morning Liturgy)</strong>
+            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">8:30 AM (Kiswahili Liturgy)</strong>
             <p className="text-slate-600 text-xs">Morning parish Eucharistic liturgy with congregational hymns.</p>
           </div>
 
           <div className="p-4 bg-[#EAF4FB] rounded-[12px] border border-[#1058A8]/40 space-y-1 shadow-sm">
             <span className="text-[13px] font-bold text-[#1058A8] block">Mass 3 · Main Choir Ministry</span>
-            <strong className="text-base font-bold text-[#1058A8] block font-fraunces tabular-nums">10:00 AM (Third Mass / High Mass)</strong>
+            <strong className="text-base font-bold text-[#1058A8] block font-fraunces tabular-nums">10:00 AM (Sunday Sung Mass)</strong>
             <p className="text-slate-700 text-xs font-medium">St. Monica Third Mass Choir leads solemn four-part SATB liturgy.</p>
-          </div>
-
-          <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
-            <span className="text-[13px] font-semibold text-slate-500 block">Mass 4</span>
-            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">11:30 AM (Youth Liturgy)</strong>
-            <p className="text-slate-600 text-xs">Midday parish liturgy with youth and children ministry.</p>
           </div>
         </div>
       </section>

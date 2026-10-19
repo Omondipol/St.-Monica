@@ -146,15 +146,22 @@ export const CHOIR_STATS = {
   phone: "+254 722 845 291",
   whatsapp: "+254 722 845 291",
   whatsappUrl: "https://wa.me/254722845291",
-  diocese: "Catholic Diocese of Nakuru (CDDN)",
+  diocese: "Catholic Diocese of Nakuru",
   dioceseSw: "Jimbo Katoliki la Nakuru",
   patronSaint: "Saint Monica (Mtakatifu Monika)",
   feastDay: "27 August",
-  feastDaySw: "27 Agosti",
-  massTimesSunday: "7:00 AM (Dawn), 8:30 AM (2nd Mass), 10:00 AM (Third Mass / High Mass - St. Monica Third Mass Choir) & 11:30 AM (Youth)",
-  massTimesSundaySw: "Saa 1:00 Asubuhi (Alfajiri), Saa 2:30 Asubuhi, Saa 4:00 Asubuhi (Misa ya Tatu Kuu - Kwaya ya Misa ya Tatu) & Saa 5:30 Asubuhi (Vijana)",
+  massTimesSunday: "7:00 AM (Dawn), 8:30 AM (2nd Mass), 10:00 AM (3rd Mass: Sunday Sung Mass - St. Monica Third Mass Choir)",
+  massTimesSundaySw: "Saa 1:00 Asubuhi (Alfajiri), Saa 2:30 Asubuhi (Kiswahili), Saa 4:00 Asubuhi (Misa ya 3: Misa ya Jumapili Inayoimbwa - Kwaya ya Misa ya Tatu)",
   rehearsalSchedule: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
   rehearsalScheduleSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
+};
+
+// Approved Catholic Scripture translation for Colossians 3:16
+export const COLOSSIANS_3_16 = {
+  textEn: "Let the word of Christ dwell in you richly, as in all wisdom you teach and admonish one another, singing psalms, hymns, and spiritual songs with gratitude in your hearts to God.",
+  textSw: "Neno la Kristo na likae kwa wingi ndani yenu, mkifundishana na kuonyana kwa hekima yote, huku mkiimba zaburi, na nyimbo, na tenzi za rohoni kwa shukrani mioyoni mwenu kwa Mungu.",
+  citationEn: "— Colossians 3:16 (NABRE)",
+  citationSw: "— Wakolosai 3:16 (NABRE)",
 };
 
 // Helper to ensure audio works across GitHub Pages subpaths and custom domains
@@ -404,7 +411,7 @@ export const INITIAL_ALBUMS: Album[] = [
     trackCount: 4,
     coverImage: "choir_singing_moment",
     priceKes: 500,
-    description: "The official master recording collection from St. Monica Catholic Choir, recorded with Khakstudio Production and parish audio engineers.",
+    description: "The official master recording collection from St. Monica Third Mass Choir, recorded with Khakstudio Production and parish audio engineers.",
     descriptionSw: "Mkusanyiko rasmi wa nyimbo za kiliturujia kutoka Kwaya ya Mtakatifu Monika, zilizorekodiwa rasmi kwa ajili ya utukufu wa Mungu.",
     youtubePlaylistUrl: YOUTUBE_CHANNEL_URL,
     songs: ["Machozi ya Imani", "Maisha ya Mwanadamu", "Ni Mzima", "Jumuiya Ndogondogo"]
@@ -418,8 +425,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     role: "Music Leadership & Directorship",
     roleSw: "Uongozi wa Muziki na Kwaya",
     category: "trainer",
-    responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and prepares Sunday High Masses.",
-    responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na maandalizi ya Misa Kuu ya Jumapili.",
+    responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and prepares Sunday Sung Masses.",
+    responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na maandalizi ya Misa ya Jumapili Inayoimbwa.",
     tenure: "Serving the Parish",
     tenureSw: "Wanahudumu Parokiani"
   },
@@ -485,8 +492,8 @@ export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
     id: "grp-vestment",
     title: "Kwaya Nzima ya Mtakatifu Monika",
     titleSw: "Kwaya Nzima ya Mtakatifu Monika",
-    description: "The entire chorister ensemble of St. Monica Choir gathered at the altar of Section 58 Parish after Sunday High Mass.",
-    descriptionSw: "Wanakwaya wote wa Mtakatifu Monika wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa Kuu ya Jumapili.",
+    description: "The entire chorister ensemble of St. Monica Choir gathered at the altar of Section 58 Parish after Sunday Sung Mass.",
+    descriptionSw: "Wanakwaya wote wa Mtakatifu Monika wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa ya Jumapili Inayoimbwa.",
     year: "2024",
     imageKey: "choir_singing_moment",
     occasion: "Feast Day of St. Monica & Parish Dedication",
@@ -548,8 +555,8 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 export const INITIAL_EVENTS: EventItem[] = [
   {
     id: "evt-sunday-mass",
-    title: "Third Mass (Sunday High Mass)",
-    titleSw: "Misa ya Tatu (Misa Kuu ya Jumapili)",
+    title: "Third Mass (Sunday Sung Mass)",
+    titleSw: "Misa ya Tatu (Misa ya Jumapili Inayoimbwa)",
     dateDay: "Sun",
     dateMonth: "Every",
     fullDate: "Kila Jumapili / Every Sunday",
@@ -618,38 +625,38 @@ export const VOICE_SECTIONS_DATA = [
   {
     name: "Soprano",
     nameEn: "Soprano Section",
-    range: "C4 — A5",
+    range: "Sauti ya Kwanza · First Voice",
     membersCount: 16,
     description: "The primary melodic leadership carrying the sacred text clearly across the sanctuary with purity.",
     descriptionSw: "Wanaoongoza melodi ya wimbo kwa sauti nyororo na ya juu inayofika mbali altaroni.",
-    sampleClip: "Soprano Melody (C4 - A5)"
+    sampleClip: "Soprano Melody (Melodi Kuu)"
   },
   {
     name: "Alto",
     nameEn: "Alto Section",
-    range: "F3 — D5",
+    range: "Sauti ya Pili · Second Voice",
     membersCount: 14,
     description: "The rich harmonic warmth supporting the soprano melody with contemplative depth.",
     descriptionSw: "Sauti ya pili inayotoa utajiri wa upatanisho na joto la sala ya muziki mtakatifu.",
-    sampleClip: "Alto Harmony (F3 - D5)"
+    sampleClip: "Alto Harmony (Patanisho la Kati)"
   },
   {
     name: "Tenor",
     nameEn: "Tenor Section",
-    range: "C3 — G4",
+    range: "Sauti ya Tatu · Third Voice",
     membersCount: 10,
     description: "The bright vocal counterpoint providing energy and liturgical clarity to four-part harmony.",
     descriptionSw: "Sauti ya kiume ya juu inayoleta mng'ao na nguvu katika sala za Misa.",
-    sampleClip: "Tenor Counterpoint (C3 - G4)"
+    sampleClip: "Tenor Counterpoint (Tenor ya Juu)"
   },
   {
     name: "Bass",
     nameEn: "Bass Section",
-    range: "E2 — C4",
+    range: "Sauti ya Nne · Fourth Voice",
     membersCount: 8,
     description: "The foundational acoustic anchor upon which the sacred polyphonic chords are firmly grounded.",
     descriptionSw: "Sauti nzito ya msingi inayoshikilia na kuweka uthabiti wa kwaya nzima.",
-    sampleClip: "Bass Foundation (E2 - C4)"
+    sampleClip: "Bass Foundation (Sauti ya Msingi)"
   }
 ];
 

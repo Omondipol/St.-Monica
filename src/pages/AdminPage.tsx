@@ -222,18 +222,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     mass1Time: massSchedule?.mass1Time || '7:00 AM',
     mass1Desc: massSchedule?.mass1Desc || 'Solemn morning Eucharistic prayer for early parishioners.',
     mass1DescSw: massSchedule?.mass1DescSw || 'Misa ya Asubuhi Mapema (Alfajiri) kwa sala na utulivu.',
-    mass2Title: massSchedule?.mass2Title || '2nd Mass (Morning Liturgy)',
+    mass2Title: massSchedule?.mass2Title || '2nd Mass (Kiswahili)',
     mass2Time: massSchedule?.mass2Time || '8:30 AM',
     mass2Desc: massSchedule?.mass2Desc || 'Morning parish Eucharistic liturgy with congregational hymns.',
     mass2DescSw: massSchedule?.mass2DescSw || 'Misa ya pili ya asubuhi na nyimbo za kutaniko.',
-    mass3Title: massSchedule?.mass3Title || '3rd Mass (Sunday High Mass)',
+    mass3Title: massSchedule?.mass3Title || '3rd Mass (Sunday Sung Mass)',
     mass3Time: massSchedule?.mass3Time || '10:00 AM',
     mass3Desc: massSchedule?.mass3Desc || 'St. Monica Third Mass Choir leads solemn four-part SATB liturgy.',
-    mass3DescSw: massSchedule?.mass3DescSw || 'Misa Kuu ya Kwaya ya Mtakatifu Monika kwa sauti nne (SATB).',
-    mass4Title: massSchedule?.mass4Title || '4th Mass (Youth Liturgy)',
-    mass4Time: massSchedule?.mass4Time || '11:30 AM',
-    mass4Desc: massSchedule?.mass4Desc || 'Midday parish liturgy with youth and children ministry.',
-    mass4DescSw: massSchedule?.mass4DescSw || 'Misa ya mchana na utume wa vijana na watoto.',
+    mass3DescSw: massSchedule?.mass3DescSw || 'Misa ya Tatu (Misa ya Jumapili Inayoimbwa) - Kwaya ya Mtakatifu Monika.',
     rehearsals: massSchedule?.rehearsals || 'Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)',
     rehearsalsSw: massSchedule?.rehearsalsSw || 'Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
   });
@@ -1596,46 +1592,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                           value={scheduleForm.mass3DescSw}
                           onChange={e => setScheduleForm(prev => ({ ...prev, mass3DescSw: e.target.value }))}
                           className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/70 text-slate-700"
-                          placeholder="Maelezo (Kiswahili Second Section)"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-white rounded-2xl border border-[#0C2340]/15 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                          4th Mass (Youth & Children Liturgy)
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass4Title}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4Title: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
-                          placeholder="4th Mass (Youth)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass4Time}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4Time: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-bold"
-                          placeholder="11:30 AM"
-                        />
-                      </div>
-                      <div className="space-y-2 pt-1 border-t border-slate-100">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass4Desc}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4Desc: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
-                          placeholder="Description (English Main)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass4DescSw}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass4DescSw: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/50 text-slate-700"
                           placeholder="Maelezo (Kiswahili Second Section)"
                         />
                       </div>

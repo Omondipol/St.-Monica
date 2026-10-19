@@ -337,6 +337,13 @@ export const ContactPage: React.FC = () => {
                 <p className="text-[14px] text-slate-500 pt-1">
                   {lang === 'sw' ? 'Kwa kawaida tunajibu ndani ya siku mbili.' : 'We usually reply within two days.'}
                 </p>
+
+                {/* Privacy Notice under Contact Form */}
+                <p className="text-xs text-slate-500 font-source leading-relaxed pt-2 border-t border-[#0C2340]/10">
+                  {lang === 'sw'
+                    ? "Tunatumia maelezo yako kwa mawasiliano ya kwaya pekee na yanalindwa chini ya Sheria ya Kulinda Data ya Kenya, 2019. Picha za watoto wachanga na vijana huchapishwa tu kwa idhini ya wazazi."
+                    : "We use your details only for choir communication and are protected under Kenya's Data Protection Act, 2019. Photos of minors are published only with parental consent."}
+                </p>
               </div>
             </form>
           )}

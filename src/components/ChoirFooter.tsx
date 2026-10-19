@@ -48,10 +48,13 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             <h3 className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
               {lang === 'sw' ? 'Imba Nasi Mtakatifu Monika' : 'Sing with us at St. Monica'}
             </h3>
-            <p className="text-sm sm:text-base text-slate-300 font-source max-w-2xl leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-200 font-source max-w-2xl leading-relaxed">
               {lang === 'sw'
                 ? `Mazoezi ya kwaya: ${CHOIR_STATS.rehearsalScheduleSw}`
                 : `Rehearsals every Wednesday and Friday evening (5:30 PM – 7:30 PM) in the parish hall, Section 58.`}
+            </p>
+            <p className="text-xs sm:text-sm text-[#7EC8F0] font-source font-medium">
+              {lang === 'sw' ? 'Sauti zote zinakaribishwa kwenye majaribio ya kujiunga.' : 'All voices are welcome to audition.'}
             </p>
           </div>
 
@@ -61,6 +64,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               href={CHOIR_STATS.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Chat with choir on WhatsApp"
               className="w-full sm:w-auto min-h-[44px] px-6 py-3 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm shadow-lg shadow-emerald-950/40 transition-all cursor-pointer flex items-center justify-center gap-2.5"
             >
               {/* Official WhatsApp SVG Logo */}
@@ -92,19 +96,19 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             <div className="flex items-center gap-4">
               <ChoirLogo size={112} variant="simplified" interactive={true} className="shrink-0 w-26 h-26 sm:w-28 sm:h-28 drop-shadow-md" />
               <div>
-                <h4 className="font-fraunces text-lg font-bold text-white leading-snug">
+                <h4 className="font-fraunces text-lg font-bold text-white leading-snug whitespace-nowrap">
                   {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
                 </h4>
                 <span className="text-xs text-[#7EC8F0] block mt-0.5">
-                  Section 58 Parish · CDDN Nakuru
+                  Section 58 Parish · Catholic Diocese of Nakuru
                 </span>
               </div>
             </div>
 
-            <p className="text-slate-300 text-sm leading-relaxed">
+            <p className="text-[#B8C7D9] text-sm leading-relaxed">
               {lang === 'sw'
-                ? 'Catholic Diocese of Nakuru, Parokia ya Mtakatifu Monika. Utume wa uimbaji mtakatifu kwa ajili ya Misa Kuu ya Jumapili na sala ya taifa la Mungu.'
-                : 'Catholic Diocese of Nakuru, St. Monica Parish. Consecrated liturgical vocal ministry dedicated to Sunday High Mass and sacred praise.'}
+                ? 'Catholic Diocese of Nakuru, Parokia ya Mtakatifu Monika. Utume wa muziki wa kiliturujia unaotumikia Misa ya Jumapili na sifa za Mwenyezi Mungu.'
+                : 'Catholic Diocese of Nakuru, St. Monica Parish. A liturgical music ministry serving the Sunday Mass and the praise of God.'}
             </p>
           </div>
 
@@ -205,18 +209,19 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               {lang === 'sw' ? 'Ratiba ya ibada' : 'Service times'}
             </span>
 
-            <div className={`space-y-3 text-sm text-slate-300 ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
+            <div className={`space-y-3 text-sm text-[#B8C7D9] ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
-                <strong className="text-white block font-medium">Third Mass (Sunday High Mass)</strong>
-                <span className="text-slate-300 text-xs tabular-nums">10:00 AM (Section 58 Sanctuary)</span>
+                <strong className="text-white block font-medium">3rd Mass (Sunday Sung Mass)</strong>
+                <span className="text-[#B8C7D9] text-xs tabular-nums">10:00 AM (Section 58 Sanctuary)</span>
               </div>
               <div>
-                <strong className="text-white block font-medium">Choir Rehearsals</strong>
-                <span className="text-slate-300 text-xs tabular-nums">Wed & Fri: 5:30 PM – 7:30 PM</span>
+                <strong className="text-white block font-medium">{lang === 'sw' ? 'Mazoezi ya Kwaya' : 'Choir Rehearsals'}</strong>
+                <span className="text-[#B8C7D9] text-xs tabular-nums">Wed & Fri: 5:30 PM – 7:30 PM</span>
               </div>
               <div>
-                <strong className="text-white block font-medium">Feast of St. Monica</strong>
-                <span className="text-slate-300 text-xs">27 August (Annual Patronal Mass)</span>
+                {/* Confirm with Parish Priest whether the parish observes this as a Solemnity */}
+                <strong className="text-white block font-medium">Patronal Feast of St. Monica, 27 August</strong>
+                <span className="text-[#B8C7D9] text-xs">{lang === 'sw' ? 'Sikukuu ya Patron ya Mtakatifu Monika' : 'Parish Patronal Mass'}</span>
               </div>
             </div>
           </div>
@@ -346,30 +351,20 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* STEP 5: BOTTOM BAR WITH COPYRIGHT & BACK TO TOP ARROW (Padding prevents player overlap) */}
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-source pb-24 sm:pb-28">
+        {/* STEP 5: BOTTOM BAR WITH COPYRIGHT & BACK TO TOP ARROW */}
+        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#B8C7D9] font-source pb-24 sm:pb-28">
           <div className="text-center sm:text-left flex flex-col sm:flex-row sm:items-center gap-2">
             <span>
               {lang === 'sw'
-                ? '© 2026 Kwaya ya Mtakatifu Monika, Nakuru. Utume wa bure wa kiliturujia.'
-                : '© 2026 St. Monica Catholic Choir, Nakuru. Consecrated liturgical vocal ministry.'}
+                ? '© 2026 Kwaya ya Misa ya Tatu ya Mtakatifu Monika, Nakuru. Haki zote zimehifadhiwa.'
+                : '© 2026 St. Monica Third Mass Choir, Nakuru. All rights reserved.'}
             </span>
-            <span className="hidden sm:inline text-slate-600">·</span>
+            <span className="hidden sm:inline text-slate-500">·</span>
             <button
-              onClick={() => onNavigate('logo-concepts')}
-              className="text-[#7EC8F0]/70 hover:text-white transition-colors cursor-pointer text-[11px]"
+              onClick={() => onNavigate('privacy')}
+              className="text-[#7EC8F0] hover:text-white transition-colors cursor-pointer text-xs underline-offset-2 hover:underline"
             >
-              Logo Concepts (Stage 1)
-            </button>
-            <span className="hidden sm:inline text-slate-600">·</span>
-            <button
-              onClick={() => onNavigate('admin')}
-              className="text-[#7EC8F0]/70 hover:text-white transition-colors cursor-pointer text-[11px] flex items-center gap-1"
-            >
-              <svg className="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span>{lang === 'sw' ? 'Usimamizi' : 'Admin Portal'}</span>
+              {lang === 'sw' ? 'Sera ya Faragha' : 'Privacy Policy'}
             </button>
           </div>
 

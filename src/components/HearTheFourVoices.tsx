@@ -8,12 +8,13 @@ interface VoiceConfig {
   id: VoicePart;
   name: string;
   nameSw: string;
-  range: string;
   color: string;
   glowColor: string;
   borderColor: string;
   filterType?: BiquadFilterType;
   filterFreq?: number;
+  role: string;
+  roleSw: string;
   description: string;
   descriptionSw: string;
 }
@@ -23,7 +24,8 @@ const VOICES: VoiceConfig[] = [
     id: 'soprano',
     name: 'Soprano',
     nameSw: 'Sauti ya Kwanza (Soprano)',
-    range: 'C4 — A5',
+    role: 'Melody Leadership',
+    roleSw: 'Sauti ya Kwanza',
     color: 'bg-[#7EC8F0]',
     glowColor: 'shadow-[0_0_15px_#7EC8F0]',
     borderColor: 'border-[#7EC8F0]',
@@ -36,7 +38,8 @@ const VOICES: VoiceConfig[] = [
     id: 'alto',
     name: 'Alto',
     nameSw: 'Sauti ya Pili (Alto)',
-    range: 'F3 — D5',
+    role: 'Harmonic Warmth',
+    roleSw: 'Sauti ya Pili',
     color: 'bg-[#4EA2E8]',
     glowColor: 'shadow-[0_0_15px_#4EA2E8]',
     borderColor: 'border-[#4EA2E8]',
@@ -49,7 +52,8 @@ const VOICES: VoiceConfig[] = [
     id: 'tenor',
     name: 'Tenor',
     nameSw: 'Sauti ya Tatu (Tenor)',
-    range: 'C3 — G4',
+    role: 'Bright Counterpoint',
+    roleSw: 'Sauti ya Tatu',
     color: 'bg-[#1058A8]',
     glowColor: 'shadow-[0_0_15px_#1058A8]',
     borderColor: 'border-[#1058A8]',
@@ -62,7 +66,8 @@ const VOICES: VoiceConfig[] = [
     id: 'bass',
     name: 'Bass',
     nameSw: 'Sauti ya Nne (Bass)',
-    range: 'E2 — C4',
+    role: 'Acoustic Foundation',
+    roleSw: 'Sauti ya Nne / Msingi',
     color: 'bg-[#0C2340]',
     glowColor: 'shadow-[0_0_15px_#0C2340]',
     borderColor: 'border-[#0C2340]',
@@ -217,8 +222,8 @@ export const HearTheFourVoices: React.FC = () => {
                       <h3 className="font-fraunces text-lg sm:text-xl font-bold text-[#0C2340]">
                         {lang === 'sw' ? voice.nameSw : voice.name}
                       </h3>
-                      <span className="text-xs font-source font-semibold tabular-nums px-2 py-0.5 rounded-[12px] bg-slate-100 text-slate-600">
-                        {voice.range}
+                      <span className="text-xs font-source font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                        {lang === 'sw' ? voice.roleSw : voice.role}
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 font-source pl-6">

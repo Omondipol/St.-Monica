@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { CHOIR_STATS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, Song } from '../data/choirContent';
+import { 
+  CHOIR_STATS, 
+  YOUTUBE_CHANNEL_URL, 
+  COLOSSIANS_3_16,
+  Song 
+} from '../data/choirContent';
 import { 
   Play, 
   Pause, 
@@ -8,18 +13,16 @@ import {
   ShoppingBag, 
   MapPin,
   ExternalLink, 
-  FileText,
   Clock,
   UserPlus,
-  Sparkles
+  Music,
+  BookOpen
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
-import { CoreValuesSection } from '../components/CoreValuesSection';
 
 import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
 import heroSlide2Faces from '../assets/images/hero_slide_2_faces.jpg';
 import heroSlide3Director from '../assets/images/hero_slide_3_director.jpg';
-import heroSlide4Scores from '../assets/images/hero_slide_4_scores.jpg';
 import heroSlide5Church from '../assets/images/hero_slide_5_church.jpg';
 
 import heroSlide1Portrait from '../assets/images/hero_slide_1_portrait.jpg';
@@ -34,49 +37,78 @@ import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372
 import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
 import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
 
-const DESKTOP_HERO_SLIDES = [
+interface HeroSlideData {
+  src: string;
+  alt: string;
+  description: string;
+  focus: string;
+  focusMobile: string;
+  isChoirDirector?: boolean;
+}
+
+const DESKTOP_HERO_SLIDES: HeroSlideData[] = [
   {
     src: heroSlide1Mass,
-    alt: "Full choir shot at Mass altar in St. Monica Catholic Church, Section 58",
-    description: "Full Choir at Sunday High Mass"
+    alt: "Full choir at Sunday Sung Mass altar in St. Monica Catholic Church, Section 58",
+    description: "Full Choir at Sunday Sung Mass",
+    focus: "50% 25%",
+    focusMobile: "50% 20%"
   },
   {
     src: heroSlide5Church,
     alt: "St. Monica's Catholic Church sanctuary and altar, Section 58 Nakuru",
-    description: "Parish Sanctuary & Church"
+    description: "Parish Sanctuary & Church",
+    focus: "50% 30%",
+    focusMobile: "50% 25%"
   },
   {
     src: heroSlide2Faces,
-    alt: "Close-up of singers' faces singing liturgical praises",
-    description: "Singers in Sacred Song"
+    alt: "Choristers singing praise before the parish altar",
+    description: "Singers in Sacred Song",
+    focus: "50% 20%",
+    focusMobile: "50% 15%"
   },
   {
+    // Replace with a real photo of our choir / choirmaster
     src: heroSlide3Director,
-    alt: "The choirmaster directing the four vocal sections",
-    description: "Choirmaster Directing"
+    alt: "The choirmaster directing four-part vocal polyphony",
+    description: "Choirmaster Directing",
+    focus: "60% 15%",
+    focusMobile: "60% 15%",
+    isChoirDirector: true
   }
 ];
 
-const MOBILE_HERO_SLIDES = [
+const MOBILE_HERO_SLIDES: HeroSlideData[] = [
   {
     src: heroSlide1Portrait,
-    alt: "Full choir shot at Mass altar",
-    description: "Full Choir at Mass"
+    alt: "Full choir at Mass altar",
+    description: "Full Choir at Mass",
+    focus: "50% 20%",
+    focusMobile: "50% 20%"
   },
   {
     src: heroSlide5Church,
     alt: "St. Monica's Catholic Church sanctuary",
-    description: "Parish Church"
+    description: "Parish Church",
+    focus: "50% 25%",
+    focusMobile: "50% 25%"
   },
   {
     src: heroSlide2Portrait,
-    alt: "Close-up of singers' faces",
-    description: "Choristers Singing"
+    alt: "Choristers singing sacred hymns",
+    description: "Choristers Singing",
+    focus: "50% 15%",
+    focusMobile: "50% 15%"
   },
   {
+    // Replace with a real photo of our choir / choirmaster
     src: heroSlide3Portrait,
-    alt: "The choirmaster directing",
-    description: "Choirmaster Directing"
+    alt: "The choirmaster directing the choir",
+    description: "Choirmaster Directing",
+    focus: "60% 15%",
+    focusMobile: "60% 15%",
+    isChoirDirector: true
   }
 ];
 
@@ -101,7 +133,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     openJoinModal
   } = useChoir();
 
-  // Part 3: Rotating hero background slideshow (5 photos on desktop, 3 on mobile)
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 640;
@@ -118,6 +149,40 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [isTabHidden, setIsTabHidden] = useState<boolean>(false);
+  const [isTouching, setIsTouching] = useState<boolean>(false);
+
+  const touchStartXRef = useRef<number>(0);
+
+  // Measure real header height with JS into --header-h (on load and resize)
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const headerEl = document.getElementById('site-header') || document.querySelector('header');
+      if (headerEl) {
+        const height = headerEl.getBoundingClientRect().height || headerEl.offsetHeight;
+        if (height > 0) {
+          document.documentElement.style.setProperty('--header-h', `${Math.round(height)}px`);
+        }
+      }
+    };
+
+    updateHeaderHeight();
+
+    window.addEventListener('resize', updateHeaderHeight);
+    window.addEventListener('load', updateHeaderHeight);
+    window.addEventListener('orientationchange', updateHeaderHeight);
+
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts?.ready?.then(updateHeaderHeight).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateHeaderHeight);
+      window.removeEventListener('load', updateHeaderHeight);
+      window.removeEventListener('orientationchange', updateHeaderHeight);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -135,15 +200,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     return () => mql.removeEventListener('change', handleMotionChange);
   }, []);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsTabHidden(document.visibilityState === 'hidden');
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
   const activeSlides = isMobile ? MOBILE_HERO_SLIDES : DESKTOP_HERO_SLIDES;
 
-  // Preload remaining photos in the background after the first photo mounts
+  // Preload slide N+1 after slide N shows
   useEffect(() => {
-    activeSlides.slice(1).forEach(slide => {
+    const nextIdx = (currentSlideIndex + 1) % activeSlides.length;
+    if (activeSlides[nextIdx]?.src) {
       const img = new Image();
-      img.src = slide.src;
-    });
-  }, [isMobile]);
+      img.src = activeSlides[nextIdx].src;
+    }
+  }, [currentSlideIndex, activeSlides]);
 
   // Keep index within bounds if switching mobile/desktop
   useEffect(() => {
@@ -152,14 +226,44 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     }
   }, [activeSlides.length, currentSlideIndex]);
 
-  // 5.5-second auto advance, pause on hover, stop on prefers-reduced-motion
+  // Autoplay every 7s. Pause on hover, focus within, hidden tab, or touch. Stop under prefers-reduced-motion.
   useEffect(() => {
-    if (prefersReducedMotion || isHovered) return;
+    if (prefersReducedMotion || isHovered || isFocused || isTabHidden || isTouching) return;
     const interval = setInterval(() => {
       setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
-    }, 5500);
+    }, 7000);
     return () => clearInterval(interval);
-  }, [activeSlides.length, isHovered, prefersReducedMotion]);
+  }, [activeSlides.length, isHovered, isFocused, isTabHidden, isTouching, prefersReducedMotion]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setCurrentSlideIndex(prev => (prev - 1 + activeSlides.length) % activeSlides.length);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsTouching(true);
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setIsTouching(false);
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartXRef.current - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        // Swiped left -> next
+        setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
+      } else {
+        // Swiped right -> prev
+        setCurrentSlideIndex(prev => (prev - 1 + activeSlides.length) % activeSlides.length);
+      }
+    }
+  };
 
   const getScoreImage = (id: string) => {
     if (id.includes('machozi')) return scorePreviewMachozi;
@@ -178,36 +282,96 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     album: "Nyimbo za Kiliturujia"
   };
 
+  const heroSlideContents = [
+    // Slide 1 (index 0): Full choir shot at Mass altar
+    {
+      eyebrow: null,
+      headline: lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music'),
+      author: null,
+      subhead: lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
+      type: 'mass' as const
+    },
+    // Slide 2 (index 1): Parish Sanctuary & Altar (St. Augustine quote)
+    {
+      eyebrow: lang === 'sw' ? 'Mtakatifu Augustino wa Hippo' : 'Saint Augustine on Sacred Song',
+      headline: lang === 'sw' ? '“Mwenye kuimba vizuri husali mara mbili.”' : '“He who sings prays twice.”',
+      author: lang === 'sw' ? '— Mtakatifu Augustino wa Hippo' : '— St. Augustine of Hippo',
+      subhead: lang === 'sw' 
+        ? 'Toa sauti yako kumtukuza Mungu katika Altare ya Parokia ya Mtakatifu Monika. Jiunge na familia ya kwaya leo.' 
+        : 'Offer your vocal gifts to glorify God before the sacred altar at St. Monica Parish. Join our liturgical choral fellowship today.',
+      type: 'sanctuary' as const
+    },
+    // Slide 3 (index 2): Choristers Singing in Sacred Song (Psalm 96:1)
+    {
+      eyebrow: lang === 'sw' ? 'Zaburi 96:1 · Maandiko Matakatifu' : 'Psalm 96:1 · Sacred Scripture',
+      headline: lang === 'sw' ? '“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”' : '“Sing to the Lord a new song; sing to the Lord, all the earth.”',
+      author: '— Psalm 96:1 / Zaburi 96:1',
+      subhead: lang === 'sw'
+        ? 'Uimbaji wa sauti nne (Soprano, Alto, Tenor, Bass) uliojengwa kwa nidhamu, sala, na upatanisho mtakatifu.'
+        : 'Four-part SATB polyphony grounded in liturgical discipline, unceasing prayer, and fraternal communion.',
+      type: 'songs' as const
+    },
+    // Slide 4 (index 3): Sacred Polyphony & Liturgical Song
+    {
+      eyebrow: lang === 'sw' ? 'POLIFONIA TAKATIFU NA NYIMBO ZA LITURUJIA' : 'SACRED POLYPHONY & LITURGICAL SONG',
+      headline: lang === 'sw' ? 'Sauti Nne, Sala Moja Takatifu Mbele ya Altare.' : 'Four Voices, One Sacred Harmony Before the Altar.',
+      author: 'St. Monica Third Mass Choir · Section 58 Nakuru',
+      subhead: lang === 'sw'
+        ? 'Waimbaji arobaini na nane wanaoongoza sala ya kuimba ya waumini katika Misa ya Parokia ya Jumapili.'
+        : "Forty-eight choristers leading the people's sung prayer at the Sunday Parish Mass.",
+      type: 'polyphony' as const
+    }
+  ];
+
+  const currentContent = heroSlideContents[currentSlideIndex % heroSlideContents.length];
+
   return (
     <div className="w-full space-y-0">
       
-      {/* 1. HERO SECTION: 4-Photo rotating crossfade slideshow with synchronized words & buttons */}
+      {/* 1. HERO SECTION: 4-Photo rotating crossfade slideshow with WCAG AA gradient and fluid framing */}
       <section 
         id="home-hero-section" 
-        className="relative min-h-[540px] sm:min-h-[600px] lg:h-[calc(100vh-148px)] lg:min-h-[600px] lg:max-h-[840px] w-full flex flex-col justify-end p-5 sm:p-10 lg:p-16 pb-16 sm:pb-16 overflow-hidden bg-[#0C2340]"
+        tabIndex={0}
+        aria-roledescription="carousel"
+        aria-label={lang === 'sw' ? 'Picha za mandhari ya Kwaya ya Mtakatifu Monika' : 'St. Monica Choir Hero Carousel'}
+        className="relative w-full overflow-hidden bg-[#0C2340] focus:outline-none"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        onKeyDown={handleKeyDown}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        {/* Background Slides: Absolute stacked layers with smooth 1000ms crossfade and continuous Ken Burns zooming */}
+        {/* Background Slides: Absolute stacked layers with smooth 800ms crossfade and Ken Burns slow zoom */}
         {activeSlides.map((slide, index) => {
           const isActive = index === currentSlideIndex;
+          const focusPos = isMobile ? slide.focusMobile : slide.focus;
+
           return (
             <div
               key={slide.src}
-              className={`absolute inset-0 transition-opacity duration-[1000ms] ease-in-out overflow-hidden ${
-                isActive ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
+              className={`absolute inset-0 transition-opacity duration-800 ease-in-out overflow-hidden pointer-events-none ${
+                isActive ? 'opacity-100 z-0' : 'opacity-0'
               }`}
               aria-hidden={!isActive}
             >
+              {/* Replace with a real photo of our choir / choirmaster */}
               <img
-                key={isActive ? `active-${slide.src}-${currentSlideIndex}` : `inactive-${slide.src}`}
+                key={`${slide.src}-${isActive ? 'active' : 'inactive'}`}
                 src={slide.src}
                 alt={slide.alt}
+                width={1920}
+                height={1080}
                 loading={index === 0 ? 'eager' : 'lazy'}
-                className={`w-full h-full object-cover object-center contrast-[1.05] brightness-[1.01] will-change-transform ${
-                  !prefersReducedMotion && isActive
-                    ? 'animate-ken-burns'
-                    : 'scale-100'
+                fetchPriority={index === 0 ? 'high' : 'auto'}
+                style={{
+                  '--focus': focusPos,
+                  objectPosition: 'var(--focus)',
+                  objectFit: 'cover'
+                } as React.CSSProperties}
+                className={`w-full h-full contrast-[1.05] brightness-[1.01] ${
+                  isActive && !prefersReducedMotion ? 'animate-ken-burns' : ''
                 }`}
                 referrerPolicy="no-referrer"
               />
@@ -215,206 +379,210 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           );
         })}
 
-        {/* Professional Ambient Lighting Gradients: Ensures 100% legibility on any display size */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 via-45% to-transparent to-80% z-10 pointer-events-none hidden sm:block" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340] via-[#0C2340]/95 via-60% to-[#0C2340]/30 sm:hidden z-10 pointer-events-none" />
-
-        {/* Hero Content (shuffles smoothly with slides, exactly 4 slides in 1:1 sync) */}
-        {(() => {
-          const heroSlideContents = [
-            // Slide 1 (index 0): Full choir shot at Sunday High Mass (Parish Introduction)
-            {
-              eyebrow: lang === 'sw' ? 'Utume wa Muziki Mtakatifu' : 'Sacred Liturgical Ministry',
-              headline: lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music'),
-              author: null,
-              subhead: lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
-              type: 'default' as const
-            },
-            // Slide 2 (index 1): Parish Sanctuary & Altar (St. Augustine singing quote + Join Us)
-            {
-              eyebrow: lang === 'sw' ? 'Mtakatifu Augustino wa Hippo' : 'Saint Augustine on Sacred Song',
-              headline: lang === 'sw' ? '“Mwenye kuimba vizuri husali mara mbili.”' : '“He who sings prays twice.”',
-              author: lang === 'sw' ? '— Mtakatifu Augustino wa Hippo' : '— St. Augustine of Hippo',
-              subhead: lang === 'sw' 
-                ? 'Toa sauti yako kumtukuza Mungu katika Altare ya Parokia ya Mtakatifu Monika. Jiunge na familia ya kwaya leo (Ada ya mwaka: Kshs. 500).' 
-                : 'Offer your vocal gifts to glorify God before the sacred altar at St. Monica Parish. Join our liturgical choral fellowship today (Annual fee: Kshs. 500).',
-              type: 'quote-join' as const
-            },
-            // Slide 3 (index 2): Choristers Singing in Sacred Song (Psalm 96:1 + Join Us)
-            {
-              eyebrow: lang === 'sw' ? 'Zaburi 96:1 · Maandiko Matakatifu' : 'Psalm 96:1 · Sacred Scripture',
-              headline: lang === 'sw' ? '“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”' : '“Sing to the Lord a new song; sing to the Lord, all the earth.”',
-              author: '— Psalm 96:1 / Zaburi 96:1',
-              subhead: lang === 'sw'
-                ? 'Uimbaji wa sauti nne (Soprano, Alto, Tenor, Bass) uliojengwa kwa nidhamu, sala, na upatanisho mtakatifu.'
-                : 'Four-part SATB polyphony grounded in liturgical discipline, unceasing prayer, and fraternal communion.',
-              type: 'quote-join' as const
-            },
-            // Slide 4 (index 3): Choirmaster Directing (Fellowship & Mass Service + Join Us)
-            {
-              eyebrow: lang === 'sw' ? 'Umoja wa Kwaya Altaroni' : 'Sacred Polyphony & Altar Service',
-              headline: lang === 'sw' ? '“Sauti Nne, Sala Moja Takatifu Mbele ya Altare.”' : '“Four Voices, One Sacred Harmony Before the Altar.”',
-              author: 'St. Monica Third Mass Choir · Section 58 Nakuru',
-              subhead: lang === 'sw'
-                ? 'Waimbaji arobaini na nane wanaotumikia Misa Kuu ya Jumapili kila juma kwa unyenyekevu na nidhamu ya kiliturujia.'
-                : 'Dedicated ensemble of forty-eight choristers serving Sunday High Mass each week with liturgical devotion.',
-              type: 'quote-join' as const
-            }
-          ];
-
-          const currentContent = heroSlideContents[currentSlideIndex % heroSlideContents.length];
-
-          return (
-            <div 
-              key={currentSlideIndex} 
-              className="relative z-20 w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-2.5 sm:space-y-3.5 min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out"
-            >
-              {currentContent.eyebrow && (
-                <div className="text-amber-400 font-source text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-5 h-[1.5px] bg-amber-400/80 inline-block shrink-0" aria-hidden="true" />
-                  <span>{currentContent.eyebrow}</span>
-                </div>
-              )}
-
-              <h1 className="font-eb-garamond text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.12] drop-shadow-sm break-words">
-                {currentContent.headline}
-              </h1>
-
-              {currentContent.author && (
-                <span className="text-amber-200/90 font-eb-garamond text-sm sm:text-lg font-medium block italic">
-                  {currentContent.author}
-                </span>
-              )}
-
-              <p className="font-source text-xs sm:text-sm md:text-base text-white/90 font-medium tracking-wide break-words max-w-2xl leading-relaxed">
-                {currentContent.subhead}
-              </p>
-
-              {/* Shuffling Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
-                {currentContent.type === 'quote-join' ? (
-                  <>
-                    {/* Primary Join Us Button with Pop-up trigger */}
-                    <button
-                      onClick={() => openJoinModal()}
-                      className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[44px]"
-                    >
-                      <UserPlus className="w-4 h-4 text-slate-950" />
-                      <span>{lang === 'sw' ? 'Jiunge Nasi (Kshs. 500)' : 'Join Us (Kshs. 500)'}</span>
-                    </button>
-
-                    {/* Voice Sections */}
-                    <button
-                      onClick={() => onNavigate('about-sections')}
-                      className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
-                    >
-                      <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
-                    </button>
-
-                    {/* YouTube Channel */}
-                    <a
-                      href={YOUTUBE_CHANNEL_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer font-source min-h-[44px]"
-                    >
-                      <RealYouTubeIcon size={18} variant="badge" />
-                      <span>YouTube</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-white/70" />
-                    </a>
-                  </>
-                ) : (
-                  <>
-                    {/* First Slide Default Buttons: Listen Now, Choir Gallery, YouTube */}
-                    <button
-                      onClick={() => {
-                        if (currentSong.id === featuredSong.id) {
-                          togglePlay();
-                        } else {
-                          playSong(featuredSong as Song);
-                        }
-                      }}
-                      className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[44px]"
-                    >
-                      {isPlaying && currentSong.id === featuredSong.id ? (
-                        <>
-                          <Pause className="w-4 h-4 fill-current text-[#1058A8]" />
-                          <span>{lang === 'sw' ? 'Sitisha Wimbo' : 'Pause Song'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-4 h-4 fill-current text-[#1058A8] ml-0.5" />
-                          <span>{lang === 'sw' ? 'Sikiliza Sasa' : 'Listen Now'}</span>
-                        </>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => onNavigate('about-gallery')}
-                      className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs min-h-[44px]"
-                    >
-                      <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
-                    </button>
-
-                    <a
-                      href={YOUTUBE_CHANNEL_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/90 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer min-h-[44px]"
-                    >
-                      <RealYouTubeIcon size={18} variant="badge" />
-                      <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-white/70" />
-                    </a>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Clean Pagination Indicator at Bottom Right: Separated from text and buttons so zero collision on any screen */}
+        {/* WCAG AA Compliant High-Contrast Gradient Overlays */}
         <div 
-          className="absolute bottom-5 sm:bottom-6 right-5 sm:right-10 lg:right-16 z-30 flex items-center gap-2.5 bg-[#0C1420]/75 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-lg"
-          role="tablist"
-          aria-label={lang === 'sw' ? 'Picha za mandhari ya kwaya' : 'Choir hero photo slides'}
+          className="absolute inset-0 z-10 pointer-events-none hidden sm:block" 
+          style={{
+            background: 'linear-gradient(90deg, rgba(0,32,64,0.92) 0%, rgba(0,32,64,0.70) 45%, rgba(0,32,64,0.15) 100%)'
+          }}
+        />
+        <div 
+          className="absolute inset-0 z-10 pointer-events-none sm:hidden" 
+          style={{
+            background: 'linear-gradient(0deg, rgba(0,32,64,0.95) 0%, rgba(0,32,64,0.75) 55%, rgba(0,32,64,0.30) 100%)'
+          }}
+        />
+
+        {/* Hero Content Container: padding-top: calc(var(--header-h) + 24px); padding-bottom: calc(var(--player-h) + 24px); display:flex; flex-direction:column; justify-content:flex-end; min-height:100dvh (fallback 100vh); grows with content */}
+        <div 
+          className="hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
+          style={{
+            minHeight: '100dvh',
+            paddingTop: 'calc(var(--header-h, 148px) + 24px)',
+            paddingBottom: 'calc(var(--player-h, 64px) + 24px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end'
+          }}
         >
-          <span className="text-[11px] font-mono text-white/90 font-bold tabular-nums">
-            0{currentSlideIndex + 1} / 0{activeSlides.length}
-          </span>
-          <div className="w-[1px] h-3 bg-white/30" aria-hidden="true" />
-          <div className="flex items-center gap-1.5">
-            {activeSlides.map((slide, idx) => {
-              const isDotActive = idx === currentSlideIndex;
-              return (
+          {/* Inner Content: Animated on slide change, grows with content, no fixed height, no overflow:hidden */}
+          <div 
+            key={`hero-content-${currentSlideIndex}`}
+            className="w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-3 sm:space-y-4 min-w-0 animate-hero-content"
+          >
+            {currentContent.eyebrow && (
+              <div className="text-amber-400 font-source text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                <span className="w-5 h-[1.5px] bg-amber-400 inline-block shrink-0" aria-hidden="true" />
+                <span>{currentContent.eyebrow}</span>
+              </div>
+            )}
+
+            <h1 className="font-eb-garamond hero-fluid-title font-bold text-white tracking-tight leading-[1.12] drop-shadow-sm break-words hero-title lg:line-clamp-3">
+              {currentContent.headline}
+            </h1>
+
+          {currentContent.author && (
+            <span className="text-amber-200/95 font-eb-garamond text-sm sm:text-lg font-medium block italic">
+              {currentContent.author}
+            </span>
+          )}
+
+          <p className="font-source text-xs sm:text-sm md:text-base text-white/95 font-medium tracking-wide break-words max-w-2xl leading-relaxed">
+            {currentContent.subhead}
+          </p>
+
+          {/* Action Buttons tailored specifically to each slide */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
+            {currentContent.type === 'mass' && (
+              <>
                 <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setCurrentSlideIndex(idx)}
-                  role="tab"
-                  aria-selected={isDotActive}
-                  className={`transition-all duration-300 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7EC8F0] ${
-                    isDotActive
-                      ? 'w-5 h-2 bg-[#7EC8F0] shadow-sm'
-                      : 'w-2 h-2 bg-white/40 hover:bg-white/80'
-                  }`}
-                  aria-label={`Slide ${idx + 1} of ${activeSlides.length}: ${slide.description}`}
-                  title={slide.description}
-                />
-              );
-            })}
+                  onClick={() => {
+                    if (currentSong.id === featuredSong.id) {
+                      togglePlay();
+                    } else {
+                      playSong(featuredSong as Song);
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[44px]"
+                >
+                  {isPlaying && currentSong.id === featuredSong.id ? (
+                    <>
+                      <Pause className="w-4 h-4 fill-current text-[#1058A8]" />
+                      <span>{lang === 'sw' ? 'Sitisha Wimbo' : 'Pause Song'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 fill-current text-[#1058A8] ml-0.5" />
+                      <span>{lang === 'sw' ? 'Sikiliza Sasa' : 'Listen Now'}</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => onNavigate('about-gallery')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs min-h-[44px]"
+                >
+                  <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
+                </button>
+
+                <a
+                  href={YOUTUBE_CHANNEL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer min-h-[44px]"
+                >
+                  <RealYouTubeIcon size={18} variant="badge" />
+                  <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-white/80" />
+                </a>
+              </>
+            )}
+
+            {currentContent.type === 'sanctuary' && (
+              <>
+                <button
+                  onClick={() => openJoinModal()}
+                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[44px]"
+                >
+                  <UserPlus className="w-4 h-4 text-slate-950" />
+                  <span>{lang === 'sw' ? 'Jiunge na Kwaya' : 'Join the Choir'}</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('about-sections')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                >
+                  <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('about-story')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                >
+                  <BookOpen className="w-4 h-4 text-amber-300" />
+                  <span>{lang === 'sw' ? 'Historia Yetu' : 'Our Story'}</span>
+                </button>
+              </>
+            )}
+
+            {currentContent.type === 'songs' && (
+              <>
+                <button
+                  onClick={() => {
+                    const el = document.getElementById('recorded-songs-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[44px]"
+                >
+                  <Music className="w-4 h-4 text-[#1058A8]" />
+                  <span>{lang === 'sw' ? 'Nyimbo Zilizorekodiwa' : 'Recorded Songs'}</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('shop')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                >
+                  <ShoppingBag className="w-4 h-4 text-amber-300" />
+                  <span>{lang === 'sw' ? 'Noti za Nyimbo' : 'Sheet Music Scores'}</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('about-sections')}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                >
+                  <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
+                </button>
+              </>
+            )}
+
+            {currentContent.type === 'polyphony' && (
+              <>
+                <button
+                  onClick={() => openJoinModal()}
+                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[44px]"
+                >
+                  <UserPlus className="w-4 h-4 text-slate-950" />
+                  <span>{lang === 'sw' ? 'Jiunge na Kwaya' : 'Join the Choir'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const el = document.getElementById('sunday-mass-schedule');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                >
+                  <Clock className="w-4 h-4 text-amber-300" />
+                  <span>{lang === 'sw' ? 'Ratiba ya Misa' : 'Sunday Mass Times'}</span>
+                </button>
+
+                <a
+                  href={YOUTUBE_CHANNEL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer font-source min-h-[44px]"
+                >
+                  <RealYouTubeIcon size={18} variant="badge" />
+                  <span>YouTube</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-white/80" />
+                </a>
+              </>
+            )}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Site Announcement Notice (Controlled via Admin) */}
+    </section>
+
+      {/* Parish Notice Ticker: Never exceeds 44px on mobile, sits directly beneath hero */}
       {siteNotice?.enabled && (
         <aside 
           aria-label={lang === 'sw' ? 'Tangazo Rasmi la Kwaya' : 'Official Choir Announcement'}
-          className="bg-[#0C1420] text-white border-b border-[#7EC8F0]/30 py-2.5 px-4 sm:px-6 relative z-10"
+          className="bg-[#0C1420] text-white border-b border-[#7EC8F0]/30 px-4 sm:px-6 relative z-20 flex items-center max-h-[44px] h-[44px] overflow-hidden"
+          style={{ height: 'var(--ticker-h, 44px)' }}
         >
-          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-source">
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="max-w-6xl mx-auto w-full flex items-center justify-between gap-3 text-xs font-source">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
               <span className={`px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider shrink-0 ${
                 siteNotice.type === 'urgent' ? 'bg-rose-500 text-white' : siteNotice.type === 'feast' ? 'bg-amber-400 text-slate-900' : 'bg-[#1058A8] text-white'
               }`}>
@@ -443,14 +611,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="lg:col-span-7 space-y-5">
               <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340] leading-tight">
                 {lang === 'sw' 
-                  ? 'Kutoka Altare ya Parokia Hadi Matamasha ya Kijimbo'
-                  : 'From Parish Altar to Diocesan Celebrations'}
+                  ? 'Kutoka Altare ya Parokia Hadi Dekania na Zaidi'
+                  : 'From the Parish Altar to the Deanery and Beyond'}
               </h2>
 
               <p className="text-base text-slate-800 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? 'Kwaya ya Mtakatifu Monika ilianzishwa mwaka 2012 na kundi dogo la waimbaji waliojitolea katika Parokia ya Mtakatifu Monika, Nakuru. Tukio letu la kukumbukwa lilitokea mwaka 2019 kwenye Tamasha la Muziki wa Kikatoliki la Dekania ya Nakuru, ambapo uimbaji wetu wa "Machozi ya Imani" ulileta ukimya na sala ya dhati kanisani kabla ya baraka kuu.'
-                  : 'St. Monica Catholic Choir began in 2012 with a dedicated circle of choristers at St. Monica Parish in Nakuru. A defining moment in our journey took place in 2019 at the Nakuru Deanery Choral Festival, when our four-part performance of "Machozi ya Imani" held the congregation in prayerful silence before the final blessing.'}
+                  ? 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilianzishwa mwaka 2012 na kundi dogo la waimbaji waliojitolea katika Parokia ya Mtakatifu Monika, Nakuru. Tukio letu la kukumbukwa lilitokea mwaka 2019 kwenye Tamasha la Muziki wa Kikatoliki la Dekania ya Nakuru, ambapo toleo letu la sauti nne la "Machozi ya Imani" lilishikilia kusanyiko katika ukimya wa sala kabla ya baraka kuu.'
+                  : 'St. Monica Third Mass Choir began in 2012 with a dedicated circle of choristers at St. Monica Parish in Nakuru. A defining moment in our journey took place in 2019 at the Nakuru Deanery Choral Festival, when our four-part offering of "Machozi ya Imani" held the congregation in prayerful silence before the final blessing.'}
               </p>
 
               <p className="text-base text-slate-700 font-source leading-relaxed">
@@ -484,6 +652,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <img
                   src={churchImg}
                   alt="St. Monica Catholic Church, Section 58 Nakuru"
+                  width={600}
+                  height={400}
+                  loading="lazy"
                   className="w-full h-72 sm:h-80 object-cover"
                   referrerPolicy="no-referrer"
                 />
@@ -500,6 +671,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     href={CHOIR_STATS.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="Open St. Monica Church map location"
                     className="text-xs font-semibold text-[#1058A8] hover:underline flex items-center gap-1"
                   >
                     <MapPin className="w-3.5 h-3.5" />
@@ -513,11 +685,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 2b. OUR CORE VALUES */}
-      <CoreValuesSection lang={lang} />
-
       {/* 3. OUR RECORDED SONGS */}
-      <section className="bg-[#0C2340] text-white py-16 sm:py-20">
+      <section id="recorded-songs-section" className="bg-[#0C2340] text-white py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -527,8 +696,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </h2>
               <p className="text-sm sm:text-base text-white/80 font-source mt-1">
                 {lang === 'sw'
-                  ? 'Nyimbo nne zilizorekodiwa na kwaya katika Section 58, Nakuru.'
-                  : 'Four songs recorded by the choir at Section 58, Nakuru.'}
+                  ? 'Nyimbo nne zilizorekodiwa na Kwaya ya Misa ya Tatu katika Section 58, Nakuru.'
+                  : 'Four sacred songs recorded by St. Monica Third Mass Choir at Section 58, Nakuru.'}
               </p>
             </div>
 
@@ -536,6 +705,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               href={YOUTUBE_CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Visit St. Monica Choir official YouTube channel"
               className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-full transition-colors self-start sm:self-auto cursor-pointer"
             >
               <RealYouTubeIcon size={18} variant="badge" />
@@ -544,13 +714,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             </a>
           </div>
 
-          {/* 4 Song Rows with One Clear Play Cue (icon on thumbnail only) */}
+          {/* 4 Song Cards: Keyboard accessible, clean typography without fringes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {songs.slice(0, 4).map((song) => {
               const isThisPlaying = currentSong.id === song.id && isPlaying;
               return (
                 <div
                   key={song.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Play ${lang === 'sw' ? song.titleSwahili : song.title} by ${song.composer}`}
                   onClick={() => {
                     if (currentSong.id === song.id) {
                       togglePlay();
@@ -558,7 +731,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       playSong(song);
                     }
                   }}
-                  className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 group ${
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (currentSong.id === song.id) {
+                        togglePlay();
+                      } else {
+                        playSong(song);
+                      }
+                    }
+                  }}
+                  className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                     isThisPlaying
                       ? 'bg-white/15 border-sky-400 shadow-md ring-1 ring-sky-400/50'
                       : 'bg-[#132B4A] hover:bg-[#1A385E] border-white/10 hover:border-white/25'
@@ -566,10 +749,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     {/* 16:9 Video Thumbnail with Play Badge */}
-                    <div className="relative w-20 sm:w-24 aspect-16/9 rounded-lg overflow-hidden shrink-0 border border-white/15 shadow-xs">
+                    <div className="relative w-20 sm:w-24 aspect-video rounded-lg overflow-hidden shrink-0 border border-white/15 shadow-xs">
                       <img
                         src={song.thumbnailUrl}
                         alt={song.title}
+                        width={160}
+                        height={90}
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         referrerPolicy="no-referrer"
                       />
@@ -589,7 +775,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     </div>
 
                     <div className="min-w-0">
-                      <h4 className="font-eb-garamond font-bold text-base text-white truncate group-hover:text-sky-300 transition-colors">
+                      <h4 className="font-eb-garamond font-bold text-base text-white truncate group-hover:text-sky-300 transition-colors song-card-title">
                         {lang === 'sw' ? song.titleSwahili : song.title}
                       </h4>
                       <p className="text-xs text-white/75 truncate font-source mt-0.5">
@@ -616,11 +802,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 4. PHOTO BAND */}
+      {/* 4. SCRIPTURE BANNER: Colossians 3:16 (NABRE) */}
       <section className="relative py-24 sm:py-28 overflow-hidden bg-[#0C2340]">
         <img
           src={choirHeroImg}
           alt="Choir vocal ministry"
+          width={1920}
+          height={1080}
+          loading="lazy"
           className="absolute inset-0 w-full h-full object-cover object-center filter brightness-40"
           referrerPolicy="no-referrer"
         />
@@ -628,22 +817,21 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-3 sm:space-y-4">
           <p className="text-xs uppercase tracking-widest text-[#7EC8F0] font-source font-semibold">
-            {lang === 'sw' ? 'Utume wa Muziki Mtakatifu' : 'Liturgical Calling & Praise'}
+            {lang === 'sw' ? 'Maandiko Matakatifu · Barua kwa Wakolosai' : 'Sacred Scripture · Letter to the Colossians'}
           </p>
-          <blockquote className="font-eb-garamond text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug">
-            {lang === 'sw'
-              ? '“Neno la Kristo na likae kwa wingi ndani yenu, mkifundishana na kuonyana kwa zaburi, na nyimbo, na tenzi za rohoni; huku mkimwimbia Mungu kwa neema mioyoni mwenu.”'
-              : '“Let the word of Christ dwell in you richly, teaching and admonishing one another in psalms and hymns and spiritual songs, singing with grace in your hearts to the Lord.”'}
+
+          {/* PASTE VERIFIED CATHOLIC TRANSLATION HERE */}
+          <blockquote className="font-eb-garamond text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug scripture-quote">
+            “{lang === 'sw' ? COLOSSIANS_3_16.textSw : COLOSSIANS_3_16.textEn}”
           </blockquote>
+          
           <p className="font-source text-xs sm:text-sm text-sky-200">
-            {lang === 'sw'
-              ? '— Wakolosai 3:16 · Maandiko Matakatifu'
-              : '— Colossians 3:16 · Sacred Scripture'}
+            {lang === 'sw' ? COLOSSIANS_3_16.citationSw : COLOSSIANS_3_16.citationEn}
           </p>
         </div>
       </section>
 
-      {/* 5. SHEET MUSIC SCORES: Authentic Score Previews & Buy Score Button */}
+      {/* 5. SHEET MUSIC SCORES: Authentic Score Previews & M-Pesa Buy Button */}
       <section className="bg-[#FAF8F5] py-16 sm:py-20 border-b border-[#0C2340]/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           
@@ -652,7 +840,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340]">
                 {lang === 'sw' ? 'Noti za Nyimbo Zilizopangiliwa' : 'Choral Sheet Music Scores'}
               </h2>
-              <p className="text-sm sm:text-base text-slate-700 font-source mt-1">
+              {/* Short line under sheet music heading */}
+              <p className="text-xs sm:text-sm text-[#1058A8] font-source font-semibold mt-1">
+                {lang === 'sw' 
+                  ? 'Noti zinauzwa kwa idhini ya watunzi.' 
+                  : 'Scores are sold with the permission of the composers.'}
+              </p>
+              <p className="text-xs sm:text-sm text-slate-600 font-source mt-0.5">
                 {lang === 'sw'
                   ? 'Noti za sauti nne (Soprano, Alto, Tenor, Bass) zenye solfa na stafu kwa ajili ya walimu wa kwaya.'
                   : 'Official four-part scores (Soprano, Alto, Tenor, Bass) in tonic sol-fa and staff notation.'}
@@ -668,7 +862,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             </button>
           </div>
 
-          {/* Cards for each score with individual page-one top preview, title with SATB tag, M-Pesa beside price, and Buy Score */}
+          {/* 4 Cards: Fixed 4/3 aspect ratio, identical CSS watermark, KES 300 price */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {sheetMusicList.slice(0, 4).map((item) => (
               <div 
@@ -676,14 +870,22 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 className="bg-white rounded-xl border border-[#0C2340]/15 p-4 flex flex-col justify-between shadow-2xs hover:border-[#1058A8] transition-all space-y-3"
               >
                 <div className="space-y-2.5">
-                  {/* Distinct Score Preview Image (top half of page one with faint PREVIEW mark) */}
-                  <div className="w-full h-36 rounded-lg overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group">
+                  {/* Distinct Score Preview Image with fixed 4/3 aspect ratio and CSS watermark */}
+                  <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group">
+                    {/* TODO: Replace the "Ni Mzima" image with a flat scan */}
                     <img
                       src={getScoreImage(item.id)}
-                      alt={`${item.title} Score Preview`}
+                      alt={`Preview of the score for ${item.title}`}
+                      width={400}
+                      height={300}
+                      loading="lazy"
                       className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
+                    {/* Identical diagonal PREVIEW watermark on ALL 4 cards */}
+                    <div className="score-preview-watermark" aria-hidden="true">
+                      PREVIEW
+                    </div>
                   </div>
 
                   {/* Title only with SATB small tag */}
@@ -699,10 +901,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <p className="text-xs text-slate-700 font-source">
                     {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-slate-900">{item.composer}</strong>
                   </p>
-
-                  <p className="text-[11px] text-slate-600 font-source">
-                    Soprano · Alto · Tenor · Bass
-                  </p>
                 </div>
 
                 <div className="pt-3 border-t border-[#0C2340]/10 space-y-2.5">
@@ -710,7 +908,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="font-eb-garamond font-bold text-base text-[#1058A8]">
-                        KES {item.priceKes}
+                        KES 300
                       </span>
                       <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded tracking-wider shadow-2xs">
                         M-PESA
@@ -718,20 +916,21 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     </div>
                   </div>
 
-                  {/* Clean Buy Score button */}
+                  {/* Clean Buy Score button with accessible aria-label */}
                   <button
                     onClick={() => addToCart({
                       id: `prod-${item.id}`,
                       name: item.title,
                       nameSw: item.titleSw,
                       type: 'sheet_music',
-                      priceKes: item.priceKes,
+                      priceKes: 300,
                       priceUsd: item.priceUsd,
                       description: item.description,
                       descriptionSw: item.descriptionSw,
                       image: 'sheet_music_hymnal',
                       downloadable: true
                     })}
+                    aria-label={`Buy ${item.title} score for KES 300 via M-Pesa`}
                     className="w-full py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
@@ -745,7 +944,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 6. CHOIRMASTER MESSAGE & SUNDAY MASS SCHEDULE: Cream background with photo and dark text */}
+      {/* 6. CHOIRMASTER MESSAGE & SUNDAY MASS SCHEDULE */}
       <section className="bg-[#FAF8F5] py-16 sm:py-20 border-b border-[#0C2340]/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -758,15 +957,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <p className="text-base text-slate-800 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? '“Karibu sana kwenye jukwaa la Kwaya ya Mtakatifu Monika, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe dhabihu safi na sala ya kicho mbele ya Mwenyezi Mungu.”'
-                  : '“Welcome to the musical home of St. Monica Catholic Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is an authentic sacrifice of praise before Almighty God.”'}
+                  ? '“Karibu sana kwenye jukwaa la muziki la Kwaya ya Misa ya Tatu ya Mtakatifu Monika, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe toleo la dhati la sifa kwa Mwenyezi Mungu.”'
+                  : '“Welcome to the musical home of St. Monica Third Mass Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is a sincere offering of praise to Almighty God.”'}
               </p>
 
               <div className="pt-2 flex items-center gap-3.5">
-                {/* Choirmaster photo in a clean round frame */}
+                {/* Replace with a real photo of our choirmaster */}
                 <img
                   src={choirmasterImg}
                   alt="Mwalimu Joseph Otieno"
+                  width={64}
+                  height={64}
+                  loading="lazy"
                   className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#1058A8] shadow-sm shrink-0"
                 />
                 <div>
@@ -780,8 +982,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Sunday Mass Schedule & Church Location */}
-            <div className="lg:col-span-5 bg-white rounded-2xl p-6 sm:p-7 border border-[#0C2340]/15 space-y-4 shadow-xs">
+            {/* Sunday Mass Schedule Card */}
+            <div id="sunday-mass-schedule" className="lg:col-span-5 bg-white rounded-2xl p-6 sm:p-7 border border-[#0C2340]/15 space-y-4 shadow-xs">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[#1058A8]" />
                 <h3 className="font-eb-garamond font-bold text-lg text-[#0C2340]">
@@ -789,31 +991,28 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </h3>
               </div>
 
+              {/* Rows styled with grid-template-columns: 1fr auto to prevent wrapping */}
               <ul className="space-y-2.5 text-sm text-slate-800 font-source">
-                <li className="flex items-center justify-between pb-1.5 border-b border-[#0C2340]/10">
+                <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-1.5 border-b border-[#0C2340]/10">
                   <span>{massSchedule?.mass1Title || (lang === 'sw' ? 'Misa ya 1 (Asubuhi Mapema)' : '1st Mass (Dawn)')}</span>
-                  <strong className="text-[#0C2340]">{massSchedule?.mass1Time || '7:00 AM'}</strong>
+                  <strong className="text-[#0C2340] whitespace-nowrap tabular-nums">{massSchedule?.mass1Time || '7:00 AM'}</strong>
                 </li>
-                <li className="flex items-center justify-between pb-1.5 border-b border-[#0C2340]/10">
+                <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-1.5 border-b border-[#0C2340]/10">
                   <span>{massSchedule?.mass2Title || (lang === 'sw' ? 'Misa ya 2 (Kiswahili)' : '2nd Mass')}</span>
-                  <strong className="text-[#0C2340]">{massSchedule?.mass2Time || '8:30 AM'}</strong>
+                  <strong className="text-[#0C2340] whitespace-nowrap tabular-nums">{massSchedule?.mass2Time || '8:30 AM'}</strong>
                 </li>
-                <li className="flex items-center justify-between pb-2 border-b border-[#0C2340]/10 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20">
-                  <div className="flex flex-col">
+                <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-2 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20">
+                  <div className="flex flex-col min-w-0 pr-1">
                     <span className="font-bold text-[#1058A8]">
-                      {massSchedule?.mass3Title || (lang === 'sw' ? 'Misa ya 3: Misa Kuu (Sunday High Mass)' : '3rd Mass: Sunday High Mass')}
+                      {lang === 'sw' ? 'Misa ya 3 (Misa ya Jumapili Inayoimbwa)' : '3rd Mass (Sunday Sung Mass)'}
                     </span>
-                    <span className="text-[11px] text-[#0C2340] font-medium">
+                    <span className="text-[11px] text-[#0C2340] font-medium leading-snug">
                       {lang === 'sw' 
-                        ? (massSchedule?.mass3DescSw || '★ Kwaya ya Misa ya Tatu ya Mtakatifu Monika')
-                        : (massSchedule?.mass3Desc || '★ St. Monica Third Mass Choir (Main Choir)')}
+                        ? '★ Kwaya ya Misa ya Tatu ya Mtakatifu Monika inaongoza sala ya kuimba ya kusanyiko.'
+                        : '★ St. Monica Third Mass Choir leads the sung prayer of the assembly.'}
                     </span>
                   </div>
-                  <strong className="text-base font-bold text-[#1058A8] ml-2">{massSchedule?.mass3Time || '10:00 AM'}</strong>
-                </li>
-                <li className="flex items-center justify-between pt-1">
-                  <span>{massSchedule?.mass4Title || (lang === 'sw' ? 'Misa ya 4 (Vijana / Youth)' : '4th Mass (Youth)')}</span>
-                  <strong className="text-[#0C2340]">{massSchedule?.mass4Time || '11:30 AM'}</strong>
+                  <strong className="text-base font-bold text-[#1058A8] whitespace-nowrap tabular-nums">{massSchedule?.mass3Time || '10:00 AM'}</strong>
                 </li>
               </ul>
 
@@ -856,4 +1055,3 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     </div>
   );
 };
-

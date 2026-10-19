@@ -40,6 +40,13 @@ export const CartDrawer: React.FC = () => {
   const [mpesaCountdown, setMpesaCountdown] = useState(3);
   const [transactionRef, setTransactionRef] = useState('');
   const [hasDownloaded, setHasDownloaded] = useState(false);
+  const [copiedField, setCopiedField] = useState<'till' | 'ref' | 'amount' | null>(null);
+
+  const handleCopyText = (text: string, field: 'till' | 'ref' | 'amount') => {
+    navigator.clipboard?.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   if (!isCartOpen) return null;
 
@@ -296,21 +303,76 @@ export const CartDrawer: React.FC = () => {
                 {lang === 'sw' ? 'Njia ya malipo:' : 'Payment method:'}
               </label>
 
-              <div className="flex items-center justify-between text-xs font-semibold text-[#1058A8] py-1">
-                <div className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 shrink-0 text-[#1058A8]" />
-                  <span>{lang === 'sw' ? 'Lipa kwa M-Pesa' : 'Pay with M-Pesa'}</span>
-                </div>
-                <span className="text-[10px] font-bold bg-[#1058A8]/10 text-[#1058A8] px-2 py-0.5 rounded">
-                  Safaricom STK Push
+            {/* M-Pesa Payment Details with Copy Buttons */}
+            <div className="p-3.5 rounded-xl bg-[#FCFAF7] border border-[#0C2340]/15 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#1058A8]">
+                  {lang === 'sw' ? 'Maelezo ya Malipo ya M-Pesa' : 'M-Pesa Payment Details'}
+                </span>
+                <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded">
+                  M-PESA
                 </span>
               </div>
+
+              <div className="space-y-1.5 text-xs">
+                {/* Till / Paybill Number */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Namba ya Till / Paybill:' : 'Paybill / Till Number:'}</span>
+                    <strong className="font-source text-xs sm:text-sm text-[#0C2340] tabular-nums tracking-wide font-bold">
+                      {"{{MPESA_TILL}}"}
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyText('{{MPESA_TILL}}', 'till')}
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
+                  >
+                    {copiedField === 'till' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
+                  </button>
+                </div>
+
+                {/* Account Reference */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Kumbukumbu ya Akaunti:' : 'Account Reference:'}</span>
+                    <strong className="font-source text-xs sm:text-sm text-[#0C2340] tracking-wide font-bold">
+                      {"{{ACCOUNT_REF}}"}
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyText('{{ACCOUNT_REF}}', 'ref')}
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
+                  >
+                    {copiedField === 'ref' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
+                  </button>
+                </div>
+
+                {/* Amount */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Kiasi cha Kulipa:' : 'Amount to Pay:'}</span>
+                    <strong className="font-source text-xs sm:text-sm text-[#1058A8] tabular-nums font-bold">
+                      KES {cartTotalKes}
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyText(`KES ${cartTotalKes}`, 'amount')}
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
+                  >
+                    {copiedField === 'amount' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
+                  </button>
+                </div>
+              </div>
+            </div>
             </div>
 
-            {/* Normal M-Pesa Phone Input Field (Clean field, NO green panel, empty by default) */}
+            {/* STK Push Option */}
             <div className="pt-2 border-t border-[#0C2340]/10 space-y-1.5">
               <label className="block text-xs font-semibold text-[#0C2340]">
-                {lang === 'sw' ? 'Nambari ya simu ya M-Pesa *' : 'M-Pesa mobile number *'}
+                {lang === 'sw' ? 'Nambari ya simu ya M-Pesa (Kwa ombi la STK Push) *' : 'M-Pesa mobile number (For STK Push prompt) *'}
               </label>
               <input
                 type="tel"
@@ -334,8 +396,8 @@ export const CartDrawer: React.FC = () => {
               )}
               <p className="text-[11px] text-slate-500 leading-relaxed pt-0.5">
                 {lang === 'sw'
-                  ? 'Utapokea ombi la M-Pesa kwenye simu hii. Weka PIN yako kukamilisha.'
-                  : 'You will receive an M-Pesa prompt on this phone. Enter your PIN to complete.'}
+                  ? 'Unaweza kulipa moja kwa moja kupitia Till iliyo hapo juu, au uweke namba yako kupokea ombi la PIN kwenye simu yako.'
+                  : 'You can pay manually via the Till above, or enter your number to receive an instant PIN prompt on your phone.'}
               </p>
             </div>
 
@@ -362,6 +424,13 @@ export const CartDrawer: React.FC = () => {
                 {lang === 'sw' ? 'Lipa kwa M-Pesa' : 'Pay with M-Pesa'}
               </button>
             </div>
+
+            {/* Privacy Note under form */}
+            <p className="text-[11px] text-slate-500 font-source leading-relaxed pt-2 border-t border-[#0C2340]/10">
+              {lang === 'sw'
+                ? "Tunatumia maelezo yako kwa mawasiliano ya kwaya pekee na yanalindwa chini ya Sheria ya Kulinda Data ya Kenya, 2019. Picha za watoto wachanga na vijana huchapishwa tu kwa idhini ya wazazi."
+                : "We use your details only for choir communication and are protected under Kenya's Data Protection Act, 2019. Photos of minors are published only with parental consent."}
+            </p>
           </form>
         )}
 

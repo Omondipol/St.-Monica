@@ -65,12 +65,13 @@ export const CoreValuesSection: React.FC<CoreValuesSectionProps> = ({ lang }) =>
             return (
               <div
                 key={val.id}
-                className="group bg-white rounded-2xl p-6 border border-[#0C2340]/10 hover:border-[#1058A8]/40 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative"
+                tabIndex={0}
+                className="core-value-card group bg-white rounded-2xl p-6 border border-[#0C2340]/10 shadow-xs hover:shadow-md flex flex-col justify-between relative cursor-default focus:outline-none"
               >
                 <div>
                   {/* Top Bar: Icon and Editorial Index */}
                   <div className="flex items-center justify-between mb-5">
-                    <div className="w-12 h-12 rounded-xl bg-[#EAF4FB] text-[#1058A8] flex items-center justify-center border border-[#1058A8]/15 group-hover:bg-[#1058A8] group-hover:text-white transition-colors duration-300 shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-[#EAF4FB] text-[#1058A8] flex items-center justify-center border border-[#1058A8]/15 core-value-icon-tile transition-colors duration-200 shrink-0">
                       <IconComponent className="w-6 h-6 stroke-[1.8]" />
                     </div>
 
@@ -88,16 +89,6 @@ export const CoreValuesSection: React.FC<CoreValuesSectionProps> = ({ lang }) =>
                   <p className="font-source text-sm text-slate-600 leading-relaxed">
                     {displayDesc}
                   </p>
-                </div>
-
-                {/* Subtle bottom decorative line */}
-                <div className="mt-5 pt-3 border-t border-[#0C2340]/5 flex items-center justify-between text-xs font-source text-slate-400">
-                  <span className="italic">
-                    {lang === 'sw' ? 'Fadhila ya Kwaya' : 'Choir Virtue'}
-                  </span>
-                  <span className="text-[#1058A8]/70 font-medium">
-                    #{val.number}
-                  </span>
                 </div>
               </div>
             );

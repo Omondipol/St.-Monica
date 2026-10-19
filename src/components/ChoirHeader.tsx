@@ -50,6 +50,44 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
 
   const aboutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const musicTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Measure real header height into CSS variable --header-h on mount and resize
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const el = headerRef.current || document.getElementById('site-header') || document.querySelector('header');
+      if (el) {
+        const height = el.getBoundingClientRect().height || el.offsetHeight;
+        if (height > 0) {
+          document.documentElement.style.setProperty('--header-h', `${Math.round(height)}px`);
+        }
+      }
+    };
+
+    updateHeaderHeight();
+
+    let ro: ResizeObserver | null = null;
+    const el = headerRef.current || document.getElementById('site-header');
+    if (el && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => updateHeaderHeight());
+      ro.observe(el);
+    }
+
+    window.addEventListener('resize', updateHeaderHeight);
+    window.addEventListener('load', updateHeaderHeight);
+    window.addEventListener('orientationchange', updateHeaderHeight);
+
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts?.ready?.then(updateHeaderHeight).catch(() => {});
+    }
+
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', updateHeaderHeight);
+      window.removeEventListener('load', updateHeaderHeight);
+      window.removeEventListener('orientationchange', updateHeaderHeight);
+    };
+  }, []);
 
   const cartCount = cart.reduce((acc, curr) => acc + curr.quantity, 0);
   const latestSong: Song = songs[0] || {
@@ -124,7 +162,11 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full max-w-full bg-[#1C1E24] text-white border-b border-black/40 shadow-md">
+    <header 
+      id="site-header"
+      ref={headerRef}
+      className="sticky top-0 z-50 w-full max-w-full bg-[#1C1E24] text-white border-b border-black/40 shadow-md"
+    >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 relative">
         <div className="flex items-center justify-between h-[108px] sm:h-[128px] lg:h-[148px] gap-2 sm:gap-4">
           
