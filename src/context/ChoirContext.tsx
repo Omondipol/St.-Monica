@@ -14,7 +14,21 @@ import {
   INITIAL_ALBUMS,
   EventItem,
   INITIAL_EVENTS,
-  CHOIR_STATS
+  CHOIR_STATS,
+  MassItem,
+  DEFAULT_MASSES,
+  HeroSlideConfig,
+  DEFAULT_HERO_SLIDES_CONFIG,
+  ParishMessageConfig,
+  DEFAULT_PARISH_MESSAGE,
+  ScriptureQuoteConfig,
+  DEFAULT_SCRIPTURE_QUOTE,
+  ChoirmasterMessageConfig,
+  DEFAULT_CHOIRMASTER_MESSAGE,
+  FooterContactConfig,
+  DEFAULT_FOOTER_CONTACT,
+  AboutPageConfig,
+  DEFAULT_ABOUT_CONFIG
 } from '../data/choirContent';
 import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
 import { ChoirMember, INITIAL_MEMBERS, isMemberActive } from '../data/membersData';
@@ -227,6 +241,41 @@ interface ChoirContextType {
   exportDataJson: () => string;
   importDataJson: (jsonStr: string) => boolean;
 
+  // Custom Logo
+  customLogoUrl: string;
+  updateCustomLogoUrl: (url: string) => void;
+
+  // Hero Slides
+  heroSlides: HeroSlideConfig[];
+  updateHeroSlides: (slides: HeroSlideConfig[]) => void;
+  updateSingleHeroSlide: (index: number, updated: Partial<HeroSlideConfig>) => void;
+
+  // Parish Message & Church Photo
+  parishMessage: ParishMessageConfig;
+  updateParishMessage: (updated: Partial<ParishMessageConfig>) => void;
+
+  // Bible Scripture Quote
+  scriptureQuote: ScriptureQuoteConfig;
+  updateScriptureQuote: (updated: Partial<ScriptureQuoteConfig>) => void;
+
+  // Choirmaster Message & Picture
+  choirmasterMessage: ChoirmasterMessageConfig;
+  updateChoirmasterMessage: (updated: Partial<ChoirmasterMessageConfig>) => void;
+
+  // Masses List (Add, Edit, Delete)
+  massesList: MassItem[];
+  addMass: (mass: Omit<MassItem, 'id'>) => void;
+  updateMass: (id: string, updated: Partial<MassItem>) => void;
+  deleteMass: (id: string) => void;
+
+  // Footer & Contact Info
+  footerContact: FooterContactConfig;
+  updateFooterContact: (updated: Partial<FooterContactConfig>) => void;
+
+  // About Page Config
+  aboutPageConfig: AboutPageConfig;
+  updateAboutPageConfig: (updated: Partial<AboutPageConfig>) => void;
+
   // Choir Members & Registration (Renewable yearly, Ksh 500)
   members: ChoirMember[];
   activeMembers: ChoirMember[];
@@ -256,7 +305,7 @@ export const parseDurationToSeconds = (dur: string): number => {
   return 240;
 };
 
-// Storage keys - version bumped to v5 to guarantee clean migration to verified 4 songs only
+// Storage keys - version bumped to v6 to guarantee full persistence of newly added admin features
 const STORAGE_KEYS = {
   SONGS: 'st_monica_songs_data_v5',
   SHEET: 'st_monica_sheet_data_v5',
@@ -271,7 +320,15 @@ const STORAGE_KEYS = {
   SCHEDULE: 'st_monica_schedule_v5',
   NOTICE: 'st_monica_notice_v5',
   HERO: 'st_monica_hero_v5',
-  MEMBERS: 'st_monica_members_v2'
+  MEMBERS: 'st_monica_members_v2',
+  LOGO: 'st_monica_logo_v6',
+  HERO_SLIDES: 'st_monica_hero_slides_v6',
+  PARISH_MSG: 'st_monica_parish_msg_v6',
+  SCRIPTURE: 'st_monica_scripture_v6',
+  CHOIRMASTER: 'st_monica_choirmaster_v6',
+  MASSES_LIST: 'st_monica_masses_list_v6',
+  FOOTER_CONTACT: 'st_monica_footer_contact_v6',
+  ABOUT_CONFIG: 'st_monica_about_config_v6'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -556,6 +613,210 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // ignore
     }
   }, [heroContent]);
+
+  // 7g. Custom Logo URL / Uploaded Seal
+  const [customLogoUrl, setCustomLogoUrl] = useState<string>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.LOGO) || '';
+    } catch (e) {
+      return '';
+    }
+  });
+
+  const updateCustomLogoUrl = (url: string) => {
+    setCustomLogoUrl(url);
+    try {
+      localStorage.setItem(STORAGE_KEYS.LOGO, url);
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  // 7h. Hero Slides Config
+  const [heroSlides, setHeroSlides] = useState<HeroSlideConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.HERO_SLIDES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_HERO_SLIDES_CONFIG;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.HERO_SLIDES, JSON.stringify(heroSlides));
+    } catch (e) {
+      // ignore
+    }
+  }, [heroSlides]);
+
+  const updateHeroSlides = (slides: HeroSlideConfig[]) => {
+    setHeroSlides(slides);
+  };
+
+  const updateSingleHeroSlide = (index: number, updated: Partial<HeroSlideConfig>) => {
+    setHeroSlides(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        copy[index] = { ...copy[index], ...updated };
+      }
+      return copy;
+    });
+  };
+
+  // 7i. Parish Altar Message & St. Monica Church Photo
+  const [parishMessage, setParishMessage] = useState<ParishMessageConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.PARISH_MSG);
+      if (saved) return { ...DEFAULT_PARISH_MESSAGE, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_PARISH_MESSAGE;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.PARISH_MSG, JSON.stringify(parishMessage));
+    } catch (e) {
+      // ignore
+    }
+  }, [parishMessage]);
+
+  const updateParishMessage = (updated: Partial<ParishMessageConfig>) => {
+    setParishMessage(prev => ({ ...prev, ...updated }));
+  };
+
+  // 7j. Bible Scripture Quote
+  const [scriptureQuote, setScriptureQuote] = useState<ScriptureQuoteConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SCRIPTURE);
+      if (saved) return { ...DEFAULT_SCRIPTURE_QUOTE, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_SCRIPTURE_QUOTE;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SCRIPTURE, JSON.stringify(scriptureQuote));
+    } catch (e) {
+      // ignore
+    }
+  }, [scriptureQuote]);
+
+  const updateScriptureQuote = (updated: Partial<ScriptureQuoteConfig>) => {
+    setScriptureQuote(prev => ({ ...prev, ...updated }));
+  };
+
+  // 7k. Word from Choirmaster & Picture
+  const [choirmasterMessage, setChoirmasterMessage] = useState<ChoirmasterMessageConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CHOIRMASTER);
+      if (saved) return { ...DEFAULT_CHOIRMASTER_MESSAGE, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_CHOIRMASTER_MESSAGE;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CHOIRMASTER, JSON.stringify(choirmasterMessage));
+    } catch (e) {
+      // ignore
+    }
+  }, [choirmasterMessage]);
+
+  const updateChoirmasterMessage = (updated: Partial<ChoirmasterMessageConfig>) => {
+    setChoirmasterMessage(prev => ({ ...prev, ...updated }));
+  };
+
+  // 7l. Masses Dynamic List (Add, Edit, Delete)
+  const [massesList, setMassesList] = useState<MassItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.MASSES_LIST);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_MASSES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MASSES_LIST, JSON.stringify(massesList));
+    } catch (e) {
+      // ignore
+    }
+  }, [massesList]);
+
+  const addMass = (mass: Omit<MassItem, 'id'>) => {
+    const id = `mass-${Date.now()}`;
+    setMassesList(prev => [...prev, { ...mass, id }]);
+  };
+
+  const updateMass = (id: string, updated: Partial<MassItem>) => {
+    setMassesList(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+  };
+
+  const deleteMass = (id: string) => {
+    setMassesList(prev => prev.filter(m => m.id !== id));
+  };
+
+  // 7m. Footer & Contact Info
+  const [footerContact, setFooterContact] = useState<FooterContactConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.FOOTER_CONTACT);
+      if (saved) return { ...DEFAULT_FOOTER_CONTACT, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_FOOTER_CONTACT;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.FOOTER_CONTACT, JSON.stringify(footerContact));
+    } catch (e) {
+      // ignore
+    }
+  }, [footerContact]);
+
+  const updateFooterContact = (updated: Partial<FooterContactConfig>) => {
+    setFooterContact(prev => ({ ...prev, ...updated }));
+  };
+
+  // 7n. About Page Everything
+  const [aboutPageConfig, setAboutPageConfig] = useState<AboutPageConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.ABOUT_CONFIG);
+      if (saved) return { ...DEFAULT_ABOUT_CONFIG, ...JSON.parse(saved) };
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_ABOUT_CONFIG;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.ABOUT_CONFIG, JSON.stringify(aboutPageConfig));
+    } catch (e) {
+      // ignore
+    }
+  }, [aboutPageConfig]);
+
+  const updateAboutPageConfig = (updated: Partial<AboutPageConfig>) => {
+    setAboutPageConfig(prev => ({ ...prev, ...updated }));
+  };
 
   // 7f. Choir Members (Renewable Yearly, Ksh 500)
   const [members, setMembers] = useState<ChoirMember[]>(() => {
@@ -1453,6 +1714,14 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.removeItem(STORAGE_KEYS.SCHEDULE);
       localStorage.removeItem(STORAGE_KEYS.NOTICE);
       localStorage.removeItem(STORAGE_KEYS.HERO);
+      localStorage.removeItem(STORAGE_KEYS.LOGO);
+      localStorage.removeItem(STORAGE_KEYS.HERO_SLIDES);
+      localStorage.removeItem(STORAGE_KEYS.PARISH_MSG);
+      localStorage.removeItem(STORAGE_KEYS.SCRIPTURE);
+      localStorage.removeItem(STORAGE_KEYS.CHOIRMASTER);
+      localStorage.removeItem(STORAGE_KEYS.MASSES_LIST);
+      localStorage.removeItem(STORAGE_KEYS.FOOTER_CONTACT);
+      localStorage.removeItem(STORAGE_KEYS.ABOUT_CONFIG);
     } catch (e) {
       // ignore
     }
@@ -1466,11 +1735,19 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setChoirStats(CHOIR_STATS);
     setEventsList(INITIAL_EVENTS);
     setHeroContent(INITIAL_HERO_CONTENT);
+    setCustomLogoUrl('');
+    setHeroSlides(DEFAULT_HERO_SLIDES_CONFIG);
+    setParishMessage(DEFAULT_PARISH_MESSAGE);
+    setScriptureQuote(DEFAULT_SCRIPTURE_QUOTE);
+    setChoirmasterMessage(DEFAULT_CHOIRMASTER_MESSAGE);
+    setMassesList(DEFAULT_MASSES);
+    setFooterContact(DEFAULT_FOOTER_CONTACT);
+    setAboutPageConfig(DEFAULT_ABOUT_CONFIG);
   };
 
   const exportDataJson = (): string => {
     const backup = {
-      version: '5.0',
+      version: '6.0',
       exportDate: new Date().toISOString(),
       parish: choirStats.parish,
       heroContent,
@@ -1483,7 +1760,15 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       leadersList,
       groupPhotosList,
       productsList,
-      librarySongs
+      librarySongs,
+      customLogoUrl,
+      heroSlides,
+      parishMessage,
+      scriptureQuote,
+      choirmasterMessage,
+      massesList,
+      footerContact,
+      aboutPageConfig
     };
     return JSON.stringify(backup, null, 2);
   };
@@ -1515,6 +1800,14 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (data.librarySongs && Array.isArray(data.librarySongs)) {
         setLibrarySongs(data.librarySongs);
       }
+      if (typeof data.customLogoUrl === 'string') setCustomLogoUrl(data.customLogoUrl);
+      if (data.heroSlides && Array.isArray(data.heroSlides)) setHeroSlides(data.heroSlides);
+      if (data.parishMessage) setParishMessage(data.parishMessage);
+      if (data.scriptureQuote) setScriptureQuote(data.scriptureQuote);
+      if (data.choirmasterMessage) setChoirmasterMessage(data.choirmasterMessage);
+      if (data.massesList && Array.isArray(data.massesList)) setMassesList(data.massesList);
+      if (data.footerContact) setFooterContact(data.footerContact);
+      if (data.aboutPageConfig) setAboutPageConfig(data.aboutPageConfig);
       return true;
     } catch (err) {
       console.error('Failed to import JSON data', err);
@@ -1654,6 +1947,41 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         resetToDefaults,
         exportDataJson,
         importDataJson,
+
+        // Custom Logo
+        customLogoUrl,
+        updateCustomLogoUrl,
+
+        // Hero Slides
+        heroSlides,
+        updateHeroSlides,
+        updateSingleHeroSlide,
+
+        // Parish Message & Church Photo
+        parishMessage,
+        updateParishMessage,
+
+        // Scripture Quote
+        scriptureQuote,
+        updateScriptureQuote,
+
+        // Choirmaster Message & Picture
+        choirmasterMessage,
+        updateChoirmasterMessage,
+
+        // Masses Dynamic List
+        massesList,
+        addMass,
+        updateMass,
+        deleteMass,
+
+        // Footer & Contact Info
+        footerContact,
+        updateFooterContact,
+
+        // About Page Config
+        aboutPageConfig,
+        updateAboutPageConfig,
 
         members,
         activeMembers,
@@ -1807,7 +2135,25 @@ export const useChoir = (): ChoirContextType => {
       incrementDownloadCount: () => {},
       resetToDefaults: () => {},
       exportDataJson: () => '[]',
-      importDataJson: () => false,
+      customLogoUrl: '',
+      updateCustomLogoUrl: () => {},
+      heroSlides: DEFAULT_HERO_SLIDES_CONFIG,
+      updateHeroSlides: () => {},
+      updateSingleHeroSlide: () => {},
+      parishMessage: DEFAULT_PARISH_MESSAGE,
+      updateParishMessage: () => {},
+      scriptureQuote: DEFAULT_SCRIPTURE_QUOTE,
+      updateScriptureQuote: () => {},
+      choirmasterMessage: DEFAULT_CHOIRMASTER_MESSAGE,
+      updateChoirmasterMessage: () => {},
+      massesList: DEFAULT_MASSES,
+      addMass: () => {},
+      updateMass: () => {},
+      deleteMass: () => {},
+      footerContact: DEFAULT_FOOTER_CONTACT,
+      updateFooterContact: () => {},
+      aboutPageConfig: DEFAULT_ABOUT_CONFIG,
+      updateAboutPageConfig: () => {},
       members: INITIAL_MEMBERS,
       activeMembers: INITIAL_MEMBERS,
       registerMember: () => INITIAL_MEMBERS[0],

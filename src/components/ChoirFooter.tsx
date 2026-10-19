@@ -21,7 +21,7 @@ interface ChoirFooterProps {
 }
 
 export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
-  const { lang } = useChoir();
+  const { lang, footerContact, choirStats, massesList, massSchedule } = useChoir();
 
   // Collapsible accordion sections for phone screens (closed by default)
   const [mobileExploreOpen, setMobileExploreOpen] = useState(false);
@@ -210,16 +210,32 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </span>
 
             <div className={`space-y-3 text-sm text-[#B8C7D9] ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
-              <div>
-                <strong className="text-white block font-medium">3rd Mass (Sunday Sung Mass)</strong>
-                <span className="text-[#B8C7D9] text-xs tabular-nums">10:00 AM (Section 58 Sanctuary)</span>
-              </div>
+              {massesList && massesList.length > 0 ? (
+                massesList.slice(0, 3).map((m) => (
+                  <div key={m.id}>
+                    <strong className="text-white block font-medium">
+                      {lang === 'sw' ? (m.titleSw || m.title) : m.title}
+                    </strong>
+                    <span className="text-[#B8C7D9] text-xs tabular-nums">
+                      {m.time} {m.isSungMass ? (lang === 'sw' ? '(Misa Inayoimbwa)' : '(Sung Mass)') : ''}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div>
+                  <strong className="text-white block font-medium">3rd Mass (Sunday Sung Mass)</strong>
+                  <span className="text-[#B8C7D9] text-xs tabular-nums">10:00 AM (Section 58 Sanctuary)</span>
+                </div>
+              )}
               <div>
                 <strong className="text-white block font-medium">{lang === 'sw' ? 'Mazoezi ya Kwaya' : 'Choir Rehearsals'}</strong>
-                <span className="text-[#B8C7D9] text-xs tabular-nums">Wed & Fri: 5:30 PM – 7:30 PM</span>
+                <span className="text-[#B8C7D9] text-xs tabular-nums">
+                  {lang === 'sw' 
+                    ? (footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku") 
+                    : (footerContact?.rehearsalsEn || massSchedule?.rehearsals || "Wed & Fri: 5:30 PM – 7:30 PM")}
+                </span>
               </div>
               <div>
-                {/* Confirm with Parish Priest whether the parish observes this as a Solemnity */}
                 <strong className="text-white block font-medium">Patronal Feast of St. Monica, 27 August</strong>
                 <span className="text-[#B8C7D9] text-xs">{lang === 'sw' ? 'Sikukuu ya Patron ya Mtakatifu Monika' : 'Parish Patronal Mass'}</span>
               </div>
@@ -246,10 +262,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             <div className={`space-y-3 text-sm text-slate-300 ${mobileContactOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
-                <span className="block text-white font-medium">St. Monica's Catholic Church</span>
-                <span className="text-slate-300 text-xs block">{CHOIR_STATS.churchAddress}</span>
+                <span className="block text-white font-medium">{choirStats?.parish || "St. Monica's Catholic Church"}</span>
+                <span className="text-slate-300 text-xs block">{footerContact?.churchAddress || choirStats?.churchAddress || CHOIR_STATS.churchAddress}</span>
                 <a 
-                  href={CHOIR_STATS.mapsUrl}
+                  href={footerContact?.mapsUrl || choirStats?.mapsUrl || CHOIR_STATS.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-[#7EC8F0] hover:text-white font-semibold transition-colors mt-1"
@@ -262,10 +278,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-xs text-slate-400 block">Email Address</span>
                 <a 
-                  href={`mailto:${CHOIR_STATS.email}`}
+                  href={`mailto:${footerContact?.email || choirStats?.email || CHOIR_STATS.email}`}
                   className="text-slate-200 hover:text-white transition-colors text-xs font-medium"
                 >
-                  {CHOIR_STATS.email}
+                  {footerContact?.email || choirStats?.email || CHOIR_STATS.email}
                 </a>
               </div>
 
@@ -273,15 +289,15 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
                 <span className="text-xs text-slate-400 block">Phone & WhatsApp</span>
                 <div className="flex items-center gap-2 pt-0.5">
                   <a 
-                    href={`tel:${CHOIR_STATS.phone.replace(/\s+/g, '')}`}
+                    href={`tel:${(footerContact?.phone || choirStats?.phone || CHOIR_STATS.phone).replace(/\s+/g, '')}`}
                     className="text-sky-300 hover:text-white transition-colors text-xs font-semibold"
                     title="Call Parish Office / Choirmaster"
                   >
-                    {CHOIR_STATS.phone}
+                    {footerContact?.phone || choirStats?.phone || CHOIR_STATS.phone}
                   </a>
                   <span className="text-slate-500">·</span>
                   <a 
-                    href={CHOIR_STATS.whatsappUrl}
+                    href={footerContact?.whatsapp || choirStats?.whatsappUrl || CHOIR_STATS.whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#25D366] hover:text-emerald-300 transition-colors text-xs font-bold"

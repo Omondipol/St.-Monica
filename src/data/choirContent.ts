@@ -44,6 +44,7 @@ export interface SheetMusicItem {
   description: string;
   descriptionSw: string;
   downloadUrl?: string;
+  previewImage?: string;
 }
 
 export interface Album {
@@ -70,6 +71,7 @@ export interface ChoirLeader {
   tenure: string;
   tenureSw: string;
   contact?: string;
+  photoUrl?: string;
 }
 
 export interface ChoirGroupPhoto {
@@ -746,3 +748,277 @@ export const CORE_VALUES: CoreValue[] = [
     iconName: 'Anchor'
   }
 ];
+
+export interface MassItem {
+  id: string;
+  title: string;
+  titleSw?: string;
+  time: string;
+  desc: string;
+  descSw?: string;
+  isSungMass?: boolean;
+}
+
+export const DEFAULT_MASSES: MassItem[] = [
+  {
+    id: 'mass-dawn',
+    title: '1st Mass (Dawn)',
+    titleSw: 'Misa ya 1 (Asubuhi Mapema / Alfajiri)',
+    time: '7:00 AM',
+    desc: 'Solemn morning Eucharistic prayer for early parishioners.',
+    descSw: 'Misa ya Asubuhi Mapema (Alfajiri) kwa sala na utulivu.',
+    isSungMass: false
+  },
+  {
+    id: 'mass-morning',
+    title: '2nd Mass (Kiswahili)',
+    titleSw: 'Misa ya 2 (Kiswahili)',
+    time: '8:30 AM',
+    desc: 'Morning parish Eucharistic liturgy with congregational hymns.',
+    descSw: 'Misa ya pili ya asubuhi na nyimbo za kutaniko.',
+    isSungMass: false
+  },
+  {
+    id: 'mass-sung',
+    title: '3rd Mass (Sunday Sung Mass)',
+    titleSw: 'Misa ya 3 (Misa ya Jumapili Inayoimbwa)',
+    time: '10:00 AM',
+    desc: 'St. Monica Third Mass Choir leads solemn four-part SATB liturgy.',
+    descSw: 'Misa ya Tatu (Misa ya Jumapili Inayoimbwa) - Kwaya ya Mtakatifu Monika huongoza liturujia ya sauti nne.',
+    isSungMass: true
+  }
+];
+
+export interface HeroSlideConfig {
+  id: string;
+  src: string;
+  srcMobile?: string;
+  alt: string;
+  description: string;
+  eyebrowEn: string;
+  eyebrowSw: string;
+  headlineEn: string;
+  headlineSw: string;
+  attributionEn: string;
+  attributionSw: string;
+  descEn?: string;
+  descSw?: string;
+  focus?: string;
+  focusMobile?: string;
+}
+
+export interface ParishMessageConfig {
+  titleEn: string;
+  titleSw: string;
+  body1En: string;
+  body1Sw: string;
+  body2En: string;
+  body2Sw: string;
+  churchImg: string;
+  churchName: string;
+  churchSubtitle: string;
+  mapsUrl: string;
+}
+
+export const DEFAULT_PARISH_MESSAGE: ParishMessageConfig = {
+  titleEn: "From the Parish Altar to the Deanery and Beyond",
+  titleSw: "Kutoka Altare ya Parokia Hadi Dekania na Zaidi",
+  body1En: 'St. Monica Third Mass Choir began in 2012 with a dedicated circle of choristers at St. Monica Parish in Nakuru. A defining moment in our journey took place in 2019 at the Nakuru Deanery Choral Festival, when our four-part offering of "Machozi ya Imani" held the congregation in prayerful silence before the final blessing.',
+  body1Sw: 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilianzishwa mwaka 2012 na kundi dogo la waimbaji waliojitolea katika Parokia ya Mtakatifu Monika, Nakuru. Tukio letu la kukumbukwa lilitokea mwaka 2019 kwenye Tamasha la Muziki wa Kikatoliki la Dekania ya Nakuru, ambapo toleo letu la sauti nne la "Machozi ya Imani" lilishikilia kusanyiko katika ukimya wa sala kabla ya baraka kuu.',
+  body2En: 'Today, our choristers sing every Sunday in disciplined four-part harmony (SATB), training young parish voices in tonic sol-fa to keep liturgical tradition vibrant and alive.',
+  body2Sw: 'Leo, tunaimba kila Dominika kwa sauti nne (Soprano, Alto, Tenor, Bass), tukihakikisha watoto na vijana wa parokia wanajifunza noti za solfa na kuendeleza utamaduni wa muziki mtakatifu.',
+  churchImg: '', // empty defaults to bundled asset
+  churchName: "St. Monica Catholic Church",
+  churchSubtitle: "Section 58, Nakuru · Catholic Diocese of Nakuru",
+  mapsUrl: "https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru"
+};
+
+export interface ScriptureQuoteConfig {
+  categoryEn: string;
+  categorySw: string;
+  textEn: string;
+  textSw: string;
+  citationEn: string;
+  citationSw: string;
+  bgImage?: string;
+}
+
+export const DEFAULT_SCRIPTURE_QUOTE: ScriptureQuoteConfig = {
+  categoryEn: "Sacred Scripture · Letter to the Colossians",
+  categorySw: "Maandiko Matakatifu · Barua kwa Wakolosai",
+  textEn: "Let the word of Christ dwell in you richly, as in all wisdom you teach and admonish one another, singing psalms, hymns, and spiritual songs with gratitude in your hearts to God.",
+  textSw: "Neno la Kristo na likae kwa wingi ndani yenu, mkifundishana na kuonyana kwa hekima yote, huku mkiimba zaburi, na nyimbo, na tenzi za rohoni kwa shukrani mioyoni mwenu kwa Mungu.",
+  citationEn: "— Colossians 3:16 (NABRE)",
+  citationSw: "— Wakolosai 3:16 (NABRE)",
+  bgImage: ""
+};
+
+export interface ChoirmasterMessageConfig {
+  titleEn: string;
+  titleSw: string;
+  messageEn: string;
+  messageSw: string;
+  name: string;
+  roleEn: string;
+  roleSw: string;
+  image: string;
+}
+
+export const DEFAULT_CHOIRMASTER_MESSAGE: ChoirmasterMessageConfig = {
+  titleEn: "A Word from the Choirmaster",
+  titleSw: "Ujumbe Kutoka kwa Mwalimu wa Kwaya",
+  messageEn: "“Welcome to the musical home of St. Monica Third Mass Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is a sincere offering of praise to Almighty God.”",
+  messageSw: "“Karibu sana kwenye jukwaa la muziki la Kwaya ya Misa ya Tatu ya Mtakatifu Monika, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe toleo la dhati la sifa kwa Mwenyezi Mungu.”",
+  name: "Mwalimu Joseph Otieno",
+  roleEn: "Director of Music & Choirmaster",
+  roleSw: "Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya",
+  image: ""
+};
+
+export interface FooterContactConfig {
+  phone: string;
+  whatsapp: string;
+  email: string;
+  churchAddress: string;
+  mapsUrl: string;
+  mpesaTill: string;
+  rehearsalsEn: string;
+  rehearsalsSw: string;
+}
+
+export const DEFAULT_FOOTER_CONTACT: FooterContactConfig = {
+  phone: "+254 700 000 000",
+  whatsapp: "https://wa.me/254700000000",
+  email: "info@stmonicachoir.org",
+  churchAddress: "Section 58, Off Kanu Street, Nakuru, Kenya",
+  mapsUrl: "https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru",
+  mpesaTill: "8421092",
+  rehearsalsEn: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
+  rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
+};
+
+export interface AboutPageConfig {
+  storyBannerImg: string;
+  storyTitleEn: string;
+  storyTitleSw: string;
+  storySubtitleEn: string;
+  storySubtitleSw: string;
+  storyParagraph1En: string;
+  storyParagraph1Sw: string;
+  storyParagraph2En: string;
+  storyParagraph2Sw: string;
+  storyPhotoImg: string;
+  patronBannerImg: string;
+  patronPortraitImg: string;
+  patronTitleEn: string;
+  patronTitleSw: string;
+  patronSubtitleEn: string;
+  patronSubtitleSw: string;
+  patronBio1En: string;
+  patronBio1Sw: string;
+  patronBio2En: string;
+  patronBio2Sw: string;
+  patronFeastDayEn: string;
+  patronFeastDaySw: string;
+  patronPrayerEn: string;
+  patronPrayerSw: string;
+}
+
+export const DEFAULT_ABOUT_CONFIG: AboutPageConfig = {
+  storyBannerImg: "",
+  storyTitleEn: "Our Roots in St. Monica Parish, Nakuru",
+  storyTitleSw: "Mizizi Yetu Katika Parokia ya Mtakatifu Monika",
+  storySubtitleEn: "Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.",
+  storySubtitleSw: "Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya inayotumikia altare ya Mungu kila juma.",
+  storyParagraph1En: "St. Monica Third Mass Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass (the parish 3rd Mass). Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.",
+  storyParagraph1Sw: "Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.",
+  storyParagraph2En: "Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.",
+  storyParagraph2Sw: "Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.",
+  storyPhotoImg: "",
+  patronBannerImg: "",
+  patronPortraitImg: "",
+  patronTitleEn: "Why St. Monica is Our Heavenly Patroness",
+  patronTitleSw: "Kwanini Mtakatifu Monika ni Somo Wetu?",
+  patronSubtitleEn: "Mother of tears & unceasing prayer · Feast Day: August 27.",
+  patronSubtitleSw: "Mama wa machozi na sala isiyokoma · Sikukuu: 27 Agosti.",
+  patronBio1En: "Saint Monica (c. 332–387 AD) was born in Tagaste, North Africa (modern-day Algeria). A woman of profound Catholic piety and unmatched perseverance, she is globally celebrated for praying persistently for seventeen years for the conversion of her wayward son, Augustine.",
+  patronBio1Sw: "Mtakatifu Monika (takriban 332–387 BK) alizaliwa Tagaste, Afrika Kaskazini (nchini Algeria ya sasa). Alikuwa mwanamke wa sala na uvumilivu mkubwa ambaye alimlilia Mungu kwa miaka kumi na saba hadi mwanaye Augustino alipobatizwa na kuwa Askofu na Mwalimu Mkuu wa Kanisa.",
+  patronBio2En: "For our choristers at Section 58 in Nakuru, Saint Monica embodies the heart of choir ministry: weeping with those who mourn, rejoicing with those who hope, and never ceasing to lift tears and hymns of faith to God.",
+  patronBio2Sw: "Kwa waimbaji wetu wa Misa ya Tatu Parokiani Section 58 Nakuru, Mtakatifu Monika ni mfano wa upendo, sala ya machozi isiyokata tamaa na unyenyekevu mkuu mbele ya Altare ya Ekaristi Takatifu.",
+  patronFeastDayEn: "27th August (Universal Feast Day of Saint Monica)",
+  patronFeastDaySw: "Tarehe 27 Agosti (Sikukuu ya Mtakatifu Monika Duniani)",
+  patronPrayerEn: "Lord, through the persistent prayers and tears of Saint Monica, You led Saint Augustine into the light of the true faith. Through her intercession, give our choir faithful devotion, vocal humility, and grace to draw all souls to Your Altar through sacred song. Amen.",
+  patronPrayerSw: "Ee Mungu wetu, kupitia sala na machozi ya Mtakatifu Monika, ulimwongoza mwanaye Augustino kwenye ukweli wa Injili. Kupitia maombezi yake, ijalie kwaya yetu neema ya kuimba kwa unyenyekevu na nidhamu ya kicho altaroni ili mioyo ya wengi ivutwe kwako. Amina."
+};
+
+export const DEFAULT_HERO_SLIDES_CONFIG: HeroSlideConfig[] = [
+  {
+    id: "hero-slide-1",
+    src: "",
+    srcMobile: "",
+    alt: "Full choir at Sunday Sung Mass altar in St. Monica Catholic Church, Section 58",
+    description: "Full Choir at Sunday Sung Mass",
+    eyebrowEn: "Four-part SATB polyphony at Section 58, Nakuru",
+    eyebrowSw: "Muziki wa sauti nne (SATB) Section 58, Nakuru",
+    headlineEn: "Uniting hearts through sacred music",
+    headlineSw: "Kuunganisha mioyo kupitia muziki mtakatifu",
+    attributionEn: "St. Monica Third Mass Choir · Nakuru",
+    attributionSw: "Kwaya ya Misa ya Tatu, Mtakatifu Monika · Nakuru",
+    descEn: "Four-part SATB polyphony sung every Sunday at 10:00 AM Mass. Preserving sacred liturgical music tradition in the Catholic Diocese of Nakuru.",
+    descSw: "Muziki wa kiliturujia wa sauti nne (Soprano, Alto, Tenor, Bass) kila Dominika Misa ya Saa Nne Asubuhi Parokia ya Mtakatifu Monika.",
+    focus: "50% 25%",
+    focusMobile: "50% 20%"
+  },
+  {
+    id: "hero-slide-2",
+    src: "",
+    srcMobile: "",
+    alt: "St. Monica's Catholic Church sanctuary and altar, Section 58 Nakuru",
+    description: "Parish Sanctuary & Church",
+    eyebrowEn: "Saint Augustine on the Sacred Liturgy",
+    eyebrowSw: "Mtakatifu Augustino Kuhusu Liturujia Takatifu",
+    headlineEn: "“He who sings well prays twice.”",
+    headlineSw: "“Aimbaye vizuri anasali mara mbili.”",
+    attributionEn: "St. Augustine of Hippo (Bishop & Doctor of the Church)",
+    attributionSw: "Mtakatifu Augustino wa Hippo (Askofu na Mwalimu wa Kanisa)",
+    descEn: "Our voices are lifted before the parish altar in reverent service, offering prayer through solemn chant and four-part liturgical song.",
+    descSw: "Sauti zetu zinainuliwa mbele ya Altare ya Parokia kwa heshima kuu, tukitoa sala kupitia nyimbo takatifu na kwaya ya sauti nne.",
+    focus: "50% 30%",
+    focusMobile: "50% 25%"
+  },
+  {
+    id: "hero-slide-3",
+    src: "",
+    srcMobile: "",
+    alt: "Choristers singing praise before the parish altar",
+    description: "Singers in Sacred Song",
+    eyebrowEn: "Liturgical Harmony Before the Altar",
+    eyebrowSw: "Upatanisho wa Kiliturujia Mbele ya Altare",
+    headlineEn: "“Sing to the Lord a new song; sing to the Lord, all the earth.”",
+    headlineSw: "“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”",
+    attributionEn: "Psalm 96:1 / Zaburi 96:1",
+    attributionSw: "Zaburi 96:1",
+    descEn: "Leading the congregation into prayerful worship every Sunday through authentic Kenyan Catholic choral repertoire and solemn polyphony.",
+    descSw: "Kuongoza kutaniko katika sala ya heshima kila Dominika kupitia nyimbo takatifu za Kikatoliki za Kenya na utajiri wa sauti nne.",
+    focus: "50% 20%",
+    focusMobile: "50% 15%"
+  },
+  {
+    id: "hero-slide-4",
+    src: "",
+    srcMobile: "",
+    alt: "The choirmaster directing four-part vocal polyphony",
+    description: "Choirmaster Directing",
+    eyebrowEn: "Vocal Ministry & Solfa Training",
+    eyebrowSw: "Huduma ya Sauti na Mafunzo ya Solfa",
+    headlineEn: "Four Voices, One Sacred Harmony Before the Altar.",
+    headlineSw: "Sauti Nne, Upatanisho Mmoja Mtakatifu Mbele ya Altare.",
+    attributionEn: "Section 58, Nakuru · Catholic Diocese of Nakuru",
+    attributionSw: "Section 58, Nakuru · Jimbo Katoliki la Nakuru",
+    descEn: "Rigorous tonic sol-fa and staff training nurturing parish vocalists for liturgical excellence and devoted Catholic worship.",
+    descSw: "Mafunzo ya kina ya noti za solfa na stafu kwa vijana na waimbaji wa parokia kwa utukufu wa Mungu na liturujia takatifu.",
+    focus: "60% 15%",
+    focusMobile: "60% 15%"
+  }
+];
+

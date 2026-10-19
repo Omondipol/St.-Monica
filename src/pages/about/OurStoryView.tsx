@@ -13,7 +13,7 @@ interface OurStoryViewProps {
 }
 
 export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, choirStats } = useChoir();
+  const { lang, choirStats, aboutPageConfig } = useChoir();
 
   const timeline = [
     {
@@ -51,7 +51,7 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
       {/* Page Title Banner (Matching Music Section Slim Banner) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={churchImg} 
+          src={aboutPageConfig?.storyBannerImg || churchImg} 
           alt="St. Monica Catholic Church, Nakuru" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -65,8 +65,8 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
           </h1>
           <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
             {lang === 'sw'
-              ? 'Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya inayotumikia altare ya Mungu kila juma.'
-              : 'Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.'}
+              ? (aboutPageConfig?.storySubtitleSw || 'Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya inayotumikia altare ya Mungu kila juma.')
+              : (aboutPageConfig?.storySubtitleEn || 'Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.')}
           </p>
         </div>
         <AfricanGeometricBorder className="relative z-10" />
@@ -79,17 +79,19 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/90 border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
         <div className="lg:col-span-7 space-y-4 text-[16px] text-[#0C2340]/85 font-source leading-relaxed">
           <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-            {lang === 'sw' ? 'Mizizi Yetu Katika Parokia ya Mtakatifu Monika' : 'Our Roots in St. Monica Parish, Nakuru'}
+            {lang === 'sw' 
+              ? (aboutPageConfig?.storyTitleSw || 'Mizizi Yetu Katika Parokia ya Mtakatifu Monika') 
+              : (aboutPageConfig?.storyTitleEn || 'Our Roots in St. Monica Parish, Nakuru')}
           </h2>
           <p>
             {lang === 'sw'
-              ? 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.'
-              : 'St. Monica Third Mass Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass (the parish 3rd Mass). Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.'}
+              ? (aboutPageConfig?.storyParagraph1Sw || 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.')
+              : (aboutPageConfig?.storyParagraph1En || 'St. Monica Third Mass Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass (the parish 3rd Mass). Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.')}
           </p>
           <p>
             {lang === 'sw'
-              ? 'Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.'
-              : 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.'}
+              ? (aboutPageConfig?.storyParagraph2Sw || 'Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.')
+              : (aboutPageConfig?.storyParagraph2En || 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.')}
           </p>
 
           <div className="pt-5 border-t border-[#0C2340]/10">
@@ -144,9 +146,9 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-sm">
+        <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-sm bg-slate-900">
           <img
-            src={churchImg}
+            src={aboutPageConfig?.storyPhotoImg || churchImg}
             alt="St. Monica Parish Church"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"

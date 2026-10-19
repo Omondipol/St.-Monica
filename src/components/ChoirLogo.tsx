@@ -133,15 +133,17 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
   interactive = false,
   title = "St. Monica Third Mass Choir Official Seal"
 }) => {
-  const { lang } = useChoir();
+  const { lang, customLogoUrl } = useChoir();
   const [showModal, setShowModal] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // We load the official transparent PNG seal with high-DPI srcset, falling back to SVG vector
+  const effectiveSrc = customLogoUrl || "./logo/st_monica_seal_final_transparent.png";
+
+  // We load the custom logo or the official transparent PNG seal with high-DPI srcset, falling back to SVG vector
   const logoGraphic = !imageError ? (
     <img
-      src="./logo/st_monica_seal_final_transparent.png"
-      srcSet="./logo/st_monica_seal_final_transparent.png 1x, ./logo/st_monica_choir_seal.png 2x"
+      src={effectiveSrc}
+      srcSet={!customLogoUrl ? "./logo/st_monica_seal_final_transparent.png 1x, ./logo/st_monica_choir_seal.png 2x" : undefined}
       alt="St. Monica Third Mass Choir Official Seal"
       width={size}
       height={size}

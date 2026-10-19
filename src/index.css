@@ -103,7 +103,7 @@ p {
   }
 }
 
-/* Fallback for slides 3 and 4 on short screens (viewport height under 680px),
+/* Fallback for slide 3 on short screens (viewport height under 680px),
    applied only if the text still does not fit after --hero-fit reaches 0.72:
    - Hide the description (.hero-desc) on that slide.
    - Reduce the gap between the headline and the attribution to 6px.
@@ -116,6 +116,60 @@ p {
 .hero-content[data-hero-fallback="true"] .hero-attribution,
 .hero-content-container[data-hero-fallback="true"] .hero-attribution {
   margin-top: 6px !important;
+}
+
+/* =========================================================
+   SLIDE 4 ONLY RULES (touch nothing on slides 1 to 3)
+   ========================================================= */
+.slide-4 .hero-content,
+.slide-4.hero-content,
+[data-slide="4"] .hero-content,
+[data-slide="4"].hero-content {
+  justify-content: flex-start !important;
+  padding-top: calc(var(--header-h, 80px) + 12px) !important;
+  padding-bottom: calc(var(--player-h, 64px) + 24px) !important;
+}
+
+.slide-4 .hero-eyebrow,
+[data-slide="4"] .hero-eyebrow {
+  margin-bottom: 6px !important;
+}
+
+.slide-4 h1,
+.slide-4 .hero-fluid-title,
+[data-slide="4"] h1,
+[data-slide="4"] .hero-fluid-title {
+  font-size: clamp(1.6rem, 4.6vh, 2.8rem) !important;
+  line-height: 1.08 !important;
+  margin: 0 0 6px !important;
+}
+
+.slide-4 .hero-attribution,
+[data-slide="4"] .hero-attribution {
+  margin-bottom: 6px !important;
+}
+
+.slide-4 .hero-desc,
+[data-slide="4"] .hero-desc {
+  display: none !important;
+}
+
+.slide-4 .hero-buttons,
+.slide-4 .hero-buttons-container,
+[data-slide="4"] .hero-buttons,
+[data-slide="4"] .hero-buttons-container {
+  margin-top: 12px !important;
+  padding-top: 0 !important;
+}
+
+.slide-4 .hero-buttons .btn,
+.slide-4 .hero-buttons-container button,
+.slide-4 .hero-buttons-container a,
+[data-slide="4"] .hero-buttons .btn,
+[data-slide="4"] .hero-buttons-container button,
+[data-slide="4"] .hero-buttons-container a {
+  height: 42px !important;
+  min-height: 42px !important;
 }
 
 .song-card-title {

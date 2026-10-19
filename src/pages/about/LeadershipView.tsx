@@ -57,7 +57,13 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
           {trainers.map((trainer) => (
             <div key={trainer.id} className="p-6 sm:p-8 bg-white/95 border border-[#0C2340]/10 rounded-2xl space-y-4 hover:border-[#1058A8]/40 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all">
               <div className="flex items-start gap-4">
-                {trainer.id === 'ldr-choirmaster' ? (
+                {trainer.photoUrl ? (
+                  <img
+                    src={trainer.photoUrl}
+                    alt={trainer.name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#1058A8] shrink-0 shadow-xs"
+                  />
+                ) : trainer.id === 'ldr-choirmaster' ? (
                   <img
                     src={choirmasterImg}
                     alt={trainer.name}
@@ -103,9 +109,17 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
           {officials.map((official) => (
             <div key={official.id} className="p-6 sm:p-8 bg-white/95 border border-[#0C2340]/10 rounded-2xl space-y-4 hover:border-[#1058A8]/40 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#FAF8F5] border border-[#0C2340]/10 flex items-center justify-center text-[#0C2340] font-eb-garamond font-bold text-xl shrink-0 shadow-xs">
-                  {official.name.split(' ').slice(-1)[0][0]}
-                </div>
+                {official.photoUrl ? (
+                  <img
+                    src={official.photoUrl}
+                    alt={official.name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#1058A8] shrink-0 shadow-xs"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-[#FAF8F5] border border-[#0C2340]/10 flex items-center justify-center text-[#0C2340] font-eb-garamond font-bold text-xl shrink-0 shadow-xs">
+                    {official.name.split(' ').slice(-1)[0][0]}
+                  </div>
+                )}
                 <div>
                   <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">{official.name}</h3>
                   <span className="text-[13px] font-semibold text-[#1058A8] block mt-0.5 font-source">

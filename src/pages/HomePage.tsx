@@ -130,6 +130,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     choirStats,
     massSchedule,
     siteNotice,
+    heroSlides,
+    parishMessage,
+    scriptureQuote,
+    choirmasterMessage,
+    massesList,
     openJoinModal
   } = useChoir();
 
@@ -319,6 +324,79 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     };
   }, [currentSlideIndex, lang]);
 
+  // Safety check, slide 4 ONLY:
+  // When slide 4 becomes active (and on load and resize), measure the bottom of its last button
+  // against the top of the player bar.
+  // If button.bottom > playerBar.top - 20, apply transform: scale(factor) with transform-origin: left top
+  // to the slide 4 text block, where factor = available height / text height, with a minimum of 0.75.
+  // Reset the scale to 1 before each measurement. Never apply this scale to slides 1 to 3.
+  useEffect(() => {
+    const textBlock = document.getElementById('hero-active-slide-content');
+    if (!textBlock) return;
+
+    if (currentSlideIndex !== 3) {
+      textBlock.style.transform = 'none';
+      return;
+    }
+
+    const checkSlide4Safety = () => {
+      // Reset the scale to 1 before each measurement
+      textBlock.style.transform = 'none';
+      textBlock.style.transformOrigin = 'left top';
+
+      requestAnimationFrame(() => {
+        const buttonsContainer = textBlock.querySelector('.hero-buttons') || textBlock.querySelector('.hero-buttons-container');
+        if (!buttonsContainer) return;
+
+        const buttons = buttonsContainer.querySelectorAll('button, a');
+        if (buttons.length === 0) return;
+
+        const lastButton = buttons[buttons.length - 1];
+        const lastBtnBottom = lastButton.getBoundingClientRect().bottom;
+
+        const playerBar = document.getElementById('audio-player-bar');
+        const playerBarTop = playerBar && playerBar.offsetHeight > 0 
+          ? playerBar.getBoundingClientRect().top 
+          : window.innerHeight;
+
+        const threshold = playerBarTop - 20;
+
+        if (lastBtnBottom > threshold) {
+          const textTop = textBlock.getBoundingClientRect().top;
+          const textHeight = lastBtnBottom - textTop;
+          const availableHeight = threshold - textTop;
+
+          if (textHeight > 0 && availableHeight > 0) {
+            const factor = Math.max(0.75, Math.min(1, availableHeight / textHeight));
+            textBlock.style.transformOrigin = 'left top';
+            textBlock.style.transform = `scale(${Math.round(factor * 1000) / 1000})`;
+          } else {
+            textBlock.style.transformOrigin = 'left top';
+            textBlock.style.transform = 'scale(0.75)';
+          }
+        } else {
+          textBlock.style.transform = 'none';
+        }
+      });
+    };
+
+    checkSlide4Safety();
+
+    window.addEventListener('resize', checkSlide4Safety);
+    window.addEventListener('orientationchange', checkSlide4Safety);
+    window.addEventListener('load', checkSlide4Safety);
+
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts?.ready?.then(checkSlide4Safety).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkSlide4Safety);
+      window.removeEventListener('orientationchange', checkSlide4Safety);
+      window.removeEventListener('load', checkSlide4Safety);
+    };
+  }, [currentSlideIndex, lang]);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -343,7 +421,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
-  const activeSlides = isMobile ? MOBILE_HERO_SLIDES : DESKTOP_HERO_SLIDES;
+  const defaultSlides = isMobile ? MOBILE_HERO_SLIDES : DESKTOP_HERO_SLIDES;
+  const activeSlides = defaultSlides.map((def, idx) => {
+    const custom = heroSlides?.[idx];
+    const customSrc = isMobile ? (custom?.srcMobile || custom?.src) : custom?.src;
+    return {
+      ...def,
+      src: customSrc || def.src,
+      alt: custom?.alt || def.alt,
+      description: custom?.description || def.description
+    };
+  });
 
   // Preload slide N+1 after slide N shows
   useEffect(() => {
@@ -400,7 +488,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     }
   };
 
-  const getScoreImage = (id: string) => {
+  const getScoreImage = (id: string, customPreview?: string) => {
+    if (customPreview) return customPreview;
     if (id.includes('machozi')) return scorePreviewMachozi;
     if (id.includes('maisha')) return scorePreviewMaisha;
     if (id.includes('nimzima')) return scorePreviewNimzima;
@@ -417,46 +506,49 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     album: "Nyimbo za Kiliturujia"
   };
 
-  const heroSlideContents = [
-    // Slide 1 (index 0): Full choir shot at Mass altar
-    {
-      eyebrow: null,
-      headline: lang === 'sw' ? (heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (heroContent?.headlineEn || 'Uniting hearts through sacred music'),
-      author: null,
-      subhead: lang === 'sw' ? (heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
-      type: 'mass' as const
-    },
-    // Slide 2 (index 1): Parish Sanctuary & Altar (St. Augustine quote)
-    {
-      eyebrow: lang === 'sw' ? 'Mtakatifu Augustino wa Hippo' : 'Saint Augustine on Sacred Song',
-      headline: lang === 'sw' ? '“Mwenye kuimba vizuri husali mara mbili.”' : '“He who sings prays twice.”',
-      author: lang === 'sw' ? '— Mtakatifu Augustino wa Hippo' : '— St. Augustine of Hippo',
-      subhead: lang === 'sw' 
-        ? 'Toa sauti yako kumtukuza Mungu katika Altare ya Parokia ya Mtakatifu Monika. Jiunge na familia ya kwaya leo.' 
-        : 'Offer your vocal gifts to glorify God before the sacred altar at St. Monica Parish. Join our liturgical choral fellowship today.',
-      type: 'sanctuary' as const
-    },
-    // Slide 3 (index 2): Choristers Singing in Sacred Song (Psalm 96:1)
-    {
-      eyebrow: lang === 'sw' ? 'Zaburi 96:1 · Maandiko Matakatifu' : 'Psalm 96:1 · Sacred Scripture',
-      headline: lang === 'sw' ? '“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”' : '“Sing to the Lord a new song; sing to the Lord, all the earth.”',
-      author: '— Psalm 96:1 / Zaburi 96:1',
-      subhead: lang === 'sw'
-        ? 'Uimbaji wa sauti nne (Soprano, Alto, Tenor, Bass) uliojengwa kwa nidhamu, sala, na upatanisho mtakatifu.'
-        : 'Four-part SATB polyphony grounded in liturgical discipline, unceasing prayer, and fraternal communion.',
-      type: 'songs' as const
-    },
-    // Slide 4 (index 3): Sacred Polyphony & Liturgical Song
-    {
-      eyebrow: lang === 'sw' ? 'POLIFONIA TAKATIFU NA NYIMBO ZA LITURUJIA' : 'SACRED POLYPHONY & LITURGICAL SONG',
-      headline: lang === 'sw' ? 'Sauti Nne, Sala Moja Takatifu Mbele ya Altare.' : 'Four Voices, One Sacred Harmony Before the Altar.',
-      author: 'St. Monica Third Mass Choir · Section 58 Nakuru',
-      subhead: lang === 'sw'
-        ? 'Waimbaji arobaini na nane wanaoongoza sala ya kuimba ya waumini katika Misa ya Parokia ya Jumapili.'
-        : "Forty-eight choristers leading the people's sung prayer at the Sunday Parish Mass.",
-      type: 'polyphony' as const
+  const heroSlideContents = [0, 1, 2, 3].map((idx) => {
+    const s = heroSlides?.[idx];
+    if (idx === 0) {
+      return {
+        eyebrow: lang === 'sw' ? (s?.eyebrowSw || null) : (s?.eyebrowEn || null),
+        headline: lang === 'sw' ? (s?.headlineSw || heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (s?.headlineEn || heroContent?.headlineEn || 'Uniting hearts through sacred music'),
+        author: lang === 'sw' ? (s?.attributionSw || null) : (s?.attributionEn || null),
+        subhead: lang === 'sw' ? (s?.descSw || heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (s?.descEn || heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
+        type: 'mass' as const
+      };
     }
-  ];
+    if (idx === 1) {
+      return {
+        eyebrow: lang === 'sw' ? (s?.eyebrowSw || 'Mtakatifu Augustino wa Hippo') : (s?.eyebrowEn || 'Saint Augustine on Sacred Song'),
+        headline: lang === 'sw' ? (s?.headlineSw || '“Mwenye kuimba vizuri husali mara mbili.”') : (s?.headlineEn || '“He who sings prays twice.”'),
+        author: lang === 'sw' ? (s?.attributionSw || '— Mtakatifu Augustino wa Hippo') : (s?.attributionEn || '— St. Augustine of Hippo'),
+        subhead: lang === 'sw' 
+          ? (s?.descSw || 'Toa sauti yako kumtukuza Mungu katika Altare ya Parokia ya Mtakatifu Monika. Jiunge na familia ya kwaya leo.') 
+          : (s?.descEn || 'Offer your vocal gifts to glorify God before the sacred altar at St. Monica Parish. Join our liturgical choral fellowship today.'),
+        type: 'sanctuary' as const
+      };
+    }
+    if (idx === 2) {
+      return {
+        eyebrow: lang === 'sw' ? (s?.eyebrowSw || 'Zaburi 96:1 · Maandiko Matakatifu') : (s?.eyebrowEn || 'Psalm 96:1 · Sacred Scripture'),
+        headline: lang === 'sw' ? (s?.headlineSw || '“Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.”') : (s?.headlineEn || '“Sing to the Lord a new song; sing to the Lord, all the earth.”'),
+        author: lang === 'sw' ? (s?.attributionSw || '— Psalm 96:1 / Zaburi 96:1') : (s?.attributionEn || '— Psalm 96:1 / Zaburi 96:1'),
+        subhead: lang === 'sw'
+          ? (s?.descSw || 'Uimbaji wa sauti nne (Soprano, Alto, Tenor, Bass) uliojengwa kwa nidhamu, sala, na upatanisho mtakatifu.')
+          : (s?.descEn || 'Four-part SATB polyphony grounded in liturgical discipline, unceasing prayer, and fraternal communion.'),
+        type: 'songs' as const
+      };
+    }
+    return {
+      eyebrow: lang === 'sw' ? (s?.eyebrowSw || 'POLIFONIA TAKATIFU NA NYIMBO ZA LITURUJIA') : (s?.eyebrowEn || 'SACRED POLYPHONY & LITURGICAL SONG'),
+      headline: lang === 'sw' ? (s?.headlineSw || 'Sauti Nne, Sala Moja Takatifu Mbele ya Altare.') : (s?.headlineEn || 'Four Voices, One Sacred Harmony Before the Altar.'),
+      author: lang === 'sw' ? (s?.attributionSw || 'St. Monica Third Mass Choir · Section 58 Nakuru') : (s?.attributionEn || 'St. Monica Third Mass Choir · Section 58 Nakuru'),
+      subhead: lang === 'sw'
+        ? (s?.descSw || 'Waimbaji arobaini na nane wanaoongoza sala ya kuimba ya waumini katika Misa ya Parokia ya Jumapili.')
+        : (s?.descEn || "Forty-eight choristers leading the people's sung prayer at the Sunday Parish Mass."),
+      type: 'polyphony' as const
+    };
+  });
 
   const currentContent = heroSlideContents[currentSlideIndex % heroSlideContents.length];
 
@@ -466,10 +558,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* 1. HERO SECTION: 4-Photo rotating crossfade slideshow with WCAG AA gradient and fluid framing */}
       <section 
         id="home-hero-section" 
+        data-slide={currentSlideIndex + 1}
         tabIndex={0}
         aria-roledescription="carousel"
         aria-label={lang === 'sw' ? 'Picha za mandhari ya Kwaya ya Mtakatifu Monika' : 'St. Monica Choir Hero Carousel'}
-        className="relative w-full overflow-hidden bg-[#0C2340] focus:outline-none"
+        className={`relative w-full overflow-hidden bg-[#0C2340] focus:outline-none ${currentSlideIndex === 3 ? 'slide-4' : ''}`}
         onKeyDown={handleKeyDown}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -527,7 +620,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         {/* Hero Content Container: top-anchored and reserves space for header, player, and ticker */}
         <div 
           id="hero-content-wrapper"
-          className="hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
+          data-slide={currentSlideIndex + 1}
+          className={`hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16 ${currentSlideIndex === 3 ? 'slide-4' : ''}`}
         >
           {/* Inner Content: Animated on slide change, grows with content, no fixed height, no overflow:hidden */}
           <div 
@@ -557,7 +651,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </p>
 
           {/* Action Buttons tailored specifically to each slide */}
-          <div className="hero-buttons-container flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
+          <div className="hero-buttons hero-buttons-container flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
             {currentContent.type === 'mass' && (
               <>
                 <button
@@ -664,7 +758,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <>
                 <button
                   onClick={() => openJoinModal()}
-                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[44px]"
+                  className="btn inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[42px] h-[42px]"
                 >
                   <UserPlus className="w-4 h-4 text-slate-950" />
                   <span>{lang === 'sw' ? 'Jiunge na Kwaya' : 'Join the Choir'}</span>
@@ -675,7 +769,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     const el = document.getElementById('sunday-mass-schedule');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                  className="btn inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
                 >
                   <Clock className="w-4 h-4 text-amber-300" />
                   <span>{lang === 'sw' ? 'Ratiba ya Misa' : 'Sunday Mass Times'}</span>
@@ -685,7 +779,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   href={YOUTUBE_CHANNEL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer font-source min-h-[44px]"
+                  className="btn inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer font-source min-h-[42px] h-[42px]"
                 >
                   <RealYouTubeIcon size={18} variant="badge" />
                   <span>YouTube</span>
@@ -758,20 +852,20 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="lg:col-span-7 space-y-5">
               <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340] leading-tight">
                 {lang === 'sw' 
-                  ? 'Kutoka Altare ya Parokia Hadi Dekania na Zaidi'
-                  : 'From the Parish Altar to the Deanery and Beyond'}
+                  ? (parishMessage?.titleSw || 'Kutoka Altare ya Parokia Hadi Dekania na Zaidi')
+                  : (parishMessage?.titleEn || 'From the Parish Altar to the Deanery and Beyond')}
               </h2>
 
               <p className="text-base text-slate-800 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilianzishwa mwaka 2012 na kundi dogo la waimbaji waliojitolea katika Parokia ya Mtakatifu Monika, Nakuru. Tukio letu la kukumbukwa lilitokea mwaka 2019 kwenye Tamasha la Muziki wa Kikatoliki la Dekania ya Nakuru, ambapo toleo letu la sauti nne la "Machozi ya Imani" lilishikilia kusanyiko katika ukimya wa sala kabla ya baraka kuu.'
-                  : 'St. Monica Third Mass Choir began in 2012 with a dedicated circle of choristers at St. Monica Parish in Nakuru. A defining moment in our journey took place in 2019 at the Nakuru Deanery Choral Festival, when our four-part offering of "Machozi ya Imani" held the congregation in prayerful silence before the final blessing.'}
+                  ? (parishMessage?.body1Sw || 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilianzishwa mwaka 2012 na kundi dogo la waimbaji waliojitolea katika Parokia ya Mtakatifu Monika, Nakuru. Tukio letu la kukumbukwa lilitokea mwaka 2019 kwenye Tamasha la Muziki wa Kikatoliki la Dekania ya Nakuru, ambapo toleo letu la sauti nne la "Machozi ya Imani" lilishikilia kusanyiko katika ukimya wa sala kabla ya baraka kuu.')
+                  : (parishMessage?.body1En || 'St. Monica Third Mass Choir began in 2012 with a dedicated circle of choristers at St. Monica Parish in Nakuru. A defining moment in our journey took place in 2019 at the Nakuru Deanery Choral Festival, when our four-part offering of "Machozi ya Imani" held the congregation in prayerful silence before the final blessing.')}
               </p>
 
               <p className="text-base text-slate-700 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? 'Leo, tunaimba kila Dominika kwa sauti nne (Soprano, Alto, Tenor, Bass), tukihakikisha watoto na vijana wa parokia wanajifunza noti za solfa na kuendeleza utamaduni wa muziki mtakatifu.'
-                  : 'Today, our choristers sing every Sunday in disciplined four-part harmony (SATB), training young parish voices in tonic sol-fa to keep liturgical tradition vibrant and alive.'}
+                  ? (parishMessage?.body2Sw || 'Leo, tunaimba kila Dominika kwa sauti nne (Soprano, Alto, Tenor, Bass), tukihakikisha watoto na vijana wa parokia wanajifunza noti za solfa na kuendeleza utamaduni wa muziki mtakatifu.')
+                  : (parishMessage?.body2En || 'Today, our choristers sing every Sunday in disciplined four-part harmony (SATB), training young parish voices in tonic sol-fa to keep liturgical tradition vibrant and alive.')}
               </p>
 
               {/* Invitation to explore full About story and stats */}
@@ -797,8 +891,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="lg:col-span-5">
               <div className="rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md bg-white">
                 <img
-                  src={churchImg}
-                  alt="St. Monica Catholic Church, Section 58 Nakuru"
+                  src={parishMessage?.churchImg || churchImg}
+                  alt={parishMessage?.churchName || "St. Monica Catholic Church, Section 58 Nakuru"}
                   width={600}
                   height={400}
                   loading="lazy"
@@ -808,14 +902,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <div className="p-4 bg-white border-t border-[#0C2340]/10 flex items-center justify-between">
                   <div>
                     <strong className="text-sm font-bold text-[#0C2340] block">
-                      St. Monica Catholic Church
+                      {parishMessage?.churchName || choirStats?.parish || "St. Monica Catholic Church"}
                     </strong>
                     <span className="text-xs text-slate-600 block mt-0.5">
-                      Section 58, Nakuru · Catholic Diocese of Nakuru
+                      {parishMessage?.churchSubtitle || choirStats?.churchAddress || "Section 58, Nakuru · Catholic Diocese of Nakuru"}
                     </span>
                   </div>
                   <a
-                    href={CHOIR_STATS.mapsUrl}
+                    href={parishMessage?.mapsUrl || choirStats?.mapsUrl || CHOIR_STATS.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Open St. Monica Church map location"
@@ -949,10 +1043,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 4. SCRIPTURE BANNER: Colossians 3:16 (NABRE) */}
+      {/* 4. SCRIPTURE BANNER: Customizable Bible Scripture Quote */}
       <section className="relative py-24 sm:py-28 overflow-hidden bg-[#0C2340]">
         <img
-          src={choirHeroImg}
+          src={scriptureQuote?.bgImage || choirHeroImg}
           alt="Choir vocal ministry"
           width={1920}
           height={1080}
@@ -964,16 +1058,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-3 sm:space-y-4">
           <p className="text-xs uppercase tracking-widest text-[#7EC8F0] font-source font-semibold">
-            {lang === 'sw' ? 'Maandiko Matakatifu · Barua kwa Wakolosai' : 'Sacred Scripture · Letter to the Colossians'}
+            {lang === 'sw' 
+              ? (scriptureQuote?.categorySw || 'Maandiko Matakatifu · Barua kwa Wakolosai') 
+              : (scriptureQuote?.categoryEn || 'Sacred Scripture · Letter to the Colossians')}
           </p>
 
-          {/* PASTE VERIFIED CATHOLIC TRANSLATION HERE */}
           <blockquote className="font-eb-garamond text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-snug scripture-quote">
-            “{lang === 'sw' ? COLOSSIANS_3_16.textSw : COLOSSIANS_3_16.textEn}”
+            “{lang === 'sw' ? (scriptureQuote?.textSw || COLOSSIANS_3_16.textSw) : (scriptureQuote?.textEn || COLOSSIANS_3_16.textEn)}”
           </blockquote>
           
           <p className="font-source text-xs sm:text-sm text-sky-200">
-            {lang === 'sw' ? COLOSSIANS_3_16.citationSw : COLOSSIANS_3_16.citationEn}
+            {lang === 'sw' ? (scriptureQuote?.citationSw || COLOSSIANS_3_16.citationSw) : (scriptureQuote?.citationEn || COLOSSIANS_3_16.citationEn)}
           </p>
         </div>
       </section>
@@ -1021,7 +1116,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group">
                     {/* TODO: Replace the "Ni Mzima" image with a flat scan */}
                     <img
-                      src={getScoreImage(item.id)}
+                      src={getScoreImage(item.id, item.previewImage)}
                       alt={`Preview of the score for ${item.title}`}
                       width={400}
                       height={300}
@@ -1099,20 +1194,21 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             {/* Choirmaster Profile & Message */}
             <div className="lg:col-span-7 space-y-4">
               <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                {lang === 'sw' ? 'Ujumbe Kutoka kwa Mwalimu wa Kwaya' : 'A Word from the Choirmaster'}
+                {lang === 'sw' 
+                  ? (choirmasterMessage?.titleSw || 'Ujumbe Kutoka kwa Mwalimu wa Kwaya') 
+                  : (choirmasterMessage?.titleEn || 'A Word from the Choirmaster')}
               </h2>
 
               <p className="text-base text-slate-800 font-source leading-relaxed">
                 {lang === 'sw'
-                  ? '“Karibu sana kwenye jukwaa la muziki la Kwaya ya Misa ya Tatu ya Mtakatifu Monika, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe toleo la dhati la sifa kwa Mwenyezi Mungu.”'
-                  : '“Welcome to the musical home of St. Monica Third Mass Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is a sincere offering of praise to Almighty God.”'}
+                  ? (choirmasterMessage?.messageSw || '“Karibu sana kwenye jukwaa la muziki la Kwaya ya Misa ya Tatu ya Mtakatifu Monika, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe toleo la dhati la sifa kwa Mwenyezi Mungu.”')
+                  : (choirmasterMessage?.messageEn || '“Welcome to the musical home of St. Monica Third Mass Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is a sincere offering of praise to Almighty God.”')}
               </p>
 
               <div className="pt-2 flex items-center gap-3.5">
-                {/* Replace with a real photo of our choirmaster */}
                 <img
-                  src={choirmasterImg}
-                  alt="Mwalimu Joseph Otieno"
+                  src={choirmasterMessage?.image || choirmasterImg}
+                  alt={choirmasterMessage?.name || "Mwalimu Joseph Otieno"}
                   width={64}
                   height={64}
                   loading="lazy"
@@ -1120,10 +1216,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 />
                 <div>
                   <strong className="text-base font-bold text-[#0C2340] font-eb-garamond block">
-                    Mwalimu Joseph Otieno
+                    {choirmasterMessage?.name || "Mwalimu Joseph Otieno"}
                   </strong>
                   <span className="text-sm text-slate-700 font-source block">
-                    {lang === 'sw' ? 'Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya' : 'Director of Music & Choirmaster'}
+                    {lang === 'sw' 
+                      ? (choirmasterMessage?.roleSw || 'Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya') 
+                      : (choirmasterMessage?.roleEn || 'Director of Music & Choirmaster')}
                   </span>
                 </div>
               </div>
@@ -1138,29 +1236,39 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </h3>
               </div>
 
-              {/* Rows styled with grid-template-columns: 1fr auto to prevent wrapping */}
+              {/* Dynamic Mass List: allows admin to add, edit, or delete any Mass */}
               <ul className="space-y-2.5 text-sm text-slate-800 font-source">
-                <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-1.5 border-b border-[#0C2340]/10">
-                  <span>{massSchedule?.mass1Title || (lang === 'sw' ? 'Misa ya 1 (Asubuhi Mapema)' : '1st Mass (Dawn)')}</span>
-                  <strong className="text-[#0C2340] whitespace-nowrap tabular-nums">{massSchedule?.mass1Time || '7:00 AM'}</strong>
-                </li>
-                <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-1.5 border-b border-[#0C2340]/10">
-                  <span>{massSchedule?.mass2Title || (lang === 'sw' ? 'Misa ya 2 (Kiswahili)' : '2nd Mass')}</span>
-                  <strong className="text-[#0C2340] whitespace-nowrap tabular-nums">{massSchedule?.mass2Time || '8:30 AM'}</strong>
-                </li>
-                <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-2 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20">
-                  <div className="flex flex-col min-w-0 pr-1">
-                    <span className="font-bold text-[#1058A8]">
-                      {lang === 'sw' ? 'Misa ya 3 (Misa ya Jumapili Inayoimbwa)' : '3rd Mass (Sunday Sung Mass)'}
-                    </span>
-                    <span className="text-[11px] text-[#0C2340] font-medium leading-snug">
-                      {lang === 'sw' 
-                        ? '★ Kwaya ya Misa ya Tatu ya Mtakatifu Monika inaongoza sala ya kuimba ya kusanyiko.'
-                        : '★ St. Monica Third Mass Choir leads the sung prayer of the assembly.'}
-                    </span>
-                  </div>
-                  <strong className="text-base font-bold text-[#1058A8] whitespace-nowrap tabular-nums">{massSchedule?.mass3Time || '10:00 AM'}</strong>
-                </li>
+                {massesList && massesList.length > 0 ? (
+                  massesList.map((m) => (
+                    <li 
+                      key={m.id}
+                      className={`grid grid-cols-[1fr_auto] gap-3 items-center ${
+                        m.isSungMass 
+                          ? 'pb-2 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20' 
+                          : 'pb-1.5 border-b border-[#0C2340]/10'
+                      }`}
+                    >
+                      <div className="flex flex-col min-w-0 pr-1">
+                        <span className={m.isSungMass ? 'font-bold text-[#1058A8]' : 'text-slate-800'}>
+                          {lang === 'sw' ? (m.titleSw || m.title) : m.title}
+                        </span>
+                        {(m.desc || m.descSw) && (
+                          <span className={`text-[11px] ${m.isSungMass ? 'text-[#0C2340] font-medium leading-snug' : 'text-slate-500'}`}>
+                            {lang === 'sw' ? (m.descSw || m.desc) : m.desc}
+                          </span>
+                        )}
+                      </div>
+                      <strong className={`${m.isSungMass ? 'text-base font-bold text-[#1058A8]' : 'text-[#0C2340]'} whitespace-nowrap tabular-nums`}>
+                        {m.time}
+                      </strong>
+                    </li>
+                  ))
+                ) : (
+                  <li className="grid grid-cols-[1fr_auto] gap-3 items-center pb-2 bg-[#EAF4FB] p-2.5 rounded-xl border border-[#1058A8]/20">
+                    <span className="font-bold text-[#1058A8]">10:00 AM Sunday Sung Mass</span>
+                    <strong className="text-base font-bold text-[#1058A8]">10:00 AM</strong>
+                  </li>
+                )}
               </ul>
 
               <div className="pt-2 text-xs text-slate-700 font-source space-y-2.5">
