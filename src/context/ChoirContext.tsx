@@ -433,7 +433,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [leadersList, setLeadersList] = useState<ChoirLeader[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.LEADERS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.some((l: ChoirLeader) => l.name === 'John Baptist Kiprono' || l.name === 'Agnes Wanjiku' || l.name === 'The Choir Leadership')) {
+          return INITIAL_LEADERS;
+        }
+        return parsed;
+      }
     } catch (e) {
       // ignore
     }

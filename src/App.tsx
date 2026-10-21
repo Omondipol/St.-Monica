@@ -130,14 +130,16 @@ function ChoirApp() {
         {lang === 'sw' ? 'Ruka hadi maudhui makuu' : 'Skip to content'}
       </a>
 
-      {/* Grouped Header with Top Utility Ribbon & Dark Bar */}
-      <ChoirHeader
-        currentRoute={currentRoute}
-        setCurrentRoute={handleNavigate}
-      />
+      {/* Grouped Header with Top Utility Ribbon & Dark Bar (Hidden on Admin) */}
+      {!isAdmin && (
+        <ChoirHeader
+          currentRoute={currentRoute}
+          setCurrentRoute={handleNavigate}
+        />
+      )}
 
       {/* Main Content Rendered by Route */}
-      <main id="main-content" tabIndex={-1} className={`flex-1 w-full pb-32 sm:pb-36 focus:outline-none ${isHome ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'}`}>
+      <main id="main-content" tabIndex={-1} className={`flex-1 w-full ${isAdmin ? 'p-0 pb-12' : (isHome ? 'pb-32 sm:pb-36' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-32 sm:pb-36')} focus:outline-none`}>
         {isHome && (
           <HomePage onNavigate={handleNavigate} />
         )}
@@ -195,12 +197,12 @@ function ChoirApp() {
         )}
       </main>
 
-      {/* Modern Deep Navy Footer */}
-      <ChoirFooter onNavigate={handleNavigate} />
+      {/* Modern Deep Navy Footer (Hidden on Admin) */}
+      {!isAdmin && <ChoirFooter onNavigate={handleNavigate} />}
 
       {/* Global Interactive Modals & Player */}
       <YouTubeAudioHost currentRoute={currentRoute} />
-      <AudioPlayerBar />
+      {!isAdmin && <AudioPlayerBar />}
       <NowPlayingModal />
       <SongCutoffModal />
       <SupportChoirModal />

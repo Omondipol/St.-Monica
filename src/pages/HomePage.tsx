@@ -154,6 +154,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   const [isTabHidden, setIsTabHidden] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [isTouching, setIsTouching] = useState<boolean>(false);
 
   const touchStartXRef = useRef<number>(0);
 
@@ -228,174 +231,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     };
   }, [siteNotice?.enabled]);
 
-  // Fit check (--hero-fit) per slide: measure ACTIVE slide's last button against player bar and dots top
-  // Run on load, on every slide change, on resize and after fonts load
-  // Reset --hero-fit to 1 before measuring each slide
+  // Reset --hero-fit to 1
   useEffect(() => {
-    const runHeroFitCheck = () => {
-      const heroWrapper = document.getElementById('hero-content-wrapper');
-      if (!heroWrapper) return;
-
-      // Reset --hero-fit to 1 and clear fallback before measuring active slide
-      heroWrapper.style.setProperty('--hero-fit', '1');
-      heroWrapper.removeAttribute('data-hero-fallback');
-
-      requestAnimationFrame(() => {
-        const buttonsContainer = heroWrapper.querySelector('.hero-buttons-container');
-        if (!buttonsContainer) return;
-
-        const buttons = buttonsContainer.querySelectorAll('button, a');
-        if (buttons.length === 0) return;
-
-        const lastButton = buttons[buttons.length - 1];
-        const lastBtnRect = lastButton.getBoundingClientRect();
-
-        const playerBar = document.getElementById('audio-player-bar');
-        const playerBarTop = playerBar && playerBar.offsetHeight > 0 
-          ? playerBar.getBoundingClientRect().top 
-          : window.innerHeight;
-
-        const dotsEl = document.getElementById('hero-slide-dots');
-        const dotsTop = dotsEl 
-          ? dotsEl.getBoundingClientRect().top 
-          : (playerBarTop - 28);
-
-        // Safe zone: buttons must end at least 24px above player bar and 24px above dots
-        const safeLimit = Math.min(playerBarTop - 24, dotsTop - 24);
-
-        if (lastBtnRect.bottom > safeLimit) {
-          const contentTop = heroWrapper.getBoundingClientRect().top;
-          const totalHeight = lastBtnRect.bottom - contentTop;
-          const availableHeight = safeLimit - contentTop;
-
-          let targetFit = 1;
-          if (totalHeight > 0 && availableHeight > 0) {
-            targetFit = Math.max(0.72, Math.min(1, availableHeight / totalHeight));
-            targetFit = Math.round(targetFit * 100) / 100;
-          } else {
-            targetFit = 0.72;
-          }
-
-          heroWrapper.style.setProperty('--hero-fit', targetFit.toString());
-
-          // Re-measure after applying --hero-fit
-          requestAnimationFrame(() => {
-            const recheckRect = lastButton.getBoundingClientRect();
-            if (recheckRect.bottom > safeLimit) {
-              heroWrapper.style.setProperty('--hero-fit', '0.72');
-
-              // Fallback for slides 3 and 4 on short screens (viewport height under 680px),
-              // applied only if the text still does not fit after --hero-fit reaches 0.72
-              const isSlide3Or4 = (currentSlideIndex % 4 === 2) || (currentSlideIndex % 4 === 3);
-              if (window.innerHeight < 680 && isSlide3Or4) {
-                heroWrapper.setAttribute('data-hero-fallback', 'true');
-                // Re-evaluate fit with description hidden
-                requestAnimationFrame(() => {
-                  const fallbackRect = lastButton.getBoundingClientRect();
-                  if (fallbackRect.bottom <= safeLimit) {
-                    const newTotal = fallbackRect.bottom - contentTop;
-                    if (newTotal > 0 && availableHeight > newTotal) {
-                      const restoredFit = Math.min(1, Math.round((availableHeight / newTotal) * 100) / 100);
-                      heroWrapper.style.setProperty('--hero-fit', restoredFit.toString());
-                    }
-                  }
-                });
-              }
-            }
-          });
-        }
-      });
-    };
-
-    runHeroFitCheck();
-
-    window.addEventListener('resize', runHeroFitCheck);
-    window.addEventListener('orientationchange', runHeroFitCheck);
-    window.addEventListener('load', runHeroFitCheck);
-
-    if (typeof document !== 'undefined' && 'fonts' in document) {
-      document.fonts?.ready?.then(runHeroFitCheck).catch(() => {});
-    }
-
-    return () => {
-      window.removeEventListener('resize', runHeroFitCheck);
-      window.removeEventListener('orientationchange', runHeroFitCheck);
-      window.removeEventListener('load', runHeroFitCheck);
-    };
-  }, [currentSlideIndex, lang]);
-
-  // Safety check, slide 4 ONLY:
-  // When slide 4 becomes active (and on load and resize), measure the bottom of its last button
-  // against the top of the player bar.
-  // If button.bottom > playerBar.top - 20, apply transform: scale(factor) with transform-origin: left top
-  // to the slide 4 text block, where factor = available height / text height, with a minimum of 0.75.
-  // Reset the scale to 1 before each measurement. Never apply this scale to slides 1 to 3.
-  useEffect(() => {
-    const textBlock = document.getElementById('hero-active-slide-content');
-    if (!textBlock) return;
-
-    if (currentSlideIndex !== 3) {
-      textBlock.style.transform = 'none';
-      return;
-    }
-
-    const checkSlide4Safety = () => {
-      // Reset the scale to 1 before each measurement
-      textBlock.style.transform = 'none';
-      textBlock.style.transformOrigin = 'left top';
-
-      requestAnimationFrame(() => {
-        const buttonsContainer = textBlock.querySelector('.hero-buttons') || textBlock.querySelector('.hero-buttons-container');
-        if (!buttonsContainer) return;
-
-        const buttons = buttonsContainer.querySelectorAll('button, a');
-        if (buttons.length === 0) return;
-
-        const lastButton = buttons[buttons.length - 1];
-        const lastBtnBottom = lastButton.getBoundingClientRect().bottom;
-
-        const playerBar = document.getElementById('audio-player-bar');
-        const playerBarTop = playerBar && playerBar.offsetHeight > 0 
-          ? playerBar.getBoundingClientRect().top 
-          : window.innerHeight;
-
-        const threshold = playerBarTop - 20;
-
-        if (lastBtnBottom > threshold) {
-          const textTop = textBlock.getBoundingClientRect().top;
-          const textHeight = lastBtnBottom - textTop;
-          const availableHeight = threshold - textTop;
-
-          if (textHeight > 0 && availableHeight > 0) {
-            const factor = Math.max(0.75, Math.min(1, availableHeight / textHeight));
-            textBlock.style.transformOrigin = 'left top';
-            textBlock.style.transform = `scale(${Math.round(factor * 1000) / 1000})`;
-          } else {
-            textBlock.style.transformOrigin = 'left top';
-            textBlock.style.transform = 'scale(0.75)';
-          }
-        } else {
-          textBlock.style.transform = 'none';
-        }
-      });
-    };
-
-    checkSlide4Safety();
-
-    window.addEventListener('resize', checkSlide4Safety);
-    window.addEventListener('orientationchange', checkSlide4Safety);
-    window.addEventListener('load', checkSlide4Safety);
-
-    if (typeof document !== 'undefined' && 'fonts' in document) {
-      document.fonts?.ready?.then(checkSlide4Safety).catch(() => {});
-    }
-
-    return () => {
-      window.removeEventListener('resize', checkSlide4Safety);
-      window.removeEventListener('orientationchange', checkSlide4Safety);
-      window.removeEventListener('load', checkSlide4Safety);
-    };
-  }, [currentSlideIndex, lang]);
+    document.documentElement.style.setProperty('--hero-fit', '1');
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -449,16 +288,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     }
   }, [activeSlides.length, currentSlideIndex]);
 
-  // Autoplay every 7s with a crossfade, continuous loop (restart at slide 1 after slide 4).
-  // Two safeguards only: pause while the browser tab is hidden, and no autoplay under prefers-reduced-motion.
+  // Autoplay every 7s with a crossfade, continuous loop.
+  // Pause on hover/focus/touch, when browser tab is hidden, or under prefers-reduced-motion.
   // Manual changes (arrow keys or swipe) update currentSlideIndex, which restarts the 7s timer.
+  const isPaused = prefersReducedMotion || isTabHidden || isHovered || isFocused || isTouching;
+
   useEffect(() => {
-    if (prefersReducedMotion || isTabHidden) return;
+    if (isPaused) return;
     const interval = setInterval(() => {
       setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
     }, 7000);
     return () => clearInterval(interval);
-  }, [currentSlideIndex, activeSlides.length, isTabHidden, prefersReducedMotion]);
+  }, [isPaused, currentSlideIndex, activeSlides.length]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
@@ -471,10 +312,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    setIsTouching(true);
     touchStartXRef.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    setIsTouching(false);
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartXRef.current - touchEndX;
     if (Math.abs(diff) > 40) {
@@ -486,6 +329,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         setCurrentSlideIndex(prev => (prev - 1 + activeSlides.length) % activeSlides.length);
       }
     }
+  };
+
+  const handleTouchCancel = () => {
+    setIsTouching(false);
   };
 
   const getScoreImage = (id: string, customPreview?: string) => {
@@ -562,10 +409,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         tabIndex={0}
         aria-roledescription="carousel"
         aria-label={lang === 'sw' ? 'Picha za mandhari ya Kwaya ya Mtakatifu Monika' : 'St. Monica Choir Hero Carousel'}
-        className={`relative w-full overflow-hidden bg-[#0C2340] focus:outline-none ${currentSlideIndex === 3 ? 'slide-4' : ''}`}
+        className="relative w-full bg-[#0C2340] focus:outline-none"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
       >
         {/* Background Slides: Absolute stacked layers with smooth 1000ms crossfade and Ken Burns slow zoom */}
         {activeSlides.map((slide, index) => {
@@ -621,7 +473,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div 
           id="hero-content-wrapper"
           data-slide={currentSlideIndex + 1}
-          className={`hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16 ${currentSlideIndex === 3 ? 'slide-4' : ''}`}
+          className="hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
         >
           {/* Inner Content: Animated on slide change, grows with content, no fixed height, no overflow:hidden */}
           <div 

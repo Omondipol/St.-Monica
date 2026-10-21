@@ -88,27 +88,27 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           </div>
         </section>
 
-        {/* STEP 3: FOUR EVENLY SPACED COLUMNS (Desktop: 4 equal columns; Mobile: Accordion) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm font-source pt-2">
+        {/* STEP 3: FOUR EVENLY SPACED COLUMNS (Desktop: Brand column wider to wrap onto two lines without overlapping Explore) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-8 lg:gap-10 text-sm font-source pt-2">
           
           {/* COLUMN 1: The Choir Identity */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <ChoirLogo size={112} variant="simplified" interactive={true} className="shrink-0 w-26 h-26 sm:w-28 sm:h-28 drop-shadow-md" />
-              <div>
-                <h4 className="font-fraunces text-lg font-bold text-white leading-snug whitespace-nowrap">
-                  {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
+          <div className="space-y-3.5 pr-2">
+            <div className="flex items-center gap-3.5 sm:gap-4">
+              <ChoirLogo size={112} variant="simplified" interactive={true} className="shrink-0 w-22 h-22 sm:w-24 sm:h-24 drop-shadow-md" />
+              <div className="min-w-0">
+                <h4 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white leading-tight break-words">
+                  {lang === 'sw' ? 'Kwaya ya Misa ya Tatu · Mt. Monika' : 'St. Monica Third Mass Choir'}
                 </h4>
-                <span className="text-xs text-[#7EC8F0] block mt-0.5">
+                <span className="text-xs text-[#7EC8F0] block mt-1 font-source font-medium">
                   Section 58 Parish · Catholic Diocese of Nakuru
                 </span>
               </div>
             </div>
 
-            <p className="text-[#B8C7D9] text-sm leading-relaxed">
+            <p className="text-[#B8C7D9] text-sm leading-relaxed font-source">
               {lang === 'sw'
-                ? 'Catholic Diocese of Nakuru, Parokia ya Mtakatifu Monika. Utume wa muziki wa kiliturujia unaotumikia Misa ya Jumapili na sifa za Mwenyezi Mungu.'
-                : 'Catholic Diocese of Nakuru, St. Monica Parish. A liturgical music ministry serving the Sunday Mass and the praise of God.'}
+                ? 'Kuongoza kusanyiko katika sala ya nyimbo takatifu za sauti nne na ibada ya Misa Takatifu kila Dominika.'
+                : 'Leading the congregation in disciplined four-part sacred song and liturgical prayer every Sunday.'}
             </p>
           </div>
 
@@ -130,19 +130,25 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               {lang === 'sw' ? 'Gundua kurasa' : 'Explore'}
             </span>
 
-            {/* Links list: real destinations only */}
+            {/* Links list: Directory, Songs, Our Album, Music Library, Choir Sheet Music, Gallery, Events */}
             <ul className={`space-y-2.5 text-slate-300 text-sm ${mobileExploreOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <li>
                 <button 
-                  onClick={() => onNavigate('about-story')} 
+                  onClick={() => {
+                    onNavigate('about-sections');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
-                  {lang === 'sw' ? 'Historia Yetu' : 'Our Story'}
+                  {lang === 'sw' ? 'Orodha ya Waimbaji' : 'Directory'}
                 </button>
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('music-repertoire')} 
+                  onClick={() => {
+                    onNavigate('music-repertoire');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Nyimbo Zetu' : 'Songs'}
@@ -150,7 +156,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('music-albums')} 
+                  onClick={() => {
+                    onNavigate('music-albums');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Albamu Yetu' : 'Our Album'}
@@ -158,7 +167,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('music-library')} 
+                  onClick={() => {
+                    onNavigate('music-library');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Maktaba ya Noti' : 'Music Library'}
@@ -166,7 +178,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('shop')} 
+                  onClick={() => {
+                    onNavigate('shop');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Noti za Kwaya' : 'Choir Sheet Music'}
@@ -174,7 +189,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('about-gallery')} 
+                  onClick={() => {
+                    onNavigate('about-gallery');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Picha za Kwaya' : 'Gallery'}
@@ -182,7 +200,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('events')} 
+                  onClick={() => {
+                    onNavigate('events');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
                   className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
                 >
                   {lang === 'sw' ? 'Matukio na Kalenda' : 'Events'}

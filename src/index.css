@@ -50,126 +50,51 @@ p {
   text-wrap: pretty;
 }
 
-.hero-fluid-title {
-  font-size: calc(clamp(1.9rem, 4vw, 3.4rem) * var(--hero-fit, 1));
+.hero-fluid-title,
+.hero-title,
+.hero-content h1,
+.hero-content-container h1 {
+  font-size: clamp(2rem, 4.2vw, 3.6rem);
   text-wrap: balance;
   line-height: 1.12;
+}
+
+@media (min-width: 1024px) {
+  .hero-fluid-title,
+  .hero-title,
+  .hero-content h1,
+  .hero-content-container h1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 
 .hero-content,
 .hero-content-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
   min-height: 100vh;
   min-height: 100dvh;
-  padding-top: calc(var(--header-h, 80px) + clamp(20px, 5vh, 64px));
-  padding-bottom: calc(var(--player-h, 64px) + var(--ticker-h, 44px) + 64px);
+  padding-top: calc(var(--header-h, 108px) + 24px);
+  padding-bottom: calc(var(--player-h, 0px) + 24px);
   box-sizing: border-box;
 }
 
 .hero-desc {
-  font-size: calc(clamp(0.82rem, 1.15vw, 1rem) * var(--hero-fit, 1));
-  line-height: calc(1.5 * var(--hero-fit, 1));
+  font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+  line-height: 1.5;
 }
 
 .hero-attribution {
-  font-size: calc(clamp(0.85rem, 1.25vw, 1.1rem) * var(--hero-fit, 1));
-  line-height: 1.25;
+  font-size: clamp(0.9rem, 1.3vw, 1.15rem);
+  line-height: 1.3;
 }
 
 .hero-buttons-container {
-  gap: calc(12px * var(--hero-fit, 1));
-}
-
-/* Short screens: under 720px viewport height */
-@media (max-height: 720px) {
-  .hero-content,
-  .hero-content-container {
-    padding-top: calc(var(--header-h, 80px) + 16px) !important;
-  }
-
-  .hero-content h1,
-  .hero-content-container h1,
-  .hero-fluid-title {
-    font-size: calc(clamp(1.75rem, 3.4vw, 2.75rem) * var(--hero-fit, 1)) !important;
-    line-height: 1.14 !important;
-  }
-
-  .hero-buttons-container {
-    padding-top: 16px !important;
-    margin-top: 0 !important;
-    gap: 10px !important;
-  }
-}
-
-/* Fallback for slide 3 on short screens (viewport height under 680px),
-   applied only if the text still does not fit after --hero-fit reaches 0.72:
-   - Hide the description (.hero-desc) on that slide.
-   - Reduce the gap between the headline and the attribution to 6px.
-   - Keep the eyebrow, headline, attribution and ALL buttons visible. */
-.hero-content[data-hero-fallback="true"] .hero-desc,
-.hero-content-container[data-hero-fallback="true"] .hero-desc {
-  display: none !important;
-}
-
-.hero-content[data-hero-fallback="true"] .hero-attribution,
-.hero-content-container[data-hero-fallback="true"] .hero-attribution {
-  margin-top: 6px !important;
-}
-
-/* =========================================================
-   SLIDE 4 ONLY RULES (touch nothing on slides 1 to 3)
-   ========================================================= */
-.slide-4 .hero-content,
-.slide-4.hero-content,
-[data-slide="4"] .hero-content,
-[data-slide="4"].hero-content {
-  justify-content: flex-start !important;
-  padding-top: calc(var(--header-h, 80px) + 12px) !important;
-  padding-bottom: calc(var(--player-h, 64px) + 24px) !important;
-}
-
-.slide-4 .hero-eyebrow,
-[data-slide="4"] .hero-eyebrow {
-  margin-bottom: 6px !important;
-}
-
-.slide-4 h1,
-.slide-4 .hero-fluid-title,
-[data-slide="4"] h1,
-[data-slide="4"] .hero-fluid-title {
-  font-size: clamp(1.6rem, 4.6vh, 2.8rem) !important;
-  line-height: 1.08 !important;
-  margin: 0 0 6px !important;
-}
-
-.slide-4 .hero-attribution,
-[data-slide="4"] .hero-attribution {
-  margin-bottom: 6px !important;
-}
-
-.slide-4 .hero-desc,
-[data-slide="4"] .hero-desc {
-  display: none !important;
-}
-
-.slide-4 .hero-buttons,
-.slide-4 .hero-buttons-container,
-[data-slide="4"] .hero-buttons,
-[data-slide="4"] .hero-buttons-container {
-  margin-top: 12px !important;
-  padding-top: 0 !important;
-}
-
-.slide-4 .hero-buttons .btn,
-.slide-4 .hero-buttons-container button,
-.slide-4 .hero-buttons-container a,
-[data-slide="4"] .hero-buttons .btn,
-[data-slide="4"] .hero-buttons-container button,
-[data-slide="4"] .hero-buttons-container a {
-  height: 42px !important;
-  min-height: 42px !important;
+  gap: 12px;
 }
 
 .song-card-title {

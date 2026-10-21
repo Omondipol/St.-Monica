@@ -569,70 +569,81 @@ export const INITIAL_ALBUMS: Album[] = [
 
 export const INITIAL_LEADERS: ChoirLeader[] = [
   {
-    id: "ldr-choirmaster",
-    name: "The Choir Leadership",
-    role: "Music Leadership & Directorship",
-    roleSw: "Uongozi wa Muziki na Kwaya",
-    category: "trainer",
-    responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and prepares Sunday Sung Masses.",
-    responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na maandalizi ya Misa ya Jumapili Inayoimbwa.",
-    tenure: "Serving the Parish",
-    tenureSw: "Wanahudumu Parokiani"
-  },
-  {
-    id: "ldr-asst-choirmaster",
+    id: "ldr-director",
     name: "Atebe Mark T.",
-    role: "Composer & Sectional Solfa Trainer",
-    roleSw: "Mtunzi na Mkufunzi wa Solfa (Khakstudio)",
+    role: "Music Director & Choirmaster",
+    roleSw: "Mkurugenzi wa Muziki na Mwalimu Mkuu",
     category: "trainer",
-    responsibility: "Vocal coaching, sectional practice drills, and recording production director.",
-    responsibilitySw: "Mafunzo ya sauti, kusoma noti za solfa na usimamizi wa kurekodi studio.",
-    tenure: "Serving since 2018",
-    tenureSw: "Anahudumu tangu 2018"
+    responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and directs recording production.",
+    responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na usimamizi wa kurekodi nyimbo studio.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
   },
   {
     id: "ldr-organist",
-    name: "Francis Mwangi",
+    name: "Mukomah Leshan",
     role: "Parish Organist & Keyboardist",
     roleSw: "Mpiga Kinanda na Organi ya Parokia",
     category: "trainer",
-    responsibility: "Accompanies liturgical High Masses and trains junior keyboard accompanists.",
-    responsibilitySw: "Hupiga kinanda kwenye Misa Kuu na kuongoza ala za muziki.",
-    tenure: "Serving since 2021",
-    tenureSw: "Anahudumu tangu 2021"
+    responsibility: "Accompanies liturgical Sunday Masses and coordinates instrumental harmonies for the choir.",
+    responsibilitySw: "Hupiga kinanda kwenye Misa za Jumapili na kuratibu ala za muziki.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
   },
   {
-    id: "ldr-chairperson",
-    name: "John Baptist Kiprono",
-    role: "Choir Chairperson",
-    roleSw: "Mwenyekiti wa Kwaya",
+    id: "ldr-moderator",
+    name: "Damaris Ndeto",
+    role: "Moderator",
+    roleSw: "Moderator wa Kwaya",
     category: "official",
-    responsibility: "Chairs executive meetings, represents choir to parish council, and oversees pastoral ministry.",
-    responsibilitySw: "Huongoza mikutano ya kamati na kuwakilisha kwaya kwenye Baraza la Parokia.",
-    tenure: "2023 – Present",
-    tenureSw: "2023 – Hadi Sasa"
+    responsibility: "Oversees executive committee operations, guides spiritual welfare, and coordinates with parish leadership.",
+    responsibilitySw: "Huongoza kamati ya utendaji, ustawi wa kiroho na kuratibu shughuli za kwaya na uongozi wa parokia.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
+  },
+  {
+    id: "ldr-asst-moderator",
+    name: "Peter Otieno",
+    role: "Assistant Moderator",
+    roleSw: "Msaidizi wa Moderator",
+    category: "official",
+    responsibility: "Assists the moderator in administrative coordination, rehearsal discipline, and chorister fellowship.",
+    responsibilitySw: "Husaidia moderator katika utekelezaji wa majukumu ya kiutawala na usimamizi wa mazoezi.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
   },
   {
     id: "ldr-secretary",
-    name: "Agnes Wanjiku",
-    role: "Choir Secretary",
+    name: "Terry Odhiambo",
+    role: "Secretary",
     roleSw: "Katibu wa Kwaya",
     category: "official",
-    responsibility: "Maintains official choir registers, liturgical attendance logs, and diocesan correspondence.",
-    responsibilitySw: "Huweka kumbukumbu rasmi za kwaya na mawasiliano ya kiliturujia.",
-    tenure: "2023 – Present",
-    tenureSw: "2023 – Hadi Sasa"
+    responsibility: "Maintains choir register, meeting minutes, liturgical schedules, and official notices.",
+    responsibilitySw: "Huweka daftari la wanachama, kumbukumbu za mikutano, ratiba za kiliturujia na matangazo rasmi.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
+  },
+  {
+    id: "ldr-asst-secretary",
+    name: "Ignatius Kipruto Ngure",
+    role: "Assistant Secretary",
+    roleSw: "Msaidizi wa Katibu",
+    category: "official",
+    responsibility: "Supports secretarial correspondence, membership attendance, and notice distribution.",
+    responsibilitySw: "Husaidia katibu katika mawasiliano, mahudhurio ya wanakwaya na usambazaji wa matangazo.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
   },
   {
     id: "ldr-treasurer",
-    name: "Grace Auma",
-    role: "Choir Treasurer",
+    name: "Peris W. Njuguna",
+    role: "Treasurer",
     roleSw: "Mhazini wa Kwaya",
     category: "official",
-    responsibility: "Oversees sheet music score sales, vestment funds, and choir development accounts.",
-    responsibilitySw: "Husimamia mauzo ya noti, mfuko wa sare na maendeleo ya kwaya.",
-    tenure: "2022 – Present",
-    tenureSw: "2022 – Hadi Sasa"
+    responsibility: "Manages choir finances, membership contributions, sheet music funds, and financial reports.",
+    responsibilitySw: "Hutunza hesabu za fedha, michango ya uanachama, mauzo ya noti na taarifa za fedha za kwaya.",
+    tenure: "Serving the Parish",
+    tenureSw: "Anahudumu Parokiani"
   }
 ];
 
