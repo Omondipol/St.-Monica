@@ -108,8 +108,36 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'members' | 'albums' | 'financials' | 'leaders' | 'library' | 'events' | 'photos' | 'songs' | 'sheet' | 'hero' | 'about' | 'schedule' | 'footer' | 'stats' | 'backup'>('members');
+  const [mainCategory, setMainCategory] = useState<'home' | 'about' | 'music' | 'events' | 'financials' | 'settings'>('home');
+  const [activeTab, setActiveTab] = useState<'members' | 'albums' | 'financials' | 'leaders' | 'library' | 'events' | 'photos' | 'songs' | 'sheet' | 'hero' | 'about' | 'schedule' | 'footer' | 'stats' | 'backup'>('hero');
   const [successMessage, setSuccessMessage] = useState<string>('');
+
+  const handleSelectCategory = (cat: 'home' | 'about' | 'music' | 'events' | 'financials' | 'settings') => {
+    setMainCategory(cat);
+    if (cat === 'home') {
+      if (!['hero', 'schedule'].includes(activeTab)) setActiveTab('hero');
+    } else if (cat === 'about') {
+      if (!['members', 'leaders', 'photos', 'about', 'stats'].includes(activeTab)) setActiveTab('members');
+    } else if (cat === 'music') {
+      if (!['library', 'albums', 'songs', 'sheet'].includes(activeTab)) setActiveTab('library');
+    } else if (cat === 'events') {
+      setActiveTab('events');
+    } else if (cat === 'financials') {
+      setActiveTab('financials');
+    } else if (cat === 'settings') {
+      if (!['footer', 'backup'].includes(activeTab)) setActiveTab('footer');
+    }
+  };
+
+  const handleSelectTab = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    if (['hero', 'schedule'].includes(tab)) setMainCategory('home');
+    else if (['about', 'members', 'leaders', 'photos', 'stats'].includes(tab)) setMainCategory('about');
+    else if (['songs', 'albums', 'sheet', 'library'].includes(tab)) setMainCategory('music');
+    else if (tab === 'events') setMainCategory('events');
+    else if (tab === 'financials') setMainCategory('financials');
+    else if (['footer', 'backup'].includes(tab)) setMainCategory('settings');
+  };
 
   // Maktaba ya Noti Library Form State (Step 6)
   const [showLibModal, setShowLibModal] = useState<boolean>(false);
@@ -873,269 +901,721 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </div>
       )}
 
-      {/* Navigation Tabs (Organized Grid with Badges) */}
-      <div className="bg-white border border-[#0C2340]/10 p-3 sm:p-4 rounded-2xl shadow-xs space-y-3">
-        <div className="flex items-center justify-between text-xs font-bold text-[#0C2340] pb-2 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#1058A8]" />
-            <span>Admin Control Sections (Sehemu za Usimamizi)</span>
+      {/* SECTION NAVIGATOR (Grouped Strictly by Website Section) */}
+      <div className="bg-white border border-[#0C2340]/10 p-4 sm:p-6 rounded-3xl shadow-sm space-y-5">
+        
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#1058A8] text-white uppercase tracking-wider">
+                Full Website Control Hub
+              </span>
+              <span className="text-xs font-semibold text-slate-500">
+                {lang === 'sw' ? 'Sehemu Zote Zimepangwa Kulingana na Kurasa' : 'All Functions Grouped by Section'}
+              </span>
+            </div>
+            <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340] mt-1">
+              {lang === 'sw' ? 'Usimamizi kwa Sehemu za Tovuti' : 'Website Sections & Functions Manager'}
+            </h2>
+            <p className="text-xs text-slate-500 font-source mt-0.5">
+              {lang === 'sw' 
+                ? 'Kila kipengele cha tovuti kimepangwa chini ya ukurasa wake: Mwanzo (Home), Kuhusu (About), Muziki (Music), Matukio (Events), Michango (Financials), na Mawasiliano (Footer).'
+                : 'Every feature is organized strictly under its section: Home, About (Members, Trainers, Gallery), Music (Library, Albums), Events, Financials, and Footer.'}
+            </p>
           </div>
-          <span className="text-[11px] text-slate-400 font-normal">Click any section to manage its content</span>
+          <div className="flex items-center gap-2 shrink-0 bg-[#FAF8F5] px-3 py-2 rounded-2xl border border-[#0C2340]/10">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Active Section:</span>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#1058A8] text-white shadow-xs capitalize">
+              {mainCategory}
+            </span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs font-semibold">
-          {/* Members */}
+        {/* MASTER FEATURE DIRECTORY (Instant 1-Click Map of ALL Admin Functions) */}
+        <div className="bg-gradient-to-r from-[#FAF8F5] to-[#EAF4FB]/50 border border-[#0C2340]/10 rounded-2xl p-4 text-xs font-source space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#0C2340]/10 pb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#1058A8]" />
+              <span className="font-bold text-[#0C2340] uppercase tracking-wider text-[11px]">
+                {lang === 'sw' ? 'Ramani Kamili ya Vipengele Vya Usimamizi' : 'Master Feature Directory (All Functions Grouped by Page)'}
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-500">
+              {lang === 'sw' ? 'Bofya kipengele chochote kwenda moja kwa moja' : 'Click any badge to jump directly to that function'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+            
+            {/* 1. HOME DIRECTORY */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#1058A8]" />
+                  1. HOME (Mwanzo)
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold">Home page</span>
+              </div>
+              <div className="flex flex-wrap gap-1 text-[10px]">
+                <button
+                  onClick={() => handleSelectTab('hero')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  Choir Crest Logo
+                </button>
+                <button
+                  onClick={() => handleSelectTab('hero')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  4 Hero Slides
+                </button>
+                <button
+                  onClick={() => handleSelectTab('hero')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  Parish Msg & Church Img
+                </button>
+                <button
+                  onClick={() => handleSelectTab('hero')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  Scripture & Choirmaster
+                </button>
+                <button
+                  onClick={() => handleSelectTab('schedule')}
+                  className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-[#1058A8] font-bold border border-blue-200 cursor-pointer flex items-center gap-1"
+                >
+                  <Clock className="w-2.5 h-2.5" />
+                  Sunday Masses & Rehearsals
+                </button>
+              </div>
+            </div>
+
+            {/* 2. ABOUT DIRECTORY */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-[#1058A8]" />
+                  2. ABOUT (Kuhusu)
+                </span>
+                <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded font-bold">PDF Ready</span>
+              </div>
+              <div className="flex flex-wrap gap-1 text-[10px]">
+                <button
+                  onClick={() => handleSelectTab('members')}
+                  className="px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-[#0C2340] font-bold border border-amber-300 cursor-pointer flex items-center gap-1"
+                >
+                  <Users className="w-2.5 h-2.5 text-[#1058A8]" />
+                  Choir Members Register ({members.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('members')}
+                  className="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 cursor-pointer flex items-center gap-1"
+                >
+                  <Download className="w-2.5 h-2.5 text-emerald-600" />
+                  Generate Members PDF
+                </button>
+                <button
+                  onClick={() => handleSelectTab('leaders')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <ShieldCheck className="w-2.5 h-2.5 text-[#1058A8]" />
+                  Trainers & Officials ({leadersList.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('photos')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <ImageIcon className="w-2.5 h-2.5 text-[#1058A8]" />
+                  Photo Gallery ({groupPhotosList.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('about')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  Our Story & St. Monica
+                </button>
+                <button
+                  onClick={() => handleSelectTab('stats')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  Ministry Statistics
+                </button>
+              </div>
+            </div>
+
+            {/* 3. MUSIC DIRECTORY */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5">
+                  <Music className="w-3.5 h-3.5 text-[#1058A8]" />
+                  3. MUSIC (Muziki)
+                </span>
+                <span className="text-[10px] text-sky-700 bg-sky-50 px-1.5 py-0.2 rounded font-bold">Scores & Audio</span>
+              </div>
+              <div className="flex flex-wrap gap-1 text-[10px]">
+                <button
+                  onClick={() => handleSelectTab('library')}
+                  className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-[#1058A8] font-bold border border-blue-200 cursor-pointer flex items-center gap-1"
+                >
+                  <BookOpen className="w-2.5 h-2.5" />
+                  Maktaba ya Noti Library ({librarySongs.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('albums')}
+                  className="px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-800 font-bold border border-purple-200 cursor-pointer flex items-center gap-1"
+                >
+                  <Disc className="w-2.5 h-2.5" />
+                  Choir Albums & Content ({albums.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('songs')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <Music className="w-2.5 h-2.5" />
+                  Recorded Songs & Lyrics ({songs.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('sheet')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <FileText className="w-2.5 h-2.5" />
+                  Paid Sheet Music Scores ({sheetMusicList.length})
+                </button>
+              </div>
+            </div>
+
+            {/* 4. EVENTS DIRECTORY */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#1058A8]" />
+                  4. EVENTS (Matukio)
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold">{eventsList.length} items</span>
+              </div>
+              <div className="flex flex-wrap gap-1 text-[10px]">
+                <button
+                  onClick={() => handleSelectTab('events')}
+                  className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-[#1058A8] font-bold border border-blue-200 cursor-pointer flex items-center gap-1"
+                >
+                  <Calendar className="w-2.5 h-2.5" />
+                  Liturgical Events Calendar ({eventsList.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('events')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  Parish Feast Days & Retreats
+                </button>
+              </div>
+            </div>
+
+            {/* 5. FINANCIALS DIRECTORY */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-emerald-800 flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                  5. FINANCIALS (Michango)
+                </span>
+                <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-bold">M-Pesa & PDF</span>
+              </div>
+              <div className="flex flex-wrap gap-1 text-[10px]">
+                <button
+                  onClick={() => handleSelectTab('financials')}
+                  className="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 cursor-pointer flex items-center gap-1"
+                >
+                  <DollarSign className="w-2.5 h-2.5 text-emerald-600" />
+                  Latest Supporters ({transactions.length})
+                </button>
+                <button
+                  onClick={() => handleSelectTab('financials')}
+                  className="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 cursor-pointer"
+                >
+                  Total Money Contributed / Paid
+                </button>
+                <button
+                  onClick={() => handleSelectTab('financials')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <Download className="w-2.5 h-2.5 text-emerald-600" />
+                  Generate Financial PDF Statement
+                </button>
+              </div>
+            </div>
+
+            {/* 6. FOOTER & SETTINGS DIRECTORY */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5">
+                  <Settings className="w-3.5 h-3.5 text-[#1058A8]" />
+                  6. FOOTER & SETTINGS (Mawasiliano)
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold">Parish & System</span>
+              </div>
+              <div className="flex flex-wrap gap-1 text-[10px]">
+                <button
+                  onClick={() => handleSelectTab('footer')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <MapPin className="w-2.5 h-2.5 text-[#1058A8]" />
+                  Church Contacts & Address
+                </button>
+                <button
+                  onClick={() => handleSelectTab('footer')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer"
+                >
+                  M-Pesa Till & Service Times
+                </button>
+                <button
+                  onClick={() => handleSelectTab('backup')}
+                  className="px-2 py-0.5 rounded-md bg-[#FAF8F5] hover:bg-[#EAF4FB] text-[#0C2340] font-medium border border-slate-200 cursor-pointer flex items-center gap-1"
+                >
+                  <Settings className="w-2.5 h-2.5 text-[#1058A8]" />
+                  System Backup & Reset
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* 6 Main Section Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {/* 1. HOME */}
           <button
-            onClick={() => setActiveTab('members')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'members'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            onClick={() => handleSelectCategory('home')}
+            className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all border text-center ${
+              mainCategory === 'home'
+                ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/60'
+                : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <div className="flex items-center gap-1.5 truncate">
-              <Users className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Choir Members</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'members' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {members.length}
+            <Sparkles className={`w-5 h-5 ${mainCategory === 'home' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
+            <span className="font-bold text-xs">1. HOME</span>
+            <span className={`text-[10px] ${mainCategory === 'home' ? 'text-sky-200' : 'text-slate-500'}`}>
+              Logo, Slides, Masses
             </span>
           </button>
 
-          {/* Leaders */}
+          {/* 2. ABOUT */}
           <button
-            onClick={() => setActiveTab('leaders')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'leaders'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            onClick={() => handleSelectCategory('about')}
+            className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all border text-center ${
+              mainCategory === 'about'
+                ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/60'
+                : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <div className="flex items-center gap-1.5 truncate">
-              <ShieldCheck className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Trainers & Officials</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'leaders' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {leadersList.length}
+            <BookOpen className={`w-5 h-5 ${mainCategory === 'about' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
+            <span className="font-bold text-xs">2. ABOUT</span>
+            <span className={`text-[10px] ${mainCategory === 'about' ? 'text-sky-200' : 'text-slate-500'}`}>
+              Members ({members.length}) + PDF
             </span>
           </button>
 
-          {/* Albums */}
+          {/* 3. MUSIC */}
           <button
-            onClick={() => setActiveTab('albums')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'albums'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            onClick={() => handleSelectCategory('music')}
+            className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all border text-center ${
+              mainCategory === 'music'
+                ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/60'
+                : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <div className="flex items-center gap-1.5 truncate">
-              <Disc className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Choir Albums</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'albums' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {albums.length}
+            <Music className={`w-5 h-5 ${mainCategory === 'music' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
+            <span className="font-bold text-xs">3. MUSIC</span>
+            <span className={`text-[10px] ${mainCategory === 'music' ? 'text-sky-200' : 'text-slate-500'}`}>
+              Library, Albums, Songs
             </span>
           </button>
 
-          {/* Library */}
+          {/* 4. EVENTS */}
           <button
-            onClick={() => setActiveTab('library')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'library'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            onClick={() => handleSelectCategory('events')}
+            className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all border text-center ${
+              mainCategory === 'events'
+                ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/60'
+                : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <div className="flex items-center gap-1.5 truncate">
-              <BookOpen className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Music Library</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'library' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {librarySongs.length}
+            <Calendar className={`w-5 h-5 ${mainCategory === 'events' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
+            <span className="font-bold text-xs">4. EVENTS</span>
+            <span className={`text-[10px] ${mainCategory === 'events' ? 'text-sky-200' : 'text-slate-500'}`}>
+              Liturgical Calendar ({eventsList.length})
             </span>
           </button>
 
-          {/* Financials & Supporters */}
+          {/* 5. FINANCIALS */}
           <button
-            onClick={() => setActiveTab('financials')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'financials'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            onClick={() => handleSelectCategory('financials')}
+            className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all border text-center ${
+              mainCategory === 'financials'
+                ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-emerald-400/60'
+                : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <div className="flex items-center gap-1.5 truncate">
-              <DollarSign className="w-4 h-4 shrink-0 text-emerald-400" />
-              <span className="truncate">Supporters & Funds</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'financials' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
-              {transactions.length}
+            <DollarSign className={`w-5 h-5 ${mainCategory === 'financials' ? 'text-emerald-300' : 'text-emerald-600'}`} />
+            <span className="font-bold text-xs">5. FINANCIALS</span>
+            <span className={`text-[10px] ${mainCategory === 'financials' ? 'text-emerald-200' : 'text-slate-500'}`}>
+              Supporters & M-Pesa
             </span>
           </button>
 
-          {/* Events */}
+          {/* 6. SETTINGS & FOOTER */}
           <button
-            onClick={() => setActiveTab('events')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'events'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            onClick={() => handleSelectCategory('settings')}
+            className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all border text-center ${
+              mainCategory === 'settings'
+                ? 'bg-[#0C2340] text-white border-[#0C2340] shadow-md ring-2 ring-[#7EC8F0]/60'
+                : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <div className="flex items-center gap-1.5 truncate">
-              <Calendar className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Liturgical Events</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'events' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {eventsList.length}
+            <Settings className={`w-5 h-5 ${mainCategory === 'settings' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
+            <span className="font-bold text-xs">6. FOOTER</span>
+            <span className={`text-[10px] ${mainCategory === 'settings' ? 'text-sky-200' : 'text-slate-500'}`}>
+              Contacts & Backup
             </span>
-          </button>
-
-          {/* Gallery Photos */}
-          <button
-            onClick={() => setActiveTab('photos')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'photos'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <ImageIcon className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Choir Gallery</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'photos' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {groupPhotosList.length}
-            </span>
-          </button>
-
-          {/* Songs */}
-          <button
-            onClick={() => setActiveTab('songs')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'songs'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <Music className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Songs & Lyrics</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'songs' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {songs.length}
-            </span>
-          </button>
-
-          {/* Sheet Music */}
-          <button
-            onClick={() => setActiveTab('sheet')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'sheet'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <FileText className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Paid Scores</span>
-            </div>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'sheet' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {sheetMusicList.length}
-            </span>
-          </button>
-
-          {/* Homepage & Visuals */}
-          <button
-            onClick={() => setActiveTab('hero')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'hero'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <Sparkles className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Logo & Slides</span>
-            </div>
-          </button>
-
-          {/* About Page */}
-          <button
-            onClick={() => setActiveTab('about')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'about'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <BookOpen className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">About Story & Patron</span>
-            </div>
-          </button>
-
-          {/* Mass Schedules */}
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'schedule'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <Clock className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Mass Schedules</span>
-            </div>
-          </button>
-
-          {/* Footer & Contacts */}
-          <button
-            onClick={() => setActiveTab('footer')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'footer'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <MapPin className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Contacts & Till</span>
-            </div>
-          </button>
-
-          {/* Statistics */}
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'stats'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <Users className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
-              <span className="truncate">Statistics</span>
-            </div>
-          </button>
-
-          {/* Settings & Backup */}
-          <button
-            onClick={() => setActiveTab('backup')}
-            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
-              activeTab === 'backup'
-                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <Settings className="w-4 h-4 shrink-0 text-slate-400" />
-              <span className="truncate">Backup & Reset</span>
-            </div>
           </button>
         </div>
+
+        {/* Sub-Tabs Navigation Strip for Selected Main Section */}
+        <div className="pt-3 border-t border-slate-100 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider flex items-center gap-1.5">
+              <span>Current Section Functions:</span>
+              <span className="text-[#1058A8] underline capitalize">{mainCategory}</span>
+            </span>
+            <span className="text-[11px] text-slate-400 italic hidden sm:inline">
+              Select any sub-function below to view and edit its content
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* HOME SUB-TABS */}
+            {mainCategory === 'home' && (
+              <>
+                <button
+                  onClick={() => handleSelectTab('hero')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'hero'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Logo, 4 Hero Slides, Parish Welcome & Church Photo, Scripture Quote & Choirmaster Word</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Visuals</span>
+                </button>
+                <button
+                  onClick={() => handleSelectTab('schedule')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'schedule'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Clock className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Sunday Mass Schedules & Weekday Choir Rehearsals</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-900">Mass Times</span>
+                </button>
+              </>
+            )}
+
+            {/* ABOUT SUB-TABS */}
+            {mainCategory === 'about' && (
+              <>
+                <button
+                  onClick={() => handleSelectTab('members')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'members'
+                      ? 'bg-[#1058A8] text-white shadow-md ring-2 ring-amber-400'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Users className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Choir Members Directory & Voice Sections ({members.length})</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-900 flex items-center gap-1">
+                    <Download className="w-3 h-3" />
+                    PDF Export
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('leaders')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'leaders'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Trainers, Officials & Voice Selection Reps ({leadersList.length})</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Officials</span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('photos')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'photos'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Choir Photo Gallery ({groupPhotosList.length})</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Photos</span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('about')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'about'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Our Story & Patron Saint Monica</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Story & Prayer</span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('stats')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'stats'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Users className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Ministry Statistics ({statsForm.membersCount} singers, {statsForm.yearsServing} yrs)</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Metrics</span>
+                </button>
+              </>
+            )}
+
+            {/* MUSIC SUB-TABS */}
+            {mainCategory === 'music' && (
+              <>
+                <button
+                  onClick={() => handleSelectTab('library')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'library'
+                      ? 'bg-[#1058A8] text-white shadow-md ring-2 ring-sky-300'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Music Library — Maktaba ya Noti ({librarySongs.length} Hymns)</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-200 text-[#0C2340]">Scores & Sol-fa</span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('albums')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'albums'
+                      ? 'bg-[#1058A8] text-white shadow-md ring-2 ring-purple-300'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Disc className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Choir Albums & Content ({albums.length} Albums)</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-200 text-purple-900">Covers & Tracks</span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('songs')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'songs'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Music className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Recorded Songs & Audio Lyrics ({songs.length})</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Audio & Lyrics</span>
+                </button>
+
+                <button
+                  onClick={() => handleSelectTab('sheet')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'sheet'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Paid Sheet Music Scores ({sheetMusicList.length})</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Store (KES)</span>
+                </button>
+              </>
+            )}
+
+            {/* EVENTS SUB-TAB */}
+            {mainCategory === 'events' && (
+              <button
+                onClick={() => handleSelectTab('events')}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#1058A8] text-white shadow-md flex items-center gap-2"
+              >
+                <Calendar className="w-4 h-4 text-[#7EC8F0]" />
+                <span>Liturgical Events Calendar & Feast Days ({eventsList.length} Events)</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Feasts & Masses</span>
+              </button>
+            )}
+
+            {/* FINANCIALS SUB-TAB */}
+            {mainCategory === 'financials' && (
+              <button
+                onClick={() => handleSelectTab('financials')}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#1058A8] text-white shadow-md ring-2 ring-emerald-400 flex items-center gap-2"
+              >
+                <DollarSign className="w-4 h-4 text-emerald-300" />
+                <span>Supporters Ledger & Total Money Contributed ({transactions.length})</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-400 text-slate-900 flex items-center gap-1">
+                  <Download className="w-3 h-3" />
+                  PDF Statement & M-Pesa Till
+                </span>
+              </button>
+            )}
+
+            {/* SETTINGS SUB-TABS */}
+            {mainCategory === 'settings' && (
+              <>
+                <button
+                  onClick={() => handleSelectTab('footer')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'footer'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <MapPin className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Footer Contacts, Service Times & M-Pesa Till</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Contacts</span>
+                </button>
+                <button
+                  onClick={() => handleSelectTab('backup')}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'backup'
+                      ? 'bg-[#1058A8] text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>Data Backup, Export & Reset</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Database</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ACTIVE SECTION BREADCRUMB & SIBLING SWITCHER */}
+      <div className="bg-[#FAF8F5] border border-[#0C2340]/10 px-4 py-2.5 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs font-source">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Editing:</span>
+          <span className="font-bold text-[#0C2340] uppercase tracking-wide">
+            {mainCategory === 'home' && 'Section 1: Home Page'}
+            {mainCategory === 'about' && 'Section 2: About Choir'}
+            {mainCategory === 'music' && 'Section 3: Music & Maktaba'}
+            {mainCategory === 'events' && 'Section 4: Events Calendar'}
+            {mainCategory === 'financials' && 'Section 5: Financials & Supporters'}
+            {mainCategory === 'settings' && 'Section 6: Footer & Settings'}
+          </span>
+          <span className="text-slate-300">/</span>
+          <span className="font-bold text-[#1058A8]">
+            {activeTab === 'hero' && 'Logo & Carousel Slideshow'}
+            {activeTab === 'schedule' && 'Sunday Masses & Rehearsals'}
+            {activeTab === 'members' && `Choir Members Register (${members.length}) [PDF Export Ready]`}
+            {activeTab === 'leaders' && `Trainers & Officials (${leadersList.length})`}
+            {activeTab === 'photos' && `Photo Gallery (${groupPhotosList.length})`}
+            {activeTab === 'about' && 'Our Story & St. Monica'}
+            {activeTab === 'stats' && 'Ministry Statistics'}
+            {activeTab === 'library' && `Maktaba ya Noti (${librarySongs.length} Scores)`}
+            {activeTab === 'albums' && `Choir Albums (${albums.length})`}
+            {activeTab === 'songs' && `Recorded Hymns (${songs.length})`}
+            {activeTab === 'sheet' && `Paid Sheet Music (${sheetMusicList.length})`}
+            {activeTab === 'events' && `Liturgical Calendar (${eventsList.length})`}
+            {activeTab === 'financials' && `Supporters & Contributions (${transactions.length}) [PDF Statement Ready]`}
+            {activeTab === 'footer' && 'Contacts & M-Pesa Till'}
+            {activeTab === 'backup' && 'System Backup & Reset'}
+          </span>
+        </div>
+
+        {/* Quick Sibling Switchers for About */}
+        {mainCategory === 'about' && (
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-slate-400">Switch:</span>
+            {activeTab !== 'members' && (
+              <button onClick={() => handleSelectTab('members')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Members Register ({members.length})
+              </button>
+            )}
+            {activeTab !== 'leaders' && (
+              <button onClick={() => handleSelectTab('leaders')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Trainers ({leadersList.length})
+              </button>
+            )}
+            {activeTab !== 'photos' && (
+              <button onClick={() => handleSelectTab('photos')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Gallery ({groupPhotosList.length})
+              </button>
+            )}
+            {activeTab !== 'about' && (
+              <button onClick={() => handleSelectTab('about')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Our Story
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Quick Sibling Switchers for Music */}
+        {mainCategory === 'music' && (
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-slate-400">Switch:</span>
+            {activeTab !== 'library' && (
+              <button onClick={() => handleSelectTab('library')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Music Library ({librarySongs.length})
+              </button>
+            )}
+            {activeTab !== 'albums' && (
+              <button onClick={() => handleSelectTab('albums')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Albums ({albums.length})
+              </button>
+            )}
+            {activeTab !== 'songs' && (
+              <button onClick={() => handleSelectTab('songs')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Recorded Songs ({songs.length})
+              </button>
+            )}
+            {activeTab !== 'sheet' && (
+              <button onClick={() => handleSelectTab('sheet')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Scores Store
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Quick Sibling Switchers for Home */}
+        {mainCategory === 'home' && (
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-slate-400">Switch:</span>
+            {activeTab !== 'hero' && (
+              <button onClick={() => handleSelectTab('hero')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Logo & Slideshow
+              </button>
+            )}
+            {activeTab !== 'schedule' && (
+              <button onClick={() => handleSelectTab('schedule')} className="text-[#1058A8] hover:underline font-bold cursor-pointer">
+                Sunday Masses & Rehearsals
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* TAB: CHOIR MEMBERS & VOICE SECTIONS (with PDF Generator) */}
