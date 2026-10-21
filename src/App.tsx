@@ -35,10 +35,16 @@ import { PrivacyPage } from './pages/PrivacyPage';
 function ChoirApp() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
     if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.has('admin') || searchParams.get('page') === 'admin' || searchParams.get('portal') === 'admin') {
+        return 'admin';
+      }
       const pathname = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-      if (pathname === 'admin' || pathname === 'privacy') return pathname;
+      if (['admin', 'admin-login', 'portal', 'usimamizi', 'privacy'].includes(pathname)) {
+        return pathname;
+      }
       if (window.location.hash) {
-        const h = window.location.hash.replace(/^#/, '');
+        const h = window.location.hash.replace(/^#/, '').toLowerCase();
         if (h) return h;
       }
     }
@@ -61,20 +67,29 @@ function ChoirApp() {
 
   React.useEffect(() => {
     const handleRouteCheck = () => {
-      const pathname = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-      if (pathname === 'admin' || pathname === 'privacy') {
-        setCurrentRoute(pathname);
-        setNavKey(Date.now());
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
-      const hash = window.location.hash.replace(/^#/, '');
-      if (hash) {
-        setCurrentRoute(hash);
-        setNavKey(Date.now());
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        setCurrentRoute('home');
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has('admin') || searchParams.get('page') === 'admin' || searchParams.get('portal') === 'admin') {
+          setCurrentRoute('admin');
+          setNavKey(Date.now());
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        const pathname = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+        if (['admin', 'admin-login', 'portal', 'usimamizi', 'privacy'].includes(pathname)) {
+          setCurrentRoute(pathname);
+          setNavKey(Date.now());
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        const hash = window.location.hash.replace(/^#/, '').toLowerCase();
+        if (hash) {
+          setCurrentRoute(hash);
+          setNavKey(Date.now());
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          setCurrentRoute('home');
+        }
       }
     };
     window.addEventListener('hashchange', handleRouteCheck);
@@ -100,7 +115,7 @@ function ChoirApp() {
   const isShop = ['shop', 'store'].includes(currentRoute);
   const isEvents = ['events'].includes(currentRoute);
   const isContact = ['contact'].includes(currentRoute);
-  const isAdmin = ['admin'].includes(currentRoute);
+  const isAdmin = ['admin', 'admin-login', 'portal', 'usimamizi'].includes(currentRoute);
   const isLogoConcepts = ['logo-concepts'].includes(currentRoute);
   const isPrivacy = ['privacy', 'privacy-policy'].includes(currentRoute);
 

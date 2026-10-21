@@ -12,7 +12,9 @@ interface AlbumsViewProps {
 }
 
 export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, formatPrice, addToCart, playSong, songs, openSupportModal, openVideoModal } = useChoir();
+  const { lang, formatPrice, addToCart, playSong, songs, openSupportModal, openVideoModal, albums } = useChoir();
+
+  const effectiveAlbums = albums && albums.length > 0 ? albums : INITIAL_ALBUMS;
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -43,13 +45,17 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} })
       {/* Unified Music Section Navigation Tabs */}
       <MusicNavTabs currentTab="music-albums" onNavigate={onNavigate} />
 
-      {/* Album Card */}
+      {/* Album Cards */}
       <div className="space-y-8">
-        {INITIAL_ALBUMS.map((album) => {
+        {effectiveAlbums.map((album) => {
           const matchingSongs = songs.filter(s => 
-            album.songs.some(title => s.title.toLowerCase().includes(title.toLowerCase())) ||
+            (album.songs || []).some(title => s.title.toLowerCase().includes(title.toLowerCase())) ||
             s.album.toLowerCase().includes(album.title.toLowerCase())
           );
+
+          const coverSrc = album.coverImage && (album.coverImage.startsWith('http') || album.coverImage.startsWith('data:'))
+            ? album.coverImage
+            : albumCoverImg;
 
           return (
             <div
@@ -59,10 +65,9 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} })
               {/* Album Cover Art */}
               <div className="lg:col-span-5 aspect-square rounded-2xl bg-[#EAF4FB] border border-[#7EC8F0]/30 overflow-hidden shadow-sm">
                 <img
-                  src={albumCoverImg}
+                  src={coverSrc}
                   alt={album.title}
                   className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
                 />
               </div>
 

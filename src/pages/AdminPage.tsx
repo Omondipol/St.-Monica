@@ -33,7 +33,9 @@ import {
   Globe,
   ArrowRight,
   Eye,
-  Layers
+  Layers,
+  Disc,
+  DollarSign
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
@@ -44,6 +46,9 @@ import { AdminHomepageTab } from '../components/admin/AdminHomepageTab';
 import { AdminMassesTab } from '../components/admin/AdminMassesTab';
 import { AdminFooterTab } from '../components/admin/AdminFooterTab';
 import { AdminAboutTab } from '../components/admin/AdminAboutTab';
+import { AdminMembersTab } from '../components/admin/AdminMembersTab';
+import { AdminAlbumsTab } from '../components/admin/AdminAlbumsTab';
+import { AdminFinancialsTab } from '../components/admin/AdminFinancialsTab';
 
 interface AdminPageProps {
   onNavigateHome: () => void;
@@ -87,7 +92,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     resetToDefaults,
     exportDataJson,
     importDataJson,
-    playSong
+    playSong,
+    members,
+    albums,
+    transactions
   } = useChoir();
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -100,7 +108,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'hero' | 'about' | 'schedule' | 'footer' | 'songs' | 'sheet' | 'library' | 'leaders' | 'events' | 'photos' | 'stats' | 'backup'>('hero');
+  const [activeTab, setActiveTab] = useState<'members' | 'albums' | 'financials' | 'leaders' | 'library' | 'events' | 'photos' | 'songs' | 'sheet' | 'hero' | 'about' | 'schedule' | 'footer' | 'stats' | 'backup'>('members');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   // Maktaba ya Noti Library Form State (Step 6)
@@ -865,155 +873,285 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </div>
       )}
 
-      {/* Navigation Tabs (English Main with Kiswahili Secondary) */}
-      <div 
-        className="flex items-center gap-2 bg-white border border-[#0C2340]/10 p-2 rounded-2xl shadow-xs overflow-x-auto scrollbar-none snap-x"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        <button
-          onClick={() => setActiveTab('hero')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'hero'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Homepage & Visuals <span className="text-[10px] opacity-75 font-normal">(Nembo & Slaidi)</span></span>
-        </button>
+      {/* Navigation Tabs (Organized Grid with Badges) */}
+      <div className="bg-white border border-[#0C2340]/10 p-3 sm:p-4 rounded-2xl shadow-xs space-y-3">
+        <div className="flex items-center justify-between text-xs font-bold text-[#0C2340] pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#1058A8]" />
+            <span>Admin Control Sections (Sehemu za Usimamizi)</span>
+          </div>
+          <span className="text-[11px] text-slate-400 font-normal">Click any section to manage its content</span>
+        </div>
 
-        <button
-          onClick={() => setActiveTab('about')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'about'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <BookOpen className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>About Page & Photos <span className="text-[10px] opacity-75 font-normal">(Historia)</span></span>
-        </button>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs font-semibold">
+          {/* Members */}
+          <button
+            onClick={() => setActiveTab('members')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'members'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Users className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Choir Members</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'members' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {members.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('schedule')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'schedule'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Clock className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Mass Schedules <span className="text-[10px] opacity-75 font-normal">(Ratiba ya Misa)</span></span>
-        </button>
+          {/* Leaders */}
+          <button
+            onClick={() => setActiveTab('leaders')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'leaders'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <ShieldCheck className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Trainers & Officials</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'leaders' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {leadersList.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('footer')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'footer'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <MapPin className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Footer & Contacts <span className="text-[10px] opacity-75 font-normal">(Mawasiliano)</span></span>
-        </button>
+          {/* Albums */}
+          <button
+            onClick={() => setActiveTab('albums')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'albums'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Disc className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Choir Albums</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'albums' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {albums.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('songs')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'songs'
-              ? 'bg-[#1058A8] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Music className="w-3.5 h-3.5" />
-          <span>Repertoire & YouTube <span className="text-[10px] opacity-75 font-normal">({songs.length})</span></span>
-        </button>
+          {/* Library */}
+          <button
+            onClick={() => setActiveTab('library')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'library'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <BookOpen className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Music Library</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'library' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {librarySongs.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('sheet')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'sheet'
-              ? 'bg-[#1058A8] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Paid Sheet Music <span className="text-[10px] opacity-75 font-normal">({sheetMusicList.length})</span></span>
-        </button>
+          {/* Financials & Supporters */}
+          <button
+            onClick={() => setActiveTab('financials')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'financials'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <DollarSign className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span className="truncate">Supporters & Funds</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'financials' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
+              {transactions.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('library')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'library'
-              ? 'bg-[#1058A8] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <BookOpen className="w-3.5 h-3.5" />
-          <span>Music Library <span className="text-[10px] opacity-75 font-normal">(Maktaba: {librarySongs.length})</span></span>
-        </button>
+          {/* Events */}
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'events'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Calendar className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Liturgical Events</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'events' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {eventsList.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('leaders')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'leaders'
-              ? 'bg-[#1058A8] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Users className="w-3.5 h-3.5" />
-          <span>Leadership & Trainers <span className="text-[10px] opacity-75 font-normal">({leadersList.length})</span></span>
-        </button>
+          {/* Gallery Photos */}
+          <button
+            onClick={() => setActiveTab('photos')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'photos'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <ImageIcon className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Choir Gallery</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'photos' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {groupPhotosList.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('events')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'events'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Calendar className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Liturgical Events <span className="text-[10px] opacity-75 font-normal">({eventsList.length})</span></span>
-        </button>
+          {/* Songs */}
+          <button
+            onClick={() => setActiveTab('songs')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'songs'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Music className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Songs & Lyrics</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'songs' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {songs.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('photos')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'photos'
-              ? 'bg-[#1058A8] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <ImageIcon className="w-3.5 h-3.5" />
-          <span>Choir Gallery <span className="text-[10px] opacity-75 font-normal">({groupPhotosList.length})</span></span>
-        </button>
+          {/* Sheet Music */}
+          <button
+            onClick={() => setActiveTab('sheet')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'sheet'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <FileText className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Paid Scores</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${activeTab === 'sheet' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              {sheetMusicList.length}
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('stats')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'stats'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Users className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Statistics <span className="text-[10px] opacity-75 font-normal">(Takwimu)</span></span>
-        </button>
+          {/* Homepage & Visuals */}
+          <button
+            onClick={() => setActiveTab('hero')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'hero'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Sparkles className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Logo & Slides</span>
+            </div>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('backup')}
-          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'backup'
-              ? 'bg-[#0C2340] text-white shadow-xs'
-              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
-          }`}
-        >
-          <Settings className="w-3.5 h-3.5" />
-          <span>Settings & Backup <span className="text-[10px] opacity-75 font-normal">(Mipangilio)</span></span>
-        </button>
+          {/* About Page */}
+          <button
+            onClick={() => setActiveTab('about')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'about'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <BookOpen className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">About Story & Patron</span>
+            </div>
+          </button>
+
+          {/* Mass Schedules */}
+          <button
+            onClick={() => setActiveTab('schedule')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'schedule'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Clock className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Mass Schedules</span>
+            </div>
+          </button>
+
+          {/* Footer & Contacts */}
+          <button
+            onClick={() => setActiveTab('footer')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'footer'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <MapPin className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Contacts & Till</span>
+            </div>
+          </button>
+
+          {/* Statistics */}
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'stats'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Users className="w-4 h-4 shrink-0 text-[#7EC8F0]" />
+              <span className="truncate">Statistics</span>
+            </div>
+          </button>
+
+          {/* Settings & Backup */}
+          <button
+            onClick={() => setActiveTab('backup')}
+            className={`p-2.5 rounded-xl flex items-center justify-between gap-1.5 cursor-pointer transition-all border ${
+              activeTab === 'backup'
+                ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
+                : 'bg-white text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Settings className="w-4 h-4 shrink-0 text-slate-400" />
+              <span className="truncate">Backup & Reset</span>
+            </div>
+          </button>
+        </div>
       </div>
+
+      {/* TAB: CHOIR MEMBERS & VOICE SECTIONS (with PDF Generator) */}
+      {activeTab === 'members' && (
+        <AdminMembersTab onNotify={notify} />
+      )}
+
+      {/* TAB: CHOIR ALBUMS & TRACKS */}
+      {activeTab === 'albums' && (
+        <AdminAlbumsTab onNotify={notify} />
+      )}
+
+      {/* TAB: FINANCIALS & SUPPORTERS */}
+      {activeTab === 'financials' && (
+        <AdminFinancialsTab onNotify={notify} />
+      )}
 
       {/* TAB 0A: HOMEPAGE & VISUALS (Logo, 4 Hero Slides, Parish Msg & Church Img, Bible Quote, Choirmaster Word & Picture) */}
       {activeTab === 'hero' && (

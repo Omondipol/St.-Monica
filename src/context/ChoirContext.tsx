@@ -28,7 +28,9 @@ import {
   FooterContactConfig,
   DEFAULT_FOOTER_CONTACT,
   AboutPageConfig,
-  DEFAULT_ABOUT_CONFIG
+  DEFAULT_ABOUT_CONFIG,
+  SupporterTransaction,
+  INITIAL_TRANSACTIONS
 } from '../data/choirContent';
 import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
 import { ChoirMember, INITIAL_MEMBERS, isMemberActive } from '../data/membersData';
@@ -280,12 +282,25 @@ interface ChoirContextType {
   members: ChoirMember[];
   activeMembers: ChoirMember[];
   registerMember: (data: { name: string; voice: 'soprano' | 'alto' | 'tenor' | 'bass'; phone: string; email?: string; paymentReference?: string }) => ChoirMember;
+  addMember: (member: Omit<ChoirMember, 'id'>) => void;
+  updateMember: (id: string, updated: Partial<ChoirMember>) => void;
   renewMember: (id: string, paymentReference?: string) => void;
   deleteMember: (id: string) => void;
   isJoinModalOpen: boolean;
   openJoinModal: (preselectedVoice?: 'soprano' | 'alto' | 'tenor' | 'bass') => void;
   closeJoinModal: () => void;
   preselectedVoice?: 'soprano' | 'alto' | 'tenor' | 'bass';
+
+  // Albums & Tracklists
+  albums: Album[];
+  addAlbum: (album: Omit<Album, 'id'>) => void;
+  updateAlbum: (id: string, updated: Partial<Album>) => void;
+  deleteAlbum: (id: string) => void;
+
+  // Contributions & Supporters Ledger
+  transactions: SupporterTransaction[];
+  addTransaction: (tx: Omit<SupporterTransaction, 'id'>) => void;
+  deleteTransaction: (id: string) => void;
 }
 
 const ChoirContext = createContext<ChoirContextType | undefined>(undefined);
@@ -328,7 +343,9 @@ const STORAGE_KEYS = {
   CHOIRMASTER: 'st_monica_choirmaster_v6',
   MASSES_LIST: 'st_monica_masses_list_v6',
   FOOTER_CONTACT: 'st_monica_footer_contact_v6',
-  ABOUT_CONFIG: 'st_monica_about_config_v6'
+  ABOUT_CONFIG: 'st_monica_about_config_v6',
+  ALBUMS: 'st_monica_albums_v6',
+  TRANSACTIONS: 'st_monica_transactions_v6'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -901,6 +918,76 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const deleteMember = (id: string) => {
     setMembers(prev => prev.filter(m => m.id !== id));
+  };
+
+  const addMember = (data: Omit<ChoirMember, 'id'>) => {
+    const newMem: ChoirMember = {
+      ...data,
+      id: `mem-${data.voice.slice(0, 3)}-${Date.now()}`
+    };
+    setMembers(prev => [newMem, ...prev]);
+  };
+
+  const updateMember = (id: string, updated: Partial<ChoirMember>) => {
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+  };
+
+  // 7g. Official Albums & Recordings
+  const [albums, setAlbums] = useState<Album[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.ALBUMS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_ALBUMS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(albums));
+    } catch (e) {}
+  }, [albums]);
+
+  const addAlbum = (newAlb: Omit<Album, 'id'>) => {
+    const alb: Album = {
+      ...newAlb,
+      id: `album-${Date.now()}`
+    };
+    setAlbums(prev => [alb, ...prev]);
+  };
+
+  const updateAlbum = (id: string, updated: Partial<Album>) => {
+    setAlbums(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a));
+  };
+
+  const deleteAlbum = (id: string) => {
+    setAlbums(prev => prev.filter(a => a.id !== id));
+  };
+
+  // 7h. Contributions & Supporters Transactions Ledger
+  const [transactions, setTransactions] = useState<SupporterTransaction[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_TRANSACTIONS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+    } catch (e) {}
+  }, [transactions]);
+
+  const addTransaction = (tx: Omit<SupporterTransaction, 'id'>) => {
+    const newTx: SupporterTransaction = {
+      ...tx,
+      id: `tx-${Date.now()}`
+    };
+    setTransactions(prev => [newTx, ...prev]);
+  };
+
+  const deleteTransaction = (id: string) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
   // 7b. Maktaba ya Noti (Free Sheet Music Library)
@@ -1986,12 +2073,25 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         members,
         activeMembers,
         registerMember,
+        addMember,
+        updateMember,
         renewMember,
         deleteMember,
         isJoinModalOpen,
         openJoinModal,
         closeJoinModal,
-        preselectedVoice
+        preselectedVoice,
+
+        // Albums
+        albums,
+        addAlbum,
+        updateAlbum,
+        deleteAlbum,
+
+        // Transactions & Contributions
+        transactions,
+        addTransaction,
+        deleteTransaction
       }}
     >
       {children}
@@ -2158,12 +2258,21 @@ export const useChoir = (): ChoirContextType => {
       members: INITIAL_MEMBERS,
       activeMembers: INITIAL_MEMBERS,
       registerMember: () => INITIAL_MEMBERS[0],
+      addMember: () => {},
+      updateMember: () => {},
       renewMember: () => {},
       deleteMember: () => {},
       isJoinModalOpen: false,
       openJoinModal: () => {},
       closeJoinModal: () => {},
-      preselectedVoice: undefined
+      preselectedVoice: undefined,
+      albums: INITIAL_ALBUMS,
+      addAlbum: () => {},
+      updateAlbum: () => {},
+      deleteAlbum: () => {},
+      transactions: INITIAL_TRANSACTIONS,
+      addTransaction: () => {},
+      deleteTransaction: () => {}
     };
   }
   return context;
