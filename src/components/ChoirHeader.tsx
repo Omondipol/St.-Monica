@@ -9,7 +9,8 @@ import {
   Play,
   Pause,
   ArrowRight,
-  Heart
+  Heart,
+  ShieldCheck
 } from 'lucide-react';
 import { CHOIR_STATS, Song } from '../data/choirContent';
 import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
@@ -467,6 +468,18 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
               </button>
             </div>
 
+            {/* Admin Portal Quick Access */}
+            <button
+              onClick={() => navigateTo('admin')}
+              className={`p-2 rounded-xl transition-all cursor-pointer text-white/80 hover:text-white hover:bg-white/10 ${
+                currentRoute === 'admin' ? 'bg-[#1058A8] text-white' : ''
+              }`}
+              title={lang === 'sw' ? 'Usimamizi wa Kwaya (Admin)' : 'Choir Admin Portal'}
+              aria-label="Admin Portal"
+            >
+              <ShieldCheck className="w-4 h-4 text-[#7EC8F0]" />
+            </button>
+
             {/* Shopping Bag ONLY visible when cartCount > 0 */}
             {cartCount > 0 && (
               <button
@@ -777,6 +790,18 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 className="w-full min-h-[56px] flex items-center justify-between text-left text-base font-bold text-sky-200 hover:text-white px-2 cursor-pointer bg-white/5 rounded-xl my-1"
               >
                 <span>{lang === 'sw' ? 'Unga Mkono Kwaya' : 'Support the Choir'}</span>
+                <ArrowRight className="w-4 h-4 text-[#7EC8F0]" />
+              </button>
+
+              {/* Admin Portal (Mobile menu) */}
+              <button
+                onClick={() => navigateTo('admin')}
+                className="w-full min-h-[56px] flex items-center justify-between text-left text-base font-bold text-amber-200 hover:text-white px-2 cursor-pointer bg-white/5 rounded-xl my-1 border border-white/10"
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#7EC8F0]" />
+                  <span>{lang === 'sw' ? 'Usimamizi wa Tovuti (Admin)' : 'Admin Portal'}</span>
+                </div>
                 <ArrowRight className="w-4 h-4 text-[#7EC8F0]" />
               </button>
             </div>

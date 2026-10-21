@@ -13,7 +13,8 @@ import {
   ChevronUp, 
   ArrowUp,
   Clock,
-  Compass
+  Compass,
+  ShieldCheck
 } from 'lucide-react';
 
 interface ChoirFooterProps {
@@ -381,6 +382,15 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               className="text-[#7EC8F0] hover:text-white transition-colors cursor-pointer text-xs underline-offset-2 hover:underline"
             >
               {lang === 'sw' ? 'Sera ya Faragha' : 'Privacy Policy'}
+            </button>
+            <span className="text-slate-500">·</span>
+            <button
+              onClick={() => onNavigate('admin')}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#1058A8] text-white transition-all cursor-pointer text-xs font-semibold shadow-xs"
+              title="Admin Portal (Usimamizi)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#7EC8F0]" />
+              <span>{lang === 'sw' ? 'Usimamizi (Admin)' : 'Admin Portal'}</span>
             </button>
           </div>
 

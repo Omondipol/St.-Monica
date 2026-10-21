@@ -40,8 +40,12 @@ export const SupportChoirModal: React.FC = () => {
     isSupportModalOpen, 
     closeSupportModal, 
     supportSongTitle, 
-    lang 
+    lang,
+    footerContact,
+    choirStats
   } = useChoir();
+
+  const effectiveTill = footerContact?.mpesaTill || choirStats?.mpesaTill || '8421092';
 
   // Modal screen flow: 'form' (steps 1 & 2), 'waiting', 'success', 'error'
   const [modalState, setModalState] = useState<'form' | 'waiting' | 'success' | 'error'>('form');
@@ -591,7 +595,7 @@ export const SupportChoirModal: React.FC = () => {
                           <span className="text-slate-500 block text-[10px] font-source">{lang === 'sw' ? 'Nambari ya Till:' : 'Till Number:'}</span>
                           {/* Body font, semi-bold, 22px, tabular numerals (no monospace!) */}
                           <strong className="text-[#0C2340] text-[22px] font-semibold font-source tabular-nums tracking-wide block">
-                            9842150
+                            {effectiveTill}
                           </strong>
                           <span className="text-slate-600 block text-[10px] mt-0.5 font-source">
                             {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Catholic Choir'}
@@ -599,7 +603,7 @@ export const SupportChoirModal: React.FC = () => {
                         </div>
                         <button
                           type="button"
-                          onClick={() => handleCopy('9842150', 'till')}
+                          onClick={() => handleCopy(effectiveTill, 'till')}
                           className="px-2.5 py-1 bg-[#1058A8]/10 hover:bg-[#1058A8]/20 text-[#1058A8] rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer font-source"
                         >
                           {copiedKey === 'till' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}

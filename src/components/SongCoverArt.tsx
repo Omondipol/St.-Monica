@@ -14,10 +14,12 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
   size = 'thumbnail',
   className = ''
 }) => {
-  // Use authentic cropped choir photos with zero burned-in video text or titles
-  const cleanPhoto = song.id === 'song-nimzima' || song.id === 'song-jumuiya'
-    ? choirSingingPhoto
-    : choirCoverPhoto;
+  // Use custom song thumbnail if provided by admin, or authentic cropped choir photos
+  const cleanPhoto = song.thumbnailUrl || (
+    song.id === 'song-nimzima' || song.id === 'song-jumuiya'
+      ? choirSingingPhoto
+      : choirCoverPhoto
+  );
 
   if (size === 'thumbnail') {
     return (

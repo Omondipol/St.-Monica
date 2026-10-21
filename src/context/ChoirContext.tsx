@@ -2135,6 +2135,7 @@ export const useChoir = (): ChoirContextType => {
       incrementDownloadCount: () => {},
       resetToDefaults: () => {},
       exportDataJson: () => '[]',
+      importDataJson: () => false,
       customLogoUrl: '',
       updateCustomLogoUrl: () => {},
       heroSlides: DEFAULT_HERO_SLIDES_CONFIG,

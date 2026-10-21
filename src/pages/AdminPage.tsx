@@ -39,6 +39,11 @@ import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { LIBRARY_CATEGORIES, LibrarySong } from '../data/libraryData';
+import { ImageUploadField } from '../components/ImageUploadField';
+import { AdminHomepageTab } from '../components/admin/AdminHomepageTab';
+import { AdminMassesTab } from '../components/admin/AdminMassesTab';
+import { AdminFooterTab } from '../components/admin/AdminFooterTab';
+import { AdminAboutTab } from '../components/admin/AdminAboutTab';
 
 interface AdminPageProps {
   onNavigateHome: () => void;
@@ -95,7 +100,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'hero' | 'stats' | 'schedule' | 'events' | 'songs' | 'sheet' | 'library' | 'leaders' | 'photos' | 'backup'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'about' | 'schedule' | 'footer' | 'songs' | 'sheet' | 'library' | 'leaders' | 'events' | 'photos' | 'stats' | 'backup'>('hero');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   // Maktaba ya Noti Library Form State (Step 6)
@@ -346,6 +351,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     duration: '4:20',
     youtubeUrl: YOUTUBE_CHANNEL_URL,
     audioPreviewUrl: 'preview.mp3',
+    thumbnailUrl: '',
     sheetMusicAvailable: true,
     scorePriceKes: 300,
     lyricsSwahiliText: '',
@@ -370,6 +376,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       duration: '4:15',
       youtubeUrl: YOUTUBE_CHANNEL_URL,
       audioPreviewUrl: 'preview.mp3',
+      thumbnailUrl: '',
       sheetMusicAvailable: true,
       scorePriceKes: 300,
       lyricsSwahiliText: '1. Maneno ya Kiswahili...\nKiitikio: Sala yetu hekaluni...',
@@ -396,6 +403,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       duration: song.duration,
       youtubeUrl: song.youtubeUrl,
       audioPreviewUrl: song.audioPreviewUrl,
+      thumbnailUrl: song.thumbnailUrl || '',
       sheetMusicAvailable: song.sheetMusicAvailable,
       scorePriceKes: song.scorePriceKes,
       lyricsSwahiliText: song.lyricsSwahili?.join('\n') || '',
@@ -434,6 +442,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       duration: songForm.duration.trim() || '4:00',
       youtubeUrl: songForm.youtubeUrl.trim() || YOUTUBE_CHANNEL_URL,
       audioPreviewUrl: songForm.audioPreviewUrl.trim() || 'preview.mp3',
+      thumbnailUrl: songForm.thumbnailUrl.trim() || undefined,
       sheetMusicAvailable: songForm.sheetMusicAvailable,
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
       lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monika SEC 58.'],
@@ -466,7 +475,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     priceUsd: 2.50,
     description: '',
     descriptionSw: '',
-    downloadUrl: '#'
+    downloadUrl: '#',
+    previewImage: ''
   });
 
   const openAddSheetModal = () => {
@@ -483,7 +493,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       priceUsd: 2.50,
       description: 'Complete 4-part SATB vocal sheet music in PDF format with tonic sol-fa and staff notation.',
       descriptionSw: 'Noti kamili za sauti nne (SATB) zenye solfa na stafu kwa muundo wa PDF kwa walimu wa kwaya.',
-      downloadUrl: '#'
+      downloadUrl: '#',
+      previewImage: ''
     });
     setIsSheetModalOpen(true);
   };
@@ -502,7 +513,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       priceUsd: item.priceUsd,
       description: item.description,
       descriptionSw: item.descriptionSw,
-      downloadUrl: item.downloadUrl || '#'
+      downloadUrl: item.downloadUrl || '#',
+      previewImage: item.previewImage || ''
     });
     setIsSheetModalOpen(true);
   };
@@ -523,7 +535,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       priceUsd: Number(sheetForm.priceUsd) || 2.50,
       description: sheetForm.description.trim(),
       descriptionSw: sheetForm.descriptionSw.trim() || sheetForm.description.trim(),
-      downloadUrl: sheetForm.downloadUrl.trim() || '#'
+      downloadUrl: sheetForm.downloadUrl.trim() || '#',
+      previewImage: sheetForm.previewImage.trim() || undefined
     };
 
     if (editingSheetId) {
@@ -548,7 +561,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     responsibilitySw: '',
     tenure: 'Serving since 2020',
     tenureSw: 'Anahudumu tangu 2020',
-    contact: ''
+    contact: '',
+    photoUrl: ''
   });
 
   const openAddLeaderModal = () => {
@@ -562,7 +576,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       responsibilitySw: '',
       tenure: 'Serving since 2024',
       tenureSw: 'Anahudumu tangu 2024',
-      contact: ''
+      contact: '',
+      photoUrl: ''
     });
     setIsLeaderModalOpen(true);
   };
@@ -578,7 +593,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       responsibilitySw: leader.responsibilitySw,
       tenure: leader.tenure,
       tenureSw: leader.tenureSw,
-      contact: leader.contact || ''
+      contact: leader.contact || '',
+      photoUrl: leader.photoUrl || ''
     });
     setIsLeaderModalOpen(true);
   };
@@ -596,7 +612,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       responsibilitySw: leaderForm.responsibilitySw.trim() || leaderForm.responsibility.trim(),
       tenure: leaderForm.tenure.trim(),
       tenureSw: leaderForm.tenureSw.trim() || leaderForm.tenure.trim(),
-      contact: leaderForm.contact.trim()
+      contact: leaderForm.contact.trim(),
+      photoUrl: leaderForm.photoUrl.trim() || undefined
     };
 
     if (editingLeaderId) {
@@ -716,14 +733,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               type="password"
               value={passcode}
               onChange={e => setPasscode(e.target.value)}
-              placeholder="sec58nakuru or admin"
+              placeholder="••••••••••••"
               className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
               autoFocus
             />
-            <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
-              <span>System Passcode:</span>
-              <code className="bg-slate-200 px-1.5 py-0.5 rounded text-[#0C2340] font-mono font-bold">sec58nakuru</code>
-              <span className="text-slate-400">(or <code className="font-mono font-semibold">admin</code>)</span>
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Authorized choir directors and committee members only.
             </p>
           </div>
 
@@ -864,19 +879,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Hero & Notice <span className="text-[10px] opacity-75 font-normal">(Mwanzo)</span></span>
+          <span>Homepage & Visuals <span className="text-[10px] opacity-75 font-normal">(Nembo & Slaidi)</span></span>
         </button>
 
         <button
-          onClick={() => setActiveTab('stats')}
+          onClick={() => setActiveTab('about')}
           className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'stats'
+            activeTab === 'about'
               ? 'bg-[#0C2340] text-white shadow-xs'
               : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
           }`}
         >
-          <Users className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Choir Statistics <span className="text-[10px] opacity-75 font-normal">(Takwimu)</span></span>
+          <BookOpen className="w-3.5 h-3.5 text-[#7EC8F0]" />
+          <span>About Page & Photos <span className="text-[10px] opacity-75 font-normal">(Historia)</span></span>
         </button>
 
         <button
@@ -888,19 +903,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           }`}
         >
           <Clock className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Mass Schedule <span className="text-[10px] opacity-75 font-normal">(Ratiba)</span></span>
+          <span>Mass Schedules <span className="text-[10px] opacity-75 font-normal">(Ratiba ya Misa)</span></span>
         </button>
 
         <button
-          onClick={() => setActiveTab('events')}
+          onClick={() => setActiveTab('footer')}
           className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
-            activeTab === 'events'
+            activeTab === 'footer'
               ? 'bg-[#0C2340] text-white shadow-xs'
               : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
           }`}
         >
-          <Calendar className="w-3.5 h-3.5 text-[#7EC8F0]" />
-          <span>Liturgical Events <span className="text-[10px] opacity-75 font-normal">({eventsList.length})</span></span>
+          <MapPin className="w-3.5 h-3.5 text-[#7EC8F0]" />
+          <span>Footer & Contacts <span className="text-[10px] opacity-75 font-normal">(Mawasiliano)</span></span>
         </button>
 
         <button
@@ -952,6 +967,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </button>
 
         <button
+          onClick={() => setActiveTab('events')}
+          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
+            activeTab === 'events'
+              ? 'bg-[#0C2340] text-white shadow-xs'
+              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
+          }`}
+        >
+          <Calendar className="w-3.5 h-3.5 text-[#7EC8F0]" />
+          <span>Liturgical Events <span className="text-[10px] opacity-75 font-normal">({eventsList.length})</span></span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('photos')}
           className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
             activeTab === 'photos'
@@ -961,6 +988,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         >
           <ImageIcon className="w-3.5 h-3.5" />
           <span>Choir Gallery <span className="text-[10px] opacity-75 font-normal">({groupPhotosList.length})</span></span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('stats')}
+          className={`snap-start shrink-0 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors ${
+            activeTab === 'stats'
+              ? 'bg-[#0C2340] text-white shadow-xs'
+              : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5 text-[#7EC8F0]" />
+          <span>Statistics <span className="text-[10px] opacity-75 font-normal">(Takwimu)</span></span>
         </button>
 
         <button
@@ -976,313 +1015,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </button>
       </div>
 
-      {/* TAB 0A: HERO SECTION & ANNOUNCEMENTS */}
+      {/* TAB 0A: HOMEPAGE & VISUALS (Logo, 4 Hero Slides, Parish Msg & Church Img, Bible Quote, Choirmaster Word & Picture) */}
       {activeTab === 'hero' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-[#0C2340]/10 shadow-sm overflow-hidden">
-            <AfricanGeometricBorder />
-            <div className="p-6 sm:p-8 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#0C2340]/10">
-                <div>
-                  <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                    Homepage Hero & Announcement Notice
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-600 font-source mt-1">
-                    Edit home headlines, mission message, and the site announcement notice banner. English is the primary display; Kiswahili is provided in the second section.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    Live On Website
-                  </span>
-                </div>
-              </div>
+        <AdminHomepageTab onNotify={notify} />
+      )}
 
-              {/* Live Preview of Hero & Notice (Shows English Main and Kiswahili Secondary) */}
-              <div className="p-4 bg-[#0C2340] text-white rounded-2xl border border-[#7EC8F0]/30 space-y-3 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-[#7EC8F0] tracking-wider block font-source">
-                    Live Hero Preview · Primary English & Kiswahili
-                  </span>
-                  <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/80">
-                    Website Synchronized
-                  </span>
-                </div>
-                
-                {heroForm.noticeEnabled && (
-                  <div className={`p-2.5 rounded-xl border flex items-center gap-2 text-xs font-source ${
-                    heroForm.noticeType === 'urgent' 
-                      ? 'bg-rose-500/20 border-rose-400 text-rose-200' 
-                      : heroForm.noticeType === 'feast' 
-                      ? 'bg-amber-400/20 border-amber-300 text-amber-200' 
-                      : 'bg-[#1058A8]/40 border-[#7EC8F0]/40 text-white'
-                  }`}>
-                    <span className="px-2 py-0.5 rounded-full bg-white text-slate-900 font-bold text-[10px] uppercase shrink-0">
-                      {heroForm.noticeBadgeEn || 'Notice'}
-                    </span>
-                    <span className="truncate">
-                      {heroForm.noticeTextEn}
-                    </span>
-                    <span className="text-white/60 text-[10px] hidden sm:inline ml-auto truncate pl-2 border-l border-white/20">
-                      SW: {heroForm.noticeTextSw}
-                    </span>
-                  </div>
-                )}
-
-                <div className="space-y-1.5 pt-1">
-                  <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white leading-tight">
-                    {heroForm.headlineEn}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-white/80 font-source">
-                    {heroForm.subheadEn}
-                  </p>
-                  <p className="text-[11px] text-[#7EC8F0] italic font-source pt-0.5">
-                    "{heroForm.scriptureEn}" — {heroForm.scriptureRef}
-                  </p>
-                  <div className="pt-2 border-t border-white/10 text-[11px] text-white/70">
-                    <span className="font-semibold text-white/90">Kiswahili Companion:</span> {heroForm.headlineSw} · {heroForm.subheadSw}
-                  </div>
-                </div>
-              </div>
-
-              <form onSubmit={handleSaveHeroAndNotice} className="space-y-6">
-                
-                {/* SECTION 1: ENGLISH (MAIN CONTENT) */}
-                <div className="p-5 bg-white rounded-2xl border-2 border-[#1058A8]/30 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#1058A8]"></span>
-                      <h3 className="font-bold text-sm text-[#0C2340] uppercase tracking-wider font-source">
-                        Section 1: English Content (Main)
-                      </h3>
-                    </div>
-                    <span className="text-[11px] font-bold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full">
-                      Primary Display
-                    </span>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                        Hero Headline (English) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={heroForm.headlineEn}
-                        onChange={e => setHeroForm(prev => ({ ...prev, headlineEn: e.target.value }))}
-                        placeholder="Uniting hearts through sacred music"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                        Subtitle / Mission Statement (English) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={heroForm.subheadEn}
-                        onChange={e => setHeroForm(prev => ({ ...prev, subheadEn: e.target.value }))}
-                        placeholder="St. Monica Third Mass Choir (Section 58, Nakuru)"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                        Patron Saint Spiritual Quote / Scripture (English)
-                      </label>
-                      <input
-                        type="text"
-                        value={heroForm.scriptureEn}
-                        onChange={e => setHeroForm(prev => ({ ...prev, scriptureEn: e.target.value }))}
-                        placeholder="He who sings well prays twice."
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                      <div>
-                        <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                          Notice Badge Label (English)
-                        </label>
-                        <input
-                          type="text"
-                          value={heroForm.noticeBadgeEn}
-                          onChange={e => setHeroForm(prev => ({ ...prev, noticeBadgeEn: e.target.value }))}
-                          placeholder="Notice"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                          Announcement Notice Message (English)
-                        </label>
-                        <input
-                          type="text"
-                          value={heroForm.noticeTextEn}
-                          onChange={e => setHeroForm(prev => ({ ...prev, noticeTextEn: e.target.value }))}
-                          placeholder="Choir rehearsals every Wednesday & Friday at 5:30 PM."
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SECTION 2: KISWAHILI (SECOND SECTION) */}
-                <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-amber-300/60 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-amber-200">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                      <h3 className="font-bold text-sm text-[#0C2340] uppercase tracking-wider font-source">
-                        Section 2: Kiswahili Content (Second Section)
-                      </h3>
-                    </div>
-                    <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
-                      Sehemu ya Pili (Tafsiri ya Kiswahili)
-                    </span>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Kichwa Kikuu cha Mwanzo (Kiswahili)
-                      </label>
-                      <input
-                        type="text"
-                        value={heroForm.headlineSw}
-                        onChange={e => setHeroForm(prev => ({ ...prev, headlineSw: e.target.value }))}
-                        placeholder="Kuunganisha mioyo kupitia muziki mtakatifu"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Maelezo Mafupi ya Utume (Kiswahili)
-                      </label>
-                      <input
-                        type="text"
-                        value={heroForm.subheadSw}
-                        onChange={e => setHeroForm(prev => ({ ...prev, subheadSw: e.target.value }))}
-                        placeholder="Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Maneno ya Nukuu ya Kiroho (Kiswahili)
-                      </label>
-                      <input
-                        type="text"
-                        value={heroForm.scriptureSw}
-                        onChange={e => setHeroForm(prev => ({ ...prev, scriptureSw: e.target.value }))}
-                        placeholder="Aimbaye vizuri anasali mara mbili."
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-white"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Lebo ya Tangazo (Kiswahili)
-                        </label>
-                        <input
-                          type="text"
-                          value={heroForm.noticeBadgeSw}
-                          onChange={e => setHeroForm(prev => ({ ...prev, noticeBadgeSw: e.target.value }))}
-                          placeholder="Tangazo"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Ujumbe wa Tangazo (Kiswahili)
-                        </label>
-                        <input
-                          type="text"
-                          value={heroForm.noticeTextSw}
-                          onChange={e => setHeroForm(prev => ({ ...prev, noticeTextSw: e.target.value }))}
-                          placeholder="Mazoezi ya kwaya kila Jumatano na Ijumaa Saa 11:30 Jioni."
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SECTION 3: SHARED SETTINGS & CITATIONS */}
-                <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-4">
-                  <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                    Shared Notice & Citation Settings
-                  </span>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Notice Type Style
-                      </label>
-                      <select
-                        value={heroForm.noticeType}
-                        onChange={e => setHeroForm(prev => ({ ...prev, noticeType: e.target.value as any }))}
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                      >
-                        <option value="info">Info Announcement (Navy Blue)</option>
-                        <option value="feast">Liturgical Feast / Solemnity (Gold Amber)</option>
-                        <option value="urgent">Urgent Parish Notice (Rose Red)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Citation / Author Reference
-                      </label>
-                      <input
-                        type="text"
-                        value={heroForm.scriptureRef}
-                        onChange={e => setHeroForm(prev => ({ ...prev, scriptureRef: e.target.value }))}
-                        placeholder="St. Augustine of Hippo"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-start sm:gap-4 pt-4">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={heroForm.noticeEnabled}
-                          onChange={e => setHeroForm(prev => ({ ...prev, noticeEnabled: e.target.checked }))}
-                          className="w-5 h-5 accent-[#1058A8] cursor-pointer"
-                        />
-                        <span className="text-xs font-bold text-slate-800">
-                          {heroForm.noticeEnabled ? 'Notice Active (Linaonekana)' : 'Notice Hidden (Limezimwa)'}
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Save Button */}
-                <div className="pt-2 flex items-center justify-between">
-                  <span className="text-xs text-slate-500 font-source italic">
-                    Changes save immediately to local storage and update live across the entire website.
-                  </span>
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Save Hero & Notice (Hifadhi Mwanzo)</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+      {/* TAB 0B: ABOUT PAGE CONTENT & PHOTOS (Story banner & photo, Patron Saint banner & portrait, bio, prayer) */}
+      {activeTab === 'about' && (
+        <AdminAboutTab onNotify={notify} />
       )}
 
       {/* TAB 0B: CHOIR STATISTICS & MINISTRY METRICS */}
@@ -1438,231 +1178,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </div>
       )}
 
-      {/* TAB 0C: SUNDAY MASS & REHEARSAL SCHEDULE */}
+      {/* TAB 0C: SUNDAY MASS & REHEARSAL SCHEDULE (Add, Edit, Delete Masses) */}
       {activeTab === 'schedule' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-[#0C2340]/10 shadow-sm overflow-hidden">
-            <AfricanGeometricBorder />
-            <div className="p-6 sm:p-8 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#0C2340]/10">
-                <div>
-                  <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                    Sunday Mass Times & Rehearsal Schedule
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-600 font-source mt-1">
-                    Configure Sunday Eucharistic liturgies and weekly choir practice schedules displayed on the homepage.
-                  </p>
-                  <p className="text-[11px] text-slate-400 font-source italic mt-0.5">
-                    (Ratiba ya Misa za Jumapili na Mazoezi ya Kwaya)
-                  </p>
-                </div>
-              </div>
+        <AdminMassesTab onNotify={notify} />
+      )}
 
-              <form onSubmit={handleSaveSchedule} className="space-y-6">
-                
-                {/* Section 1: Sunday Mass Times */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#1058A8]"></span>
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#0C2340] font-source">
-                      Section 1: Sunday Eucharistic Liturgies (Misa za Jumapili)
-                    </h3>
-                  </div>
-
-                  {/* Mass 1 & Mass 2 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-white rounded-2xl border border-[#0C2340]/15 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">
-                          1st Mass (Dawn Liturgy · Alfajiri)
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass1Title}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1Title: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
-                          placeholder="1st Mass (Dawn)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass1Time}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1Time: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-bold"
-                          placeholder="7:00 AM"
-                        />
-                      </div>
-                      <div className="space-y-2 pt-1 border-t border-slate-100">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass1Desc}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1Desc: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
-                          placeholder="Description (English Main)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass1DescSw}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass1DescSw: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/50 text-slate-700"
-                          placeholder="Maelezo (Kiswahili Second Section)"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-white rounded-2xl border border-[#0C2340]/15 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">
-                          2nd Mass (Morning Liturgy · Asubuhi)
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass2Title}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2Title: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC]"
-                          placeholder="2nd Mass (Morning)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass2Time}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2Time: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-bold"
-                          placeholder="8:30 AM"
-                        />
-                      </div>
-                      <div className="space-y-2 pt-1 border-t border-slate-100">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass2Desc}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2Desc: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
-                          placeholder="Description (English Main)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass2DescSw}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass2DescSw: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/50 text-slate-700"
-                          placeholder="Maelezo (Kiswahili Second Section)"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mass 3 (St. Monica Choir High Mass - Highlighted) & Mass 4 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-[#EAF4FB] rounded-2xl border-2 border-[#1058A8]/40 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider block">
-                          ★ 3rd Mass: Sunday High Mass (St. Monica Choir)
-                        </span>
-                        <span className="text-[10px] bg-[#1058A8] text-white font-bold px-2 py-0.5 rounded-full">
-                          Main Choir Liturgy
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass3Title}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3Title: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
-                          placeholder="3rd Mass (Sunday High Mass)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass3Time}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3Time: e.target.value }))}
-                          className="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-bold text-[#1058A8]"
-                          placeholder="10:00 AM"
-                        />
-                      </div>
-                      <div className="space-y-2 pt-1 border-t border-[#1058A8]/20">
-                        <input
-                          type="text"
-                          value={scheduleForm.mass3Desc}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3Desc: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white text-slate-800"
-                          placeholder="Description (English Main)"
-                        />
-                        <input
-                          type="text"
-                          value={scheduleForm.mass3DescSw}
-                          onChange={e => setScheduleForm(prev => ({ ...prev, mass3DescSw: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-amber-50/70 text-slate-700"
-                          placeholder="Maelezo (Kiswahili Second Section)"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 2: Rehearsal Days */}
-                <div className="p-5 bg-white rounded-2xl border border-[#0C2340]/15 space-y-4 shadow-xs">
-                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-[#0C2340] font-source">
-                      Section 2: Choir Rehearsal Hours (Mazoezi ya Kwaya)
-                    </h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider">
-                          Rehearsal Schedule (English - Main) *
-                        </label>
-                        <span className="text-[11px] font-bold text-[#1058A8] bg-[#EAF4FB] px-2 py-0.5 rounded">
-                          Primary
-                        </span>
-                      </div>
-                      <input
-                        type="text"
-                        value={scheduleForm.rehearsals}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, rehearsals: e.target.value }))}
-                        placeholder="Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs bg-[#F8FAFC] font-medium"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                          Ratiba ya Mazoezi (Kiswahili - Second Section)
-                        </label>
-                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                          Sehemu ya Pili
-                        </span>
-                      </div>
-                      <input
-                        type="text"
-                        value={scheduleForm.rehearsalsSw}
-                        onChange={e => setScheduleForm(prev => ({ ...prev, rehearsalsSw: e.target.value }))}
-                        placeholder="Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs bg-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex items-center justify-between">
-                  <span className="text-xs text-slate-500 font-source italic">
-                    Schedule updates live on the website homepage immediately.
-                  </span>
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Save Mass Schedule (Hifadhi Ratiba)</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+      {/* TAB 0D: FOOTER & CONTACT INFORMATION */}
+      {activeTab === 'footer' && (
+        <AdminFooterTab onNotify={notify} />
       )}
 
       {/* TAB 0D: CHOIR EVENTS CALENDAR */}
@@ -2890,6 +2413,17 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                 />
               </div>
 
+              <div>
+                <ImageUploadField
+                  label="Song Cover Art / Thumbnail (Optional)"
+                  labelSw="Picha ya Jalada la Wimbo (Thumbnail)"
+                  value={songForm.thumbnailUrl}
+                  onChange={val => setSongForm({ ...songForm, thumbnailUrl: val })}
+                  helpText="Upload album art or photo for this hymn."
+                  aspectRatio="aspect-square"
+                />
+              </div>
+
               <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
@@ -2992,6 +2526,17 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                   value={sheetForm.description}
                   onChange={e => setSheetForm({ ...sheetForm, description: e.target.value })}
                   className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div>
+                <ImageUploadField
+                  label="Sheet Music Score Preview Image (4:3)"
+                  labelSw="Picha ya Noti (Preview)"
+                  value={sheetForm.previewImage}
+                  onChange={val => setSheetForm({ ...sheetForm, previewImage: val })}
+                  helpText="Upload score page scan for card preview."
+                  aspectRatio="aspect-[4/3]"
                 />
               </div>
 
@@ -3101,6 +2646,17 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                 />
               </div>
 
+              <div>
+                <ImageUploadField
+                  label="Leader / Choirmaster Portrait Photo (Optional)"
+                  labelSw="Picha ya Kiongozi / Mwalimu"
+                  value={leaderForm.photoUrl}
+                  onChange={val => setLeaderForm({ ...leaderForm, photoUrl: val })}
+                  helpText="Upload portrait photo of official or trainer."
+                  aspectRatio="aspect-square"
+                />
+              </div>
+
               <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
@@ -3179,6 +2735,17 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                   onChange={e => setPhotoForm({ ...photoForm, description: e.target.value })}
                   placeholder="The whole 52-member choir gathered at the sanctuary steps..."
                   className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div>
+                <ImageUploadField
+                  label="Upload Gallery Photo or Enter Image URL *"
+                  labelSw="Pakia Picha ya Albamu / Weka Anwani"
+                  value={photoForm.customUrl}
+                  onChange={val => setPhotoForm({ ...photoForm, customUrl: val })}
+                  helpText="Upload ensemble photo or choose from preset authentic photos."
+                  aspectRatio="aspect-video"
                 />
               </div>
 
