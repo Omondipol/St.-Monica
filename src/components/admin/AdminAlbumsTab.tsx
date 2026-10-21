@@ -3,7 +3,7 @@ import { useChoir } from '../../context/ChoirContext';
 import { Album } from '../../data/choirContent';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';
-import { Disc, Plus, Edit3, Trash2, Save, X, ExternalLink, Music, Sparkles } from 'lucide-react';
+import { Disc, Plus, Edit3, Trash2, Save, X, ExternalLink, Music } from 'lucide-react';
 import choirCoverImg from '../../assets/images/st_monica_choir_cover_1791450290430.jpg';
 import choirSingingPhoto from '../../assets/images/choir_singing_moment_1791356740170.jpg';
 

@@ -3,7 +3,7 @@ import { useChoir } from '../../context/ChoirContext';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';
 import { ChoirLogo } from '../ChoirLogo';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
-import { Save, Sparkles, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw } from 'lucide-react';
+import { Save, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw } from 'lucide-react';
 import hero1Img from '../../assets/images/hero_slide_1_mass.jpg';
 import hero2Img from '../../assets/images/hero_slide_2_faces.jpg';
 import hero3Img from '../../assets/images/hero_slide_3_director.jpg';
@@ -157,7 +157,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
               : 'text-[#0C2340]/80 hover:bg-[#EAF4FB]'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <ImageIcon className="w-3.5 h-3.5" />
           <span>1. Choir Logo (Nembo)</span>
         </button>
 

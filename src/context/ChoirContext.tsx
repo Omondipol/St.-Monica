@@ -335,7 +335,7 @@ const STORAGE_KEYS = {
   SCHEDULE: 'st_monica_schedule_v5',
   NOTICE: 'st_monica_notice_v5',
   HERO: 'st_monica_hero_v5',
-  MEMBERS: 'st_monica_members_v2',
+  MEMBERS: 'st_monica_members_v3_official',
   LOGO: 'st_monica_logo_v6',
   HERO_SLIDES: 'st_monica_hero_slides_v6',
   PARISH_MSG: 'st_monica_parish_msg_v6',
@@ -841,7 +841,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.MEMBERS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasOfficialSinger = parsed.some((m: ChoirMember) => m.name && m.name.includes('Susan Adhiambo'));
+          if (hasOfficialSinger) return parsed;
+        }
       }
     } catch (e) {
       // ignore
@@ -1809,9 +1812,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.removeItem(STORAGE_KEYS.MASSES_LIST);
       localStorage.removeItem(STORAGE_KEYS.FOOTER_CONTACT);
       localStorage.removeItem(STORAGE_KEYS.ABOUT_CONFIG);
+      localStorage.removeItem(STORAGE_KEYS.MEMBERS);
     } catch (e) {
       // ignore
     }
+    setMembers(INITIAL_MEMBERS);
     setSongs(INITIAL_SONGS_CATALOG);
     setCurrentSong(INITIAL_SONGS_CATALOG[0]);
     setSheetMusicList(INITIAL_SHEET_MUSIC);

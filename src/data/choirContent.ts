@@ -272,7 +272,7 @@ export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monika - Nakuru"
 export const CHOIR_STATS = {
   choirName: "St. Monica Third Mass Choir",
   choirNameSw: "Kwaya ya Misa ya Tatu ya Mtakatifu Monika",
-  membersCount: 48,
+  membersCount: 56,
   yearsServing: 14,
   repertoireCount: 12,
   albumsReleased: 1,

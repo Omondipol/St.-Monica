@@ -22,7 +22,10 @@ import {
   BookOpen,
   Table,
   FileSpreadsheet,
-  Sparkles,
+  Home,
+  Church,
+  Compass,
+  KeyRound,
   Calendar,
   Clock,
   MapPin,
@@ -735,76 +738,89 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   if (!isAuthenticated) {
     return (
-      <div className="max-w-md mx-auto my-12 p-8 bg-white border border-[#0C2340]/15 rounded-3xl shadow-xl space-y-6 text-center animate-in fade-in duration-200">
-        <div className="w-16 h-16 rounded-2xl bg-[#0C2340] text-white flex items-center justify-center mx-auto shadow-md">
-          <ShieldCheck className="w-8 h-8 text-[#7EC8F0]" />
-        </div>
+      <div className="max-w-lg mx-auto my-12 bg-white border border-[#0C2340]/15 rounded-3xl shadow-xl overflow-hidden animate-in fade-in duration-200">
+        <AfricanGeometricBorder />
 
-        <div>
-          <h2 className="font-fraunces text-2xl font-bold text-[#0C2340]">
-            Choir Administration Access
-          </h2>
-          <span className="text-xs font-semibold text-[#1058A8] block mt-0.5">
-            Tovuti ya Msimamizi wa Kwaya
-          </span>
-          <p className="text-sm text-slate-600 font-source mt-1.5">
-            Enter authorized choirmaster or official passcode to manage choir repertoire, schedules, and website content.
-          </p>
-          <p className="text-xs text-slate-400 font-source mt-0.5 italic">
-            (Weka nenosiri la kamati ya kwaya ili kuendelea)
-          </p>
-        </div>
+        <div className="p-8 sm:p-10 space-y-6 text-center">
+          <div className="flex flex-col items-center">
+            <ChoirLogo size={76} variant="simplified" className="mb-2 drop-shadow-xs" />
+            <span className="text-[11px] font-bold text-[#1058A8] uppercase tracking-widest font-source">
+              Catholic Diocese of Nakuru · Section 58 Parish
+            </span>
+            <h1 className="font-eb-garamond text-3xl font-bold text-[#0C2340] mt-1">
+              Dawati la Kamati ya Kwaya
+            </h1>
+            <span className="font-eb-garamond text-base text-[#1058A8] italic block font-medium">
+              St. Monica Third Mass Choir · Leadership Desk
+            </span>
+          </div>
 
-        <form onSubmit={handleLogin} className="space-y-4 text-left">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider">
-                Admin Passcode
-              </label>
-              <span className="text-[11px] text-slate-400 font-medium">
-                Nenosiri la Msimamizi
-              </span>
+          <div className="bg-[#FAF8F5] border border-[#0C2340]/10 rounded-2xl p-4 text-left space-y-1">
+            <p className="text-xs text-slate-700 font-source leading-relaxed">
+              <strong>Karibu.</strong> Please enter your choir leadership passcode to manage the official register of singers, Sunday Mass schedules, music scores, and parish records.
+            </p>
+            <p className="text-[11px] text-slate-500 font-source italic">
+              (Ukurasa huu ni maalum kwa ajili ya Choirmaster, Kamati ya Kwaya, na Walimu wa Sauti)
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4 text-left">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider font-source">
+                  Committee Passcode (Nenosiri la Kamati)
+                </label>
+                <span className="text-[11px] text-[#1058A8] font-medium font-source">
+                  Sec 58 Nakuru
+                </span>
+              </div>
+              <input
+                type="password"
+                value={passcode}
+                onChange={e => setPasscode(e.target.value)}
+                placeholder="Weka nenosiri la kamati hapa..."
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] focus:ring-2 focus:ring-[#1058A8]/20 bg-[#F8FAFC] font-source"
+                autoFocus
+              />
+              <p className="text-[11px] text-slate-500 mt-1.5 font-source">
+                Authorized parish choirmasters and executive committee members only.
+              </p>
             </div>
-            <input
-              type="password"
-              value={passcode}
-              onChange={e => setPasscode(e.target.value)}
-              placeholder="••••••••••••"
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-              autoFocus
-            />
-            <p className="text-[11px] text-slate-500 mt-1.5">
-              Authorized choir directors and committee members only.
+
+            {authError && (
+              <p className="text-xs font-bold text-red-700 bg-red-50 p-3 rounded-xl border border-red-200 font-source flex items-center gap-2">
+                <X className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{authError}</span>
+              </p>
+            )}
+
+            <div className="pt-2 flex flex-col gap-2.5">
+              <button
+                type="submit"
+                className="w-full py-3.5 text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 font-source active:scale-[0.99]"
+              >
+                <ShieldCheck className="w-4 h-4 text-[#7EC8F0]" />
+                <span>Ingia Kwenye Dawati · Open Choir Desk</span>
+              </button>
+              <button
+                type="button"
+                onClick={onNavigateHome}
+                className="w-full py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer text-center font-source hover:underline"
+              >
+                ← Rudi kwenye Tovuti ya Kwaya · Return to Choir Website
+              </button>
+            </div>
+          </form>
+
+          <div className="border-t border-slate-100 pt-4 text-center space-y-0.5">
+            <p className="text-xs font-eb-garamond text-slate-700 italic">
+              «Mwimbieni Bwana wimbo mpya; mwimbieni Bwana, nchi yote.» — Zaburi 96:1
+            </p>
+            <p className="text-[11px] text-slate-400 font-source">
+              St. Monica Catholic Parish · Section 58 Nakuru · CDDN
             </p>
           </div>
-
-          {authError && (
-            <p className="text-xs font-bold text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
-              {authError}
-            </p>
-          )}
-
-          <div className="pt-2 flex flex-col gap-2">
-            <button
-              type="submit"
-              className="w-full py-3 text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C4685] rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>Unlock Admin Portal</span>
-              <span className="text-xs opacity-80 font-normal">· Ingia Mfumo</span>
-            </button>
-            <button
-              type="button"
-              onClick={onNavigateHome}
-              className="w-full py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer text-center"
-            >
-              Return to Website · Rudi Nyumbani
-            </button>
-          </div>
-        </form>
-
-        <p className="text-[11px] text-slate-400 font-source border-t border-slate-100 pt-3">
-          St. Monica Catholic Choir · Nakuru · CDDN
-        </p>
+        </div>
       </div>
     );
   }
@@ -936,13 +952,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         <div className="bg-gradient-to-r from-[#FAF8F5] to-[#EAF4FB]/50 border border-[#0C2340]/10 rounded-2xl p-4 text-xs font-source space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#0C2340]/10 pb-2">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#1058A8]" />
+              <Compass className="w-4 h-4 text-[#1058A8]" />
               <span className="font-bold text-[#0C2340] uppercase tracking-wider text-[11px]">
-                {lang === 'sw' ? 'Ramani Kamili ya Vipengele Vya Usimamizi' : 'Master Feature Directory (All Functions Grouped by Page)'}
+                {lang === 'sw' ? 'Maudhui na Kumbukumbu Zote za Kwaya' : 'Parish Choir Ministry Directory (All Records Grouped by Section)'}
               </span>
             </div>
             <span className="text-[11px] text-slate-500">
-              {lang === 'sw' ? 'Bofya kipengele chochote kwenda moja kwa moja' : 'Click any badge to jump directly to that function'}
+              {lang === 'sw' ? 'Bofya kipengele chochote kwenda moja kwa moja' : 'Click any section to view and edit its records'}
             </span>
           </div>
 
@@ -951,11 +967,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             {/* 1. HOME DIRECTORY */}
             <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#1058A8]" />
+                <span className="font-bold text-xs text-[#0C2340] flex items-center gap-1.5 font-source">
+                  <Home className="w-3.5 h-3.5 text-[#1058A8]" />
                   1. HOME (Mwanzo)
                 </span>
-                <span className="text-[10px] text-slate-400 font-semibold">Home page</span>
+                <span className="text-[10px] text-slate-400 font-semibold font-source">Home page</span>
               </div>
               <div className="flex flex-wrap gap-1 text-[10px]">
                 <button
@@ -1192,7 +1208,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 : 'bg-[#FAF8F5] text-[#0C2340] border-[#0C2340]/10 hover:bg-[#EAF4FB] hover:border-[#1058A8]'
             }`}
           >
-            <Sparkles className={`w-5 h-5 ${mainCategory === 'home' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
+            <Home className={`w-5 h-5 ${mainCategory === 'home' ? 'text-[#7EC8F0]' : 'text-[#1058A8]'}`} />
             <span className="font-bold text-xs">1. HOME</span>
             <span className={`text-[10px] ${mainCategory === 'home' ? 'text-sky-200' : 'text-slate-500'}`}>
               Logo, Slides, Masses
@@ -1304,7 +1320,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  <Sparkles className="w-4 h-4 text-[#7EC8F0]" />
+                  <Home className="w-4 h-4 text-[#7EC8F0]" />
                   <span>Logo, 4 Hero Slides, Parish Welcome & Church Photo, Scripture Quote & Choirmaster Word</span>
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">Visuals</span>
                 </button>
@@ -1909,7 +1925,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                 Choir Repertoire & YouTube Releases
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
@@ -1943,7 +1959,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   {songs.map((song) => (
                     <tr key={song.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
                       <td className="py-3 px-4 font-medium">
-                        <div className="font-bold text-[#0C2340] font-fraunces text-sm">{song.title}</div>
+                        <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{song.title}</div>
                         {song.titleSwahili !== song.title && (
                           <div className="text-[11px] text-[#0C2340]/60 italic">{song.titleSwahili}</div>
                         )}
@@ -2024,7 +2040,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                 Sheet Music & Noti za Nyimbo on Sale
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
@@ -2048,12 +2064,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     <span className="bg-[#EAF4FB] text-[#1058A8] font-bold text-[11px] px-2 py-0.5 rounded font-source">
                       {item.notationType}
                     </span>
-                    <span className="text-base font-bold font-fraunces text-[#1058A8]">
+                    <span className="text-base font-bold font-eb-garamond text-[#1058A8]">
                       KES {item.priceKes}
                     </span>
                   </div>
 
-                  <h3 className="font-fraunces text-base font-bold text-[#0C2340] leading-snug">
+                  <h3 className="font-eb-garamond text-base font-bold text-[#0C2340] leading-snug">
                     {item.title}
                   </h3>
                   <div className="text-xs text-[#0C2340]/70 font-source">
@@ -2095,7 +2111,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         <div className="space-y-6 animate-fadeIn">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                 Maktaba ya Noti (Free Sheet Music Library)
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
@@ -2648,7 +2664,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                 Trainers & Officials Recognition
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
@@ -2669,11 +2685,11 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
               <div key={leader.id} className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl shadow-xs space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#EAF4FB] border border-[#7EC8F0]/40 flex items-center justify-center font-fraunces font-bold text-lg text-[#1058A8]">
+                    <div className="w-12 h-12 rounded-full bg-[#EAF4FB] border border-[#7EC8F0]/40 flex items-center justify-center font-eb-garamond font-bold text-lg text-[#1058A8]">
                       {leader.name.split(' ').slice(-1)[0][0]}
                     </div>
                     <div>
-                      <h3 className="font-fraunces text-base font-bold text-[#0C2340]">{leader.name}</h3>
+                      <h3 className="font-eb-garamond text-base font-bold text-[#0C2340]">{leader.name}</h3>
                       <span className="text-xs font-bold text-[#1058A8] block">{leader.role}</span>
                       <span className="text-[12px] text-[#0C2340]/50 font-source tabular-nums">{leader.tenure}</span>
                     </div>
@@ -2723,7 +2739,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+              <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                 Choir Group Gallery & Ministry Photos
               </h2>
               <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
@@ -2749,7 +2765,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                   </span>
                 </div>
                 <div className="p-4 space-y-2">
-                  <h4 className="font-fraunces font-bold text-[#0C2340] text-sm">{photo.title}</h4>
+                  <h4 className="font-eb-garamond font-bold text-[#0C2340] text-sm">{photo.title}</h4>
                   <span className="text-[11px] text-[#1058A8] font-bold block">{photo.occasion}</span>
                   <p className="text-xs text-[#0C2340]/70 font-source leading-relaxed">
                     {photo.description}
@@ -2778,7 +2794,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
       {activeTab === 'backup' && (
         <div className="bg-white border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 space-y-8 shadow-xs">
           <div>
-            <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-[#0C2340]">
+            <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
               Data Backup & Storage Control
             </h2>
             <p className="text-xs sm:text-sm text-[#0C2340]/70 font-source mt-1">
@@ -2792,7 +2808,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
               <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#1058A8] flex items-center justify-center">
                 <Download className="w-5 h-5" />
               </div>
-              <h3 className="font-fraunces font-bold text-[#0C2340] text-base">Export JSON Backup</h3>
+              <h3 className="font-eb-garamond font-bold text-[#0C2340] text-base">Export JSON Backup</h3>
               <p className="text-xs text-[#0C2340]/70">
                 Download a complete JSON file containing all customized songs, sheet music, officials, and photos.
               </p>
@@ -2809,7 +2825,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
                 <Upload className="w-5 h-5" />
               </div>
-              <h3 className="font-fraunces font-bold text-[#0C2340] text-base">Restore from JSON</h3>
+              <h3 className="font-eb-garamond font-bold text-[#0C2340] text-base">Restore from JSON</h3>
               <p className="text-xs text-[#0C2340]/70">
                 Upload a previously saved JSON backup file to restore all choir data instantly.
               </p>
@@ -2829,7 +2845,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
               <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center">
                 <RotateCcw className="w-5 h-5" />
               </div>
-              <h3 className="font-fraunces font-bold text-red-900 text-base">Reset to Verified Catalog</h3>
+              <h3 className="font-eb-garamond font-bold text-red-900 text-base">Reset to Verified Catalog</h3>
               <p className="text-xs text-red-700/80">
                 Restore the default catalog of St. Monica Catholic Choir Nakuru with real YouTube releases.
               </p>
@@ -2850,7 +2866,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <div>
-                <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                   {editingSongId ? 'Edit Song Details' : 'Add New Song to Catalog'}
                 </h3>
                 <span className="text-xs text-[#1058A8] font-source">
@@ -3068,7 +3084,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
-              <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingSheetId ? 'Edit Sheet Music Score' : 'Add Sheet Music on Sale'}
               </h3>
               <button onClick={() => setIsSheetModalOpen(false)} className="cursor-pointer">
@@ -3184,7 +3200,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
-              <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingLeaderId ? 'Edit Official / Trainer' : 'Recognize Trainer / Official'}
               </h3>
               <button onClick={() => setIsLeaderModalOpen(false)} className="cursor-pointer">
@@ -3301,7 +3317,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
-              <h3 className="font-fraunces text-xl font-bold text-[#0C2340]">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 Add Choir Group Photo
               </h3>
               <button onClick={() => setIsPhotoModalOpen(false)} className="cursor-pointer">

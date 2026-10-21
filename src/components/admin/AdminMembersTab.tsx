@@ -20,7 +20,6 @@ import {
   ShieldCheck, 
   X, 
   Save, 
-  Sparkles,
   FileText
 } from 'lucide-react';
 import jsPDF from 'jspdf';

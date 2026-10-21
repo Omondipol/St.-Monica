@@ -12,7 +12,6 @@ import {
   Calendar, 
   Phone, 
   CreditCard, 
-  Sparkles, 
   Heart, 
   Music, 
   Users, 
