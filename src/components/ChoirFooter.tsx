@@ -88,32 +88,32 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           </div>
         </section>
 
-        {/* STEP 3: FOUR EVENLY SPACED COLUMNS (Desktop: Brand column wider to wrap onto two lines without overlapping Explore) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-8 lg:gap-10 text-sm font-source pt-2">
+        {/* STEP 3: FOUR EVENLY SPACED COLUMNS (Desktop: Brand column has generous width to wrap onto two lines without overlapping Explore) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 text-sm font-source pt-2">
           
-          {/* COLUMN 1: The Choir Identity */}
-          <div className="space-y-3.5 pr-2">
-            <div className="flex items-center gap-3.5 sm:gap-4">
-              <ChoirLogo size={112} variant="simplified" interactive={true} className="shrink-0 w-22 h-22 sm:w-24 sm:h-24 drop-shadow-md" />
-              <div className="min-w-0">
-                <h4 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white leading-tight break-words">
+          {/* COLUMN 1: The Choir Identity (Takes 4 of 12 columns for generous room) */}
+          <div className="lg:col-span-4 space-y-3.5 pr-2 sm:pr-4">
+            <div className="flex items-start gap-3.5 sm:gap-4">
+              <ChoirLogo size={96} variant="simplified" interactive={true} className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 drop-shadow-md mt-0.5" />
+              <div className="min-w-0 flex-1">
+                <h4 className="font-eb-garamond text-xl sm:text-2xl font-bold text-white leading-snug break-words">
                   {lang === 'sw' ? 'Kwaya ya Misa ya Tatu · Mt. Monika' : 'St. Monica Third Mass Choir'}
                 </h4>
                 <span className="text-xs text-[#7EC8F0] block mt-1 font-source font-medium">
-                  Section 58 Parish · Catholic Diocese of Nakuru
+                  Section 58 Parish · Nakuru
                 </span>
               </div>
             </div>
 
             <p className="text-[#B8C7D9] text-sm leading-relaxed font-source">
               {lang === 'sw'
-                ? 'Kuongoza kusanyiko katika sala ya nyimbo takatifu za sauti nne na ibada ya Misa Takatifu kila Dominika.'
-                : 'Leading the congregation in disciplined four-part sacred song and liturgical prayer every Sunday.'}
+                ? 'Kuongoza liturjia na sala ya parokia kupitia uimbaji mtakatifu wa sauti nne kila Dominika.'
+                : 'Leading liturgical worship and parish prayer through sacred four-part choral singing.'}
             </p>
           </div>
 
-          {/* COLUMN 2: Explore */}
-          <div className="border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
+          {/* COLUMN 2: Explore (Takes 2 of 12 columns on desktop) */}
+          <div className="lg:col-span-2 border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
             {/* Mobile Header Accordion Trigger */}
             <button
               onClick={() => setMobileExploreOpen(!mobileExploreOpen)}
@@ -212,8 +212,8 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* COLUMN 3: Service Times */}
-          <div className="border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
+          {/* COLUMN 3: Service Times (Takes 3 of 12 columns) */}
+          <div className="lg:col-span-3 border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
             {/* Mobile Header Accordion Trigger */}
             <button
               onClick={() => setMobileServiceOpen(!mobileServiceOpen)}
@@ -263,8 +263,8 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* COLUMN 4: Contact & Location */}
-          <div className="border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
+          {/* COLUMN 4: Contact & Location (Takes 3 of 12 columns) */}
+          <div className="lg:col-span-3 border-t border-white/10 sm:border-t-0 pt-4 sm:pt-0">
             {/* Mobile Header Accordion Trigger */}
             <button
               onClick={() => setMobileContactOpen(!mobileContactOpen)}

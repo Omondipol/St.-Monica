@@ -64,10 +64,8 @@ p {
   .hero-title,
   .hero-content h1,
   .hero-content-container h1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    display: block;
+    overflow: visible;
   }
 }
 
@@ -75,12 +73,31 @@ p {
 .hero-content-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  min-height: 100vh;
+  justify-content: flex-start;
   min-height: 100dvh;
-  padding-top: calc(var(--header-h, 108px) + 24px);
-  padding-bottom: calc(var(--player-h, 0px) + 24px);
+  padding-top: calc(var(--header-h, 80px) + clamp(24px, 6vh, 72px));
+  padding-bottom: calc(var(--player-h, 64px) + var(--ticker-h, 44px) + 72px);
   box-sizing: border-box;
+}
+
+@media (max-height: 720px) {
+  .hero-content,
+  .hero-content-container {
+    padding-top: calc(var(--header-h, 80px) + 16px);
+    padding-bottom: calc(var(--player-h, 64px) + var(--ticker-h, 44px) + 56px);
+  }
+
+  .hero-fluid-title,
+  .hero-title,
+  .hero-content h1,
+  .hero-content-container h1 {
+    font-size: clamp(1.8rem, 3.6vw, 3rem) !important;
+  }
+
+  .hero-buttons,
+  .hero-buttons-container {
+    gap: 16px !important;
+  }
 }
 
 .hero-desc {

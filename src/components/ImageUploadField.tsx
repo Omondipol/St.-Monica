@@ -35,6 +35,13 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const [previewError, setPreviewError] = useState<boolean>(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
 
+  const effectiveValue = value || defaultValue || '';
+
+  React.useEffect(() => {
+    setUrlInput(value || defaultValue || '');
+    setPreviewError(false);
+  }, [value, defaultValue]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -72,7 +79,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     }
   };
 
-  const isCustom = defaultValue && value !== defaultValue;
+  const isCustom = defaultValue && value && value !== defaultValue;
 
   return (
     <div className={`space-y-2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl ${className}`}>
@@ -95,7 +102,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             title="Reset to default image"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Reset Default</span>
+            <span>Reset default</span>
           </button>
         )}
       </div>
@@ -110,18 +117,20 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-1">
         
         {/* Preview Box */}
-        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-slate-200 border border-slate-300 relative group flex items-center justify-center shadow-inner`}>
-          {value && !previewError ? (
+        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-white border border-slate-300 relative group flex items-center justify-center shadow-inner`}>
+          {effectiveValue && !previewError ? (
             <img
-              src={value}
+              src={effectiveValue}
               alt={label}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain p-1"
               onError={() => setPreviewError(true)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
-              <ImageIcon className="w-6 h-6 mb-1" />
-              <span className="text-[10px]">No image / preview error</span>
+              <ImageIcon className="w-6 h-6 mb-1 text-slate-300" />
+              <span className="text-[10px] text-slate-500 font-medium">
+                {previewError ? 'Unable to load image' : 'No image selected'}
+              </span>
             </div>
           )}
           

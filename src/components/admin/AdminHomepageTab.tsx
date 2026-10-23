@@ -240,10 +240,21 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
               {/* Live Preview Display */}
               <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-[#0C2340]/15 shadow-xs text-center space-y-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-source">
-                  Live Header Preview
+                  {lang === 'sw' ? 'Muonekano wa Sasa' : 'Logo Preview'}
                 </span>
-                <div className="p-3 bg-[#0C1420] rounded-2xl border border-amber-400/20 shadow-md">
-                  <ChoirLogo size={96} showText={false} />
+                <div className="p-3 bg-[#0C1420] rounded-2xl border border-amber-400/20 shadow-md w-28 h-28 flex items-center justify-center">
+                  {logoInput ? (
+                    <img
+                      src={logoInput}
+                      alt="Selected Choir Logo"
+                      className="w-20 h-20 object-contain drop-shadow"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <ChoirLogo size={96} showText={false} />
+                  )}
                 </div>
                 <div className="pt-1">
                   <strong className="text-sm font-bold text-[#0C2340] font-eb-garamond block">
@@ -258,12 +269,12 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
               {/* Upload & Configuration Form */}
               <div className="md:col-span-8 space-y-5">
                 <ImageUploadField
-                  label="Upload New Choir Logo or Enter Image URL"
-                  labelSw="Pakia Picha ya Nembo Mpya au Weka Anwani ya Mtandao"
+                  label={lang === 'sw' ? 'Nembo ya Kwaya' : 'Choir Logo'}
+                  labelSw={lang === 'sw' ? 'Pakia nembo mpya au chagua hapa chini' : undefined}
                   value={logoInput}
                   onChange={setLogoInput}
-                  defaultValue=""
-                  helpText="PNG with transparent background, SVG, or high-resolution JPG recommended."
+                  defaultValue="./logo/st_monica_seal_final_transparent.png"
+                  helpText={lang === 'sw' ? 'Badilisha nembo inayoonekana kwenye tovuti na nyaraka zote.' : 'Change the logo shown on the website and printed documents.'}
                   presets={logoPresets}
                   aspectRatio="aspect-square"
                 />
@@ -275,7 +286,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                     className="px-6 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Apply Logo to Website (Weka Nembo)</span>
+                    <span>{lang === 'sw' ? 'Hifadhi mabadiliko' : 'Save changes'}</span>
                   </button>
 
                   {customLogoUrl && (
@@ -285,7 +296,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                       className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Reset to Official Default Seal</span>
+                      <span>{lang === 'sw' ? 'Rejesha nembo rasmi' : 'Reset to default seal'}</span>
                     </button>
                   )}
                 </div>
