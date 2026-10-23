@@ -135,10 +135,10 @@ export const AudioPlayerBar: React.FC = () => {
     <aside 
       id="audio-player-bar"
       aria-label="Choir Audio Player"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#0C2340] text-white border-t border-black/40 shadow-xl select-none min-h-[60px] sm:min-h-[64px] flex items-center transition-all duration-300"
+      className="player-bar fixed bottom-0 left-0 right-0 z-40 bg-[#0C2340] text-white border-t border-black/40 shadow-xl select-none min-h-[56px] sm:min-h-[64px] flex items-center transition-all duration-300"
       style={{ height: 'var(--player-h, 64px)' }}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full py-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full py-1.5 sm:py-2">
         
         {/* DESKTOP LAYOUT: Every item vertically centred on one line with equal spacing */}
         <div className="hidden sm:flex items-center justify-between gap-4 w-full">
@@ -150,14 +150,14 @@ export const AudioPlayerBar: React.FC = () => {
             title={`${currentSong.title} — ${currentSong.composer}`}
           >
             {/* Circular Logo Mark */}
-            <div className="relative shrink-0 w-12 h-12 rounded-full bg-[#0C1420] border border-amber-400/30 shadow-sm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform p-0.5">
-              <ChoirLogo size={44} variant="simplified" className="w-11 h-11" />
+            <div className="relative shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0C1420] border border-amber-400/30 shadow-sm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform p-0.5">
+              <ChoirLogo size={44} variant="simplified" className="w-10 h-10 sm:w-11 sm:h-11" />
             </div>
             <div className="min-w-0">
-              <h4 className="font-eb-garamond text-[16px] font-semibold text-white group-hover:text-sky-200 transition-colors truncate leading-tight song-card-title">
+              <h4 className="font-eb-garamond text-[15px] sm:text-[16px] font-semibold text-white group-hover:text-sky-200 transition-colors truncate leading-tight song-card-title">
                 {lang === 'sw' ? currentSong.titleSwahili : currentSong.title}
               </h4>
-              <p className="text-[11px] text-white/70 font-source truncate mt-0.5">
+              <p className="track-artist text-[11px] text-white/70 font-source truncate mt-0.5">
                 {currentSong.composer}
               </p>
             </div>

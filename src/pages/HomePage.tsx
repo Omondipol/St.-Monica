@@ -236,6 +236,69 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     document.documentElement.style.setProperty('--hero-fit', '1');
   }, []);
 
+  // Slide 4 specific safety check: touch nothing on slides 1-3
+  useEffect(() => {
+    const checkSlide4Fit = () => {
+      const activeContentEl = document.getElementById('hero-active-slide-content');
+      if (!activeContentEl) return;
+
+      if (currentSlideIndex !== 3) {
+        // Explicit instruction: touch nothing on slides 1 to 3
+        activeContentEl.style.transform = 'none';
+        activeContentEl.style.transformOrigin = '';
+        return;
+      }
+
+      // Slide 4 safety measurement against player bar
+      const buttonsContainer = activeContentEl.querySelector('.hero-buttons');
+      const lastButton = (buttonsContainer?.lastElementChild as HTMLElement | null);
+      const playerBar = document.getElementById('audio-player-bar') || document.querySelector('.player-bar');
+
+      if (!lastButton || !playerBar) {
+        activeContentEl.style.transform = 'none';
+        return;
+      }
+
+      const playerRect = playerBar.getBoundingClientRect();
+      const isPlayerBarVisible = playerRect.height > 0 && playerRect.top < window.innerHeight;
+      if (!isPlayerBarVisible) {
+        activeContentEl.style.transform = 'none';
+        return;
+      }
+
+      const threshold = playerRect.top - 20;
+      const buttonRect = lastButton.getBoundingClientRect();
+
+      if (buttonRect.bottom > threshold) {
+        const overflow = buttonRect.bottom - threshold;
+        const currentHeight = activeContentEl.offsetHeight;
+        if (currentHeight > 0) {
+          const targetHeight = currentHeight - overflow;
+          const factor = Math.max(0.75, Math.min(1, targetHeight / currentHeight));
+          activeContentEl.style.transformOrigin = 'left top';
+          activeContentEl.style.transform = `scale(${factor.toFixed(3)})`;
+        }
+      } else {
+        activeContentEl.style.transform = 'none';
+      }
+    };
+
+    const rafId = requestAnimationFrame(() => {
+      checkSlide4Fit();
+    });
+    const timer = setTimeout(checkSlide4Fit, 80);
+
+    window.addEventListener('resize', checkSlide4Fit);
+    window.addEventListener('orientationchange', checkSlide4Fit);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkSlide4Fit);
+      window.removeEventListener('orientationchange', checkSlide4Fit);
+    };
+  }, [currentSlideIndex]);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -473,13 +536,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div 
           id="hero-content-wrapper"
           data-slide={currentSlideIndex + 1}
-          className="hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16"
+          className={`hero-content hero-content-container relative z-20 w-full px-5 sm:px-10 lg:px-16 slide-${currentSlideIndex + 1}`}
         >
           {/* Inner Content: Animated on slide change, grows with content, no fixed height, no overflow:hidden */}
           <div 
             id="hero-active-slide-content"
             key={`hero-content-${currentSlideIndex}`}
-            className="w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-3 sm:space-y-4 min-w-0 animate-hero-content hero-inner-wrapper"
+            className="w-full sm:max-w-[85%] lg:max-w-[70%] xl:max-w-[62%] text-left space-y-2 sm:space-y-3 min-w-0 animate-hero-content hero-inner-wrapper"
           >
             {currentContent.eyebrow && (
               <div className="hero-eyebrow text-amber-400 font-source text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
@@ -493,7 +556,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             </h1>
 
           {currentContent.author && (
-            <span className="hero-attribution text-amber-200/95 font-eb-garamond text-sm sm:text-lg font-medium block italic">
+            <span className="hero-attribution text-amber-200/95 font-eb-garamond text-xs sm:text-base font-medium block italic">
               {currentContent.author}
             </span>
           )}
@@ -503,7 +566,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </p>
 
           {/* Action Buttons tailored specifically to each slide */}
-          <div className="hero-buttons hero-buttons-container flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-3">
+          <div className="hero-buttons hero-buttons-container flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
             {currentContent.type === 'mass' && (
               <>
                 <button
@@ -514,7 +577,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       playSong(featuredSong as Song);
                     }
                   }}
-                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[42px] h-[42px]"
                 >
                   {isPlaying && currentSong.id === featuredSong.id ? (
                     <>
@@ -531,7 +594,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
                 <button
                   onClick={() => onNavigate('about-gallery')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs min-h-[42px] h-[42px]"
                 >
                   <span>{lang === 'sw' ? 'Picha za Kwaya' : 'Choir Gallery'}</span>
                 </button>
@@ -540,7 +603,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   href={YOUTUBE_CHANNEL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer min-h-[44px]"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-2 cursor-pointer min-h-[42px] h-[42px]"
                 >
                   <RealYouTubeIcon size={18} variant="badge" />
                   <span>{lang === 'sw' ? 'Tazama YouTube' : 'YouTube Channel'}</span>
@@ -553,7 +616,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <>
                 <button
                   onClick={() => openJoinModal()}
-                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[42px] h-[42px]"
                 >
                   <UserPlus className="w-4 h-4 text-slate-950" />
                   <span>{lang === 'sw' ? 'Jiunge na Kwaya' : 'Join the Choir'}</span>
@@ -561,14 +624,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
                 <button
                   onClick={() => onNavigate('about-sections')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
                 >
                   <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('about-story')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
                 >
                   <BookOpen className="w-4 h-4 text-amber-300" />
                   <span>{lang === 'sw' ? 'Historia Yetu' : 'Our Story'}</span>
@@ -583,7 +646,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     const el = document.getElementById('recorded-songs-section');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] rounded-xl transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap min-h-[42px] h-[42px]"
                 >
                   <Music className="w-4 h-4 text-[#1058A8]" />
                   <span>{lang === 'sw' ? 'Nyimbo Zilizorekodiwa' : 'Recorded Songs'}</span>
@@ -591,7 +654,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
                 <button
                   onClick={() => onNavigate('shop')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
                 >
                   <ShoppingBag className="w-4 h-4 text-amber-300" />
                   <span>{lang === 'sw' ? 'Noti za Nyimbo' : 'Sheet Music Scores'}</span>
@@ -599,7 +662,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
                 <button
                   onClick={() => onNavigate('about-sections')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
                 >
                   <span>{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</span>
                 </button>
@@ -610,7 +673,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <>
                 <button
                   onClick={() => openJoinModal()}
-                  className="btn inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[42px] h-[42px]"
+                  className="btn inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-lg hover:shadow-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap uppercase tracking-wider font-source min-h-[42px] h-[42px]"
                 >
                   <UserPlus className="w-4 h-4 text-slate-950" />
                   <span>{lang === 'sw' ? 'Jiunge na Kwaya' : 'Join the Choir'}</span>
@@ -621,7 +684,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     const el = document.getElementById('sunday-mass-schedule');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="btn inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
+                  className="btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/40 rounded-xl transition-all cursor-pointer whitespace-nowrap backdrop-blur-xs font-source min-h-[42px] h-[42px]"
                 >
                   <Clock className="w-4 h-4 text-amber-300" />
                   <span>{lang === 'sw' ? 'Ratiba ya Misa' : 'Sunday Mass Times'}</span>
@@ -631,7 +694,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   href={YOUTUBE_CHANNEL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-1 cursor-pointer font-source min-h-[42px] h-[42px]"
+                  className="btn inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white/95 hover:text-white underline-offset-4 hover:underline transition-colors py-2 px-2 cursor-pointer font-source min-h-[42px] h-[42px]"
                 >
                   <RealYouTubeIcon size={18} variant="badge" />
                   <span>YouTube</span>
@@ -648,7 +711,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         id="hero-slide-dots"
         aria-hidden="true"
         className="absolute left-5 sm:left-10 lg:left-16 z-30 flex items-center gap-[8px] pointer-events-none select-none"
-        style={{ bottom: 'calc(var(--player-h, 0px) + 28px)' }}
+        style={{ bottom: 'calc(var(--player-h, 0px) + 22px)' }}
       >
         {activeSlides.map((slide, idx) => {
           const isActive = idx === currentSlideIndex;
