@@ -29,28 +29,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Install dependencies (robust)
+      - name: Install dependencies
         run: |
           echo "node: $(node -v)"
           echo "npm: $(npm -v)"
-          if [ -f package-lock.json ]; then
-            echo "Using package-lock.json"
-            npm ci --loglevel verbose || (echo "npm ci failed, showing npm logs..." && ls -la /home/runner/.npm/_logs || true && cat /home/runner/.npm/_logs/*.log || true && npm cache clean --force && npm install)
-          else
-            npm install --loglevel verbose || (echo "npm install failed, showing npm logs..." && ls -la /home/runner/.npm/_logs || true && cat /home/runner/.npm/_logs/*.log || true)
-          fi
-
-      - name: Print npm debug logs (only on failure)
-        if: failure()
-        run: |
-          echo "=== npm debug logs ==="
-          ls -la /home/runner/.npm/_logs || true
-          cat /home/runner/.npm/_logs/*.log || true
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Build production site
         run: npm run build
