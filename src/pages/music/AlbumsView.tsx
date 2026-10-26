@@ -6,6 +6,7 @@ import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
 import albumCoverImg from '../../assets/images/st_monica_choir_cover_1791450290430.jpg';
 import { MusicNavTabs } from '../../components/MusicNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface AlbumsViewProps {
   onNavigate?: (route: string) => void;
@@ -21,7 +22,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} })
       {/* Page Title Banner (Matching About and Music Section Slim Banner) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={albumCoverImg} 
+          src={getAssetUrl('/assets/choir/choir_02.jpg')} 
           alt="St. Monica Catholic Choir Album" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -53,9 +54,9 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({ onNavigate = () => {} })
             s.album.toLowerCase().includes(album.title.toLowerCase())
           );
 
-          const coverSrc = album.coverImage && (album.coverImage.startsWith('http') || album.coverImage.startsWith('data:'))
-            ? album.coverImage
-            : albumCoverImg;
+          const coverSrc = album.coverImage && (album.coverImage.startsWith('http') || album.coverImage.startsWith('data:') || album.coverImage.startsWith('/assets/'))
+            ? getAssetUrl(album.coverImage)
+            : getAssetUrl('/assets/choir/choir_02.jpg');
 
           return (
             <div

@@ -13,8 +13,7 @@ import {
   BookOpen
 } from 'lucide-react';
 
-// Using generated image assets
-import choirImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { getAssetUrl } from '../utils/assetHelper';
 import hymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 
 interface ExecutiveSummaryProps {
@@ -196,8 +195,8 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
           <div className="bg-white border border-[#0C2340]/10 rounded-xl overflow-hidden shadow-xs">
             <div className="relative aspect-video">
               <img 
-                src={choirImg} 
-                alt="St. Monica Choir singing in Nakuru" 
+                src={getAssetUrl('/assets/choir/choir_01.jpg')} 
+                alt="St. Monica Choir singing at the altar" 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />

@@ -480,7 +480,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          if (parsed.some((p: ChoirGroupPhoto) => !p.customUrl || p.customUrl.includes('unsplash') || p.id === 'grp-vestment-2024')) {
+          if (parsed.some((p: ChoirGroupPhoto) => !p.customUrl || p.customUrl.includes('unsplash') || p.id === 'grp-vestment-2024' || p.title === 'Kwaya Nzima ya Mtakatifu Monika Altaroni')) {
             return INITIAL_GROUP_PHOTOS;
           }
           return parsed;
@@ -689,8 +689,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // If stored slides have old unsplash placeholders, upgrade to real parish choir photos
-          const hasOldPhotos = parsed.some((s: HeroSlideConfig) => !s.src || s.src.includes('unsplash.com'));
+          // If stored slides have old placeholders, upgrade to real parish choir photos
+          const hasOldPhotos = parsed.some((s: HeroSlideConfig) => !s.src || s.src.includes('unsplash.com') || s.src.includes('hero_slide_'));
           if (!hasOldPhotos) return parsed;
         }
       }
@@ -728,7 +728,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.PARISH_MSG);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.churchImg && parsed.churchImg.includes('unsplash.com')) {
+        if (!parsed.churchImg || parsed.churchImg.includes('unsplash.com') || parsed.churchImg.includes('st_monica_parish_church_nakuru')) {
           return DEFAULT_PARISH_MESSAGE;
         }
         return { ...DEFAULT_PARISH_MESSAGE, ...parsed };
@@ -757,7 +757,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.SCRIPTURE);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.bgImage && parsed.bgImage.includes('unsplash.com')) {
+        if (!parsed.bgImage || parsed.bgImage.includes('unsplash.com') || parsed.bgImage.includes('choir_singing_moment')) {
           return DEFAULT_SCRIPTURE_QUOTE;
         }
         return { ...DEFAULT_SCRIPTURE_QUOTE, ...parsed };
@@ -786,7 +786,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.CHOIRMASTER);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if ((parsed.image && parsed.image.includes('unsplash.com')) || parsed.name === 'Brother Dominic K.' || parsed.name === 'Br. Dominic K.') {
+        if (!parsed.image || parsed.image.includes('unsplash.com') || parsed.image.includes('choirmaster_director') || parsed.name === 'Brother Dominic K.' || parsed.name === 'Br. Dominic K.') {
           return DEFAULT_CHOIRMASTER_MESSAGE;
         }
         return { ...DEFAULT_CHOIRMASTER_MESSAGE, ...parsed };

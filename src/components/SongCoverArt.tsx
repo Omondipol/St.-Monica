@@ -1,7 +1,6 @@
 import React from 'react';
 import { Song } from '../data/choirContent';
-import choirCoverPhoto from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
-import choirSingingPhoto from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { getAssetUrl } from '../utils/assetHelper';
 
 interface SongCoverArtProps {
   song: Song;
@@ -14,11 +13,11 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
   size = 'thumbnail',
   className = ''
 }) => {
-  // Use custom song thumbnail if provided by admin, or authentic cropped choir photos
+  // Use custom song thumbnail if provided by admin, or authentic choir photos
   const cleanPhoto = song.thumbnailUrl || (
     song.id === 'song-nimzima' || song.id === 'song-jumuiya'
-      ? choirSingingPhoto
-      : choirCoverPhoto
+      ? getAssetUrl('/assets/choir/choir_04.jpg')
+      : getAssetUrl('/assets/choir/choir_01.jpg')
   );
 
   if (size === 'thumbnail') {

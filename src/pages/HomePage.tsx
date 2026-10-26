@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { CoreValuesSection } from '../components/CoreValuesSection';
+import { getAssetUrl } from '../utils/assetHelper';
 
 import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
 import heroSlide2Faces from '../assets/images/hero_slide_2_faces.jpg';
@@ -497,7 +498,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               {/* Real liturgical choir & parish altar photography */}
               <img
                 key={`${slide.src}-${isActive ? 'active' : 'inactive'}`}
-                src={slide.src}
+                src={getAssetUrl(slide.src)}
                 alt={slide.alt}
                 width={1920}
                 height={1080}
@@ -805,7 +806,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="lg:col-span-5">
               <div className="rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md bg-white">
                 <img
-                  src={parishMessage?.churchImg || churchImg}
+                  src={getAssetUrl(parishMessage?.churchImg || '/assets/choir/choir_08.jpg')}
                   alt={parishMessage?.churchName || "St. Monica Catholic Church, Section 58 Nakuru"}
                   width={600}
                   height={400}
@@ -963,8 +964,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* 4. SCRIPTURE BANNER: Customizable Bible Scripture Quote */}
       <section className="relative py-24 sm:py-28 overflow-hidden bg-[#0C2340]">
         <img
-          src={scriptureQuote?.bgImage || choirHeroImg}
-          alt="Choir vocal ministry"
+          src={getAssetUrl(
+            scriptureQuote?.bgImage && !scriptureQuote.bgImage.includes('choir_singing_moment')
+              ? scriptureQuote.bgImage
+              : '/assets/choir/choir_03.jpg'
+          )}
+          alt="St. Monica Choir sacred music ministry before the altar"
           width={1920}
           height={1080}
           loading="lazy"
@@ -1124,8 +1129,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <div className="pt-2 flex items-center gap-3.5">
                 <img
-                  src={choirmasterMessage?.image || choirmasterImg}
-                  alt={choirmasterMessage?.name || "Mwalimu Joseph Otieno"}
+                  src={getAssetUrl(
+                    choirmasterMessage?.image && !choirmasterMessage.image.includes('choirmaster_director')
+                      ? choirmasterMessage.image
+                      : '/assets/choir/choir_leader_02.jpg'
+                  )}
+                  alt={choirmasterMessage?.name || "Mwalimu Atebe Mark T."}
                   width={64}
                   height={64}
                   loading="lazy"

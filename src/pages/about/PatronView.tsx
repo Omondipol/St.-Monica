@@ -4,6 +4,7 @@ import hymnalImg from '../../assets/images/sheet_music_hymnal_1791356751097.jpg'
 import { ChoirLogo } from '../../components/ChoirLogo';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface PatronViewProps {
   onNavigate?: (route: string) => void;
@@ -12,8 +13,8 @@ interface PatronViewProps {
 export const PatronView: React.FC<PatronViewProps> = ({ onNavigate = () => {} }) => {
   const { lang, aboutPageConfig } = useChoir();
 
-  const bannerImgSrc = aboutPageConfig?.patronBannerImg || hymnalImg;
-  const portraitImgSrc = aboutPageConfig?.patronPortraitImg || hymnalImg;
+  const bannerImgSrc = getAssetUrl(aboutPageConfig?.patronBannerImg || '/assets/choir/choir_06.jpg');
+  const portraitImgSrc = getAssetUrl(aboutPageConfig?.patronPortraitImg || '/assets/choir/choir_leader_01.jpg');
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">

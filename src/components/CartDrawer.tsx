@@ -16,7 +16,7 @@ import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372
 import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
 import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
 import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
-import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const CartDrawer: React.FC = () => {
   const { 
@@ -57,7 +57,7 @@ export const CartDrawer: React.FC = () => {
     if (lower.includes('nimzima')) return scorePreviewNimzima;
     if (lower.includes('jumuiya')) return scorePreviewJumuiya;
     if (lower.includes('bundle') || image === 'sheet_music_hymnal') return sheetMusicHymnalImg;
-    return choirHeroImg;
+    return getAssetUrl('/assets/choir/choir_02.jpg');
   };
 
   const handleStartCheckout = () => {

@@ -18,6 +18,7 @@ import {
   Music
 } from 'lucide-react';
 import { isMemberActive } from '../../data/membersData';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface SectionsViewProps {
   onNavigate?: (route: string) => void;
@@ -77,7 +78,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
       {/* Page Title Banner - Clean Marian Navy & Blue with Choir Altar Imagery */}
       <section className="relative h-[160px] sm:h-[185px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img
-          src="/assets/choir/choir_04.jpg"
+          src={getAssetUrl('/assets/choir/choir_04.jpg')}
           alt="St. Monica Choir SATB Ministry"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -293,7 +294,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
                     {/* Dignified Avatar (Photo or Initial) */}
                     {member.photoUrl ? (
                       <img
-                        src={member.photoUrl}
+                        src={getAssetUrl(member.photoUrl)}
                         alt={member.name}
                         className="w-11 h-11 rounded-full object-cover border border-[#1058A8]/30 shrink-0 shadow-xs"
                       />

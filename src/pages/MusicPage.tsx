@@ -16,6 +16,7 @@ import {
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
+import { getAssetUrl } from '../utils/assetHelper';
 
 import choirBannerImg from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
 import choirSingingMomentImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
@@ -191,9 +192,9 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
   const getCleanSongCover = (song: Song) => {
     if (song.id === 'song-nimzima' || song.id === 'song-jumuiya') {
-      return choirSingingMomentImg;
+      return getAssetUrl('/assets/choir/choir_04.jpg');
     }
-    return choirBannerImg;
+    return getAssetUrl('/assets/choir/choir_01.jpg');
   };
 
   return (
@@ -203,8 +204,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         {/* Real choir cover photo background */}
         <img 
-          src={choirBannerImg} 
-          alt="St. Monica Catholic Choir, Nakuru" 
+          src={getAssetUrl('/assets/choir/choir_01.jpg')} 
+          alt="St. Monica Catholic Choir, Section 58 Nakuru" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
 

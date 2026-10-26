@@ -1,10 +1,8 @@
 import React from 'react';
 import { DOCUMENT_METADATA, SPRINT_TIMELINE, TECHNICAL_TARGETS, API_MODULES, USER_ROLES } from '../data/planData';
 import { Printer, ArrowLeft } from 'lucide-react';
-
-import choirImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { getAssetUrl } from '../utils/assetHelper';
 import hymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
-import churchImg from '../assets/images/nakuru_parish_cathedral_1791356761479.jpg';
 
 interface ExecutiveReportViewProps {
   onBack: () => void;
@@ -94,19 +92,19 @@ export const ExecutiveReportView: React.FC<ExecutiveReportViewProps> = ({ onBack
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
         <div className="border border-[#0C2340]/10 rounded-lg overflow-hidden">
           <img 
-            src={choirImg} 
-            alt="St. Monica Choir singing" 
+            src={getAssetUrl('/assets/choir/choir_01.jpg')} 
+            alt="St. Monica Choir at the altar" 
             className="w-full h-48 object-cover" 
             referrerPolicy="no-referrer"
           />
           <div className="p-3 bg-[#F8FAFC] text-[11px] text-[#0C2340]/70 font-source italic">
-            Fig 1: Documentary rehearsal photography adhering to Section 3.4 guidelines (no stock images).
+            Fig 1: Authentic documentary photography of St. Monica Choir at Sunday Mass.
           </div>
         </div>
 
         <div className="border border-[#0C2340]/10 rounded-lg overflow-hidden">
           <img 
-            src={churchImg} 
+            src={getAssetUrl('/assets/choir/choir_06.jpg')} 
             alt="Nakuru parish church interior" 
             className="w-full h-48 object-cover" 
             referrerPolicy="no-referrer"

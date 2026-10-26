@@ -9,6 +9,7 @@ import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
 import { ExternalLink, UserPlus, Sparkles } from 'lucide-react';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface ChoirGalleryViewProps {
   onNavigate?: (route: string) => void;
@@ -20,10 +21,10 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
   const photosToDisplay = groupPhotosList && groupPhotosList.length > 0 ? groupPhotosList : INITIAL_GROUP_PHOTOS;
 
   const getImageSrc = (imageKey: string, customUrl?: string) => {
-    if (customUrl) return customUrl;
-    if (imageKey === 'nakuru_parish_cathedral') return '/assets/choir/choir_06.jpg';
-    if (imageKey === 'sheet_music_hymnal') return '/assets/choir/choir_05.jpg';
-    return '/assets/choir/choir_01.jpg';
+    if (customUrl) return getAssetUrl(customUrl);
+    if (imageKey === 'nakuru_parish_cathedral') return getAssetUrl('/assets/choir/choir_06.jpg');
+    if (imageKey === 'sheet_music_hymnal') return getAssetUrl('/assets/choir/choir_05.jpg');
+    return getAssetUrl('/assets/choir/choir_01.jpg');
   };
 
   return (
@@ -31,7 +32,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
       {/* Page Title Banner (Matching Music Section Slim Banner) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src="/assets/choir/choir_02.jpg" 
+          src={getAssetUrl('/assets/choir/choir_02.jpg')} 
           alt="St. Monica Catholic Choir in Sacred Vestments" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -59,7 +60,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
       <section className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
         <div className="lg:col-span-7 aspect-16/10 relative overflow-hidden bg-slate-900">
           <img
-            src="/assets/choir/choir_01.jpg"
+            src={getAssetUrl('/assets/choir/choir_01.jpg')}
             alt="St. Monica Catholic Choir in Full Vestments"
             className="w-full h-full object-cover object-center"
             referrerPolicy="no-referrer"
@@ -161,14 +162,19 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
 
               <div className="p-5 space-y-2">
                 <span className="text-xs font-semibold text-[#1058A8] font-source block">
-                  {lang === 'sw' ? photo.occasionSw : photo.occasion}
+                  {photo.occasion || photo.occasionSw}
                 </span>
                 <h4 className="font-eb-garamond text-xl font-bold text-[#0C2340] leading-snug">
-                  {lang === 'sw' ? photo.titleSw : photo.title}
+                  {photo.title || photo.titleSw}
                 </h4>
-                <p className="text-xs text-[#0C2340]/75 font-source leading-relaxed">
-                  {lang === 'sw' ? photo.descriptionSw : photo.description}
+                <p className="text-xs text-[#0C2340]/85 font-source leading-relaxed">
+                  {photo.description}
                 </p>
+                {lang === 'sw' && photo.descriptionSw && photo.descriptionSw !== photo.description && (
+                  <p className="text-[11px] text-slate-500 font-source italic pt-1 border-t border-slate-100">
+                    {photo.descriptionSw}
+                  </p>
+                )}
               </div>
             </div>
           ))}

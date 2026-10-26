@@ -4,6 +4,7 @@ import { ProductItem } from '../data/choirContent';
 import { ShoppingBag } from 'lucide-react';
 import { MusicNavTabs } from '../components/MusicNavTabs';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
+import { getAssetUrl } from '../utils/assetHelper';
 
 import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
 import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
@@ -75,7 +76,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
       {/* Header Banner matching About & Music */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={sheetMusicHymnalImg} 
+          src={getAssetUrl('/assets/choir/choir_05.jpg')} 
           alt="St. Monica Choir Scores Store" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />

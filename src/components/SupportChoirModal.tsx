@@ -20,7 +20,7 @@ import {
 import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
-import choirSingingImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { getAssetUrl } from '../utils/assetHelper';
 
 interface AmountOption {
   kes: number;
@@ -292,7 +292,7 @@ export const SupportChoirModal: React.FC = () => {
                 {/* Real rehearsal / Mass photo of the choir */}
                 <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-[#1058A8]/20 shadow-2xs bg-[#EFECE6]">
                   <img 
-                    src={choirSingingImg} 
+                    src={getAssetUrl('/assets/choir/choir_03.jpg')} 
                     alt="St. Monica Choir" 
                     className="w-full h-full object-cover" 
                     loading="lazy"

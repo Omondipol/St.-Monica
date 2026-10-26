@@ -4,6 +4,7 @@ import { Send, CheckCircle2, ExternalLink, MessageCircle, MapPin, Navigation, Co
 import { CHOIR_STATS } from '../data/choirContent';
 import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const ContactPage: React.FC = () => {
   const { lang } = useChoir();
@@ -100,8 +101,8 @@ export const ContactPage: React.FC = () => {
       {/* 1. Header Banner (Matching Music & About Sections) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={churchImg} 
-          alt="St. Monica Catholic Church, Nakuru" 
+          src={getAssetUrl('/assets/choir/choir_07.jpg')} 
+          alt="St. Monica Catholic Choir, Section 58 Nakuru" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />

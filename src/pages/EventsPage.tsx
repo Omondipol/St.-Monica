@@ -4,6 +4,7 @@ import { INITIAL_EVENTS, EventItem, CHOIR_STATS } from '../data/choirContent';
 import { RotateCw, ExternalLink, CalendarPlus } from 'lucide-react';
 import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const EventsPage: React.FC = () => {
   const { lang, eventsList } = useChoir();
@@ -44,8 +45,8 @@ export const EventsPage: React.FC = () => {
       {/* Header Banner (Matching Music & About Sections) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={churchImg} 
-          alt="St. Monica Catholic Church, Nakuru" 
+          src={getAssetUrl('/assets/choir/choir_06.jpg')} 
+          alt="St. Monica Catholic Choir in the sanctuary" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />

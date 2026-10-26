@@ -12,10 +12,9 @@ import {
   Heart
 } from 'lucide-react';
 import { CHOIR_STATS, Song } from '../data/choirContent';
-import choirHeroImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
-import choirCoverImg from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { SupportChoirModal } from './SupportChoirModal';
+import { getAssetUrl } from '../utils/assetHelper';
 
 interface ChoirHeaderProps {
   currentRoute: string;
@@ -337,7 +336,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                       <div className="space-y-2">
                         <div className="relative aspect-[16/10] rounded-lg overflow-hidden border border-white/10 shadow-xs">
                           <img 
-                            src={choirHeroImg} 
+                            src={getAssetUrl('/assets/choir/choir_01.jpg')} 
                             alt="St. Monica Third Mass Choir" 
                             className="w-full h-full object-cover"
                           />
@@ -594,7 +593,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 <div className="space-y-2">
                   <div className="relative aspect-[16/10] rounded-lg overflow-hidden border border-white/10 shadow-xs group">
                     <img 
-                      src={choirCoverImg} 
+                      src={getAssetUrl('/assets/choir/choir_04.jpg')} 
                       alt={latestSong.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />

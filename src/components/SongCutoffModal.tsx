@@ -3,8 +3,7 @@ import { useChoir } from '../context/ChoirContext';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
-import choirCoverPhoto from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
-import choirSingingPhoto from '../assets/images/choir_singing_moment_1791356740170.jpg';
+import { getAssetUrl } from '../utils/assetHelper';
 import { 
   ExternalLink, 
   Heart, 
@@ -48,8 +47,8 @@ export const SongCutoffModal: React.FC = () => {
 
   // Clean cover photo with no text on it
   const cleanCoverPhoto = currentSong.id === 'song-nimzima' || currentSong.id === 'song-jumuiya'
-    ? choirSingingPhoto
-    : choirCoverPhoto;
+    ? getAssetUrl('/assets/choir/choir_04.jpg')
+    : getAssetUrl('/assets/choir/choir_01.jpg');
 
   // Authentic choir note about the song
   const songChoirNote = lang === 'sw'

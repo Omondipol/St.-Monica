@@ -7,6 +7,7 @@ import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 import { Users, Calendar, Music } from 'lucide-react';
 import { CoreValuesSection } from '../../components/CoreValuesSection';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface OurStoryViewProps {
   onNavigate?: (route: string) => void;
@@ -51,7 +52,7 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
       {/* Page Title Banner (Matching Music Section Slim Banner) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={aboutPageConfig?.storyBannerImg || churchImg} 
+          src={getAssetUrl(aboutPageConfig?.storyBannerImg || '/assets/choir/choir_02.jpg')} 
           alt="St. Monica Catholic Church, Nakuru" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -148,8 +149,8 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
 
         <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-sm bg-slate-900">
           <img
-            src={aboutPageConfig?.storyPhotoImg || churchImg}
-            alt="St. Monica Parish Church"
+            src={getAssetUrl(aboutPageConfig?.storyPhotoImg || '/assets/choir/choir_04.jpg')}
+            alt="St. Monica Parish Choir"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
