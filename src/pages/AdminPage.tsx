@@ -46,6 +46,7 @@ import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { LIBRARY_CATEGORIES, LibrarySong } from '../data/libraryData';
 import { ImageUploadField } from '../components/ImageUploadField';
+import { getAssetUrl } from '../utils/assetHelper';
 import { AdminHomepageTab } from '../components/admin/AdminHomepageTab';
 import { AdminMassesTab } from '../components/admin/AdminMassesTab';
 import { AdminFooterTab } from '../components/admin/AdminFooterTab';
@@ -54,6 +55,7 @@ import { AdminMembersTab } from '../components/admin/AdminMembersTab';
 import { AdminAlbumsTab } from '../components/admin/AdminAlbumsTab';
 import { AdminFinancialsTab } from '../components/admin/AdminFinancialsTab';
 import { AdminCoreValuesTab } from '../components/admin/AdminCoreValuesTab';
+import { MediaManager } from '../components/MediaManager';
 import { triggerFileDownload } from '../utils/fileDownload';
 
 interface AdminPageProps {
@@ -77,6 +79,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     deleteLeader,
     groupPhotosList,
     addGroupPhoto,
+    updateGroupPhoto,
     deleteGroupPhoto,
     librarySongs,
     addLibrarySong,
@@ -117,6 +120,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   const [mainCategory, setMainCategory] = useState<'home' | 'about' | 'music' | 'events' | 'financials' | 'settings'>('home');
   const [activeTab, setActiveTab] = useState<'members' | 'albums' | 'financials' | 'leaders' | 'library' | 'events' | 'photos' | 'songs' | 'sheet' | 'hero' | 'about' | 'schedule' | 'footer' | 'stats' | 'backup' | 'values'>('hero');
+  const [photosSubView, setPhotosSubView] = useState<'gallery' | 'supabase'>('gallery');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   const handleSelectCategory = (cat: 'home' | 'about' | 'music' | 'events' | 'financials' | 'settings') => {
@@ -695,6 +699,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   // Group Photo Form State
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [photoForm, setPhotoForm] = useState({
     title: '',
     titleSw: '',
@@ -707,11 +712,43 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     occasionSw: 'Misa Kuu ya Jumapili'
   });
 
+  const openAddPhotoModal = () => {
+    setEditingPhotoId(null);
+    setPhotoForm({
+      title: '',
+      titleSw: '',
+      description: '',
+      descriptionSw: '',
+      year: '2024',
+      imageKey: 'choir_singing_moment',
+      customUrl: '',
+      occasion: 'Sunday High Mass',
+      occasionSw: 'Misa Kuu ya Jumapili'
+    });
+    setIsPhotoModalOpen(true);
+  };
+
+  const openEditPhotoModal = (photo: ChoirGroupPhoto) => {
+    setEditingPhotoId(photo.id);
+    setPhotoForm({
+      title: photo.title,
+      titleSw: photo.titleSw || photo.title,
+      description: photo.description,
+      descriptionSw: photo.descriptionSw || photo.description,
+      year: photo.year,
+      imageKey: photo.imageKey,
+      customUrl: photo.customUrl || '',
+      occasion: photo.occasion,
+      occasionSw: photo.occasionSw || photo.occasion
+    });
+    setIsPhotoModalOpen(true);
+  };
+
   const handleSavePhoto = (e: React.FormEvent) => {
     e.preventDefault();
     if (!photoForm.title.trim()) return;
 
-    addGroupPhoto({
+    const payload = {
       title: photoForm.title.trim(),
       titleSw: photoForm.titleSw.trim() || photoForm.title.trim(),
       description: photoForm.description.trim(),
@@ -721,8 +758,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       customUrl: photoForm.customUrl.trim(),
       occasion: photoForm.occasion.trim(),
       occasionSw: photoForm.occasionSw.trim() || photoForm.occasion.trim()
-    });
-    notify(`Group photo "${photoForm.title}" added to choir gallery!`);
+    };
+
+    if (editingPhotoId) {
+      updateGroupPhoto(editingPhotoId, payload);
+      notify(`Group photo "${payload.title}" updated in choir gallery!`);
+    } else {
+      addGroupPhoto(payload);
+      notify(`Group photo "${payload.title}" added to choir gallery!`);
+    }
     setIsPhotoModalOpen(false);
   };
 
@@ -2295,9 +2339,17 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
               <div key={leader.id} className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl shadow-xs space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#EAF4FB] border border-[#7EC8F0]/40 flex items-center justify-center font-eb-garamond font-bold text-lg text-[#1058A8]">
-                      {leader.name.split(' ').slice(-1)[0][0]}
-                    </div>
+                    {leader.photoUrl ? (
+                      <img 
+                        src={getAssetUrl(leader.photoUrl)} 
+                        alt={leader.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-[#1058A8]/30 shadow-xs shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-[#EAF4FB] border border-[#7EC8F0]/40 flex items-center justify-center font-eb-garamond font-bold text-lg text-[#1058A8] shrink-0">
+                        {leader.name.split(' ').slice(-1)[0][0]}
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-eb-garamond text-base font-bold text-[#0C2340]">{leader.name}</h3>
                       <span className="text-xs font-bold text-[#1058A8] block">{leader.role}</span>
@@ -2347,56 +2399,104 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
       {/* TAB 4: GROUP PHOTOS & GALLERY */}
       {activeTab === 'photos' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
-                Choir Group Gallery & Ministry Photos
-              </h2>
-              <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                Group photos of the whole choir ensemble in vestments and parish ministry.
-              </p>
-            </div>
+          {/* Sub-view switcher */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-[#0C2340]/10 pb-3">
             <button
-              onClick={() => setIsPhotoModalOpen(true)}
-              className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+              onClick={() => setPhotosSubView('gallery')}
+              className={`px-4 py-2 text-xs font-bold rounded-xl cursor-pointer transition-colors ${
+                photosSubView === 'gallery'
+                  ? 'bg-[#1058A8] text-white shadow-xs'
+                  : 'bg-slate-100 text-[#0C2340] hover:bg-slate-200'
+              }`}
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Group Photo</span>
+              Choir Gallery ({groupPhotosList.length})
+            </button>
+            <button
+              onClick={() => setPhotosSubView('supabase')}
+              className={`px-4 py-2 text-xs font-bold rounded-xl cursor-pointer transition-colors flex items-center gap-1.5 ${
+                photosSubView === 'supabase'
+                  ? 'bg-[#1058A8] text-white shadow-xs'
+                  : 'bg-slate-100 text-[#0C2340] hover:bg-slate-200'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Supabase Cloud Media (Realtime)</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {groupPhotosList.map((photo) => (
-              <div key={photo.id} className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between">
-                <div className="aspect-16/10 bg-[#EAF4FB] relative overflow-hidden flex items-center justify-center">
-                  <ImageIcon className="w-12 h-12 text-[#1058A8]/40" />
-                  <span className="absolute top-2 left-2 bg-[#0C2340] text-white font-source tabular-nums text-xs px-2 py-0.5 rounded-[12px]">
-                    {photo.year}
-                  </span>
-                </div>
-                <div className="p-4 space-y-2">
-                  <h4 className="font-eb-garamond font-bold text-[#0C2340] text-sm">{photo.title}</h4>
-                  <span className="text-[11px] text-[#1058A8] font-bold block">{photo.occasion}</span>
-                  <p className="text-xs text-[#0C2340]/70 font-source leading-relaxed">
-                    {photo.description}
+          {photosSubView === 'supabase' ? (
+            <MediaManager />
+          ) : (
+            <>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
+                    Choir Group Gallery & Ministry Photos
+                  </h2>
+                  <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
+                    Group photos of the whole choir ensemble in vestments and parish ministry.
                   </p>
                 </div>
-                <div className="p-3 border-t border-[#0C2340]/5 flex justify-end">
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Delete photo "${photo.title}"?`)) {
-                        deleteGroupPhoto(photo.id);
-                        notify(`Photo removed from gallery.`);
-                      }
-                    }}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <button
+                  onClick={openAddPhotoModal}
+                  className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Group Photo</span>
+                </button>
               </div>
-            ))}
-          </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {groupPhotosList.map((photo) => (
+                  <div key={photo.id} className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div className="aspect-16/10 bg-[#EAF4FB] relative overflow-hidden flex items-center justify-center">
+                      <img
+                        src={getAssetUrl(
+                          photo.customUrl || 
+                          (photo.imageKey === 'nakuru_parish_cathedral' ? '/assets/choir/choir_06.jpg' :
+                           photo.imageKey === 'sheet_music_hymnal' ? '/assets/choir/choir_05.jpg' :
+                           '/assets/choir/choir_01.jpg')
+                        )}
+                        alt={photo.title}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                      <span className="absolute top-2 left-2 bg-[#0C2340]/90 backdrop-blur-xs text-white font-source tabular-nums text-xs px-2.5 py-0.5 rounded-lg shadow-xs">
+                        {photo.year}
+                      </span>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <h4 className="font-eb-garamond font-bold text-[#0C2340] text-sm">{photo.title}</h4>
+                      <span className="text-[11px] text-[#1058A8] font-bold block">{photo.occasion}</span>
+                      <p className="text-xs text-[#0C2340]/70 font-source leading-relaxed line-clamp-2">
+                        {photo.description}
+                      </p>
+                    </div>
+                    <div className="p-3 border-t border-[#0C2340]/5 flex items-center justify-between">
+                      <button
+                        onClick={() => openEditPhotoModal(photo)}
+                        className="px-2.5 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
+                        <span>Edit Photo</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Delete photo "${photo.title}"?`)) {
+                            deleteGroupPhoto(photo.id);
+                            notify(`Photo removed from gallery.`);
+                          }
+                        }}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
+                        title="Delete photo"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -2899,8 +2999,14 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                   labelSw="Picha ya Kiongozi / Mwalimu"
                   value={leaderForm.photoUrl}
                   onChange={val => setLeaderForm({ ...leaderForm, photoUrl: val })}
-                  helpText="Upload portrait photo of official or trainer."
+                  helpText="Upload portrait photo of official or trainer, or choose an authentic portrait."
                   aspectRatio="aspect-square"
+                  presetOptions={[
+                    { label: 'Choir Director Portrait', value: '/assets/choir/choir_leader_02.jpg' },
+                    { label: 'Choirmaster Conducting', value: '/assets/choir/choir_07.jpg' },
+                    { label: 'Choral Leader & Hymnal', value: '/assets/choir/choir_05.jpg' },
+                    { label: 'Organist & Trainer', value: '/assets/choir/choir_04.jpg' },
+                  ]}
                 />
               </div>
 
@@ -2925,13 +3031,13 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
         </div>
       )}
 
-      {/* MODAL: ADD GROUP PHOTO */}
+      {/* MODAL: ADD / EDIT GROUP PHOTO */}
       {isPhotoModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                Add Choir Group Photo
+                {editingPhotoId ? 'Edit Choir Group Photo' : 'Add Choir Group Photo'}
               </h3>
               <button onClick={() => setIsPhotoModalOpen(false)} className="cursor-pointer">
                 <X className="w-5 h-5 text-[#0C2340]/60" />
@@ -2987,12 +3093,26 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
 
               <div>
                 <ImageUploadField
-                  label="Upload Gallery Photo or Enter Image URL *"
-                  labelSw="Pakia Picha ya Albamu / Weka Anwani"
+                  label="Upload Gallery Photo or Choose Authentic Preset *"
+                  labelSw="Pakia Picha ya Albamu / Chagua Picha Halisi"
                   value={photoForm.customUrl}
                   onChange={val => setPhotoForm({ ...photoForm, customUrl: val })}
                   helpText="Upload ensemble photo or choose from preset authentic photos."
                   aspectRatio="aspect-video"
+                  presetOptions={[
+                    { label: 'Full Ensemble Vestments', value: '/assets/choir/choir_01.jpg' },
+                    { label: 'Singing in Sanctuary', value: '/assets/choir/choir_02.jpg' },
+                    { label: 'Choir Procession', value: '/assets/choir/choir_03.jpg' },
+                    { label: 'Altar & Choristers', value: '/assets/choir/choir_04.jpg' },
+                    { label: 'Hymnal & Scores', value: '/assets/choir/choir_05.jpg' },
+                    { label: 'Parish Cathedral Exterior', value: '/assets/choir/choir_06.jpg' },
+                    { label: 'Director Conducting', value: '/assets/choir/choir_07.jpg' },
+                    { label: 'Sanctuary Liturgy', value: '/assets/choir/choir_08.jpg' },
+                    { label: 'Youth Choristers', value: '/assets/choir/choir_09.jpg' },
+                    { label: 'Festive High Mass', value: '/assets/choir/choir_10.jpg' },
+                    { label: 'Diocesan Festival', value: '/assets/choir/choir_11.jpg' },
+                    { label: 'Director Portrait', value: '/assets/choir/choir_leader_02.jpg' },
+                  ]}
                 />
               </div>
 
@@ -3009,7 +3129,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                   className="px-5 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Add Photo</span>
+                  <span>{editingPhotoId ? 'Save Changes' : 'Add Photo'}</span>
                 </button>
               </div>
             </form>

@@ -326,7 +326,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const defaultSlides = isMobile ? MOBILE_HERO_SLIDES : DESKTOP_HERO_SLIDES;
   const activeSlides = defaultSlides.map((def, idx) => {
     const custom = heroSlides?.[idx];
-    const customSrc = isMobile ? (custom?.srcMobile || custom?.src) : custom?.src;
+    const customSrc = custom?.src || (isMobile ? custom?.srcMobile : undefined);
     return {
       ...def,
       src: customSrc || def.src,
@@ -489,7 +489,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
           return (
             <div
-              key={slide.src}
+              key={`hero-slide-container-${index}`}
               className={`absolute inset-0 transition-opacity duration-1000 ease-in-out overflow-hidden pointer-events-none ${
                 isActive ? 'opacity-100 z-0' : 'opacity-0 -z-10'
               }`}
@@ -497,7 +497,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             >
               {/* Real liturgical choir & parish altar photography */}
               <img
-                key={`${slide.src}-${isActive ? 'active' : 'inactive'}`}
+                key={`hero-img-${index}-${slide.src}-${isActive ? 'active' : 'inactive'}`}
                 src={getAssetUrl(slide.src)}
                 alt={slide.alt}
                 width={1920}
@@ -965,7 +965,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <section className="relative py-24 sm:py-28 overflow-hidden bg-[#0C2340]">
         <img
           src={getAssetUrl(
-            scriptureQuote?.bgImage && !scriptureQuote.bgImage.includes('choir_singing_moment')
+            scriptureQuote?.bgImage && !scriptureQuote.bgImage.includes('choir_singing_moment_1791356740170') && !scriptureQuote.bgImage.includes('unsplash.com')
               ? scriptureQuote.bgImage
               : '/assets/choir/choir_03.jpg'
           )}
@@ -1130,7 +1130,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <div className="pt-2 flex items-center gap-3.5">
                 <img
                   src={getAssetUrl(
-                    choirmasterMessage?.image && !choirmasterMessage.image.includes('choirmaster_director')
+                    choirmasterMessage?.image && !choirmasterMessage.image.includes('choirmaster_director_1791446339605') && !choirmasterMessage.image.includes('unsplash.com')
                       ? choirmasterMessage.image
                       : '/assets/choir/choir_leader_02.jpg'
                   )}

@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Link as LinkIcon, RotateCcw, Image as ImageIcon, Check } from 'lucide-react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export interface PresetImageOption {
   label: string;
-  url: string;
+  url?: string;
+  value?: string;
 }
 
 interface ImageUploadFieldProps {
@@ -14,6 +16,7 @@ interface ImageUploadFieldProps {
   defaultValue?: string;
   helpText?: string;
   presets?: PresetImageOption[];
+  presetOptions?: PresetImageOption[];
   aspectRatio?: string; // e.g. "aspect-video", "aspect-square", "aspect-[4/3]"
   className?: string;
 }
@@ -26,9 +29,11 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   defaultValue,
   helpText,
   presets,
+  presetOptions,
   aspectRatio = 'aspect-video',
   className = ''
 }) => {
+  const activePresets = presets || presetOptions;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUrlMode, setIsUrlMode] = useState<boolean>(false);
   const [urlInput, setUrlInput] = useState<string>(value);
@@ -117,16 +122,16 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-1">
         
         {/* Preview Box */}
-        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-white border border-slate-300 relative group flex items-center justify-center shadow-inner`}>
+        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-slate-900 border border-slate-300 relative group flex items-center justify-center shadow-inner`}>
           {effectiveValue && !previewError ? (
             <img
-              src={effectiveValue}
+              src={getAssetUrl(effectiveValue)}
               alt={label}
-              className="w-full h-full object-contain p-1"
+              className="w-full h-full object-cover"
               onError={() => setPreviewError(true)}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+            <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center bg-slate-100 w-full h-full">
               <ImageIcon className="w-6 h-6 mb-1 text-slate-300" />
               <span className="text-[10px] text-slate-500 font-medium">
                 {previewError ? 'Unable to load image' : 'No image selected'}
@@ -198,31 +203,34 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           )}
 
           {/* Quick Presets if provided */}
-          {presets && presets.length > 0 && (
+          {activePresets && activePresets.length > 0 && (
             <div className="pt-1">
               <span className="text-[10px] text-slate-500 font-medium block mb-1">
                 Quick Preset Photos:
               </span>
               <div className="flex flex-wrap gap-1">
-                {presets.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      onChange(preset.url);
-                      setUrlInput(preset.url);
-                      setPreviewError(false);
-                      setUploadedFileName('');
-                    }}
-                    className={`text-[10px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${
-                      value === preset.url
-                        ? 'bg-[#1058A8] text-white border-[#1058A8] font-bold'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
-                    }`}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+                {activePresets.map((preset, idx) => {
+                  const presetUrl = preset.url || preset.value || '';
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        onChange(presetUrl);
+                        setUrlInput(presetUrl);
+                        setPreviewError(false);
+                        setUploadedFileName('');
+                      }}
+                      className={`text-[10px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                        value === presetUrl
+                          ? 'bg-[#1058A8] text-white border-[#1058A8] font-bold'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

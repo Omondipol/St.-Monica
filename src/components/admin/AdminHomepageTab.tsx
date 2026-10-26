@@ -1,16 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';
 import { ChoirLogo } from '../ChoirLogo';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
-import { Save, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw } from 'lucide-react';
-import hero1Img from '../../assets/images/hero_slide_1_mass.jpg';
-import hero2Img from '../../assets/images/hero_slide_2_faces.jpg';
-import hero3Img from '../../assets/images/hero_slide_3_director.jpg';
-import hero4Img from '../../assets/images/hero_slide_4_scores.jpg';
-import churchImg from '../../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
-import choirmasterImg from '../../assets/images/choirmaster_director_1791446339605.jpg';
-import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
+import { Save, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw, Sparkles, Eye } from 'lucide-react';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface AdminHomepageTabProps {
   onNotify: (msg: string) => void;
@@ -43,15 +37,20 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
     { label: 'Vector Heraldic Seal (SVG)', url: './logo/st_monica_choir_seal.svg' }
   ];
 
-  // Choir photo presets for hero & backgrounds
+  // Authentic Choir photo presets for hero & backgrounds
   const photoPresets: PresetImageOption[] = [
-    { label: 'Slide 1: Sunday Sung Mass Altar', url: hero1Img },
-    { label: 'Slide 2: Chorister Faces & Sanctuary', url: hero2Img },
-    { label: 'Slide 3: Choirmaster Directing Altar', url: hero3Img },
-    { label: 'Slide 4: Liturgical Scores & Choir', url: hero4Img },
-    { label: 'St. Monica Parish Church, Nakuru', url: churchImg },
-    { label: 'Choral Singing Moment (Robes)', url: choirHeroImg },
-    { label: 'Choirmaster Mwalimu Joseph', url: choirmasterImg }
+    { label: 'Full Choir Ensemble (Choir 01)', url: '/assets/choir/choir_01.jpg' },
+    { label: 'Liturgical Vestments (Choir 02)', url: '/assets/choir/choir_02.jpg' },
+    { label: 'Reverent Prayer Sanctuary (Choir 03)', url: '/assets/choir/choir_03.jpg' },
+    { label: 'SATB Voicing in Robes (Choir 04)', url: '/assets/choir/choir_04.jpg' },
+    { label: 'Festive Singing Praise (Choir 05)', url: '/assets/choir/choir_05.jpg' },
+    { label: 'Choir Assembly (Choir 06)', url: '/assets/choir/choir_06.jpg' },
+    { label: 'Choirmaster Directing (Choir 07)', url: '/assets/choir/choir_07.jpg' },
+    { label: 'Sunday High Mass (Choir 08)', url: '/assets/choir/choir_08.jpg' },
+    { label: 'Thanksgiving Praise (Choir 09)', url: '/assets/choir/choir_09.jpg' },
+    { label: 'Soprano & Alto (Choir 10)', url: '/assets/choir/choir_10.jpg' },
+    { label: 'Tenor & Bass (Choir 11)', url: '/assets/choir/choir_11.jpg' },
+    { label: 'Mwalimu Atebe Mark T.', url: '/assets/choir/choir_leader_02.jpg' }
   ];
 
   // Local draft states
@@ -91,6 +90,53 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
     image: choirmasterMessage?.image || ''
   });
 
+  // Keep local draft states in sync if context values update
+  useEffect(() => {
+    if (parishMessage) {
+      setParishForm({
+        titleEn: parishMessage.titleEn || '',
+        titleSw: parishMessage.titleSw || '',
+        body1En: parishMessage.body1En || '',
+        body1Sw: parishMessage.body1Sw || '',
+        body2En: parishMessage.body2En || '',
+        body2Sw: parishMessage.body2Sw || '',
+        churchImg: parishMessage.churchImg || '',
+        churchName: parishMessage.churchName || '',
+        churchSubtitle: parishMessage.churchSubtitle || '',
+        mapsUrl: parishMessage.mapsUrl || ''
+      });
+    }
+  }, [parishMessage]);
+
+  useEffect(() => {
+    if (scriptureQuote) {
+      setScriptureForm({
+        categoryEn: scriptureQuote.categoryEn || '',
+        categorySw: scriptureQuote.categorySw || '',
+        textEn: scriptureQuote.textEn || '',
+        textSw: scriptureQuote.textSw || '',
+        citationEn: scriptureQuote.citationEn || '',
+        citationSw: scriptureQuote.citationSw || '',
+        bgImage: scriptureQuote.bgImage || ''
+      });
+    }
+  }, [scriptureQuote]);
+
+  useEffect(() => {
+    if (choirmasterMessage) {
+      setChoirmasterForm({
+        titleEn: choirmasterMessage.titleEn || '',
+        titleSw: choirmasterMessage.titleSw || '',
+        messageEn: choirmasterMessage.messageEn || '',
+        messageSw: choirmasterMessage.messageSw || '',
+        name: choirmasterMessage.name || '',
+        roleEn: choirmasterMessage.roleEn || '',
+        roleSw: choirmasterMessage.roleSw || '',
+        image: choirmasterMessage.image || ''
+      });
+    }
+  }, [choirmasterMessage]);
+
   // Handle Logo Save
   const handleSaveLogo = () => {
     updateCustomLogoUrl(logoInput.trim());
@@ -128,6 +174,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
   const currentSlide = heroSlides?.[selectedSlideIndex] || {
     id: `hero-slide-${selectedSlideIndex + 1}`,
     src: '',
+    srcMobile: '',
     alt: '',
     description: '',
     eyebrowEn: '',
@@ -141,7 +188,11 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
   };
 
   const handleUpdateCurrentSlideField = (field: string, val: string) => {
-    updateSingleHeroSlide(selectedSlideIndex, { [field]: val });
+    if (field === 'src') {
+      updateSingleHeroSlide(selectedSlideIndex, { src: val, srcMobile: val });
+    } else {
+      updateSingleHeroSlide(selectedSlideIndex, { [field]: val });
+    }
   };
 
   return (
@@ -361,12 +412,40 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
             {/* Selected Slide Editor */}
             <div className="p-6 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-                <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider font-source">
-                  Editing Slide {selectedSlideIndex + 1}: {currentSlide.description || `Slide ${selectedSlideIndex + 1}`}
+                <span className="text-xs font-bold text-[#1058A8] uppercase tracking-wider font-source flex items-center gap-1.5">
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Editing Slide {selectedSlideIndex + 1}: {currentSlide.description || `Slide ${selectedSlideIndex + 1}`}</span>
                 </span>
-                <span className="text-[11px] text-slate-500 font-source">
-                  Changes save automatically live to website
+                <span className="text-[11px] text-emerald-700 font-semibold font-source flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Updates homepage immediately</span>
                 </span>
+              </div>
+
+              {/* Visual Live Preview of Slide in Admin */}
+              <div className="rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-sm relative aspect-21/9 sm:aspect-16/7 bg-[#0C2340] flex items-center">
+                <img
+                  src={getAssetUrl(currentSlide.src || photoPresets[selectedSlideIndex]?.url || '/assets/choir/choir_01.jpg')}
+                  alt={currentSlide.alt || 'Slide preview'}
+                  className="absolute inset-0 w-full h-full object-cover filter brightness-70"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/65 to-transparent" />
+                <div className="relative z-10 p-5 sm:p-7 max-w-lg text-white space-y-1.5">
+                  <span className="text-[10px] sm:text-xs font-bold text-[#7EC8F0] uppercase tracking-wider block font-source">
+                    {lang === 'sw' ? currentSlide.eyebrowSw || currentSlide.eyebrowEn : currentSlide.eyebrowEn || currentSlide.eyebrowSw}
+                  </span>
+                  <h4 className="font-eb-garamond text-lg sm:text-2xl font-bold leading-tight">
+                    {lang === 'sw' ? currentSlide.headlineSw || currentSlide.headlineEn : currentSlide.headlineEn || currentSlide.headlineSw}
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-200 line-clamp-2 font-source">
+                    {lang === 'sw' ? currentSlide.descSw || currentSlide.descEn : currentSlide.descEn || currentSlide.descSw}
+                  </p>
+                  <div className="pt-1 flex items-center gap-2">
+                    <span className="bg-[#1058A8] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-lg font-source">
+                      Slide {selectedSlideIndex + 1} Live View
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Slide Image Upload */}
@@ -379,7 +458,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                     handleUpdateCurrentSlideField('src', val);
                     onNotify(`Slide ${selectedSlideIndex + 1} image updated!`);
                   }}
-                  defaultValue={photoPresets[selectedSlideIndex]?.url || ''}
+                  defaultValue={photoPresets[selectedSlideIndex]?.url || '/assets/choir/choir_01.jpg'}
                   helpText="High-resolution landscape photo (1920x1080 or 16:9 ratio recommended)."
                   presets={photoPresets}
                   aspectRatio="aspect-video"
@@ -578,8 +657,12 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   label="Upload Church Image or Enter URL"
                   labelSw="Pakia Picha ya Kanisa au Weka Anwani ya Picha"
                   value={parishForm.churchImg}
-                  onChange={(val) => setParishForm(prev => ({ ...prev, churchImg: val }))}
-                  defaultValue={churchImg}
+                  onChange={(val) => {
+                    setParishForm(prev => ({ ...prev, churchImg: val }));
+                    updateParishMessage({ churchImg: val });
+                    onNotify(lang === 'sw' ? 'Picha ya kanisa imesasishwa na kuonekana moja kwa moja!' : 'Church photo updated live on homepage!');
+                  }}
+                  defaultValue="/assets/choir/choir_08.jpg"
                   helpText="High-quality photo of St. Monica Catholic Church exterior or sanctuary, Section 58 Nakuru."
                   presets={photoPresets}
                   aspectRatio="aspect-[4/3]"
@@ -754,8 +837,12 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   label="Upload Banner Background Image or Enter URL"
                   labelSw="Pakia Picha ya Mandhari ya Nukuu ya Biblia"
                   value={scriptureForm.bgImage}
-                  onChange={(val) => setScriptureForm(prev => ({ ...prev, bgImage: val }))}
-                  defaultValue={choirHeroImg}
+                  onChange={(val) => {
+                    setScriptureForm(prev => ({ ...prev, bgImage: val }));
+                    updateScriptureQuote({ bgImage: val });
+                    onNotify(lang === 'sw' ? 'Picha ya mandhari ya Biblia imesasishwa moja kwa moja!' : 'Scripture background photo updated live on homepage!');
+                  }}
+                  defaultValue="/assets/choir/choir_03.jpg"
                   helpText="Atmospheric, reverent image of choristers singing or church sanctuary."
                   presets={photoPresets}
                   aspectRatio="aspect-video"
@@ -895,9 +982,13 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   label="Upload Choirmaster Photo or Enter URL"
                   labelSw="Pakia Picha ya Mwalimu au Weka Anwani ya Picha"
                   value={choirmasterForm.image}
-                  onChange={(val) => setChoirmasterForm(prev => ({ ...prev, image: val }))}
-                  defaultValue={choirmasterImg}
-                  helpText="Clear portrait photo of Mwalimu Joseph Otieno or presiding choirmaster."
+                  onChange={(val) => {
+                    setChoirmasterForm(prev => ({ ...prev, image: val }));
+                    updateChoirmasterMessage({ image: val });
+                    onNotify(lang === 'sw' ? 'Picha ya Mwalimu wa Kwaya imesasishwa moja kwa moja!' : 'Choirmaster photo updated live on homepage!');
+                  }}
+                  defaultValue="/assets/choir/choir_leader_02.jpg"
+                  helpText="Clear portrait photo of Mwalimu Atebe Mark T. or presiding choirmaster."
                   presets={photoPresets}
                   aspectRatio="aspect-square"
                 />

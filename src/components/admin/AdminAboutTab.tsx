@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
 import { Save, BookOpen, Heart, Image as ImageIcon } from 'lucide-react';
-import churchImg from '../../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
-import hymnalImg from '../../assets/images/sheet_music_hymnal_1791356751097.jpg';
-import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
-import cathedralImg from '../../assets/images/nakuru_parish_cathedral_1791356761479.jpg';
-import choirmasterImg from '../../assets/images/choirmaster_director_1791446339605.jpg';
+import { getAssetUrl } from '../../utils/assetHelper';
 
 interface AdminAboutTabProps {
   onNotify: (msg: string) => void;
@@ -19,11 +15,12 @@ export const AdminAboutTab: React.FC<AdminAboutTabProps> = ({ onNotify }) => {
   const [subSection, setSubSection] = useState<'story' | 'patron'>('story');
 
   const photoPresets: PresetImageOption[] = [
-    { label: 'St. Monica Parish Church, Nakuru', url: churchImg },
-    { label: 'Saint Monica Hymnal Scores', url: hymnalImg },
-    { label: 'Choir Singing Moment (Vestments)', url: choirHeroImg },
-    { label: 'Nakuru Parish Cathedral', url: cathedralImg },
-    { label: 'Choirmaster Mwalimu Joseph', url: choirmasterImg }
+    { label: 'Choir in Vestments (Choir 02)', url: '/assets/choir/choir_02.jpg' },
+    { label: 'Reverent Prayer Sanctuary (Choir 03)', url: '/assets/choir/choir_03.jpg' },
+    { label: 'SATB Polyphony (Choir 04)', url: '/assets/choir/choir_04.jpg' },
+    { label: 'Sanctuary Singing Praise (Choir 05)', url: '/assets/choir/choir_05.jpg' },
+    { label: 'Grand Choir Assembly (Choir 06)', url: '/assets/choir/choir_06.jpg' },
+    { label: 'Saint Monica Icon Portrait', url: '/assets/choir/choir_leader_01.jpg' }
   ];
 
   const [form, setForm] = useState({
@@ -53,6 +50,38 @@ export const AdminAboutTab: React.FC<AdminAboutTabProps> = ({ onNotify }) => {
     patronPrayerEn: aboutPageConfig?.patronPrayerEn || 'Lord, through the persistent prayers and tears of Saint Monica, You led Saint Augustine into the light of the true faith. Through her intercession, give our choir faithful devotion, vocal humility, and grace to draw all souls to Your Altar through sacred song. Amen.',
     patronPrayerSw: aboutPageConfig?.patronPrayerSw || 'Ee Mungu wetu, kupitia sala na machozi ya Mtakatifu Monika, ulimwongoza mwanaye Augustino kwenye ukweli wa Injili. Kupitia maombezi yake, ijalie kwaya yetu neema ya kuimba kwa unyenyekevu na nidhamu ya kicho altaroni ili mioyo ya wengi ivutwe kwako. Amina.'
   });
+
+  useEffect(() => {
+    if (aboutPageConfig) {
+      setForm({
+        storyBannerImg: aboutPageConfig.storyBannerImg || '',
+        storyTitleEn: aboutPageConfig.storyTitleEn || 'Our Roots in St. Monica Parish, Nakuru',
+        storyTitleSw: aboutPageConfig.storyTitleSw || 'Mizizi Yetu Katika Parokia ya Mtakatifu Monika',
+        storySubtitleEn: aboutPageConfig.storySubtitleEn || 'Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.',
+        storySubtitleSw: aboutPageConfig.storySubtitleSw || 'Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya inayotumikia altare ya Mungu kila juma.',
+        storyParagraph1En: aboutPageConfig.storyParagraph1En || 'St. Monica Third Mass Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass (the parish 3rd Mass). Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.',
+        storyParagraph1Sw: aboutPageConfig.storyParagraph1Sw || 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.',
+        storyParagraph2En: aboutPageConfig.storyParagraph2En || 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.',
+        storyParagraph2Sw: aboutPageConfig.storyParagraph2Sw || 'Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.',
+        storyPhotoImg: aboutPageConfig.storyPhotoImg || '',
+
+        patronBannerImg: aboutPageConfig.patronBannerImg || '',
+        patronPortraitImg: aboutPageConfig.patronPortraitImg || '',
+        patronTitleEn: aboutPageConfig.patronTitleEn || 'Why St. Monica is Our Heavenly Patroness',
+        patronTitleSw: aboutPageConfig.patronTitleSw || 'Kwanini Mtakatifu Monika ni Somo Wetu?',
+        patronSubtitleEn: aboutPageConfig.patronSubtitleEn || 'Mother of tears & unceasing prayer · Feast Day: August 27.',
+        patronSubtitleSw: aboutPageConfig.patronSubtitleSw || 'Mama wa machozi na sala isiyokoma · Sikukuu: 27 Agosti.',
+        patronBio1En: aboutPageConfig.patronBio1En || 'Saint Monica (c. 332–387 AD) was born in Tagaste, North Africa (modern-day Algeria). A woman of profound Catholic piety and unmatched perseverance, she is globally celebrated for praying persistently for seventeen years for the conversion of her wayward son, Augustine.',
+        patronBio1Sw: aboutPageConfig.patronBio1Sw || 'Mtakatifu Monika (takriban 332–387 BK) alizaliwa Tagaste, Afrika Kaskazini (nchini Algeria ya sasa). Alikuwa mwanamke wa sala na uvumilivu mkubwa ambaye alimlilia Mungu kwa miaka kumi na saba hadi mwanaye Augustino alipobatizwa na kuwa Askofu na Mwalimu Mkuu wa Kanisa.',
+        patronBio2En: aboutPageConfig.patronBio2En || 'For our choristers at Section 58 in Nakuru, Saint Monica embodies the heart of choir ministry: weeping with those who mourn, rejoicing with those who hope, and never ceasing to lift tears and hymns of faith to God.',
+        patronBio2Sw: aboutPageConfig.patronBio2Sw || 'Kwa waimbaji wetu wa Misa ya Tatu Parokiani Section 58 Nakuru, Mtakatifu Monika ni mfano wa upendo, sala ya machozi isiyokata tamaa na unyenyekevu mkuu mbele ya Altare ya Ekaristi Takatifu.',
+        patronFeastDayEn: aboutPageConfig.patronFeastDayEn || '27th August (Universal Feast Day of Saint Monica)',
+        patronFeastDaySw: aboutPageConfig.patronFeastDaySw || 'Tarehe 27 Agosti (Sikukuu ya Mtakatifu Monika Duniani)',
+        patronPrayerEn: aboutPageConfig.patronPrayerEn || 'Lord, through the persistent prayers and tears of Saint Monica, You led Saint Augustine into the light of the true faith. Through her intercession, give our choir faithful devotion, vocal humility, and grace to draw all souls to Your Altar through sacred song. Amen.',
+        patronPrayerSw: aboutPageConfig.patronPrayerSw || 'Ee Mungu wetu, kupitia sala na machozi ya Mtakatifu Monika, ulimwongoza mwanaye Augustino kwenye ukweli wa Injili. Kupitia maombezi yake, ijalie kwaya yetu neema ya kuimba kwa unyenyekevu na nidhamu ya kicho altaroni ili mioyo ya wengi ivutwe kwako. Amina.'
+      });
+    }
+  }, [aboutPageConfig]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,8 +150,12 @@ export const AdminAboutTab: React.FC<AdminAboutTabProps> = ({ onNotify }) => {
                     label="Story Slim Banner Image"
                     labelSw="Picha ya Bango la Juu la Historia"
                     value={form.storyBannerImg}
-                    onChange={val => setForm(prev => ({ ...prev, storyBannerImg: val }))}
-                    defaultValue={churchImg}
+                    onChange={val => {
+                      setForm(prev => ({ ...prev, storyBannerImg: val }));
+                      updateAboutPageConfig({ storyBannerImg: val });
+                      onNotify(lang === 'sw' ? 'Bango la historia limesasishwa moja kwa moja!' : 'Story banner photo updated live on Our Story page!');
+                    }}
+                    defaultValue="/assets/choir/choir_02.jpg"
                     helpText="Wide slim banner photo for top of Our Story page."
                     presets={photoPresets}
                     aspectRatio="aspect-video"
@@ -132,8 +165,12 @@ export const AdminAboutTab: React.FC<AdminAboutTabProps> = ({ onNotify }) => {
                     label="Story Main Church / Group Photo"
                     labelSw="Picha Kuu ya Kanisa / Wanakwaya"
                     value={form.storyPhotoImg}
-                    onChange={val => setForm(prev => ({ ...prev, storyPhotoImg: val }))}
-                    defaultValue={churchImg}
+                    onChange={val => {
+                      setForm(prev => ({ ...prev, storyPhotoImg: val }));
+                      updateAboutPageConfig({ storyPhotoImg: val });
+                      onNotify(lang === 'sw' ? 'Picha ya historia imesasishwa moja kwa moja!' : 'Story photo updated live on Our Story page!');
+                    }}
+                    defaultValue="/assets/choir/choir_04.jpg"
                     helpText="Photo shown next to the story narrative."
                     presets={photoPresets}
                     aspectRatio="aspect-[4/3]"
@@ -250,8 +287,12 @@ export const AdminAboutTab: React.FC<AdminAboutTabProps> = ({ onNotify }) => {
                     label="Saint Monica Banner Image"
                     labelSw="Picha ya Bango la Juu la Somo Monika"
                     value={form.patronBannerImg}
-                    onChange={val => setForm(prev => ({ ...prev, patronBannerImg: val }))}
-                    defaultValue={hymnalImg}
+                    onChange={val => {
+                      setForm(prev => ({ ...prev, patronBannerImg: val }));
+                      updateAboutPageConfig({ patronBannerImg: val });
+                      onNotify(lang === 'sw' ? 'Bango la Mtakatifu Monika limesasishwa moja kwa moja!' : 'Patron Saint banner updated live on Patron page!');
+                    }}
+                    defaultValue="/assets/choir/choir_06.jpg"
                     helpText="Wide banner image for Patron Saint page."
                     presets={photoPresets}
                     aspectRatio="aspect-video"
@@ -261,8 +302,12 @@ export const AdminAboutTab: React.FC<AdminAboutTabProps> = ({ onNotify }) => {
                     label="Saint Monica Icon / Portrait Image"
                     labelSw="Picha ya Picha Takatifu / Picha ya Monika"
                     value={form.patronPortraitImg}
-                    onChange={val => setForm(prev => ({ ...prev, patronPortraitImg: val }))}
-                    defaultValue={hymnalImg}
+                    onChange={val => {
+                      setForm(prev => ({ ...prev, patronPortraitImg: val }));
+                      updateAboutPageConfig({ patronPortraitImg: val });
+                      onNotify(lang === 'sw' ? 'Picha ya Mtakatifu Monika imesasishwa moja kwa moja!' : 'Patron Saint portrait updated live on Patron page!');
+                    }}
+                    defaultValue="/assets/choir/choir_leader_01.jpg"
                     helpText="Holy icon, portrait painting, or statue of Saint Monica."
                     presets={photoPresets}
                     aspectRatio="aspect-[4/3]"

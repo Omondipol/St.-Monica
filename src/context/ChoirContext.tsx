@@ -223,6 +223,7 @@ interface ChoirContextType {
   deleteLeader: (id: string) => void;
 
   addGroupPhoto: (photo: Omit<ChoirGroupPhoto, 'id'>) => void;
+  updateGroupPhoto: (id: string, updated: Partial<ChoirGroupPhoto>) => void;
   deleteGroupPhoto: (id: string) => void;
 
   addEvent: (event: Omit<EventItem, 'id'>) => void;
@@ -1849,6 +1850,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setGroupPhotosList(prev => [{ ...photo, id }, ...prev]);
   };
 
+  const updateGroupPhoto = (id: string, updated: Partial<ChoirGroupPhoto>) => {
+    setGroupPhotosList(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p));
+  };
+
   const deleteGroupPhoto = (id: string) => {
     setGroupPhotosList(prev => prev.filter(p => p.id !== id));
   };
@@ -2146,6 +2151,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteLeader,
 
         addGroupPhoto,
+        updateGroupPhoto,
         deleteGroupPhoto,
 
         addEvent,
@@ -2359,6 +2365,7 @@ export const useChoir = (): ChoirContextType => {
       updateLeader: () => {},
       deleteLeader: () => {},
       addGroupPhoto: () => {},
+      updateGroupPhoto: () => {},
       deleteGroupPhoto: () => {},
       addEvent: () => {},
       updateEvent: () => {},
