@@ -25,6 +25,7 @@ import {
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
 import { CHOIR_STATS } from '../data/choirContent';
+import { triggerFileDownload } from '../utils/fileDownload';
 import scorePreviewSheet from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 
 interface MaktabaYaNotiPageProps {
@@ -189,6 +190,24 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  // Dedicated Sheet Notes Download
+  const handleDownloadNotes = (song: LibrarySong) => {
+    const targetUrl = song.notesUrl || song.pdfUrl;
+    if (targetUrl) {
+      incrementDownloadCount(song.id);
+      triggerFileDownload(targetUrl, song.notesFileName || `${song.title.replace(/\s+/g, '_')}_Notes.pdf`);
+    } else {
+      handleDownloadPdf(song);
+    }
+  };
+
+  // Dedicated MIDI Download
+  const handleDownloadMidi = (song: LibrarySong) => {
+    if (!song.midiUrl) return;
+    incrementDownloadCount(song.id);
+    triggerFileDownload(song.midiUrl, song.midiFileName || `${song.title.replace(/\s+/g, '_')}_SATB.mid`);
   };
 
   // Copy Composer Permission Template
@@ -451,25 +470,64 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                   )}
                 </div>
 
-                {/* Top Action Buttons: Download PDF (where permitted) / Find This Song (Link Only) */}
-                <div className="flex flex-wrap items-center gap-3">
-                  {currentSong.sharingStatus !== 'Link only' ? (
+                {/* Top Action Buttons: Notes & MIDI Download Buttons (greyed out if unavailable) */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* 1. Download Notes Button */}
+                  {(currentSong.notesUrl || currentSong.pdfUrl || currentSong.sharingStatus !== 'Link only') ? (
                     <button
-                      onClick={() => handleDownloadPdf(currentSong)}
-                      className="px-5 py-3 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      onClick={() => handleDownloadNotes(currentSong)}
+                      className="px-4 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      title={lang === 'sw' ? 'Pakua noti halisi za wimbo (PDF)' : 'Download actual song notes (PDF)'}
                     >
-                      <Download className="w-4 h-4" />
-                      <span>{lang === 'sw' ? 'Pakua Noti (PDF)' : 'Download PDF'}</span>
+                      <FileText className="w-4 h-4 text-sky-200" />
+                      <span>{lang === 'sw' ? 'Pakua Noti (PDF)' : 'Download Notes (PDF)'}</span>
+                      <Download className="w-3.5 h-3.5 opacity-80" />
                     </button>
                   ) : (
+                    <button
+                      disabled
+                      aria-disabled="true"
+                      title={lang === 'sw' ? 'Noti za wimbo huu hazijapakiwa bado' : 'Score notes not available for this song'}
+                      className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-not-allowed opacity-60 select-none"
+                    >
+                      <FileText className="w-4 h-4 opacity-40" />
+                      <span>{lang === 'sw' ? 'Noti Hazipatikani' : 'Notes Unavailable'}</span>
+                    </button>
+                  )}
+
+                  {/* 2. Download MIDI Button */}
+                  {currentSong.midiUrl ? (
+                    <button
+                      onClick={() => handleDownloadMidi(currentSong)}
+                      className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      title={lang === 'sw' ? 'Pakua faili la MIDI la sauti nne (.mid)' : 'Download SATB 4-part MIDI file (.mid)'}
+                    >
+                      <Music className="w-4 h-4 text-emerald-200" />
+                      <span>{lang === 'sw' ? 'Pakua MIDI (.mid)' : 'Download MIDI (.mid)'}</span>
+                      <Download className="w-3.5 h-3.5 opacity-80" />
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      aria-disabled="true"
+                      title={lang === 'sw' ? 'Faili la MIDI halijapakiwa bado' : 'MIDI audio file not available for this song'}
+                      className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-not-allowed opacity-60 select-none"
+                    >
+                      <Music className="w-4 h-4 opacity-40" />
+                      <span>{lang === 'sw' ? 'MIDI Haipatikani' : 'MIDI Unavailable'}</span>
+                    </button>
+                  )}
+
+                  {/* 3. External Source Link fallback if song is external */}
+                  {currentSong.sharingStatus === 'Link only' && currentSong.externalSourceUrl && (
                     <a
-                      href={currentSong.externalSourceUrl || 'https://swahilimusicnotes.com'}
+                      href={currentSong.externalSourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-5 py-3 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-sm font-bold flex items-center gap-2 shadow-sm transition-all"
+                      className="px-3.5 py-2.5 rounded-xl border border-[#0C2340]/20 hover:bg-slate-50 text-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-all"
                     >
-                      <span>{lang === 'sw' ? 'Tafuta Wimbo Huu' : 'Find this song'}</span>
-                      <ExternalLink className="w-4 h-4" />
+                      <span>{lang === 'sw' ? 'Chanzo cha Nje' : 'External Link'}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
                     </a>
                   )}
                 </div>
@@ -1118,23 +1176,62 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center pl-10 sm:pl-0">
-                            {/* Download PDF Quick Action */}
-                            {song.sharingStatus !== 'Link only' && (
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 self-end sm:self-center pl-10 sm:pl-0">
+                            {/* 1. Download Notes Button */}
+                            {(song.notesUrl || song.pdfUrl || song.sharingStatus !== 'Link only') ? (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDownloadPdf(song);
+                                  handleDownloadNotes(song);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1058A8]/10 hover:bg-[#1058A8] text-[#1058A8] hover:text-white text-xs font-bold transition-all cursor-pointer"
-                                title="Download PDF score"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#1058A8] hover:bg-[#0C2340] text-white text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
+                                title={lang === 'sw' ? 'Pakua noti halisi za wimbo (PDF)' : 'Download actual sheet music notes (PDF)'}
                               >
-                                <Download className="w-3.5 h-3.5" />
-                                <span>PDF</span>
+                                <FileText className="w-3.5 h-3.5 text-sky-200" />
+                                <span>{lang === 'sw' ? 'Noti' : 'Notes'}</span>
+                                <Download className="w-2.5 h-2.5 opacity-80" />
+                              </button>
+                            ) : (
+                              <button
+                                disabled
+                                aria-disabled="true"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200/90 text-[11px] font-semibold cursor-not-allowed opacity-55 select-none"
+                                title={lang === 'sw' ? 'Noti hazijapakiwa bado' : 'Score notes not available for this song'}
+                              >
+                                <FileText className="w-3.5 h-3.5 opacity-40" />
+                                <span>{lang === 'sw' ? 'Bila Noti' : 'No Notes'}</span>
                               </button>
                             )}
 
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                            {/* 2. Download MIDI Button */}
+                            {song.midiUrl ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownloadMidi(song);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
+                                title={lang === 'sw' ? 'Pakua faili la MIDI la sauti nne (.mid)' : 'Download 4-part SATB MIDI file (.mid)'}
+                              >
+                                <Music className="w-3.5 h-3.5 text-emerald-200" />
+                                <span>MIDI</span>
+                                <Download className="w-2.5 h-2.5 opacity-80" />
+                              </button>
+                            ) : (
+                              <button
+                                disabled
+                                aria-disabled="true"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200/90 text-[11px] font-semibold cursor-not-allowed opacity-55 select-none"
+                                title={lang === 'sw' ? 'Faili la MIDI halijapakiwa bado' : 'MIDI audio file not available for this song'}
+                              >
+                                <Music className="w-3.5 h-3.5 opacity-40" />
+                                <span>{lang === 'sw' ? 'Bila MIDI' : 'No MIDI'}</span>
+                              </button>
+                            )}
+
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 hidden md:inline-block">
                               {song.sharingStatus}
                             </span>
 

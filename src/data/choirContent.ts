@@ -25,6 +25,10 @@ export interface Song {
   recordedAt?: string;
   whyWeSingIt?: string;
   whyWeSingItSw?: string;
+  notesUrl?: string;
+  notesFileName?: string;
+  midiUrl?: string;
+  midiFileName?: string;
 }
 
 export interface SheetMusicItem {
@@ -577,7 +581,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony, and directs recording production.",
     responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na usimamizi wa kurekodi nyimbo studio.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_02.jpg"
   },
   {
     id: "ldr-organist",
@@ -588,7 +593,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Accompanies liturgical Sunday Masses and coordinates instrumental harmonies for the choir.",
     responsibilitySw: "Hupiga kinanda kwenye Misa za Jumapili na kuratibu ala za muziki.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_03.jpg"
   },
   {
     id: "ldr-moderator",
@@ -599,7 +605,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Oversees executive committee operations, guides spiritual welfare, and coordinates with parish leadership.",
     responsibilitySw: "Huongoza kamati ya utendaji, ustawi wa kiroho na kuratibu shughuli za kwaya na uongozi wa parokia.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_05.jpg"
   },
   {
     id: "ldr-asst-moderator",
@@ -610,7 +617,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Assists the moderator in administrative coordination, rehearsal discipline, and chorister fellowship.",
     responsibilitySw: "Husaidia moderator katika utekelezaji wa majukumu ya kiutawala na usimamizi wa mazoezi.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_04.jpg"
   },
   {
     id: "ldr-secretary",
@@ -621,7 +629,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Maintains choir register, meeting minutes, liturgical schedules, and official notices.",
     responsibilitySw: "Huweka daftari la wanachama, kumbukumbu za mikutano, ratiba za kiliturujia na matangazo rasmi.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_06.jpg"
   },
   {
     id: "ldr-asst-secretary",
@@ -632,7 +641,8 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Supports secretarial correspondence, membership attendance, and notice distribution.",
     responsibilitySw: "Husaidia katibu katika mawasiliano, mahudhurio ya wanakwaya na usambazaji wa matangazo.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_07.jpg"
   },
   {
     id: "ldr-treasurer",
@@ -643,43 +653,155 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibility: "Manages choir finances, membership contributions, sheet music funds, and financial reports.",
     responsibilitySw: "Hutunza hesabu za fedha, michango ya uanachama, mauzo ya noti na taarifa za fedha za kwaya.",
     tenure: "Serving the Parish",
-    tenureSw: "Anahudumu Parokiani"
+    tenureSw: "Anahudumu Parokiani",
+    photoUrl: "/assets/choir/choir_leader_08.jpg"
   }
 ];
 
 export const INITIAL_GROUP_PHOTOS: ChoirGroupPhoto[] = [
   {
-    id: "grp-vestment",
-    title: "Kwaya Nzima ya Mtakatifu Monika",
-    titleSw: "Kwaya Nzima ya Mtakatifu Monika",
+    id: "grp-vestment-01",
+    title: "Kwaya Nzima ya Mtakatifu Monika Altaroni",
+    titleSw: "Kwaya Nzima ya Mtakatifu Monika Altaroni",
     description: "The entire chorister ensemble of St. Monica Choir gathered at the altar of Section 58 Parish after Sunday Sung Mass.",
     descriptionSw: "Wanakwaya wote wa Mtakatifu Monika wakiwa altaroni Parokia ya Section 58 Nakuru baada ya Misa ya Jumapili Inayoimbwa.",
     year: "2024",
     imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_01.jpg",
     occasion: "Feast Day of St. Monica & Parish Dedication",
     occasionSw: "Sikukuu ya Mtakatifu Monika na Sherehe za Parokia"
   },
   {
-    id: "grp-cathedral",
-    title: "Kwaya Wakati wa Misa ya Ekaristi Takatifu",
-    titleSw: "Kwaya Wakati wa Misa ya Ekaristi Takatifu",
-    description: "Active liturgical singing during the solemn Holy Eucharist procession at Section 58 Catholic Church.",
-    descriptionSw: "Uimbaji wa heshima wakati wa maandamano ya Ekaristi Takatifu katika Kanisa la Mtakatifu Monika.",
-    year: "2023",
-    imageKey: "nakuru_parish_cathedral",
-    occasion: "Corpus Christi & Confirmation Mass",
+    id: "grp-vestment-02",
+    title: "Wanakwaya na Sare za Kiliturujia",
+    titleSw: "Wanakwaya na Sare za Kiliturujia",
+    description: "Choristers unified in ceremonial blue and white choir robes before entering the parish sanctuary.",
+    descriptionSw: "Waimbaji wakiwa katika sare rasmi za kwaya zenye staha kabla ya kuingia hekaluni kwa Misa Takatifu.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_02.jpg",
+    occasion: "Sunday High Mass Procession",
+    occasionSw: "Maandamano ya Misa Kuu ya Jumapili"
+  },
+  {
+    id: "grp-vestment-03",
+    title: "Ibada na Maombi ya Waimbaji",
+    titleSw: "Ibada na Maombi ya Waimbaji",
+    description: "Reverent prayer and four-part liturgical singing during the Holy Eucharist celebration.",
+    descriptionSw: "Sala ya heshima na uimbaji wa sauti nne wakati wa Maadhimisho ya Ekaristi Takatifu.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_03.jpg",
+    occasion: "Holy Mass Thanksgiving",
+    occasionSw: "Shukrani ya Misa Takatifu"
+  },
+  {
+    id: "grp-vestment-04",
+    title: "Upangaji wa Sauti za Kwaya (SATB)",
+    titleSw: "Upangaji wa Sauti za Kwaya (SATB)",
+    description: "Soprano, Alto, Tenor, and Bass singers executing balanced vocal counterpoint during liturgy.",
+    descriptionSw: "Waimbaji wa sauti zote nne wakitekeleza upatanisho safi wa nyimbo za kwaya altaroni.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_04.jpg",
+    occasion: "Sunday Sung Mass Ministry",
+    occasionSw: "Utume wa Misa Inayoimbwa"
+  },
+  {
+    id: "grp-vestment-05",
+    title: "Waimbaji Altaroni Parokia ya Section 58",
+    titleSw: "Waimbaji Altaroni Parokia ya Section 58",
+    description: "The choristers filling the sanctuary with festive hymns of joy and gratitude.",
+    descriptionSw: "Wanakwaya wakijaza hekalu kwa nyimbo za sifa na furaha ya kiroho mbele ya Ekaristi.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_05.jpg",
+    occasion: "Corpus Christi & Parish Feast",
     occasionSw: "Sikukuu ya Mwili na Damu ya Kristo"
   },
   {
-    id: "grp-hymnal",
-    title: "Noti na Miongozo ya Muziki wa Kikatoliki",
-    titleSw: "Noti na Miongozo ya Muziki wa Kikatoliki",
-    description: "Official tonic sol-fa vocal scores prepared by choir trainers for liturgy and rehearsal training.",
-    descriptionSw: "Mkusanyiko wa vitabu vya noti za solfa na stafu zinazotumiwa na kwaya altaroni na mazoezini.",
+    id: "grp-vestment-06",
+    title: "Kwaya Katika Kanisa Kuu la Section 58",
+    titleSw: "Kwaya Katika Kanisa Kuu la Section 58",
+    description: "Grand ensemble singing for diocesan visitors and celebrating parish community growth.",
+    descriptionSw: "Kwaya ikihudumu mbele ya waamini na wageni wa Jimbo Katoliki la Nakuru.",
     year: "2024",
-    imageKey: "sheet_music_hymnal",
-    occasion: "Liturgical Repertoire Archive",
-    occasionSw: "Kumbukumbu ya Nyimbo za Kiliturujia"
+    imageKey: "nakuru_parish_cathedral",
+    customUrl: "/assets/choir/choir_06.jpg",
+    occasion: "Parish Anniversary Celebration",
+    occasionSw: "Maadhimisho ya Parokia"
+  },
+  {
+    id: "grp-vestment-07",
+    title: "Upatanisho wa Sauti na Mwalimu wa Kwaya",
+    titleSw: "Upatanisho wa Sauti na Mwalimu wa Kwaya",
+    description: "Choral conductor guiding four-part vocal polyphony with precision and solemnity.",
+    descriptionSw: "Mwalimu wa kwaya akiongoza sauti nne kwa utulivu na weledi wa kiliturujia.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_07.jpg",
+    occasion: "Solemn Pontifical Mass",
+    occasionSw: "Misa Maalum ya Kijimbo"
+  },
+  {
+    id: "grp-vestment-08",
+    title: "Kwaya Wakati wa Misa ya Jumapili",
+    titleSw: "Kwaya Wakati wa Misa ya Jumapili",
+    description: "Solemn atmosphere at the 10:00 AM Mass with harmonious choral praise.",
+    descriptionSw: "Hali ya utulivu na maombi wakati wa Misa ya Tatu ya saa nne asubuhi.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_08.jpg",
+    occasion: "Sunday Third Mass",
+    occasionSw: "Misa ya Tatu ya Jumapili"
+  },
+  {
+    id: "grp-vestment-09",
+    title: "Sala ya Nyimbo Mbele ya Altare",
+    titleSw: "Sala ya Nyimbo Mbele ya Altare",
+    description: "Lifting heartfelt hymns and psalms in gratitude to God.",
+    descriptionSw: "Kuinua sala za dhati na zaburi za shukrani kwa Mwenyezi Mungu.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_09.jpg",
+    occasion: "Parish Thanksgiving Sunday",
+    occasionSw: "Jumapili ya Shukrani ya Parokia"
+  },
+  {
+    id: "grp-vestment-10",
+    title: "Sauti za Kike (Soprano na Alto) Mazoezini",
+    titleSw: "Sauti za Kike (Soprano na Alto) Mazoezini",
+    description: "Dedicated female vocalists perfecting melodic lines and warm harmonic support.",
+    descriptionSw: "Waimbaji wa kike wakifanya mazoezi ya melodi na patanisho la pili.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_10.jpg",
+    occasion: "Weekly Vocal Workshop",
+    occasionSw: "Semina ya Sauti ya Kila Wiki"
+  },
+  {
+    id: "grp-vestment-11",
+    title: "Sauti za Kiume (Tenor na Bass) Altaroni",
+    titleSw: "Sauti za Kiume (Tenor na Bass) Altaroni",
+    description: "Tenors and basses providing steady acoustic resonance and noble counterpoint.",
+    descriptionSw: "Sauti za kiume zikitoa msingi imara na sauti ya tatu kwa utulivu mkubwa.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_11.jpg",
+    occasion: "Liturgical Polyphony Rehearsal",
+    occasionSw: "Mazoezi ya Nyimbo za Polyfonia"
+  },
+  {
+    id: "grp-vestment-12",
+    title: "Furaha ya Utume wa Uimbaji Mtakatifu",
+    titleSw: "Furaha ya Utume wa Uimbaji Mtakatifu",
+    description: "Smiles and fellowship following successful ministry at the parish altar.",
+    descriptionSw: "Tabasamu na umoja wa kidugu baada ya kukamilisha utume mzuri altaroni.",
+    year: "2024",
+    imageKey: "choir_singing_moment",
+    customUrl: "/assets/choir/choir_12.jpg",
+    occasion: "St. Monica Fellowship Luncheon",
+    occasionSw: "Mshikamano wa Wanakwaya"
   }
 ];
 
@@ -985,7 +1107,7 @@ export const DEFAULT_PARISH_MESSAGE: ParishMessageConfig = {
   body1Sw: 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilianzishwa mwaka 2012 na kundi dogo la waimbaji waliojitolea katika Parokia ya Mtakatifu Monika, Nakuru. Tukio letu la kukumbukwa lilitokea mwaka 2019 kwenye Tamasha la Muziki wa Kikatoliki la Dekania ya Nakuru, ambapo toleo letu la sauti nne la "Machozi ya Imani" lilishikilia kusanyiko katika ukimya wa sala kabla ya baraka kuu.',
   body2En: 'Today, our choristers sing every Sunday in disciplined four-part harmony (SATB), training young parish voices in tonic sol-fa to keep liturgical tradition vibrant and alive.',
   body2Sw: 'Leo, tunaimba kila Dominika kwa sauti nne (Soprano, Alto, Tenor, Bass), tukihakikisha watoto na vijana wa parokia wanajifunza noti za solfa na kuendeleza utamaduni wa muziki mtakatifu.',
-  churchImg: '', // empty defaults to bundled asset
+  churchImg: '/assets/choir/choir_08.jpg',
   churchName: "St. Monica Catholic Church",
   churchSubtitle: "Section 58, Nakuru · Catholic Diocese of Nakuru",
   mapsUrl: "https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru"
@@ -1008,7 +1130,7 @@ export const DEFAULT_SCRIPTURE_QUOTE: ScriptureQuoteConfig = {
   textSw: "Neno la Kristo na likae kwa wingi ndani yenu, mkifundishana na kuonyana kwa hekima yote, huku mkiimba zaburi, na nyimbo, na tenzi za rohoni kwa shukrani mioyoni mwenu kwa Mungu.",
   citationEn: "— Colossians 3:16 (NABRE)",
   citationSw: "— Wakolosai 3:16 (NABRE)",
-  bgImage: ""
+  bgImage: "/assets/choir/choir_03.jpg"
 };
 
 export interface ChoirmasterMessageConfig {
@@ -1027,10 +1149,10 @@ export const DEFAULT_CHOIRMASTER_MESSAGE: ChoirmasterMessageConfig = {
   titleSw: "Ujumbe Kutoka kwa Mwalimu wa Kwaya",
   messageEn: "“Welcome to the musical home of St. Monica Third Mass Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is a sincere offering of praise to Almighty God.”",
   messageSw: "“Karibu sana kwenye jukwaa la muziki la Kwaya ya Misa ya Tatu ya Mtakatifu Monika, Nakuru. Lengo letu kuu ni nidhamu ya sauti na heshima mbele ya Altare Takatifu. Tunafundisha waimbaji wetu kusoma noti za solfa kwa ufasaha, ili kila wimbo unaoimbwa uwe toleo la dhati la sifa kwa Mwenyezi Mungu.”",
-  name: "Mwalimu Joseph Otieno",
+  name: "Mwalimu Atebe Mark T.",
   roleEn: "Director of Music & Choirmaster",
   roleSw: "Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya",
-  image: ""
+  image: "/assets/choir/choir_leader_02.jpg"
 };
 
 export interface FooterContactConfig {
@@ -1083,7 +1205,7 @@ export interface AboutPageConfig {
 }
 
 export const DEFAULT_ABOUT_CONFIG: AboutPageConfig = {
-  storyBannerImg: "",
+  storyBannerImg: "/assets/choir/choir_02.jpg",
   storyTitleEn: "Our Roots in St. Monica Parish, Nakuru",
   storyTitleSw: "Mizizi Yetu Katika Parokia ya Mtakatifu Monika",
   storySubtitleEn: "Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.",
@@ -1092,9 +1214,9 @@ export const DEFAULT_ABOUT_CONFIG: AboutPageConfig = {
   storyParagraph1Sw: "Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.",
   storyParagraph2En: "Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.",
   storyParagraph2Sw: "Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.",
-  storyPhotoImg: "",
-  patronBannerImg: "",
-  patronPortraitImg: "",
+  storyPhotoImg: "/assets/choir/choir_04.jpg",
+  patronBannerImg: "/assets/choir/choir_06.jpg",
+  patronPortraitImg: "/assets/choir/choir_leader_01.jpg",
   patronTitleEn: "Why St. Monica is Our Heavenly Patroness",
   patronTitleSw: "Kwanini Mtakatifu Monika ni Somo Wetu?",
   patronSubtitleEn: "Mother of tears & unceasing prayer · Feast Day: August 27.",
@@ -1112,8 +1234,8 @@ export const DEFAULT_ABOUT_CONFIG: AboutPageConfig = {
 export const DEFAULT_HERO_SLIDES_CONFIG: HeroSlideConfig[] = [
   {
     id: "hero-slide-1",
-    src: "",
-    srcMobile: "",
+    src: "/assets/choir/choir_01.jpg",
+    srcMobile: "/assets/choir/choir_01.jpg",
     alt: "Full choir at Sunday Sung Mass altar in St. Monica Catholic Church, Section 58",
     description: "Full Choir at Sunday Sung Mass",
     eyebrowEn: "Four-part SATB polyphony at Section 58, Nakuru",
@@ -1129,8 +1251,8 @@ export const DEFAULT_HERO_SLIDES_CONFIG: HeroSlideConfig[] = [
   },
   {
     id: "hero-slide-2",
-    src: "",
-    srcMobile: "",
+    src: "/assets/choir/choir_03.jpg",
+    srcMobile: "/assets/choir/choir_03.jpg",
     alt: "St. Monica's Catholic Church sanctuary and altar, Section 58 Nakuru",
     description: "Parish Sanctuary & Church",
     eyebrowEn: "Saint Augustine on the Sacred Liturgy",
@@ -1146,8 +1268,8 @@ export const DEFAULT_HERO_SLIDES_CONFIG: HeroSlideConfig[] = [
   },
   {
     id: "hero-slide-3",
-    src: "",
-    srcMobile: "",
+    src: "/assets/choir/choir_09.jpg",
+    srcMobile: "/assets/choir/choir_09.jpg",
     alt: "Choristers singing praise before the parish altar",
     description: "Singers in Sacred Song",
     eyebrowEn: "Liturgical Harmony Before the Altar",
@@ -1163,8 +1285,8 @@ export const DEFAULT_HERO_SLIDES_CONFIG: HeroSlideConfig[] = [
   },
   {
     id: "hero-slide-4",
-    src: "",
-    srcMobile: "",
+    src: "/assets/choir/choir_07.jpg",
+    srcMobile: "/assets/choir/choir_07.jpg",
     alt: "The choirmaster directing four-part vocal polyphony",
     description: "Choirmaster Directing",
     eyebrowEn: "Vocal Ministry & Solfa Training",
@@ -1179,4 +1301,158 @@ export const DEFAULT_HERO_SLIDES_CONFIG: HeroSlideConfig[] = [
     focusMobile: "60% 15%"
   }
 ];
+
+export interface CoreValueItem {
+  id: string;
+  badgeNumber: number; // 1, 2, 3...
+  titleEn: string;
+  titleSw: string;
+  subtitleEn?: string;
+  subtitleSw?: string;
+  descriptionEn: string;
+  descriptionSw: string;
+  scriptureRef?: string;
+  active: boolean;
+}
+
+// 8 Liturgical Virtues of Catholic Choirs (Derived from official choir constitution card)
+export const ALL_EIGHT_VIRTUES_CATALOG: CoreValueItem[] = [
+  {
+    id: 'val-faith',
+    badgeNumber: 1,
+    titleEn: 'Faith',
+    titleSw: 'Imani',
+    subtitleEn: 'Rooted in Christ',
+    subtitleSw: 'Imejengwa Juu ya Kristo',
+    descriptionEn: 'Christ is the centre of all we sing. Our voices flow from lives rooted in prayer and the sacraments.',
+    descriptionSw: 'Kristo ndiye kiini cha yote tunayoimba. Sauti zetu zinatiririka kutoka kwenye maisha yaliyojikita katika sala na sakramenti.',
+    scriptureRef: 'Hebrews 11:1 / Waebrania 11:1',
+    active: true
+  },
+  {
+    id: 'val-reverence',
+    badgeNumber: 2,
+    titleEn: 'Reverence',
+    titleSw: 'Heshima na Ibada',
+    subtitleEn: 'Honouring the Sacred Liturgy',
+    subtitleSw: 'Kutukuza Liturujia Takatifu',
+    descriptionEn: 'We honour the Sacred Liturgy and bring to every Mass the dignity and recollection it deserves.',
+    descriptionSw: 'Tunaheshimu Liturujia Takatifu na kuleta kwenye kila Misa hadhi, unyenyekevu na utulivu unaostahili.',
+    scriptureRef: 'Psalm 95:6 / Zaburi 95:6',
+    active: true
+  },
+  {
+    id: 'val-communion',
+    badgeNumber: 3,
+    titleEn: 'Communion',
+    titleSw: 'Ushirika',
+    subtitleEn: 'One in Christ & Church',
+    subtitleSw: 'Umoja Ndani ya Kristo na Kanisa',
+    descriptionEn: 'We are one in Christ and one with the Church; our harmony reflects our communion with God and one another.',
+    descriptionSw: 'Sisi ni wamoja katika Kristo na wamoja na Kanisa; upatano wetu unaakisi ushirika wetu na Mungu na sisi kwa sisi.',
+    scriptureRef: '1 Corinthians 10:17 / 1 Wakorintho 10:17',
+    active: false
+  },
+  {
+    id: 'val-humility',
+    badgeNumber: 4,
+    titleEn: 'Humility',
+    titleSw: 'Unyenyekevu',
+    subtitleEn: 'Christ Glorified, Not Ourselves',
+    subtitleSw: 'Kristo Atukuzwe, Si Sisi',
+    descriptionEn: 'We serve so that Christ may be glorified, not ourselves. The music points beyond the singers to God.',
+    descriptionSw: 'Tunatumikia ili Kristo atukuzwe, si sisi wenyewe. Muziki unaelekeza zaidi ya waimbaji hadi kwa Mungu.',
+    scriptureRef: 'John 3:30 / Yohane 3:30',
+    active: false
+  },
+  {
+    id: 'val-service',
+    badgeNumber: 5,
+    titleEn: 'Service',
+    titleSw: 'Huduma ya Utoaji',
+    subtitleEn: 'Generous Offering of Gifts',
+    subtitleSw: 'Kutoa Karama kwa Ukarimu',
+    descriptionEn: 'We offer our gifts generously for the building up of the parish and the worship of God\'s people.',
+    descriptionSw: 'Tunatoa vipawa vyetu kwa ukarimu kwa ajili ya kujenga parokia na ibada ya watu wa Mungu.',
+    scriptureRef: '1 Peter 4:10 / 1 Petro 4:10',
+    active: false
+  },
+  {
+    id: 'val-excellence',
+    badgeNumber: 3, // Displayed as 3 on default 3-item home layout
+    titleEn: 'Excellence',
+    titleSw: 'Ubora wa Utume',
+    subtitleEn: 'A Fitting Sacrifice of Praise',
+    subtitleSw: 'Dhabihu Inayostahili ya Sifa',
+    descriptionEn: 'Through faithful rehearsal and growth in skill, we offer God our very best, a fitting sacrifice of praise.',
+    descriptionSw: 'Kupitia mazoezi ya uaminifu na kukuza stadi zetu, tunamtolea Mungu kilicho bora zaidi, dhabihu inayostahili ya sifa.',
+    scriptureRef: 'Colossians 3:23 / Wakolosai 3:23',
+    active: true
+  },
+  {
+    id: 'val-evangelisation',
+    badgeNumber: 7,
+    titleEn: 'Evangelisation',
+    titleSw: 'Uinjilishaji',
+    subtitleEn: 'Lifting Souls to God',
+    subtitleSw: 'Kuinua Roho kwa Mungu',
+    descriptionEn: 'Through sacred music we touch hearts, lift souls to God, and proclaim the Gospel in beauty and truth.',
+    descriptionSw: 'Kupitia muziki mtakatifu tunagusa mioyo, kuinua roho kwa Mungu, na kutangaza Injili kwa uzuri na ukweli.',
+    scriptureRef: 'Mark 16:15 / Marko 16:15',
+    active: false
+  },
+  {
+    id: 'val-perseverance',
+    badgeNumber: 8,
+    titleEn: 'Perseverance',
+    titleSw: 'Uvumilivu na Uthabiti',
+    subtitleEn: 'Steadfast in Mission',
+    subtitleSw: 'Imara Katika Utume',
+    descriptionEn: 'Committed in joy and in trial, we persevere in practice and prayer for the mission entrusted to us.',
+    descriptionSw: 'Tukiwa tumejitolea katika furaha na majaribu, tunadumu katika mazoezi na sala kwa ajili ya utume tuliopewa.',
+    scriptureRef: 'Galatians 6:9 / Wagalatia 6:9',
+    active: false
+  }
+];
+
+// Top 3 best core values selected by default for the home page (Faith, Reverence, Excellence)
+export const DEFAULT_CORE_VALUES: CoreValueItem[] = [
+  {
+    id: 'val-faith',
+    badgeNumber: 1,
+    titleEn: 'Faith',
+    titleSw: 'Imani',
+    subtitleEn: 'Rooted in Christ',
+    subtitleSw: 'Imejengwa Juu ya Kristo',
+    descriptionEn: 'Christ is the centre of all we sing. Our voices flow from lives rooted in prayer and the sacraments.',
+    descriptionSw: 'Kristo ndiye kiini cha yote tunayoimba. Sauti zetu zinatiririka kutoka kwenye maisha yaliyojikita katika sala na sakramenti.',
+    scriptureRef: 'Hebrews 11:1 / Waebrania 11:1',
+    active: true
+  },
+  {
+    id: 'val-reverence',
+    badgeNumber: 2,
+    titleEn: 'Reverence',
+    titleSw: 'Heshima na Ibada',
+    subtitleEn: 'Honouring the Sacred Liturgy',
+    subtitleSw: 'Kutukuza Liturujia Takatifu',
+    descriptionEn: 'We honour the Sacred Liturgy and bring to every Mass the dignity and recollection it deserves.',
+    descriptionSw: 'Tunaheshimu Liturujia Takatifu na kuleta kwenye kila Misa hadhi, unyenyekevu na utulivu unaostahili.',
+    scriptureRef: 'Psalm 95:6 / Zaburi 95:6',
+    active: true
+  },
+  {
+    id: 'val-excellence',
+    badgeNumber: 3,
+    titleEn: 'Excellence',
+    titleSw: 'Ubora wa Utume',
+    subtitleEn: 'A Fitting Sacrifice of Praise',
+    subtitleSw: 'Dhabihu Inayostahili ya Sifa',
+    descriptionEn: 'Through faithful rehearsal and growth in skill, we offer God our very best, a fitting sacrifice of praise.',
+    descriptionSw: 'Kupitia mazoezi ya uaminifu na kukuza stadi zetu, tunamtolea Mungu kilicho bora zaidi, dhabihu inayostahili ya sifa.',
+    scriptureRef: 'Colossians 3:23 / Wakolosai 3:23',
+    active: true
+  }
+];
+
 

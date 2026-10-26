@@ -74,10 +74,15 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Page Title Banner - Clean Marian Navy & Blue */}
-      <section className="relative h-[160px] sm:h-[175px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
-        <div className="absolute inset-0 bg-[#0C2340]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 to-[#1058A8]/40" />
+      {/* Page Title Banner - Clean Marian Navy & Blue with Choir Altar Imagery */}
+      <section className="relative h-[160px] sm:h-[185px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+        <img
+          src="/assets/choir/choir_04.jpg"
+          alt="St. Monica Choir SATB Ministry"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-[#0C2340]/85" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 to-[#1058A8]/60" />
         
         <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
           <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
@@ -285,10 +290,18 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
                   className="p-4 rounded-2xl border bg-white border-[#0C2340]/10 hover:border-[#1058A8]/30 shadow-xs hover:shadow-md transition-all flex items-center justify-between gap-3.5"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    {/* Dignified Initial Avatar */}
-                    <div className="w-11 h-11 rounded-full bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 flex items-center justify-center font-eb-garamond font-bold text-lg shrink-0">
-                      {member.name.charAt(0)}
-                    </div>
+                    {/* Dignified Avatar (Photo or Initial) */}
+                    {member.photoUrl ? (
+                      <img
+                        src={member.photoUrl}
+                        alt={member.name}
+                        className="w-11 h-11 rounded-full object-cover border border-[#1058A8]/30 shrink-0 shadow-xs"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 flex items-center justify-center font-eb-garamond font-bold text-lg shrink-0">
+                        {member.name.charAt(0)}
+                      </div>
+                    )}
                     
                     <div className="min-w-0">
                       <h4 className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] leading-tight truncate">

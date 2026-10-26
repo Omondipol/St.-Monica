@@ -30,7 +30,10 @@ import {
   AboutPageConfig,
   DEFAULT_ABOUT_CONFIG,
   SupporterTransaction,
-  INITIAL_TRANSACTIONS
+  INITIAL_TRANSACTIONS,
+  CoreValueItem,
+  DEFAULT_CORE_VALUES,
+  ALL_EIGHT_VIRTUES_CATALOG
 } from '../data/choirContent';
 import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
 import { ChoirMember, INITIAL_MEMBERS, isMemberActive } from '../data/membersData';
@@ -301,6 +304,13 @@ interface ChoirContextType {
   transactions: SupporterTransaction[];
   addTransaction: (tx: Omit<SupporterTransaction, 'id'>) => void;
   deleteTransaction: (id: string) => void;
+
+  // Catholic Liturgical Core Values (Editable via Admin)
+  coreValues: CoreValueItem[];
+  addCoreValue: (val: Omit<CoreValueItem, 'id'>) => void;
+  updateCoreValue: (id: string, updated: Partial<CoreValueItem>) => void;
+  deleteCoreValue: (id: string) => void;
+  resetCoreValues: () => void;
 }
 
 const ChoirContext = createContext<ChoirContextType | undefined>(undefined);
@@ -345,7 +355,8 @@ const STORAGE_KEYS = {
   FOOTER_CONTACT: 'st_monica_footer_contact_v6',
   ABOUT_CONFIG: 'st_monica_about_config_v6',
   ALBUMS: 'st_monica_albums_v6',
-  TRANSACTIONS: 'st_monica_transactions_v6'
+  TRANSACTIONS: 'st_monica_transactions_v6',
+  CORE_VALUES: 'st_monica_core_values_v1'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -435,10 +446,18 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.LEADERS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.some((l: ChoirLeader) => l.name === 'John Baptist Kiprono' || l.name === 'Agnes Wanjiku' || l.name === 'The Choir Leadership')) {
-          return INITIAL_LEADERS;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (parsed.some((l: ChoirLeader) => l.name === 'John Baptist Kiprono' || l.name === 'Agnes Wanjiku' || l.name === 'The Choir Leadership' || (l.photoUrl && l.photoUrl.includes('unsplash')))) {
+            return INITIAL_LEADERS;
+          }
+          return parsed.map((l: ChoirLeader) => {
+            const match = INITIAL_LEADERS.find(il => il.id === l.id);
+            if (match && (!l.photoUrl || l.photoUrl.includes('unsplash'))) {
+              return { ...l, photoUrl: match.photoUrl };
+            }
+            return l;
+          });
         }
-        return parsed;
       }
     } catch (e) {
       // ignore
@@ -458,7 +477,15 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [groupPhotosList, setGroupPhotosList] = useState<ChoirGroupPhoto[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PHOTOS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (parsed.some((p: ChoirGroupPhoto) => !p.customUrl || p.customUrl.includes('unsplash') || p.id === 'grp-vestment-2024')) {
+            return INITIAL_GROUP_PHOTOS;
+          }
+          return parsed;
+        }
+      }
     } catch (e) {
       // ignore
     }
@@ -661,7 +688,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.HERO_SLIDES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // If stored slides have old unsplash placeholders, upgrade to real parish choir photos
+          const hasOldPhotos = parsed.some((s: HeroSlideConfig) => !s.src || s.src.includes('unsplash.com'));
+          if (!hasOldPhotos) return parsed;
+        }
       }
     } catch (e) {
       // ignore
@@ -695,7 +726,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [parishMessage, setParishMessage] = useState<ParishMessageConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PARISH_MSG);
-      if (saved) return { ...DEFAULT_PARISH_MESSAGE, ...JSON.parse(saved) };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.churchImg && parsed.churchImg.includes('unsplash.com')) {
+          return DEFAULT_PARISH_MESSAGE;
+        }
+        return { ...DEFAULT_PARISH_MESSAGE, ...parsed };
+      }
     } catch (e) {
       // ignore
     }
@@ -718,7 +755,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [scriptureQuote, setScriptureQuote] = useState<ScriptureQuoteConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SCRIPTURE);
-      if (saved) return { ...DEFAULT_SCRIPTURE_QUOTE, ...JSON.parse(saved) };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.bgImage && parsed.bgImage.includes('unsplash.com')) {
+          return DEFAULT_SCRIPTURE_QUOTE;
+        }
+        return { ...DEFAULT_SCRIPTURE_QUOTE, ...parsed };
+      }
     } catch (e) {
       // ignore
     }
@@ -741,7 +784,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [choirmasterMessage, setChoirmasterMessage] = useState<ChoirmasterMessageConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CHOIRMASTER);
-      if (saved) return { ...DEFAULT_CHOIRMASTER_MESSAGE, ...JSON.parse(saved) };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if ((parsed.image && parsed.image.includes('unsplash.com')) || parsed.name === 'Brother Dominic K.' || parsed.name === 'Br. Dominic K.') {
+          return DEFAULT_CHOIRMASTER_MESSAGE;
+        }
+        return { ...DEFAULT_CHOIRMASTER_MESSAGE, ...parsed };
+      }
     } catch (e) {
       // ignore
     }
@@ -822,7 +871,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [aboutPageConfig, setAboutPageConfig] = useState<AboutPageConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ABOUT_CONFIG);
-      if (saved) return { ...DEFAULT_ABOUT_CONFIG, ...JSON.parse(saved) };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.storyBannerImg && parsed.storyBannerImg.includes('unsplash.com')) {
+          return DEFAULT_ABOUT_CONFIG;
+        }
+        return { ...DEFAULT_ABOUT_CONFIG, ...parsed };
+      }
     } catch (e) {
       // ignore
     }
@@ -849,7 +904,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const hasOfficialSinger = parsed.some((m: ChoirMember) => m.name && m.name.includes('Susan Adhiambo'));
-          if (hasOfficialSinger) return parsed;
+          if (hasOfficialSinger) {
+            // merge default real photos into stored members
+            return parsed.map((m: ChoirMember) => {
+              const defaultMatch = INITIAL_MEMBERS.find(im => im.id === m.id);
+              return defaultMatch?.photoUrl && !m.photoUrl ? { ...m, photoUrl: defaultMatch.photoUrl } : m;
+            });
+          }
         }
       }
     } catch (e) {
@@ -1003,7 +1064,25 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [librarySongs, setLibrarySongs] = useState<LibrarySong[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.LIBRARY);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Merge initial sample notesUrl/midiUrl if not explicitly overridden
+          return parsed.map((s: LibrarySong) => {
+            const initMatch = INITIAL_LIBRARY_SONGS.find(i => i.id === s.id);
+            if (initMatch) {
+              return {
+                ...s,
+                notesUrl: s.notesUrl || initMatch.notesUrl,
+                notesFileName: s.notesFileName || initMatch.notesFileName,
+                midiUrl: s.midiUrl || initMatch.midiUrl,
+                midiFileName: s.midiFileName || initMatch.midiFileName
+              };
+            }
+            return s;
+          });
+        }
+      }
     } catch (e) {
       // ignore
     }
@@ -1017,6 +1096,46 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // ignore
     }
   }, [librarySongs]);
+
+  // 7c. Catholic Liturgical Core Values (Editable via Admin)
+  const [coreValues, setCoreValues] = useState<CoreValueItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CORE_VALUES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_CORE_VALUES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CORE_VALUES, JSON.stringify(coreValues));
+    } catch (e) {
+      // ignore
+    }
+  }, [coreValues]);
+
+  const addCoreValue = (val: Omit<CoreValueItem, 'id'>) => {
+    const id = `val-${Date.now()}`;
+    const nextBadge = coreValues.length + 1;
+    setCoreValues(prev => [...prev, { ...val, id, badgeNumber: val.badgeNumber || nextBadge }]);
+  };
+
+  const updateCoreValue = (id: string, updated: Partial<CoreValueItem>) => {
+    setCoreValues(prev => prev.map(v => v.id === id ? { ...v, ...updated } : v));
+  };
+
+  const deleteCoreValue = (id: string) => {
+    setCoreValues(prev => prev.filter(v => v.id !== id));
+  };
+
+  const resetCoreValues = () => {
+    setCoreValues(DEFAULT_CORE_VALUES);
+  };
 
   // 8. REAL AUDIBLE HTML5 AUDIO PLAYBACK ENGINE
   const [currentSong, setCurrentSong] = useState<Song>(() => songs[0] || INITIAL_SONGS_CATALOG[0]);
@@ -1819,6 +1938,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.removeItem(STORAGE_KEYS.FOOTER_CONTACT);
       localStorage.removeItem(STORAGE_KEYS.ABOUT_CONFIG);
       localStorage.removeItem(STORAGE_KEYS.MEMBERS);
+      localStorage.removeItem(STORAGE_KEYS.CORE_VALUES);
     } catch (e) {
       // ignore
     }
@@ -1841,6 +1961,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setMassesList(DEFAULT_MASSES);
     setFooterContact(DEFAULT_FOOTER_CONTACT);
     setAboutPageConfig(DEFAULT_ABOUT_CONFIG);
+    setCoreValues(DEFAULT_CORE_VALUES);
   };
 
   const exportDataJson = (): string => {
@@ -2102,7 +2223,14 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Transactions & Contributions
         transactions,
         addTransaction,
-        deleteTransaction
+        deleteTransaction,
+
+        // Core Values
+        coreValues,
+        addCoreValue,
+        updateCoreValue,
+        deleteCoreValue,
+        resetCoreValues
       }}
     >
       {children}
@@ -2283,7 +2411,12 @@ export const useChoir = (): ChoirContextType => {
       deleteAlbum: () => {},
       transactions: INITIAL_TRANSACTIONS,
       addTransaction: () => {},
-      deleteTransaction: () => {}
+      deleteTransaction: () => {},
+      coreValues: DEFAULT_CORE_VALUES,
+      addCoreValue: () => {},
+      updateCoreValue: () => {},
+      deleteCoreValue: () => {},
+      resetCoreValues: () => {}
     };
   }
   return context;

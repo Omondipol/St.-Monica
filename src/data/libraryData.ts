@@ -1,3 +1,5 @@
+import { createStandardChoralMidiDataUrl } from '../utils/fileDownload';
+
 export interface LibraryCategory {
   id: string;
   nameSw: string;
@@ -31,6 +33,11 @@ export interface LibrarySong {
   addedDate: string;
   solfaNotes?: boolean;
   tempo?: string;
+  // Actual sheet music score (PDF/image) and MIDI downloads
+  notesUrl?: string;
+  notesFileName?: string;
+  midiUrl?: string;
+  midiFileName?: string;
 }
 
 export const LIBRARY_CATEGORIES: LibraryCategory[] = [
@@ -213,6 +220,10 @@ Tufurahi mbele za altare.`,
     solfaNotes: true,
     hasAudio: true,
     pdfUrl: 'https://example.com/scores/twende-wote-nyumbani.pdf',
+    notesUrl: 'https://example.com/scores/twende-wote-nyumbani.pdf',
+    notesFileName: 'Twende_Wote_Nyumbani_SATB_Score.pdf',
+    midiUrl: createStandardChoralMidiDataUrl('Twende Wote Nyumbani Mwa Bwana'),
+    midiFileName: 'Twende_Wote_Nyumbani_SATB.mid',
     audioUrl: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3'
   },
   {
@@ -239,6 +250,7 @@ Kwa kuwa Bwana ni mwema milele.`,
     addedDate: '2025-01-15',
     solfaNotes: true,
     hasAudio: true
+    // Note: lib-02 intentionally has no notesUrl and no midiUrl (both buttons greyed out)
   },
   {
     id: 'lib-03',
@@ -260,7 +272,11 @@ Gloria Patri, et Filio, et Spiritui Sancto.`,
     sharingStatus: 'Public domain',
     downloadCount: 312,
     addedDate: '2024-12-01',
-    hasAudio: true
+    hasAudio: true,
+    pdfUrl: 'https://example.com/scores/puer-natus-est.pdf',
+    notesUrl: 'https://example.com/scores/puer-natus-est.pdf',
+    notesFileName: 'Puer_Natus_Est_Nobis_Score.pdf'
+    // Has notesUrl, no midiUrl (MIDI button greyed out)
   },
 
   // 2. MATOLEO (Offertory)
@@ -293,7 +309,10 @@ Kila hitaji lao ulitimize vema.`,
     downloadCount: 220,
     addedDate: '2025-03-01',
     solfaNotes: true,
-    hasAudio: true
+    hasAudio: true,
+    midiUrl: createStandardChoralMidiDataUrl('Twaja na Matoleo - Fr. C. Temba'),
+    midiFileName: 'Twaja_Na_Matoleo_SATB.mid'
+    // Has midiUrl, no notesUrl (Notes button greyed out)
   },
   {
     id: 'lib-05',

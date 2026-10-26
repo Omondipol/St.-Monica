@@ -23,7 +23,7 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
       {/* Banner matching Music Section Slim Banner */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={choirmasterImg} 
+          src="/assets/choir/choir_07.jpg" 
           alt="Choirmaster directing St. Monica Choir" 
           className="absolute inset-0 w-full h-full object-cover object-top"
         />
@@ -65,7 +65,7 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
                   />
                 ) : trainer.id === 'ldr-choirmaster' ? (
                   <img
-                    src={choirmasterImg}
+                    src="/assets/choir/choir_leader_02.jpg"
                     alt={trainer.name}
                     className="w-14 h-14 rounded-full object-cover border-2 border-[#1058A8] shrink-0 shadow-xs"
                   />

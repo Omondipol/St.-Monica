@@ -21,9 +21,9 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
 
   const getImageSrc = (imageKey: string, customUrl?: string) => {
     if (customUrl) return customUrl;
-    if (imageKey === 'nakuru_parish_cathedral') return cathedralImg;
-    if (imageKey === 'sheet_music_hymnal') return hymnalImg;
-    return choirHeroImg;
+    if (imageKey === 'nakuru_parish_cathedral') return '/assets/choir/choir_06.jpg';
+    if (imageKey === 'sheet_music_hymnal') return '/assets/choir/choir_05.jpg';
+    return '/assets/choir/choir_01.jpg';
   };
 
   return (
@@ -31,7 +31,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
       {/* Page Title Banner (Matching Music Section Slim Banner) */}
       <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         <img 
-          src={choirHeroImg} 
+          src="/assets/choir/choir_02.jpg" 
           alt="St. Monica Catholic Choir in Sacred Vestments" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -59,7 +59,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
       <section className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
         <div className="lg:col-span-7 aspect-16/10 relative overflow-hidden bg-slate-900">
           <img
-            src={choirHeroImg}
+            src="/assets/choir/choir_01.jpg"
             alt="St. Monica Catholic Choir in Full Vestments"
             className="w-full h-full object-cover object-center"
             referrerPolicy="no-referrer"

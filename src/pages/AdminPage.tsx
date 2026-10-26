@@ -38,7 +38,8 @@ import {
   Eye,
   Layers,
   Disc,
-  DollarSign
+  DollarSign,
+  Sparkles
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
@@ -52,6 +53,8 @@ import { AdminAboutTab } from '../components/admin/AdminAboutTab';
 import { AdminMembersTab } from '../components/admin/AdminMembersTab';
 import { AdminAlbumsTab } from '../components/admin/AdminAlbumsTab';
 import { AdminFinancialsTab } from '../components/admin/AdminFinancialsTab';
+import { AdminCoreValuesTab } from '../components/admin/AdminCoreValuesTab';
+import { triggerFileDownload } from '../utils/fileDownload';
 
 interface AdminPageProps {
   onNavigateHome: () => void;
@@ -98,7 +101,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     playSong,
     members,
     albums,
-    transactions
+    transactions,
+    coreValues
   } = useChoir();
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -112,13 +116,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [authError, setAuthError] = useState('');
 
   const [mainCategory, setMainCategory] = useState<'home' | 'about' | 'music' | 'events' | 'financials' | 'settings'>('home');
-  const [activeTab, setActiveTab] = useState<'members' | 'albums' | 'financials' | 'leaders' | 'library' | 'events' | 'photos' | 'songs' | 'sheet' | 'hero' | 'about' | 'schedule' | 'footer' | 'stats' | 'backup'>('hero');
+  const [activeTab, setActiveTab] = useState<'members' | 'albums' | 'financials' | 'leaders' | 'library' | 'events' | 'photos' | 'songs' | 'sheet' | 'hero' | 'about' | 'schedule' | 'footer' | 'stats' | 'backup' | 'values'>('hero');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   const handleSelectCategory = (cat: 'home' | 'about' | 'music' | 'events' | 'financials' | 'settings') => {
     setMainCategory(cat);
     if (cat === 'home') {
-      if (!['hero', 'schedule'].includes(activeTab)) setActiveTab('hero');
+      if (!['hero', 'values', 'schedule'].includes(activeTab)) setActiveTab('hero');
     } else if (cat === 'about') {
       if (!['members', 'leaders', 'photos', 'about', 'stats'].includes(activeTab)) setActiveTab('members');
     } else if (cat === 'music') {
@@ -134,7 +138,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   const handleSelectTab = (tab: typeof activeTab) => {
     setActiveTab(tab);
-    if (['hero', 'schedule'].includes(tab)) setMainCategory('home');
+    if (['hero', 'values', 'schedule'].includes(tab)) setMainCategory('home');
     else if (['about', 'members', 'leaders', 'photos', 'stats'].includes(tab)) setMainCategory('about');
     else if (['songs', 'albums', 'sheet', 'library'].includes(tab)) setMainCategory('music');
     else if (tab === 'events') setMainCategory('events');
@@ -153,12 +157,36 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [libLyrics, setLibLyrics] = useState('');
   const [libPdfUrl, setLibPdfUrl] = useState('');
   const [libAudioUrl, setLibAudioUrl] = useState('');
+  const [libNotesUrl, setLibNotesUrl] = useState('');
+  const [libNotesFileName, setLibNotesFileName] = useState('');
+  const [libMidiUrl, setLibMidiUrl] = useState('');
+  const [libMidiFileName, setLibMidiFileName] = useState('');
   const [libSharingStatus, setLibSharingStatus] = useState<'Public domain' | 'Shared with permission' | 'Link only'>('Public domain');
   const [libPermissionGivenBy, setLibPermissionGivenBy] = useState('');
   const [libPermissionDate, setLibPermissionDate] = useState('');
   const [libExternalSourceUrl, setLibExternalSourceUrl] = useState('');
   const [showBulkSpreadsheetModal, setShowBulkSpreadsheetModal] = useState<boolean>(false);
   const [csvSpreadsheetText, setCsvSpreadsheetText] = useState('');
+
+  const handleUploadFile = (e: React.ChangeEvent<HTMLInputElement>, type: 'notes' | 'midi') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        if (type === 'notes') {
+          setLibNotesUrl(reader.result);
+          setLibNotesFileName(file.name);
+          notify(`Uploaded sheet notes file: ${file.name}`);
+        } else {
+          setLibMidiUrl(reader.result);
+          setLibMidiFileName(file.name);
+          notify(`Uploaded MIDI file: ${file.name}`);
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,7 +200,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       }
       setAuthError('');
     } else {
-      setAuthError(lang === 'sw' ? 'Nenosiri si sahihi. Jaribu "sec58nakuru" au "admin".' : 'Invalid passcode. Access denied. Try "sec58nakuru" or "admin".');
+      setAuthError('Invalid passcode. Access denied. Please try "sec58nakuru" or "admin".');
     }
   };
 
@@ -749,7 +777,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               Catholic Diocese of Nakuru · Section 58 Parish
             </span>
             <h1 className="font-eb-garamond text-3xl font-bold text-[#0C2340] mt-1">
-              Dawati la Kamati ya Kwaya
+              Choir Administration Portal
             </h1>
             <span className="font-eb-garamond text-base text-[#1058A8] italic block font-medium">
               St. Monica Third Mass Choir · Leadership Desk
@@ -758,10 +786,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
           <div className="bg-[#FAF8F5] border border-[#0C2340]/10 rounded-2xl p-4 text-left space-y-1">
             <p className="text-xs text-slate-700 font-source leading-relaxed">
-              <strong>Karibu.</strong> Please enter your choir leadership passcode to manage the official register of singers, Sunday Mass schedules, music scores, and parish records.
+              <strong>Welcome.</strong> Please enter your choir leadership passcode to manage the official register of singers, Sunday Mass schedules, music scores, core values, and parish records.
             </p>
             <p className="text-[11px] text-slate-500 font-source italic">
-              (Ukurasa huu ni maalum kwa ajili ya Choirmaster, Kamati ya Kwaya, na Walimu wa Sauti)
+              (Authorized parish choirmasters, executive committee members, and voice directors only)
             </p>
           </div>
 
@@ -769,7 +797,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider font-source">
-                  Committee Passcode (Nenosiri la Kamati)
+                  Committee Passcode
                 </label>
                 <span className="text-[11px] text-[#1058A8] font-medium font-source">
                   Sec 58 Nakuru
@@ -779,7 +807,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 type="password"
                 value={passcode}
                 onChange={e => setPasscode(e.target.value)}
-                placeholder="Weka nenosiri la kamati hapa..."
+                placeholder="Enter committee passcode..."
                 className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] focus:ring-2 focus:ring-[#1058A8]/20 bg-[#F8FAFC] font-source"
                 autoFocus
               />
@@ -801,21 +829,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 className="w-full py-3.5 text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 font-source active:scale-[0.99]"
               >
                 <ShieldCheck className="w-4 h-4 text-[#7EC8F0]" />
-                <span>Ingia Kwenye Dawati · Open Choir Desk</span>
+                <span>Sign In to Admin Portal</span>
               </button>
               <button
                 type="button"
                 onClick={onNavigateHome}
                 className="w-full py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer text-center font-source hover:underline"
               >
-                ← Rudi kwenye Tovuti ya Kwaya · Return to Choir Website
+                ← Return to Choir Website
               </button>
             </div>
           </form>
 
           <div className="border-t border-slate-100 pt-4 text-center space-y-0.5">
             <p className="text-xs font-eb-garamond text-slate-700 italic">
-              «Mwimbieni Bwana wimbo mpya; mwimbieni Bwana, nchi yote.» — Zaburi 96:1
+              «Sing to the Lord a new song; sing to the Lord, all the earth.» — Psalm 96:1
             </p>
             <p className="text-[11px] text-slate-400 font-source">
               St. Monica Catholic Parish · Section 58 Nakuru · CDDN
@@ -855,7 +883,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           </div>
           <div className="hidden sm:block bg-white/10 px-3 py-1.5 rounded-xl text-slate-200">
             <span className="text-emerald-400 font-bold mr-1.5 tabular-nums">{transactions.length}</span>
-            <span>{lang === 'sw' ? 'Michango' : 'Contributions'}</span>
+            <span>Contributions</span>
           </div>
         </div>
 
@@ -867,13 +895,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             title="Return to public website"
           >
             <Eye className="w-3.5 h-3.5 text-[#7EC8F0]" />
-            <span>{lang === 'sw' ? 'Tazama tovuti' : 'View website'}</span>
+            <span>View Website</span>
           </button>
           <button
             onClick={handleLogout}
             className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer"
           >
-            {lang === 'sw' ? 'Ondoka' : 'Log out'}
+            Log Out
           </button>
         </div>
       </header>
@@ -897,18 +925,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         {/* LEFT SIDEBAR (The ONLY Navigation) */}
         <aside className="lg:col-span-3 bg-white border border-[#0C2340]/10 rounded-2xl p-3 shadow-xs space-y-1">
           <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            {lang === "sw" ? "Sehemu za Tovuti" : "Sections"}
+            Admin Sections
           </div>
 
           {[
-            { id: "hero", icon: Home, labelEn: "Home page", labelSw: "Mwanzo" },
-            { id: "members", icon: Users, labelEn: "Members", labelSw: "Waimbaji", badge: members.length },
-            { id: "schedule", icon: Clock, labelEn: "Mass times", labelSw: "Ratiba ya Misa" },
-            { id: "music", icon: Music, labelEn: "Music", labelSw: "Muziki", badge: songs.length + librarySongs.length },
-            { id: "events", icon: Calendar, labelEn: "Events", labelSw: "Matukio", badge: eventsList.length },
-            { id: "financials", icon: DollarSign, labelEn: "Contributions", labelSw: "Michango", badge: transactions.length },
-            { id: "footer", icon: Phone, labelEn: "Contacts", labelSw: "Mawasiliano" },
-            { id: "backup", icon: Settings, labelEn: "Backup & Reset", labelSw: "Nakala na Rejesha" }
+            { id: "hero", icon: Home, label: "Home Page" },
+            { id: "values", icon: Sparkles, label: "Core Values", badge: coreValues.length },
+            { id: "members", icon: Users, label: "Members Register", badge: members.length },
+            { id: "schedule", icon: Clock, label: "Mass Times" },
+            { id: "music", icon: Music, label: "Music Library & Scores", badge: songs.length + librarySongs.length },
+            { id: "events", icon: Calendar, label: "Parish Events", badge: eventsList.length },
+            { id: "financials", icon: DollarSign, label: "Contributions", badge: transactions.length },
+            { id: "footer", icon: Phone, label: "Contacts & Footer" },
+            { id: "backup", icon: Settings, label: "Backup & Reset" }
           ].map(item => {
             const Icon = item.icon;
             const isItemActive = item.id === "music"
@@ -942,7 +971,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               >
                 <div className="flex items-center gap-2.5">
                   <Icon className={`w-4 h-4 ${isItemActive ? "text-amber-300" : "text-slate-400"}`} />
-                  <span>{lang === "sw" ? item.labelSw : item.labelEn}</span>
+                  <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tabular-nums ${
@@ -969,7 +998,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "library" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Maktaba ya Noti" : "Music Library"} ({librarySongs.length})
+                Music Library ({librarySongs.length})
               </button>
               <button
                 type="button"
@@ -978,7 +1007,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "albums" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Albamu za Kwaya" : "Albums"} ({albums.length})
+                Albums ({albums.length})
               </button>
               <button
                 type="button"
@@ -987,7 +1016,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "songs" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Nyimbo Zilizorekodiwa" : "Recorded Hymns"} ({songs.length})
+                Recorded Hymns ({songs.length})
               </button>
               <button
                 type="button"
@@ -996,7 +1025,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "sheet" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Noti za Kuuza" : "Sheet Music Store"} ({sheetMusicList.length})
+                Sheet Music Store ({sheetMusicList.length})
               </button>
             </div>
           )}
@@ -1011,7 +1040,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "members" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Orodha ya Waimbaji" : "Members Register"} ({members.length})
+                Members Register ({members.length})
               </button>
               <button
                 type="button"
@@ -1020,7 +1049,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "leaders" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Viongozi na Wakufunzi" : "Trainers & Officials"} ({leadersList.length})
+                Trainers & Officials ({leadersList.length})
               </button>
               <button
                 type="button"
@@ -1029,7 +1058,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "photos" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Picha za Kwaya" : "Photo Gallery"} ({groupPhotosList.length})
+                Photo Gallery ({groupPhotosList.length})
               </button>
               <button
                 type="button"
@@ -1038,30 +1067,35 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "about" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {lang === "sw" ? "Historia na Mtakatifu Monika" : "Our Story & Patron"}
+                Our Story & Patron
               </button>
             </div>
           )}
+
+          {/* TAB: CORE VALUES */}
+          {activeTab === 'values' && (
+            <AdminCoreValuesTab onNotify={notify} />
+          )}
           
           {/* TAB: CHOIR MEMBERS & VOICE SECTIONS (with PDF Generator) */}
-      {activeTab === 'members' && (
-        <AdminMembersTab onNotify={notify} />
-      )}
+          {activeTab === 'members' && (
+            <AdminMembersTab onNotify={notify} />
+          )}
 
-      {/* TAB: CHOIR ALBUMS & TRACKS */}
-      {activeTab === 'albums' && (
-        <AdminAlbumsTab onNotify={notify} />
-      )}
+          {/* TAB: CHOIR ALBUMS & TRACKS */}
+          {activeTab === 'albums' && (
+            <AdminAlbumsTab onNotify={notify} />
+          )}
 
-      {/* TAB: FINANCIALS & SUPPORTERS */}
-      {activeTab === 'financials' && (
-        <AdminFinancialsTab onNotify={notify} />
-      )}
+          {/* TAB: FINANCIALS & SUPPORTERS */}
+          {activeTab === 'financials' && (
+            <AdminFinancialsTab onNotify={notify} />
+          )}
 
-      {/* TAB 0A: HOMEPAGE & VISUALS (Logo, 4 Hero Slides, Parish Msg & Church Img, Bible Quote, Choirmaster Word & Picture) */}
-      {activeTab === 'hero' && (
-        <AdminHomepageTab onNotify={notify} />
-      )}
+          {/* TAB 0A: HOMEPAGE & VISUALS (Logo, 4 Hero Slides, Parish Msg & Church Img, Bible Quote, Choirmaster Word & Picture) */}
+          {activeTab === 'hero' && (
+            <AdminHomepageTab onNotify={notify} />
+          )}
 
       {/* TAB 0B: ABOUT PAGE CONTENT & PHOTOS (Story banner & photo, Patron Saint banner & portrait, bio, prayer) */}
       {activeTab === 'about' && (
@@ -1553,6 +1587,10 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                   setLibLyrics('');
                   setLibPdfUrl('');
                   setLibAudioUrl('');
+                  setLibNotesUrl('');
+                  setLibNotesFileName('');
+                  setLibMidiUrl('');
+                  setLibMidiFileName('');
                   setLibSharingStatus('Public domain');
                   setLibPermissionGivenBy('');
                   setLibPermissionDate('');
@@ -1605,6 +1643,7 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                     <th className="p-3.5">Title & Composer</th>
                     <th className="p-3.5">Language / Voices</th>
                     <th className="p-3.5">Categories</th>
+                    <th className="p-3.5">Notes & MIDI Files</th>
                     <th className="p-3.5">Sharing Status</th>
                     <th className="p-3.5 text-center">Downloads (Admin)</th>
                     <th className="p-3.5 text-right">Actions</th>
@@ -1633,6 +1672,45 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                               </span>
                             );
                           })}
+                        </div>
+                      </td>
+                      <td className="p-3.5">
+                        <div className="flex flex-col gap-1.5">
+                          {/* Notes Button */}
+                          {song.notesUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => triggerFileDownload(song.notesUrl!, song.notesFileName || `${song.title.replace(/[^a-zA-Z0-9_-]/g, '_')}_Notes.pdf`)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer w-fit"
+                              title="Test Download Sheet Music Notes"
+                            >
+                              <FileText className="w-3 h-3 text-amber-700 shrink-0" />
+                              <span>Notes (PDF)</span>
+                            </button>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed w-fit">
+                              <FileText className="w-3 h-3 text-slate-300 shrink-0" />
+                              <span>No Notes</span>
+                            </span>
+                          )}
+
+                          {/* MIDI Button */}
+                          {song.midiUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => triggerFileDownload(song.midiUrl!, song.midiFileName || `${song.title.replace(/[^a-zA-Z0-9_-]/g, '_')}.mid`)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-50 text-indigo-900 border border-indigo-200 hover:bg-indigo-100 transition-colors cursor-pointer w-fit"
+                              title="Test Download MIDI File"
+                            >
+                              <Music className="w-3 h-3 text-indigo-700 shrink-0" />
+                              <span>MIDI (.mid)</span>
+                            </button>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed w-fit">
+                              <Music className="w-3 h-3 text-slate-300 shrink-0" />
+                              <span>No MIDI</span>
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="p-3.5">
@@ -1670,6 +1748,10 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                               setLibLyrics(song.lyrics || '');
                               setLibPdfUrl(song.pdfUrl || '');
                               setLibAudioUrl(song.audioUrl || '');
+                              setLibNotesUrl(song.notesUrl || '');
+                              setLibNotesFileName(song.notesFileName || '');
+                              setLibMidiUrl(song.midiUrl || '');
+                              setLibMidiFileName(song.midiFileName || '');
                               setLibSharingStatus(song.sharingStatus);
                               setLibPermissionGivenBy(song.permissionGivenBy || '');
                               setLibPermissionDate(song.permissionDate || '');
@@ -1725,39 +1807,31 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                 e.preventDefault();
                 if (!libTitle.trim() || !libComposer.trim()) return;
 
+                const payload = {
+                  title: libTitle.trim(),
+                  composer: libComposer.trim(),
+                  language: libLanguage,
+                  categories: libCategories,
+                  voices: libVoices,
+                  lyrics: libLyrics.trim() || undefined,
+                  pdfUrl: libPdfUrl.trim() || libNotesUrl.trim() || undefined,
+                  audioUrl: libAudioUrl.trim() || undefined,
+                  hasAudio: !!libAudioUrl.trim(),
+                  notesUrl: libNotesUrl.trim() || libPdfUrl.trim() || undefined,
+                  notesFileName: libNotesFileName.trim() || (libTitle.trim() ? `${libTitle.trim().replace(/[^a-zA-Z0-9_-]/g, '_')}_Notes.pdf` : undefined),
+                  midiUrl: libMidiUrl.trim() || undefined,
+                  midiFileName: libMidiFileName.trim() || (libTitle.trim() ? `${libTitle.trim().replace(/[^a-zA-Z0-9_-]/g, '_')}.mid` : undefined),
+                  sharingStatus: libSharingStatus,
+                  permissionGivenBy: libSharingStatus === 'Shared with permission' ? libPermissionGivenBy.trim() : undefined,
+                  permissionDate: libSharingStatus === 'Shared with permission' ? libPermissionDate.trim() : undefined,
+                  externalSourceUrl: libSharingStatus === 'Link only' ? libExternalSourceUrl.trim() : undefined,
+                };
+
                 if (editingLibSongId) {
-                  updateLibrarySong(editingLibSongId, {
-                    title: libTitle.trim(),
-                    composer: libComposer.trim(),
-                    language: libLanguage,
-                    categories: libCategories,
-                    voices: libVoices,
-                    lyrics: libLyrics.trim() || undefined,
-                    pdfUrl: libPdfUrl.trim() || undefined,
-                    audioUrl: libAudioUrl.trim() || undefined,
-                    hasAudio: !!libAudioUrl.trim(),
-                    sharingStatus: libSharingStatus,
-                    permissionGivenBy: libSharingStatus === 'Shared with permission' ? libPermissionGivenBy.trim() : undefined,
-                    permissionDate: libSharingStatus === 'Shared with permission' ? libPermissionDate.trim() : undefined,
-                    externalSourceUrl: libSharingStatus === 'Link only' ? libExternalSourceUrl.trim() : undefined,
-                  });
+                  updateLibrarySong(editingLibSongId, payload);
                   setSuccessMessage(`Updated "${libTitle}" in Maktaba ya Noti.`);
                 } else {
-                  addLibrarySong({
-                    title: libTitle.trim(),
-                    composer: libComposer.trim(),
-                    language: libLanguage,
-                    categories: libCategories,
-                    voices: libVoices,
-                    lyrics: libLyrics.trim() || undefined,
-                    pdfUrl: libPdfUrl.trim() || undefined,
-                    audioUrl: libAudioUrl.trim() || undefined,
-                    hasAudio: !!libAudioUrl.trim(),
-                    sharingStatus: libSharingStatus,
-                    permissionGivenBy: libSharingStatus === 'Shared with permission' ? libPermissionGivenBy.trim() : undefined,
-                    permissionDate: libSharingStatus === 'Shared with permission' ? libPermissionDate.trim() : undefined,
-                    externalSourceUrl: libSharingStatus === 'Link only' ? libExternalSourceUrl.trim() : undefined,
-                  });
+                  addLibrarySong(payload);
                   setSuccessMessage(`Added "${libTitle}" to Maktaba ya Noti.`);
                 }
                 setShowLibModal(false);
@@ -1855,6 +1929,145 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                 </div>
               </div>
 
+              {/* DOWNLOAD ASSETS: ACTUAL NOTES & MIDI FILES */}
+              <div className="p-4 bg-amber-50/40 border border-amber-200 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Download className="w-4 h-4 text-amber-700" />
+                    <span className="font-bold text-slate-900 text-xs">
+                      Downloadable Assets: Actual Sheet Notes & MIDI Files
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full font-semibold">
+                    Public downloads enable when uploaded
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Sheet Music Notes File Upload / URL */}
+                  <div className="p-3 bg-white rounded-xl border border-amber-300/60 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Sheet Music Notes (PDF)</span>
+                      </label>
+                      {libNotesUrl && (
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                          Available
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <label className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-lg cursor-pointer font-bold text-[11px] flex items-center gap-1.5 transition-colors">
+                          <Upload className="w-3 h-3" />
+                          <span>Upload Score PDF</span>
+                          <input
+                            type="file"
+                            accept=".pdf,image/*"
+                            className="hidden"
+                            onChange={(e) => handleUploadFile(e, 'notes')}
+                          />
+                        </label>
+                        {libNotesUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLibNotesUrl('');
+                              setLibNotesFileName('');
+                            }}
+                            className="text-red-600 hover:text-red-800 text-[11px] font-semibold cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {libNotesFileName && (
+                        <p className="text-[11px] text-emerald-700 font-mono truncate" title={libNotesFileName}>
+                          File: {libNotesFileName}
+                        </p>
+                      )}
+
+                      <input
+                        type="text"
+                        value={libNotesUrl}
+                        onChange={(e) => {
+                          setLibNotesUrl(e.target.value);
+                          if (!libNotesFileName && e.target.value) {
+                            setLibNotesFileName(`${libTitle || 'Sheet_Music'}_Notes.pdf`);
+                          }
+                        }}
+                        placeholder="Or paste direct PDF URL..."
+                        className="w-full p-2 text-xs rounded-lg border border-slate-300 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* MIDI File (.mid) Upload / URL */}
+                  <div className="p-3 bg-white rounded-xl border border-indigo-300/60 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <Music className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>MIDI File (.mid)</span>
+                      </label>
+                      {libMidiUrl && (
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                          Available
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <label className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-800 text-white rounded-lg cursor-pointer font-bold text-[11px] flex items-center gap-1.5 transition-colors">
+                          <Upload className="w-3 h-3" />
+                          <span>Upload .MID File</span>
+                          <input
+                            type="file"
+                            accept=".mid,.midi,audio/midi"
+                            className="hidden"
+                            onChange={(e) => handleUploadFile(e, 'midi')}
+                          />
+                        </label>
+                        {libMidiUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLibMidiUrl('');
+                              setLibMidiFileName('');
+                            }}
+                            className="text-red-600 hover:text-red-800 text-[11px] font-semibold cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {libMidiFileName && (
+                        <p className="text-[11px] text-emerald-700 font-mono truncate" title={libMidiFileName}>
+                          File: {libMidiFileName}
+                        </p>
+                      )}
+
+                      <input
+                        type="text"
+                        value={libMidiUrl}
+                        onChange={(e) => {
+                          setLibMidiUrl(e.target.value);
+                          if (!libMidiFileName && e.target.value) {
+                            setLibMidiFileName(`${libTitle || 'Choir_Song'}.mid`);
+                          }
+                        }}
+                        placeholder="Or paste direct MIDI URL..."
+                        className="w-full p-2 text-xs rounded-lg border border-slate-300 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Sharing Status */}
               <div>
                 <label className="font-semibold text-slate-700 block mb-1">Sharing Status *</label>
@@ -1910,28 +2123,16 @@ Adeste Fideles,Traditional Latin,Latin,noeli,SATB,Public domain,,`);
                 </div>
               )}
 
-              {/* PDF and Audio URL */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">PDF File URL</label>
-                  <input
-                    type="text"
-                    value={libPdfUrl}
-                    onChange={(e) => setLibPdfUrl(e.target.value)}
-                    placeholder="https://.../score.pdf"
-                    className="w-full p-2.5 rounded-xl border border-slate-300 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Audio Recording URL (Optional)</label>
-                  <input
-                    type="text"
-                    value={libAudioUrl}
-                    onChange={(e) => setLibAudioUrl(e.target.value)}
-                    placeholder="https://.../preview.mp3"
-                    className="w-full p-2.5 rounded-xl border border-slate-300 outline-none"
-                  />
-                </div>
+              {/* Audio URL */}
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Audio Preview / Recording URL (Optional)</label>
+                <input
+                  type="text"
+                  value={libAudioUrl}
+                  onChange={(e) => setLibAudioUrl(e.target.value)}
+                  placeholder="https://.../preview.mp3"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 outline-none"
+                />
               </div>
 
               {/* Lyrics */}

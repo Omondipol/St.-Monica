@@ -19,6 +19,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
+import { CoreValuesSection } from '../components/CoreValuesSection';
 
 import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
 import heroSlide2Faces from '../assets/images/hero_slide_2_faces.jpg';
@@ -48,29 +49,28 @@ interface HeroSlideData {
 
 const DESKTOP_HERO_SLIDES: HeroSlideData[] = [
   {
-    src: heroSlide1Mass,
+    src: "/assets/choir/choir_01.jpg",
     alt: "Full choir at Sunday Sung Mass altar in St. Monica Catholic Church, Section 58",
     description: "Full Choir at Sunday Sung Mass",
     focus: "50% 25%",
     focusMobile: "50% 20%"
   },
   {
-    src: heroSlide5Church,
+    src: "/assets/choir/choir_03.jpg",
     alt: "St. Monica's Catholic Church sanctuary and altar, Section 58 Nakuru",
     description: "Parish Sanctuary & Church",
     focus: "50% 30%",
     focusMobile: "50% 25%"
   },
   {
-    src: heroSlide2Faces,
+    src: "/assets/choir/choir_09.jpg",
     alt: "Choristers singing praise before the parish altar",
     description: "Singers in Sacred Song",
     focus: "50% 20%",
     focusMobile: "50% 15%"
   },
   {
-    // Replace with a real photo of our choir / choirmaster
-    src: heroSlide3Director,
+    src: "/assets/choir/choir_07.jpg",
     alt: "The choirmaster directing four-part vocal polyphony",
     description: "Choirmaster Directing",
     focus: "60% 15%",
@@ -81,29 +81,28 @@ const DESKTOP_HERO_SLIDES: HeroSlideData[] = [
 
 const MOBILE_HERO_SLIDES: HeroSlideData[] = [
   {
-    src: heroSlide1Portrait,
+    src: "/assets/choir/choir_01.jpg",
     alt: "Full choir at Mass altar",
     description: "Full Choir at Mass",
     focus: "50% 20%",
     focusMobile: "50% 20%"
   },
   {
-    src: heroSlide5Church,
+    src: "/assets/choir/choir_03.jpg",
     alt: "St. Monica's Catholic Church sanctuary",
     description: "Parish Church",
     focus: "50% 25%",
     focusMobile: "50% 25%"
   },
   {
-    src: heroSlide2Portrait,
+    src: "/assets/choir/choir_09.jpg",
     alt: "Choristers singing sacred hymns",
     description: "Choristers Singing",
     focus: "50% 15%",
     focusMobile: "50% 15%"
   },
   {
-    // Replace with a real photo of our choir / choirmaster
-    src: heroSlide3Portrait,
+    src: "/assets/choir/choir_07.jpg",
     alt: "The choirmaster directing the choir",
     description: "Choirmaster Directing",
     focus: "60% 15%",
@@ -840,6 +839,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
+
+      {/* 2b. OUR CORE VALUES (Faith, Reverence, Excellence) */}
+      <CoreValuesSection onNavigate={onNavigate} />
 
       {/* 3. OUR RECORDED SONGS */}
       <section id="recorded-songs-section" className="bg-[#0C2340] text-white py-16 sm:py-20">
