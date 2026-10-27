@@ -670,7 +670,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     setIsLeaderModalOpen(false);
   };
 
-  // 7. Group Photos State & Modal
+  // 7. Group Photos State & Direct Supabase Uploader
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [photoForm, setPhotoForm] = useState({
@@ -678,7 +678,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     titleSw: '',
     description: '',
     descriptionSw: '',
-    year: '2024',
+    year: '2026',
     imageKey: 'choir_singing_moment' as ChoirGroupPhoto['imageKey'],
     customUrl: '',
     occasion: 'Sunday High Mass',
@@ -693,7 +693,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       titleSw: '',
       description: '',
       descriptionSw: '',
-      year: '2024',
+      year: '2026',
       imageKey: 'choir_singing_moment',
       customUrl: '',
       occasion: 'Sunday High Mass',
@@ -719,11 +719,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     setIsPhotoModalOpen(true);
   };
 
-  // Dedicated Group Photo Save & Supabase Storage Synchronizer
+  // Direct Supabase Photo Uploader Handler
   const handleSavePhoto = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!photoForm.title.trim()) {
-      alert('Please enter a photo title');
+      alert('Tafadhali weka jina la picha (Please enter a photo title)');
       return;
     }
 
@@ -734,7 +734,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       // Case 1: Physical File Selected from Device
       if (selectedPhotoFile) {
-        notify('Uploading image file to Supabase Storage...');
+        notify('Inapakia faili kwenye Supabase Storage...');
         const fileExt = selectedPhotoFile.name.split('.').pop() || 'jpg';
         const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
@@ -747,7 +747,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           });
 
         if (uploadError) {
-          throw new Error(`Storage error: ${uploadError.message}`);
+          throw new Error(`Storage upload error: ${uploadError.message}`);
         }
 
         const { data: urlData } = supabase.storage
@@ -758,7 +758,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       }
       // Case 2: Base64 or Blob Data URL from ImageUploadField
       else if (finalPublicUrl.startsWith('data:image/') || finalPublicUrl.startsWith('blob:')) {
-        notify('Processing and streaming image to Supabase...');
+        notify('Inachakata picha kwenda Supabase...');
         const res = await fetch(finalPublicUrl);
         const blob = await res.blob();
 
@@ -774,7 +774,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           });
 
         if (uploadError) {
-          throw new Error(`Storage error: ${uploadError.message}`);
+          throw new Error(`Storage upload error: ${uploadError.message}`);
         }
 
         const { data: urlData } = supabase.storage
@@ -786,12 +786,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       // Check if image link was resolved
       if (!finalPublicUrl) {
-        alert('Please choose an image file from your laptop or select a preset.');
+        alert('Tafadhali chagua picha kutoka kwa kompyuta yako (Please choose a photo from your computer).');
         setIsPhotoUploadingToSupabase(false);
         return;
       }
 
-      // Always write to Supabase 'gallery' table
+      // Always write to Supabase 'gallery' database table
       const { error: dbError } = await supabase
         .from('gallery')
         .insert([
@@ -802,7 +802,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         ]);
 
       if (dbError) {
-        throw new Error(`Database error: ${dbError.message}`);
+        throw new Error(`Database insert error: ${dbError.message}`);
       }
 
       // Sync with local context state
@@ -811,7 +811,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         titleSw: photoForm.titleSw.trim() || photoForm.title.trim(),
         description: photoForm.description.trim(),
         descriptionSw: photoForm.descriptionSw.trim() || photoForm.description.trim(),
-        year: photoForm.year.trim() || '2024',
+        year: photoForm.year.trim() || '2026',
         imageKey: photoForm.imageKey,
         customUrl: finalPublicUrl,
         occasion: photoForm.occasion.trim(),
@@ -820,17 +820,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       if (editingPhotoId) {
         updateGroupPhoto(editingPhotoId, payload);
-        notify(`Group photo "${payload.title}" updated in choir gallery!`);
+        notify(`Picha "${payload.title}" imesasishwa kikamilifu!`);
       } else {
         addGroupPhoto(payload);
-        notify(`Group photo "${payload.title}" added to Supabase & Gallery!`);
+        notify(`Picha "${payload.title}" imehifadhiwa kwenye Supabase na Galari!`);
       }
 
       setIsPhotoModalOpen(false);
       setSelectedPhotoFile(null);
     } catch (err: any) {
       console.error('Supabase upload failure:', err);
-      alert(err.message || 'Failed to upload photo to Supabase');
+      alert(err.message || 'Hitilafu: Picha haikuweza kupakiwa kwenye Supabase.');
     } finally {
       setIsPhotoUploadingToSupabase(false);
     }
