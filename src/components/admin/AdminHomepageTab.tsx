@@ -52,7 +52,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
     { label: 'Thanksgiving Praise (Choir 09)', url: '/assets/choir/choir_09.jpg' },
     { label: 'Soprano & Alto (Choir 10)', url: '/assets/choir/choir_10.jpg' },
     { label: 'Tenor & Bass (Choir 11)', url: '/assets/choir/choir_11.jpg' },
-    { label: 'Mwalimu Atebe Mark T.', url: '/assets/choir/choir_leader_02.jpg' }
+    { label: 'Mwalimu Atebe Mark T.', url: '/assets/choir/choirmaster_director.jpg' }
   ];
 
   // Local draft states
@@ -1012,7 +1012,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                     updateChoirmasterMessage({ image: val });
                     onNotify(lang === 'sw' ? 'Picha ya Mwalimu wa Kwaya imesasishwa moja kwa moja!' : 'Choirmaster photo updated live on homepage!');
                   }}
-                  defaultValue="/assets/choir/choir_leader_02.jpg"
+                  defaultValue="/assets/choir/choirmaster_director.jpg"
                   helpText="Clear portrait photo of Mwalimu Atebe Mark T. or presiding choirmaster."
                   presets={photoPresets}
                   aspectRatio="aspect-square"

@@ -158,7 +158,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             <img
               src={getAssetUrl(effectiveValue)}
               alt={label}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-[center_15%]"
               onError={() => setPreviewError(true)}
             />
           ) : (

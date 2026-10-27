@@ -453,7 +453,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
           return parsed.map((l: ChoirLeader) => {
             const match = INITIAL_LEADERS.find(il => il.id === l.id);
-            if (match && (!l.photoUrl || l.photoUrl.includes('unsplash'))) {
+            if (match && (!l.photoUrl || l.photoUrl.includes('unsplash') || (l.id === 'ldr-director' && l.photoUrl.includes('choir_leader_02')))) {
               return { ...l, photoUrl: match.photoUrl };
             }
             return l;
@@ -787,7 +787,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.CHOIRMASTER);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (!parsed.image || parsed.image.includes('unsplash.com') || parsed.image.includes('choirmaster_director') || parsed.name === 'Brother Dominic K.' || parsed.name === 'Br. Dominic K.') {
+        if (!parsed.image || parsed.image.includes('unsplash.com') || parsed.image.includes('choir_leader_02') || parsed.name === 'Brother Dominic K.' || parsed.name === 'Br. Dominic K.') {
           return DEFAULT_CHOIRMASTER_MESSAGE;
         }
         return { ...DEFAULT_CHOIRMASTER_MESSAGE, ...parsed };

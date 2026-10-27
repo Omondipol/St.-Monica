@@ -1697,15 +1697,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       }`}
                     >
                       <div className="space-y-3">
-                        <div className="flex items-start gap-3.5">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                           {leader.photoUrl ? (
                             <img
                               src={getAssetUrl(leader.photoUrl)}
                               alt={leader.name}
-                              className="w-14 h-14 rounded-full object-cover border-2 border-[#1058A8] shrink-0 shadow-xs"
+                              className="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl object-cover object-[center_12%] border-2 border-[#1058A8] shrink-0 shadow-md bg-slate-100"
                             />
                           ) : (
-                            <div className="w-14 h-14 rounded-full bg-[#EAF4FB] text-[#1058A8] border border-[#7EC8F0]/40 flex items-center justify-center font-bold text-lg shrink-0">
+                            <div className="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl bg-[#EAF4FB] text-[#1058A8] border border-[#7EC8F0]/40 flex items-center justify-center font-bold text-3xl shrink-0">
                               {leader.name.charAt(0)}
                             </div>
                           )}
@@ -2181,11 +2181,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   labelSw="Pakia Picha ya Mwalimu / Afisa (Supabase Cloud)"
                   value={leaderForm.photoUrl}
                   onChange={val => setLeaderForm(prev => ({ ...prev, photoUrl: val }))}
-                  defaultValue="/assets/choir/choir_leader_02.jpg"
+                  defaultValue="/assets/choir/choirmaster_director.jpg"
                   helpText="Upload a sharp portrait from your computer or choose from parish leaders."
                   aspectRatio="aspect-square"
                   presets={[
-                    { label: 'Choirmaster Atebe Mark T.', url: '/assets/choir/choir_leader_02.jpg' },
+                    { label: 'Choirmaster Atebe Mark T.', url: '/assets/choir/choirmaster_director.jpg' },
                     { label: 'Mukomah Leshan (Organist)', url: '/assets/choir/choir_leader_03.jpg' },
                     { label: 'Peter Otieno (Asst Moderator)', url: '/assets/choir/choir_leader_04.jpg' },
                     { label: 'Damaris Ndeto (Moderator)', url: '/assets/choir/choir_leader_05.jpg' },

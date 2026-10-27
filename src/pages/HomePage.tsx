@@ -16,7 +16,10 @@ import {
   Clock,
   UserPlus,
   Music,
-  BookOpen
+  BookOpen,
+  ZoomIn,
+  X,
+  Sparkles
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { CoreValuesSection } from '../components/CoreValuesSection';
@@ -144,11 +147,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     l.id === 'ldr-director' || 
     (l.role && (l.role.toLowerCase().includes('choirmaster') || l.role.toLowerCase().includes('music director')))
   );
-  const choirmasterDisplayPhoto = choirmasterLeader?.photoUrl || choirmasterMessage?.image || '/assets/choir/choir_leader_02.jpg';
+  const choirmasterDisplayPhoto = choirmasterLeader?.photoUrl || choirmasterMessage?.image || '/assets/choir/choirmaster_director.jpg';
   const choirmasterDisplayName = choirmasterLeader?.name || choirmasterMessage?.name || 'Mwalimu Atebe Mark T.';
   const choirmasterDisplayRole = lang === 'sw'
     ? (choirmasterLeader?.roleSw || choirmasterMessage?.roleSw || 'Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya')
     : (choirmasterLeader?.role || choirmasterMessage?.roleEn || 'Director of Music & Choirmaster');
+
+  const [enlargedImage, setEnlargedImage] = useState<{ url: string; title: string; subtitle?: string } | null>(null);
 
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -1139,22 +1144,65 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   : (choirmasterMessage?.messageEn || '“Welcome to the musical home of St. Monica Third Mass Choir, Nakuru. Our continuous focus is vocal discipline and deep reverential worship before the Holy Altar. We teach our choristers strict tonic sol-fa sight singing, ensuring every song offered is a sincere offering of praise to Almighty God.”')}
               </p>
 
-              <div className="pt-2 flex items-center gap-3.5">
-                <img
-                  src={getAssetUrl(choirmasterDisplayPhoto)}
-                  alt={choirmasterDisplayName}
-                  width={64}
-                  height={64}
-                  loading="lazy"
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#1058A8] shadow-sm shrink-0"
-                />
-                <div>
-                  <strong className="text-base font-bold text-[#0C2340] font-eb-garamond block">
-                    {choirmasterDisplayName}
-                  </strong>
-                  <span className="text-sm text-slate-700 font-source block">
-                    {choirmasterDisplayRole}
+              <div className="pt-3 flex flex-col sm:flex-row items-center sm:items-stretch gap-5 p-5 rounded-3xl bg-white border border-[#0C2340]/15 shadow-sm">
+                <div 
+                  className="relative shrink-0 cursor-pointer group"
+                  onClick={() => setEnlargedImage({
+                    url: getAssetUrl(choirmasterDisplayPhoto),
+                    title: choirmasterDisplayName,
+                    subtitle: choirmasterDisplayRole
+                  })}
+                  title="Click to view full photo in HD"
+                >
+                  <img
+                    src={getAssetUrl(choirmasterDisplayPhoto)}
+                    alt={choirmasterDisplayName}
+                    loading="lazy"
+                    className="w-36 h-44 sm:w-44 sm:h-52 rounded-2xl object-cover object-[center_12%] border-2 border-[#1058A8] shadow-md group-hover:scale-[1.02] transition-transform duration-200 bg-slate-100"
+                  />
+                  <div className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
+                      <ZoomIn className="w-3.5 h-3.5" />
+                      <span>HD View</span>
+                    </span>
+                  </div>
+                  <span className="absolute -bottom-2 -right-2 bg-[#1058A8] text-white p-1.5 rounded-full shadow-md border-2 border-white">
+                    <Music className="w-4 h-4" />
                   </span>
+                </div>
+
+                <div className="flex flex-col justify-between space-y-2 text-center sm:text-left py-1 flex-1">
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full border border-[#7EC8F0]/40 uppercase tracking-wider font-source inline-block">
+                      {lang === 'sw' ? 'Mwalimu Mkuu wa Kwaya' : 'Director of Music & Choirmaster'}
+                    </span>
+                    <strong className="text-xl sm:text-2xl font-bold text-[#0C2340] font-eb-garamond block leading-tight">
+                      {choirmasterDisplayName}
+                    </strong>
+                    <span className="text-sm font-semibold text-slate-700 font-source block">
+                      {choirmasterDisplayRole}
+                    </span>
+                    <p className="text-xs text-slate-500 font-source leading-relaxed pt-1">
+                      {lang === 'sw' 
+                        ? 'Kwaya ya Misa ya Tatu · Parokia ya Mtakatifu Monika, Section 58 Nakuru.' 
+                        : 'Third Mass Choir · St. Monica Catholic Parish, Section 58 Nakuru.'}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-center sm:justify-start gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEnlargedImage({
+                        url: getAssetUrl(choirmasterDisplayPhoto),
+                        title: choirmasterDisplayName,
+                        subtitle: choirmasterDisplayRole
+                      })}
+                      className="text-xs font-semibold text-[#1058A8] hover:text-[#0C2340] flex items-center gap-1.5 cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-colors"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5 text-blue-600" />
+                      <span>{lang === 'sw' ? 'Tazama Picha Kamili (HD)' : 'View Full Portrait (HD)'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1238,6 +1286,44 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
+
+      {/* High-Definition Photo Lightbox Modal */}
+      {enlargedImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setEnlargedImage(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-2xl border border-white/20 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative aspect-square sm:aspect-4/5 max-h-[75vh] bg-slate-950 flex items-center justify-center overflow-hidden">
+              <img
+                src={enlargedImage.url}
+                alt={enlargedImage.title}
+                className="w-full h-full object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setEnlargedImage(null)}
+                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center cursor-pointer transition-colors shadow-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 bg-white space-y-1">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {enlargedImage.title}
+              </h3>
+              {enlargedImage.subtitle && (
+                <p className="text-xs text-[#1058A8] font-semibold font-source">
+                  {enlargedImage.subtitle}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

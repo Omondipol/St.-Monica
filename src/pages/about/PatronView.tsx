@@ -52,7 +52,7 @@ export const PatronView: React.FC<PatronViewProps> = ({ onNavigate = () => {} })
           <img
             src={portraitImgSrc}
             alt="Saint Monica"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[center_20%]"
             referrerPolicy="no-referrer"
           />
         </div>

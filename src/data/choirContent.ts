@@ -582,7 +582,7 @@ export const INITIAL_LEADERS: ChoirLeader[] = [
     responsibilitySw: "Huongoza mazoezi ya kila wiki, upangaji wa sauti nne na usimamizi wa kurekodi nyimbo studio.",
     tenure: "Serving the Parish",
     tenureSw: "Anahudumu Parokiani",
-    photoUrl: "/assets/choir/choir_leader_02.jpg"
+    photoUrl: "/assets/choir/choirmaster_director.jpg"
   },
   {
     id: "ldr-organist",
@@ -1152,7 +1152,7 @@ export const DEFAULT_CHOIRMASTER_MESSAGE: ChoirmasterMessageConfig = {
   name: "Mwalimu Atebe Mark T.",
   roleEn: "Director of Music & Choirmaster",
   roleSw: "Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya",
-  image: "/assets/choir/choir_leader_02.jpg"
+  image: "/assets/choir/choirmaster_director.jpg"
 };
 
 export interface FooterContactConfig {

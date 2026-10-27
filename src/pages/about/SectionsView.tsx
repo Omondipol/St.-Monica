@@ -15,7 +15,9 @@ import {
   CreditCard,
   Clock,
   ArrowRight,
-  Music
+  Music,
+  ZoomIn,
+  X
 } from 'lucide-react';
 import { isMemberActive } from '../../data/membersData';
 import { getAssetUrl } from '../../utils/assetHelper';
@@ -29,6 +31,7 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
 
   // Active voice group selected to view member list (defaults to soprano)
   const [selectedVoice, setSelectedVoice] = useState<'soprano' | 'alto' | 'tenor' | 'bass'>('soprano');
+  const [enlargedMember, setEnlargedMember] = useState<{ name: string; photoUrl: string; role?: string } | null>(null);
 
   // Filter members by voice and ensure strictly active (less than 12 months from registration)
   // After 12 months, auto-erased from active view as requested
@@ -292,17 +295,28 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     {/* Dignified Avatar (Photo or Initial) */}
-                    {member.photoUrl ? (
-                      <img
-                        src={getAssetUrl(member.photoUrl)}
-                        alt={member.name}
-                        className="w-11 h-11 rounded-full object-cover border border-[#1058A8]/30 shrink-0 shadow-xs"
-                      />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 flex items-center justify-center font-eb-garamond font-bold text-lg shrink-0">
-                        {member.name.charAt(0)}
-                      </div>
-                    )}
+                    <div 
+                      onClick={() => member.photoUrl && setEnlargedMember({ name: member.name, photoUrl: getAssetUrl(member.photoUrl), role: member.role })}
+                      className="w-16 h-20 sm:w-20 sm:h-24 rounded-2xl overflow-hidden border-2 border-[#1058A8]/30 shadow-xs shrink-0 cursor-pointer group bg-slate-900 relative select-none"
+                      title={member.photoUrl ? 'Click to view full photo' : member.name}
+                    >
+                      {member.photoUrl ? (
+                        <>
+                          <img
+                            src={getAssetUrl(member.photoUrl)}
+                            alt={member.name}
+                            className="w-full h-full object-cover object-[center_12%] group-hover:scale-105 transition-transform duration-200"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                            <ZoomIn className="w-3.5 h-3.5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full bg-[#EAF4FB] text-[#1058A8] border border-[#1058A8]/20 flex items-center justify-center font-eb-garamond font-bold text-2xl">
+                          {member.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
                     
                     <div className="min-w-0">
                       <h4 className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] leading-tight truncate">
@@ -359,6 +373,42 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
           </div>
         </div>
       </section>
+
+      {/* High-Definition Member Lightbox Modal */}
+      {enlargedMember && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setEnlargedMember(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl overflow-hidden max-w-sm w-full shadow-2xl border border-white/20 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative aspect-3/4 max-h-[70vh] bg-slate-950 flex items-center justify-center overflow-hidden">
+              <img
+                src={enlargedMember.photoUrl}
+                alt={enlargedMember.name}
+                className="w-full h-full object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setEnlargedMember(null)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center cursor-pointer transition-colors shadow-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 bg-white space-y-0.5 text-center">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {enlargedMember.name}
+              </h3>
+              <p className="text-xs text-[#1058A8] font-bold font-source">
+                {enlargedMember.role || (lang === 'sw' ? 'Mwanakwaya' : 'Chorister')} · {currentMeta.name}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
