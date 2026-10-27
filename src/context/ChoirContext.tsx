@@ -37,6 +37,14 @@ import {
 } from '../data/choirContent';
 import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
 import { ChoirMember, INITIAL_MEMBERS, isMemberActive } from '../data/membersData';
+import {
+  loadSongsFromSupabase,
+  saveSongToSupabase,
+  deleteSongFromSupabase,
+  loadGalleryPhotosFromSupabase,
+  saveCatalogToSupabase,
+  loadCatalogFromSupabase
+} from '../lib/supabaseChoirData';
 
 export interface CartItem {
   product: ProductItem;
@@ -396,16 +404,15 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currency, setCurrency] = useState<'KES' | 'USD'>('KES');
   const usdConversionRate = 128;
 
-  // 3. Songs Catalog (migrates cleanly to verified 4 songs only)
+  // 3. Songs Catalog (synced with Supabase & localStorage)
   const [songs, setSongs] = useState<Song[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SONGS);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // If stored catalog contains hoax/extra songs, force clean reset to INITIAL_SONGS_CATALOG
-          const hasInvalidSongs = parsed.some(s => s.id === 'song-tutangaze' || s.id === 'song-rejoice' || s.id === 'song-monica');
-          if (!hasInvalidSongs) return parsed;
+          const clean = parsed.filter(s => s.id !== 'song-tutangaze' && s.id !== 'song-rejoice' && s.id !== 'song-monica');
+          if (clean.length > 0) return clean;
         }
       }
     } catch (e) {
@@ -421,6 +428,48 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // ignore
     }
   }, [songs]);
+
+  // Sync real-time catalog & photos from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    // Load songs from Supabase
+    loadSongsFromSupabase().then((remoteSongs) => {
+      if (isMounted && remoteSongs && remoteSongs.length > 0) {
+        setSongs(prev => {
+          const remoteIds = new Set(remoteSongs.map(s => s.id));
+          const localOnly = prev.filter(s => !remoteIds.has(s.id));
+          const initialMissing = INITIAL_SONGS_CATALOG.filter(s => !remoteIds.has(s.id) && !localOnly.some(l => l.id === s.id));
+          const merged = [...remoteSongs, ...localOnly, ...initialMissing];
+          try {
+            localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(merged));
+          } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Load gallery photos from Supabase 'gallery' table
+    loadGalleryPhotosFromSupabase().then((remotePhotos) => {
+      if (isMounted && remotePhotos && remotePhotos.length > 0) {
+        setGroupPhotosList(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const existingUrls = new Set(prev.map(p => p.customUrl).filter(Boolean));
+          const newPhotos = remotePhotos.filter(p => !existingIds.has(p.id) && !existingUrls.has(p.customUrl));
+          if (newPhotos.length === 0) return prev;
+          const merged = [...newPhotos, ...prev];
+          try {
+            localStorage.setItem(STORAGE_KEYS.PHOTOS, JSON.stringify(merged));
+          } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // 4. Sheet Music Catalog
   const [sheetMusicList, setSheetMusicList] = useState<SheetMusicItem[]>(() => {
@@ -1795,15 +1844,32 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return `KES ${kesAmount.toLocaleString()}`;
   };
 
-  // Admin CRUD Functions
+  // Admin CRUD Functions — synced to Supabase & localStorage
   const addSong = (newSong: Omit<Song, 'id'>) => {
     const id = `song-${Date.now()}`;
     const song: Song = { ...newSong, id };
-    setSongs(prev => [song, ...prev]);
+    setSongs(prev => {
+      const updated = [song, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(updated));
+      } catch (_) {}
+      saveSongToSupabase(song, updated);
+      return updated;
+    });
   };
 
   const updateSong = (id: string, updated: Partial<Song>) => {
-    setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+    setSongs(prev => {
+      const updatedList = prev.map(s => s.id === id ? { ...s, ...updated } : s);
+      const updatedSong = updatedList.find(s => s.id === id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(updatedList));
+      } catch (_) {}
+      if (updatedSong) {
+        saveSongToSupabase(updatedSong, updatedList);
+      }
+      return updatedList;
+    });
     if (currentSong.id === id) {
       setCurrentSong(prev => ({ ...prev, ...updated }));
     }
@@ -1812,6 +1878,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deleteSong = (id: string) => {
     setSongs(prev => {
       const filtered = prev.filter(s => s.id !== id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(filtered));
+      } catch (_) {}
+      deleteSongFromSupabase(id, filtered);
       if (currentSong.id === id && filtered.length > 0) {
         setCurrentSong(filtered[0]);
       }

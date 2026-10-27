@@ -11,7 +11,8 @@ import {
   Share2,
   ExternalLink,
   Download,
-  Music2
+  Music2,
+  Film
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
@@ -37,31 +38,49 @@ const MASS_GROUPS: MassGroup[] = [
     id: 'entrance',
     nameSw: 'Wimbo wa Kuingia',
     nameEn: 'Entrance',
-    matchParts: ['Entrance']
+    matchParts: ['Entrance', 'Kuingia']
   },
   {
-    id: 'offertory',
-    nameSw: 'Wimbo wa Matoleo',
-    nameEn: 'Offertory',
-    matchParts: ['Offertory']
-  },
-  {
-    id: 'communion',
-    nameSw: 'Komunyo',
-    nameEn: 'Communion',
-    matchParts: ['Communion']
+    id: 'kyrie_gloria',
+    nameSw: 'Bwana Utuhurumie na Utukufu',
+    nameEn: 'Kyrie & Gloria',
+    matchParts: ['Kyrie', 'Gloria', 'Utukufu', 'Huruma']
   },
   {
     id: 'meditation',
-    nameSw: 'Tafakari',
-    nameEn: 'Meditation',
-    matchParts: ['Meditation', 'Contemplative Prayer']
+    nameSw: 'Tafakari na Zaburi',
+    nameEn: 'Meditation & Psalm',
+    matchParts: ['Meditation', 'Psalm', 'Zaburi', 'Contemplative Prayer']
+  },
+  {
+    id: 'offertory',
+    nameSw: 'Wimbo wa Matoleo na Sadaka',
+    nameEn: 'Offertory',
+    matchParts: ['Offertory', 'Sadaka', 'Matoleo']
+  },
+  {
+    id: 'sanctus_agnus',
+    nameSw: 'Mtakatifu na Mwana Kondoo',
+    nameEn: 'Sanctus & Agnus Dei',
+    matchParts: ['Sanctus', 'Agnus Dei', 'Mtakatifu', 'Mwana Kondoo']
+  },
+  {
+    id: 'communion',
+    nameSw: 'Komunyo na Ekaristi',
+    nameEn: 'Communion',
+    matchParts: ['Communion', 'Ekaristi', 'Komunyo']
+  },
+  {
+    id: 'thanksgiving',
+    nameSw: 'Shukrani na Sifa',
+    nameEn: 'Thanksgiving & Praise',
+    matchParts: ['Thanksgiving', 'Shukrani', 'Praise', 'Sifa']
   },
   {
     id: 'recessional',
     nameSw: 'Wimbo wa Kutoka',
     nameEn: 'Recessional',
-    matchParts: ['Recessional']
+    matchParts: ['Recessional', 'Kutoka']
   }
 ];
 
@@ -83,7 +102,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
     formatPrice, 
     lang,
     openSupportModal,
-    openVideoModal
+    openVideoModal,
+    setHymnalTab
   } = useChoir();
 
   const [activeTab, setActiveTab] = useState<'songs' | 'sheet_music'>('songs');
@@ -153,18 +173,21 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
     if (filterSelection === 'all') return true;
 
     // Mass parts
-    if (filterSelection === 'entrance') return song.partOfMass.toLowerCase().includes('entrance');
-    if (filterSelection === 'offertory') return song.partOfMass.toLowerCase().includes('offertory');
-    if (filterSelection === 'communion') return song.partOfMass.toLowerCase().includes('communion');
-    if (filterSelection === 'meditation') return song.partOfMass.toLowerCase().includes('meditation');
-    if (filterSelection === 'recessional') return song.partOfMass.toLowerCase().includes('recessional');
+    if (filterSelection === 'entrance') return (song.partOfMass || '').toLowerCase().includes('entrance') || (song.partOfMass || '').toLowerCase().includes('kuingia');
+    if (filterSelection === 'kyrie_gloria') return (song.partOfMass || '').toLowerCase().includes('kyrie') || (song.partOfMass || '').toLowerCase().includes('gloria') || (song.partOfMass || '').toLowerCase().includes('utukufu');
+    if (filterSelection === 'meditation') return (song.partOfMass || '').toLowerCase().includes('meditation') || (song.partOfMass || '').toLowerCase().includes('psalm') || (song.partOfMass || '').toLowerCase().includes('zaburi');
+    if (filterSelection === 'offertory') return (song.partOfMass || '').toLowerCase().includes('offertory') || (song.partOfMass || '').toLowerCase().includes('matoleo') || (song.partOfMass || '').toLowerCase().includes('sadaka');
+    if (filterSelection === 'sanctus_agnus') return (song.partOfMass || '').toLowerCase().includes('sanctus') || (song.partOfMass || '').toLowerCase().includes('agnus') || (song.partOfMass || '').toLowerCase().includes('mtakatifu');
+    if (filterSelection === 'communion') return (song.partOfMass || '').toLowerCase().includes('communion') || (song.partOfMass || '').toLowerCase().includes('komunyo') || (song.partOfMass || '').toLowerCase().includes('ekaristi');
+    if (filterSelection === 'thanksgiving') return (song.partOfMass || '').toLowerCase().includes('thanksgiving') || (song.partOfMass || '').toLowerCase().includes('shukrani') || (song.partOfMass || '').toLowerCase().includes('sifa');
+    if (filterSelection === 'recessional') return (song.partOfMass || '').toLowerCase().includes('recessional') || (song.partOfMass || '').toLowerCase().includes('kutoka');
 
     // Seasons
-    if (filterSelection === 'ordinary') return song.season.toLowerCase().includes('ordinary');
-    if (filterSelection === 'advent') return song.season.toLowerCase().includes('advent');
-    if (filterSelection === 'lent') return song.season.toLowerCase().includes('lent');
-    if (filterSelection === 'easter') return song.season.toLowerCase().includes('easter');
-    if (filterSelection === 'christmas') return song.season.toLowerCase().includes('christmas');
+    if (filterSelection === 'ordinary') return (song.season || '').toLowerCase().includes('ordinary') || (song.season || '').toLowerCase().includes('kawaida');
+    if (filterSelection === 'advent') return (song.season || '').toLowerCase().includes('advent') || (song.season || '').toLowerCase().includes('majilio');
+    if (filterSelection === 'lent') return (song.season || '').toLowerCase().includes('lent') || (song.season || '').toLowerCase().includes('kwaresima');
+    if (filterSelection === 'easter') return (song.season || '').toLowerCase().includes('easter') || (song.season || '').toLowerCase().includes('pasaka');
+    if (filterSelection === 'christmas') return (song.season || '').toLowerCase().includes('christmas') || (song.season || '').toLowerCase().includes('krismasi');
 
     return true;
   });
@@ -190,11 +213,225 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
     return scorePreviewMachozi;
   };
 
-  const getCleanSongCover = (song: Song) => {
+  const getCleanSongCover = (song?: Song) => {
+    if (!song) return getAssetUrl('/assets/choir/choir_01.jpg');
+    if (song.thumbnailUrl && song.thumbnailUrl.trim()) {
+      return getAssetUrl(song.thumbnailUrl);
+    }
     if (song.id === 'song-nimzima' || song.id === 'song-jumuiya') {
       return getAssetUrl('/assets/choir/choir_04.jpg');
     }
     return getAssetUrl('/assets/choir/choir_01.jpg');
+  };
+
+  const renderSongRow = (song: Song, songIdx: number) => {
+    const isThisPlaying = currentSong.id === song.id && isPlaying;
+    const globalIndex = songs.findIndex((s) => s.id === song.id) + 1;
+
+    return (
+      <div
+        key={song.id}
+        className="group relative p-3 sm:p-4 hover:bg-[#F4EFE6]/80 transition-colors duration-150 flex items-center justify-between gap-3 sm:gap-4 select-none"
+        style={{
+          animationDelay: `${songIdx * 50}ms`
+        }}
+      >
+        {/* Left: Number (or Animated Wave when playing) + Cover photo */}
+        <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+          <div className="w-7 sm:w-9 text-right shrink-0 flex items-center justify-end">
+            {isThisPlaying ? (
+              <div className="flex items-end justify-end gap-0.5 h-4 w-5 text-[#1058A8] shrink-0">
+                <span className="w-1 bg-[#1058A8] rounded-full animate-bounce h-2.5 motion-reduce:animate-none" />
+                <span className="w-1 bg-[#1058A8] rounded-full animate-bounce h-4 motion-reduce:animate-none [animation-delay:150ms]" />
+                <span className="w-1 bg-[#1058A8] rounded-full animate-bounce h-3 motion-reduce:animate-none [animation-delay:300ms]" />
+              </div>
+            ) : (
+              <span className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]/40 group-hover:text-[#0C2340]/70 transition-colors">
+                {globalIndex > 0 ? globalIndex : songIdx + 1}
+              </span>
+            )}
+          </div>
+
+          <div 
+            onClick={() => handleSongNameClick(song)}
+            onDoubleClick={(e) => handleSongNameDoubleClick(song, e)}
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] cursor-pointer shadow-2xs relative hover:opacity-95 transition-opacity"
+            title={lang === 'sw' ? `${song.title} — Bofya mara mbili kufungua kichezaji` : `${song.title} — Double-tap to open player`}
+          >
+            <img
+              src={getCleanSongCover(song)}
+              alt={song.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
+          </div>
+        </div>
+
+        {/* Song Title & Composer */}
+        <div 
+          onClick={() => handleSongNameClick(song)}
+          onDoubleClick={(e) => handleSongNameDoubleClick(song, e)}
+          className="min-w-0 max-w-xs sm:max-w-md shrink-0 cursor-pointer"
+          title={lang === 'sw' ? `${song.title} — Bofya mara mbili kufungua kichezaji` : `${song.title} — Double-tap to pop up player`}
+        >
+          <h3 
+            className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] truncate leading-tight hover:text-[#1058A8] transition-colors"
+          >
+            {lang === 'sw' ? (song.titleSwahili || song.title) : song.title}
+          </h3>
+          <p className="font-source text-xs text-slate-600 truncate mt-0.5">
+            {song.composer}
+          </p>
+        </div>
+
+        {/* Thin dotted line like a book contents page */}
+        <div className="border-b border-dotted border-[#0C2340]/30 flex-1 mx-1 sm:mx-3 my-auto min-w-[12px] hidden sm:block" />
+
+        {/* Mass placement & duration */}
+        <div className="font-source text-xs text-slate-600 shrink-0 hidden md:block whitespace-nowrap">
+          <span>{lang === 'sw' ? (song.partOfMassSwahili || song.partOfMass) : song.partOfMass}</span>
+          <span className="mx-1.5 text-slate-400">·</span>
+          <span className="tabular-nums font-medium text-[#0C2340]">{song.duration}</span>
+        </div>
+
+        {/* Right Controls */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {song.sheetMusicAvailable && (
+            <button
+              onClick={() => addToCart({
+                id: `sheet-${song.id}`,
+                name: `Noti za ${song.title} (SATB PDF)`,
+                nameSw: `Noti za ${song.title} (SATB PDF)`,
+                type: 'sheet_music',
+                priceKes: song.scorePriceKes,
+                priceUsd: 2.50,
+                description: `Official SATB 4-part sheet music score for ${song.title}`,
+                descriptionSw: `Noti rasmi za sauti nne (SATB) za ${song.title}`,
+                image: 'sheet_music_hymnal',
+                downloadable: true
+              })}
+              className="text-xs font-semibold text-[#1058A8] hover:text-[#0C2340] hover:underline cursor-pointer font-source shrink-0"
+            >
+              {lang === 'sw' 
+                ? `Nunua Noti (${formatPrice(song.scorePriceKes)})` 
+                : `Buy Score (${formatPrice(song.scorePriceKes)})`}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentSong.id === song.id) {
+                togglePlay();
+              } else {
+                playSong(song);
+              }
+            }}
+            className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-[#1058A8] hover:bg-[#0E56A6] active:scale-90 text-white flex items-center justify-center shadow-2xs transition-all cursor-pointer group-hover:translate-x-1 motion-reduce:transform-none"
+            aria-label={isThisPlaying ? 'Pause song' : 'Play song'}
+            title={isThisPlaying ? (lang === 'sw' ? 'Simamisha wimbo' : 'Pause song') : (lang === 'sw' ? 'Sikiliza wimbo' : 'Play song')}
+          >
+            {isThisPlaying ? (
+              <Pause className="w-3.5 h-3.5 fill-current" />
+            ) : (
+              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+            )}
+          </button>
+
+          {/* 3-dot menu */}
+          <div className="relative row-menu-container">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenRowMenuId(openRowMenuId === song.id ? null : song.id);
+              }}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-[#0C2340] hover:bg-[#0C2340]/10 transition-colors cursor-pointer"
+              aria-label="More options"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
+            {openRowMenuId === song.id && (
+              <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-xl border border-[#0C2340]/15 py-1 z-30 text-xs font-source animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentSong.id !== song.id) {
+                      playSong(song);
+                    }
+                    setIsNowPlayingExpanded(true);
+                    setOpenRowMenuId(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer font-medium"
+                >
+                  <Music2 className="w-3.5 h-3.5 text-[#1058A8] shrink-0" />
+                  <span>{lang === 'sw' ? 'Fungua Kichezaji Kamili' : 'Open Full Player'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openVideoModal(song);
+                    setOpenRowMenuId(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer"
+                >
+                  <Film className="w-3.5 h-3.5 text-[#1058A8] shrink-0" />
+                  <span>{lang === 'sw' ? 'Tazama Video Ndani ya Wavuti' : 'Watch Video In-App'}</span>
+                </button>
+                <a
+                  href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpenRowMenuId(null)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-[#1058A8] shrink-0" />
+                  <span>{lang === 'sw' ? 'Tazama kwenye YouTube' : 'Watch on YouTube'}</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentSong.id !== song.id) {
+                      playSong(song);
+                    }
+                    setHymnalTab('lyrics');
+                    setIsLyricsOpen(true);
+                    setIsNowPlayingExpanded(true);
+                    setOpenRowMenuId(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#1058A8] shrink-0" />
+                  <span>{lang === 'sw' ? 'Maneno ya Wimbo (Lyrics)' : 'View Lyrics'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openSupportModal(song.title);
+                    setOpenRowMenuId(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer border-t border-[#0C2340]/10"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#1058A8]" />
+                  <span>{lang === 'sw' ? 'Pakua Video (Saidia Kwaya)' : 'Download Video (Support)'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(song.youtubeUrl || window.location.href);
+                    setOpenRowMenuId(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer border-t border-[#0C2340]/10"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-[#1058A8]" />
+                  <span>{lang === 'sw' ? 'Nakili Kiungo' : 'Copy Link'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -409,18 +646,21 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
             >
               <option value="all">{lang === 'sw' ? 'Nyimbo zote' : 'All songs'}</option>
               <optgroup label={lang === 'sw' ? 'Sehemu ya Misa' : 'Mass parts'}>
-                <option value="entrance">Entrance</option>
-                <option value="offertory">Offertory</option>
-                <option value="communion">Communion</option>
-                <option value="meditation">Meditation</option>
-                <option value="recessional">Recessional</option>
+                <option value="entrance">{lang === 'sw' ? 'Wimbo wa Kuingia (Entrance)' : 'Entrance'}</option>
+                <option value="kyrie_gloria">{lang === 'sw' ? 'Huruma na Utukufu (Kyrie / Gloria)' : 'Kyrie & Gloria'}</option>
+                <option value="meditation">{lang === 'sw' ? 'Tafakari / Zaburi (Meditation)' : 'Meditation & Psalm'}</option>
+                <option value="offertory">{lang === 'sw' ? 'Sadaka / Matoleo (Offertory)' : 'Offertory'}</option>
+                <option value="sanctus_agnus">{lang === 'sw' ? 'Mtakatifu na Mwana Kondoo' : 'Sanctus & Agnus Dei'}</option>
+                <option value="communion">{lang === 'sw' ? 'Komunyo / Ekaristi (Communion)' : 'Communion'}</option>
+                <option value="thanksgiving">{lang === 'sw' ? 'Shukrani na Sifa (Thanksgiving)' : 'Thanksgiving & Praise'}</option>
+                <option value="recessional">{lang === 'sw' ? 'Wimbo wa Kutoka (Recessional)' : 'Recessional'}</option>
               </optgroup>
               <optgroup label={lang === 'sw' ? 'Majira ya Kiliturujia' : 'Liturgical seasons'}>
-                <option value="ordinary">Ordinary time</option>
-                <option value="advent">Advent</option>
-                <option value="lent">Lent</option>
-                <option value="easter">Easter</option>
-                <option value="christmas">Christmas</option>
+                <option value="ordinary">{lang === 'sw' ? 'Wakati wa Kawaida' : 'Ordinary time'}</option>
+                <option value="advent">{lang === 'sw' ? 'Majilio' : 'Advent'}</option>
+                <option value="lent">{lang === 'sw' ? 'Kwaresima' : 'Lent'}</option>
+                <option value="easter">{lang === 'sw' ? 'Pasaka' : 'Easter'}</option>
+                <option value="christmas">{lang === 'sw' ? 'Krismasi' : 'Christmas'}</option>
               </optgroup>
             </select>
           </div>
@@ -446,263 +686,79 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
               </p>
             </div>
           ) : (
-            // Render groups in order: Wimbo wa Kuingia, Wimbo wa Matoleo, Komunyo, Tafakari, Wimbo wa Kutoka
-            MASS_GROUPS.map((group) => {
-              const groupSongs = filteredSongs.filter((song) =>
-                group.matchParts.some((p) => song.partOfMass.toLowerCase().includes(p.toLowerCase()))
-              );
+            <>
+              {/* Standard Mass Group sections */}
+              {MASS_GROUPS.map((group) => {
+                const groupSongs = filteredSongs.filter((song) =>
+                  group.matchParts.some((p) => (song.partOfMass || '').toLowerCase().includes(p.toLowerCase()))
+                );
 
-              // Step 5: Hide any group with no songs
-              if (groupSongs.length === 0) return null;
+                if (groupSongs.length === 0) return null;
 
-              return (
-                <section 
-                  key={group.id} 
-                  className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
-                >
-                  {/* Group Heading: Swahili in serif font, English beneath, thin woven border strip */}
-                  <div className="px-6 pt-5 pb-3 bg-white">
-                    <div className="flex items-baseline justify-between">
-                      <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
-                        {group.nameSw}
-                      </h2>
-                      <span className="font-source text-xs text-slate-500">
-                        {group.nameEn}
-                      </span>
+                return (
+                  <section 
+                    key={group.id} 
+                    className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
+                  >
+                    {/* Group Heading: Swahili in serif font, English beneath, thin woven border strip */}
+                    <div className="px-6 pt-5 pb-3 bg-white">
+                      <div className="flex items-baseline justify-between">
+                        <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
+                          {group.nameSw}
+                        </h2>
+                        <span className="font-source text-xs text-slate-500">
+                          {group.nameEn}
+                        </span>
+                      </div>
+                      {/* Thin woven border strip under each heading */}
+                      <div className="mt-2.5 -mx-6">
+                        <AfricanGeometricBorder />
+                      </div>
                     </div>
-                    {/* Thin woven border strip under each heading */}
-                    <div className="mt-2.5 -mx-6">
-                      <AfricanGeometricBorder />
+
+                    {/* Songs Rows */}
+                    <div className="divide-y divide-[#0C2340]/10">
+                      {groupSongs.map((song, songIdx) => renderSongRow(song, songIdx))}
                     </div>
-                  </div>
+                  </section>
+                );
+              })}
 
-                  {/* Songs Rows inside the printed songbook contents page */}
-                  <div className="divide-y divide-[#0C2340]/10">
-                    {groupSongs.map((song, songIdx) => {
-                      const isThisPlaying = currentSong.id === song.id && isPlaying;
-                      const globalIndex = songs.findIndex((s) => s.id === song.id) + 1;
+              {/* Unassigned / Custom Category Hymns so no added song is ever omitted */}
+              {(() => {
+                const unassignedSongs = filteredSongs.filter((song) =>
+                  !MASS_GROUPS.some((group) =>
+                    group.matchParts.some((p) => (song.partOfMass || '').toLowerCase().includes(p.toLowerCase()))
+                  )
+                );
 
-                      return (
-                        <div
-                          key={song.id}
-                          className="group relative p-3 sm:p-4 hover:bg-[#F4EFE6]/80 transition-colors duration-150 flex items-center justify-between gap-3 sm:gap-4 select-none"
-                          style={{
-                            animationDelay: `${songIdx * 50}ms`
-                          }}
-                        >
-                          {/* Left: Number (or Animated Wave when playing) + Cover photo */}
-                          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-                            {/* Large serif number (1, 2, 3...) or small animated wave when playing */}
-                            <div className="w-7 sm:w-9 text-right shrink-0 flex items-center justify-end">
-                              {isThisPlaying ? (
-                                <div className="flex items-end justify-end gap-0.5 h-4 w-5 text-[#1058A8] shrink-0">
-                                  <span className="w-1 bg-[#1058A8] rounded-full animate-bounce h-2.5 motion-reduce:animate-none" />
-                                  <span className="w-1 bg-[#1058A8] rounded-full animate-bounce h-4 motion-reduce:animate-none [animation-delay:150ms]" />
-                                  <span className="w-1 bg-[#1058A8] rounded-full animate-bounce h-3 motion-reduce:animate-none [animation-delay:300ms]" />
-                                </div>
-                              ) : (
-                                <span className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]/40 group-hover:text-[#0C2340]/70 transition-colors">
-                                  {globalIndex}
-                                </span>
-                              )}
-                            </div>
+                if (unassignedSongs.length === 0) return null;
 
-                            {/* Small square cover photo */}
-                            <div 
-                              onClick={() => handleSongNameClick(song)}
-                              onDoubleClick={(e) => handleSongNameDoubleClick(song, e)}
-                              className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] cursor-pointer shadow-2xs relative hover:opacity-95 transition-opacity"
-                              title={lang === 'sw' ? `${song.title} — Bofya mara mbili kufungua kichezaji` : `${song.title} — Double-tap to open player`}
-                            >
-                              <img
-                                src={getCleanSongCover(song)}
-                                alt={song.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                              />
-                            </div>
-                          </div>
+                return (
+                  <section 
+                    className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
+                  >
+                    <div className="px-6 pt-5 pb-3 bg-white">
+                      <div className="flex items-baseline justify-between">
+                        <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
+                          {lang === 'sw' ? 'Nyimbo Nyingine Zilizorekodiwa' : 'Other Sacred Hymns & Chants'}
+                        </h2>
+                        <span className="font-source text-xs text-slate-500">
+                          {lang === 'sw' ? `${unassignedSongs.length} nyimbo` : `${unassignedSongs.length} songs`}
+                        </span>
+                      </div>
+                      <div className="mt-2.5 -mx-6">
+                        <AfricanGeometricBorder />
+                      </div>
+                    </div>
 
-                          {/* Song Title & Composer - Double tap pops up player */}
-                          <div 
-                            onClick={() => handleSongNameClick(song)}
-                            onDoubleClick={(e) => handleSongNameDoubleClick(song, e)}
-                            className="min-w-0 max-w-xs sm:max-w-md shrink-0 cursor-pointer"
-                            title={lang === 'sw' ? `${song.title} — Bofya mara mbili kufungua kichezaji` : `${song.title} — Double-tap to pop up player`}
-                          >
-                            <h3 
-                              className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340] truncate leading-tight hover:text-[#1058A8] transition-colors"
-                            >
-                              {lang === 'sw' ? song.titleSwahili : song.title}
-                            </h3>
-                            <p className="font-source text-xs text-slate-600 truncate mt-0.5">
-                              {song.composer}
-                            </p>
-                          </div>
-
-                          {/* Thin dotted line like a book contents page */}
-                          <div className="border-b border-dotted border-[#0C2340]/30 flex-1 mx-1 sm:mx-3 my-auto min-w-[12px] hidden sm:block" />
-
-                          {/* Mass placement & duration: e.g. Meditation · 4:36 */}
-                          <div className="font-source text-xs text-slate-600 shrink-0 hidden md:block whitespace-nowrap">
-                            <span>{lang === 'sw' ? song.partOfMassSwahili : song.partOfMass}</span>
-                            <span className="mx-1.5 text-slate-400">·</span>
-                            <span className="tabular-nums font-medium text-[#0C2340]">{song.duration}</span>
-                          </div>
-
-                          {/* Right Controls: Buy Score text link + Play button + 3-dot menu */}
-                          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                            
-                            {/* Buy Score as small text link with price (no large button!) */}
-                            {song.sheetMusicAvailable && (
-                              <button
-                                onClick={() => addToCart({
-                                  id: `sheet-${song.id}`,
-                                  name: `Noti za ${song.title} (SATB PDF)`,
-                                  nameSw: `Noti za ${song.title} (SATB PDF)`,
-                                  type: 'sheet_music',
-                                  priceKes: song.scorePriceKes,
-                                  priceUsd: 2.50,
-                                  description: `Official SATB 4-part sheet music score for ${song.title}`,
-                                  descriptionSw: `Noti rasmi za sauti nne (SATB) za ${song.title}`,
-                                  image: 'sheet_music_hymnal',
-                                  downloadable: true
-                                })}
-                                className="text-xs font-semibold text-[#1058A8] hover:text-[#0C2340] hover:underline cursor-pointer font-source shrink-0"
-                              >
-                                {lang === 'sw' 
-                                  ? `Nunua Noti (${formatPrice(song.scorePriceKes)})` 
-                                  : `Buy Score (${formatPrice(song.scorePriceKes)})`}
-                              </button>
-                            )}
-
-                            {/* One circular play button: slides 4px on hover */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (currentSong.id === song.id) {
-                                  togglePlay();
-                                } else {
-                                  playSong(song);
-                                }
-                              }}
-                              className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-[#1058A8] hover:bg-[#0E56A6] active:scale-90 text-white flex items-center justify-center shadow-2xs transition-all cursor-pointer group-hover:translate-x-1 motion-reduce:transform-none"
-                              aria-label={isThisPlaying ? 'Pause song' : 'Play song'}
-                              title={isThisPlaying ? (lang === 'sw' ? 'Simamisha wimbo' : 'Pause song') : (lang === 'sw' ? 'Sikiliza wimbo' : 'Play song')}
-                            >
-                              {isThisPlaying ? (
-                                <Pause className="w-3.5 h-3.5 fill-current" />
-                              ) : (
-                                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                              )}
-                            </button>
-
-                            {/* Small 3-dot menu at end of row: contains Open Player, In-app Video, YouTube, Lyrics, Share */}
-                            <div className="relative row-menu-container">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenRowMenuId(openRowMenuId === song.id ? null : song.id);
-                                }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-[#0C2340] hover:bg-[#0C2340]/10 transition-colors cursor-pointer"
-                                aria-label="More options"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-
-                              {openRowMenuId === song.id && (
-                                <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-xl border border-[#0C2340]/15 py-1 z-30 text-xs font-source animate-in fade-in zoom-in-95 duration-150">
-                                  {/* Open Full Player / Hymnal */}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (currentSong.id !== song.id) {
-                                        playSong(song);
-                                      }
-                                      setIsNowPlayingExpanded(true);
-                                      setOpenRowMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer font-medium"
-                                  >
-                                    <Music2 className="w-3.5 h-3.5 text-[#1058A8] shrink-0" />
-                                    <span>{lang === 'sw' ? 'Fungua Kichezaji Kamili' : 'Open Full Player'}</span>
-                                  </button>
-                                  {/* In-app Video Preview */}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      openVideoModal(song);
-                                      setOpenRowMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer"
-                                  >
-                                    <RealYouTubeIcon size={14} variant="monochrome" className="text-red-600 shrink-0" />
-                                    <span>{lang === 'sw' ? 'Tazama Video Tovutini' : 'Preview Video in App'}</span>
-                                  </button>
-
-                                  {/* YouTube link */}
-                                  <a
-                                    href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => setOpenRowMenuId(null)}
-                                    className="flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors"
-                                  >
-                                    <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                                    <span>{lang === 'sw' ? 'Fungua YouTube' : 'Open in YouTube'}</span>
-                                  </a>
-
-                                  {/* Lyrics button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      playSong(song);
-                                      setIsLyricsOpen(true);
-                                      setOpenRowMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer"
-                                  >
-                                    <FileText className="w-3.5 h-3.5 text-[#1058A8]" />
-                                    <span>{lang === 'sw' ? 'Soma Maneno' : 'Read Lyrics'}</span>
-                                  </button>
-
-                                  {/* Download Video (Support Choir) */}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      openSupportModal(song.title);
-                                      setOpenRowMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer border-t border-[#0C2340]/10"
-                                  >
-                                    <Download className="w-3.5 h-3.5 text-[#1058A8]" />
-                                    <span>{lang === 'sw' ? 'Pakua Video (Saidia Kwaya)' : 'Download Video (Support)'}</span>
-                                  </button>
-
-                                  {/* Share link */}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      navigator.clipboard?.writeText(song.youtubeUrl || window.location.href);
-                                      setOpenRowMenuId(null);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer border-t border-[#0C2340]/10"
-                                  >
-                                    <Share2 className="w-3.5 h-3.5 text-[#1058A8]" />
-                                    <span>{lang === 'sw' ? 'Nakili Kiungo' : 'Copy Link'}</span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            })
+                    <div className="divide-y divide-[#0C2340]/10">
+                      {unassignedSongs.map((song, songIdx) => renderSongRow(song, songIdx))}
+                    </div>
+                  </section>
+                );
+              })()}
+            </>
           )}
         </div>
       )}

@@ -40,8 +40,11 @@ import {
   Disc,
   DollarSign,
   Sparkles,
-  Loader2
+  Loader2,
+  Database,
+  Copy
 } from 'lucide-react';
+import { SUPABASE_DATABASE_SQL } from '../lib/supabaseChoirData';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
@@ -126,6 +129,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [isPhotoUploadingToSupabase, setIsPhotoUploadingToSupabase] = useState<boolean>(false);
   const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
+  const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
+  const [copiedSql, setCopiedSql] = useState<boolean>(false);
 
   const handleSelectCategory = (cat: 'home' | 'about' | 'music' | 'events' | 'financials' | 'settings') => {
     setMainCategory(cat);
@@ -1457,6 +1462,36 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </button>
               </div>
 
+              {/* Supabase Realtime Storage & Database Status */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0C2340] to-[#1058A8] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm border border-white/10">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 text-emerald-400">
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm">Supabase Database & Storage Sync</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        Live & Connected
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/80 mt-0.5 font-source">
+                      Storage: <code className="bg-white/15 px-1 py-0.5 rounded font-mono text-[11px] text-amber-300">photos/data/songs.json</code> · 
+                      Database: <code className="bg-white/15 px-1 py-0.5 rounded font-mono text-[11px] text-sky-200">public.songs</code>
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowSqlModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold flex items-center gap-1.5 border border-white/20 cursor-pointer self-start sm:self-auto shrink-0 transition-colors"
+                >
+                  <Copy className="w-3.5 h-3.5 text-amber-300" />
+                  <span>View Database SQL Setup</span>
+                </button>
+              </div>
+
               <div className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-source">
@@ -2264,18 +2299,37 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   <label className="block font-bold text-[#0C2340] mb-1">Part of Mass</label>
                   <select
                     value={songForm.partOfMass}
-                    onChange={e => setSongForm({ ...songForm, partOfMass: e.target.value as any })}
+                    onChange={e => {
+                      const p = e.target.value;
+                      const swMap: Record<string, string> = {
+                        'Entrance': 'Wimbo wa Kuingia',
+                        'Kyrie': 'Bwana Utuhurumie',
+                        'Gloria': 'Utukufu kwa Mungu',
+                        'Meditation': 'Tafakari / Zaburi',
+                        'Offertory': 'Sadaka na Matoleo',
+                        'Sanctus': 'Mtakatifu',
+                        'Agnus Dei': 'Mwana Kondoo wa Mungu',
+                        'Communion': 'Komunyo na Ekaristi',
+                        'Thanksgiving': 'Shukrani na Sifa',
+                        'Recessional': 'Wimbo wa Kutoka'
+                      };
+                      setSongForm({
+                        ...songForm,
+                        partOfMass: p as any,
+                        partOfMassSwahili: swMap[p] || p
+                      });
+                    }}
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
                   >
                     <option value="Entrance">Entrance (Kuingia)</option>
                     <option value="Kyrie">Kyrie (Bwana Utuhurumie)</option>
                     <option value="Gloria">Gloria (Utukufu)</option>
-                    <option value="Meditation">Meditation / Psalm</option>
-                    <option value="Offertory">Offertory (Sadaka)</option>
+                    <option value="Meditation">Meditation / Psalm (Tafakari)</option>
+                    <option value="Offertory">Offertory (Sadaka / Matoleo)</option>
                     <option value="Sanctus">Sanctus (Mtakatifu)</option>
                     <option value="Agnus Dei">Agnus Dei (Mwana Kondoo)</option>
-                    <option value="Communion">Communion (Ekaristi)</option>
-                    <option value="Thanksgiving">Thanksgiving (Shukrani)</option>
+                    <option value="Communion">Communion (Komunyo / Ekaristi)</option>
+                    <option value="Thanksgiving">Thanksgiving (Shukrani na Sifa)</option>
                     <option value="Recessional">Recessional (Kutoka)</option>
                   </select>
                 </div>
@@ -2314,15 +2368,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </div>
               </div>
 
+              {/* Song Cover / Thumbnail Photo (Uploaded directly to Supabase Storage) */}
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">YouTube Video URL</label>
-                <input
-                  type="url"
-                  value={songForm.youtubeUrl}
-                  onChange={e => setSongForm({ ...songForm, youtubeUrl: e.target.value })}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                <ImageUploadField
+                  label="Song Cover / Thumbnail Photo (Stored on Supabase)"
+                  labelSw="Picha ya Jalada ya Wimbo (Supabase)"
+                  value={songForm.thumbnailUrl}
+                  onChange={(url) => setSongForm({ ...songForm, thumbnailUrl: url })}
+                  helpText="Upload an image to Supabase Storage bucket 'photos' or paste a direct image URL."
+                  aspectRatio="aspect-video"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">YouTube Video URL</label>
+                  <input
+                    type="url"
+                    value={songForm.youtubeUrl}
+                    onChange={e => setSongForm({ ...songForm, youtubeUrl: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Audio Preview File / Link</label>
+                  <input
+                    type="text"
+                    value={songForm.audioPreviewUrl}
+                    onChange={e => setSongForm({ ...songForm, audioPreviewUrl: e.target.value })}
+                    placeholder="preview.mp3 or Supabase audio URL"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
               </div>
 
               <div>
@@ -2353,6 +2431,51 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: SUPABASE DATABASE SQL SETUP */}
+      {showSqlModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
+              <div className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-[#1058A8]" />
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                  Supabase Database SQL Setup
+                </h3>
+              </div>
+              <button onClick={() => setShowSqlModal(false)} className="cursor-pointer text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 font-source leading-relaxed">
+              To enable direct relational SQL storage for all songs, albums, and gallery records in Supabase, run this script once in your Supabase Dashboard (<strong>SQL Editor → New Query → Run</strong>):
+            </p>
+
+            <pre className="p-4 bg-slate-950 text-emerald-400 font-mono text-[11px] rounded-xl overflow-x-auto max-h-72 border border-slate-800 leading-relaxed">
+              {SUPABASE_DATABASE_SQL}
+            </pre>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <span className="text-[11px] text-slate-500 font-source">
+                Songs & media are automatically saved to Supabase Storage (<code className="font-mono text-slate-700">photos/data/songs.json</code>).
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(SUPABASE_DATABASE_SQL);
+                  setCopiedSql(true);
+                  setTimeout(() => setCopiedSql(false), 2500);
+                }}
+                className="px-4 py-2 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors shrink-0"
+              >
+                {copiedSql ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedSql ? 'Copied to Clipboard!' : 'Copy SQL Script'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
