@@ -125,6 +125,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [photosSubView, setPhotosSubView] = useState<'gallery' | 'supabase'>('gallery');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [isPhotoUploadingToSupabase, setIsPhotoUploadingToSupabase] = useState<boolean>(false);
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
 
   const handleSelectCategory = (cat: 'home' | 'about' | 'music' | 'events' | 'financials' | 'settings') => {
     setMainCategory(cat);
@@ -669,7 +670,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     setIsLeaderModalOpen(false);
   };
 
-  // 7. Group Photos State & SUPABASE CLOUD UPLOADER
+  // 7. Group Photos State & Modal
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [photoForm, setPhotoForm] = useState({
@@ -686,6 +687,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   const openAddPhotoModal = () => {
     setEditingPhotoId(null);
+    setSelectedPhotoFile(null);
     setPhotoForm({
       title: '',
       titleSw: '',
@@ -702,6 +704,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   const openEditPhotoModal = (photo: ChoirGroupPhoto) => {
     setEditingPhotoId(photo.id);
+    setSelectedPhotoFile(null);
     setPhotoForm({
       title: photo.title,
       titleSw: photo.titleSw || photo.title,
@@ -716,78 +719,121 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     setIsPhotoModalOpen(true);
   };
 
-  // Direct Supabase Photo Uploader Handler
+  // Dedicated Group Photo Save & Supabase Storage Synchronizer
   const handleSavePhoto = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!photoForm.title.trim()) return;
+    if (!photoForm.title.trim()) {
+      alert('Please enter a photo title');
+      return;
+    }
 
-    let finalImageUrl = photoForm.customUrl.trim();
+    setIsPhotoUploadingToSupabase(true);
 
-    // If ImageUploadField provided a local base64/data URI, upload it to Supabase Storage
-    if (finalImageUrl.startsWith('data:image/')) {
-      try {
-        setIsPhotoUploadingToSupabase(true);
-        notify('Uploading image directly to Supabase Cloud...');
+    try {
+      let finalPublicUrl = photoForm.customUrl.trim();
 
-        // Convert data URL to Blob for Supabase binary upload
-        const response = await fetch(finalImageUrl);
-        const blob = await response.blob();
-
-        const fileExt = blob.type.split('/')[1] || 'jpg';
+      // Case 1: Physical File Selected from Device
+      if (selectedPhotoFile) {
+        notify('Uploading image file to Supabase Storage...');
+        const fileExt = selectedPhotoFile.name.split('.').pop() || 'jpg';
         const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
-        // 1. Storage Upload to 'photos' bucket
-        const { error: storageError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('photos')
-          .upload(cleanFileName, blob, { contentType: blob.type, upsert: false });
+          .upload(cleanFileName, selectedPhotoFile, {
+            contentType: selectedPhotoFile.type,
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (storageError) throw storageError;
+        if (uploadError) {
+          throw new Error(`Storage error: ${uploadError.message}`);
+        }
 
-        // 2. Obtain Public URL
         const { data: urlData } = supabase.storage
           .from('photos')
           .getPublicUrl(cleanFileName);
 
-        finalImageUrl = urlData.publicUrl;
+        finalPublicUrl = urlData.publicUrl;
+      }
+      // Case 2: Base64 or Blob Data URL from ImageUploadField
+      else if (finalPublicUrl.startsWith('data:image/') || finalPublicUrl.startsWith('blob:')) {
+        notify('Processing and streaming image to Supabase...');
+        const res = await fetch(finalPublicUrl);
+        const blob = await res.blob();
 
-        // 3. Write row to Supabase 'gallery' table
-        const { error: dbError } = await supabase
-          .from('gallery')
-          .insert([{ title: photoForm.title.trim(), image_url: finalImageUrl }]);
+        const fileExt = blob.type.split('/')[1] || 'jpg';
+        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
-        if (dbError) throw dbError;
+        const { error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(cleanFileName, blob, {
+            contentType: blob.type,
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        notify('Photo saved in Supabase Storage & Database table!');
-      } catch (err: any) {
-        console.error('Supabase upload error:', err);
-        alert(`Supabase upload failed: ${err.message}`);
+        if (uploadError) {
+          throw new Error(`Storage error: ${uploadError.message}`);
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('photos')
+          .getPublicUrl(cleanFileName);
+
+        finalPublicUrl = urlData.publicUrl;
+      }
+
+      // Check if image link was resolved
+      if (!finalPublicUrl) {
+        alert('Please choose an image file from your laptop or select a preset.');
         setIsPhotoUploadingToSupabase(false);
         return;
-      } finally {
-        setIsPhotoUploadingToSupabase(false);
       }
-    }
 
-    const payload = {
-      title: photoForm.title.trim(),
-      titleSw: photoForm.titleSw.trim() || photoForm.title.trim(),
-      description: photoForm.description.trim(),
-      descriptionSw: photoForm.descriptionSw.trim() || photoForm.description.trim(),
-      year: photoForm.year.trim() || '2024',
-      imageKey: photoForm.imageKey,
-      customUrl: finalImageUrl,
-      occasion: photoForm.occasion.trim(),
-      occasionSw: photoForm.occasionSw.trim() || photoForm.occasion.trim()
-    };
+      // Always write to Supabase 'gallery' table
+      const { error: dbError } = await supabase
+        .from('gallery')
+        .insert([
+          {
+            title: photoForm.title.trim(),
+            image_url: finalPublicUrl
+          }
+        ]);
 
-    if (editingPhotoId) {
-      updateGroupPhoto(editingPhotoId, payload);
-      notify(`Group photo "${payload.title}" updated in choir gallery!`);
-    } else {
-      addGroupPhoto(payload);
-      notify(`Group photo "${payload.title}" added to choir gallery!`);
+      if (dbError) {
+        throw new Error(`Database error: ${dbError.message}`);
+      }
+
+      // Sync with local context state
+      const payload = {
+        title: photoForm.title.trim(),
+        titleSw: photoForm.titleSw.trim() || photoForm.title.trim(),
+        description: photoForm.description.trim(),
+        descriptionSw: photoForm.descriptionSw.trim() || photoForm.description.trim(),
+        year: photoForm.year.trim() || '2024',
+        imageKey: photoForm.imageKey,
+        customUrl: finalPublicUrl,
+        occasion: photoForm.occasion.trim(),
+        occasionSw: photoForm.occasionSw.trim() || photoForm.occasion.trim()
+      };
+
+      if (editingPhotoId) {
+        updateGroupPhoto(editingPhotoId, payload);
+        notify(`Group photo "${payload.title}" updated in choir gallery!`);
+      } else {
+        addGroupPhoto(payload);
+        notify(`Group photo "${payload.title}" added to Supabase & Gallery!`);
+      }
+
+      setIsPhotoModalOpen(false);
+      setSelectedPhotoFile(null);
+    } catch (err: any) {
+      console.error('Supabase upload failure:', err);
+      alert(err.message || 'Failed to upload photo to Supabase');
+    } finally {
+      setIsPhotoUploadingToSupabase(false);
     }
-    setIsPhotoModalOpen(false);
   };
 
   // Backup / JSON Export & Import
@@ -1716,13 +1762,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </main>
       </div>
 
-      {/* MODAL: ADD / EDIT GROUP PHOTO (SUPABASE INTEGRATED) */}
+      {/* MODAL: ADD / EDIT GROUP PHOTO (SUPABASE DIRECT STORAGE & DATABASE INTEGRATION) */}
       {isPhotoModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                {editingPhotoId ? 'Edit Choir Group Photo' : 'Add Choir Group Photo'}
+                {editingPhotoId ? 'Edit Choir Group Photo' : 'Upload Group Photo to Supabase'}
               </h3>
               <button onClick={() => setIsPhotoModalOpen(false)} className="cursor-pointer">
                 <X className="w-5 h-5 text-[#0C2340]/60" />
@@ -1759,7 +1805,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     type="text"
                     value={photoForm.year}
                     onChange={e => setPhotoForm({ ...photoForm, year: e.target.value })}
-                    placeholder="2024"
+                    placeholder="2026"
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
                 </div>
@@ -1776,13 +1822,42 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 />
               </div>
 
+              {/* Direct File Picker Input for Laptop Images */}
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-2">
+                <label className="block font-bold text-[#0C2340] flex items-center gap-1.5">
+                  <Upload className="w-3.5 h-3.5 text-[#1058A8]" />
+                  <span>Choose Photo File from Laptop *</span>
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setSelectedPhotoFile(file);
+                    if (file) {
+                      setPhotoForm(prev => ({ ...prev, customUrl: '' }));
+                    }
+                  }}
+                  className="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#1058A8] file:text-white hover:file:bg-[#0C2340] cursor-pointer"
+                />
+                {selectedPhotoFile && (
+                  <p className="text-[11px] text-emerald-700 font-medium">
+                    Selected: {selectedPhotoFile.name} ({(selectedPhotoFile.size / 1024).toFixed(1)} KB)
+                  </p>
+                )}
+              </div>
+
+              {/* Or Existing Image URL / Preset */}
               <div>
                 <ImageUploadField
-                  label="Upload Gallery Photo or Choose Authentic Preset *"
-                  labelSw="Pakia Picha ya Albamu / Chagua Picha Halisi"
+                  label="Or Choose Authentic Preset / Paste External URL"
+                  labelSw="Chagua Picha Halisi au Weka URL"
                   value={photoForm.customUrl}
-                  onChange={val => setPhotoForm({ ...photoForm, customUrl: val })}
-                  helpText="Upload an image file from your computer (auto-saved to Supabase) or choose a preset."
+                  onChange={val => {
+                    setPhotoForm(prev => ({ ...prev, customUrl: val }));
+                    if (val) setSelectedPhotoFile(null);
+                  }}
+                  helpText="Optional: If you did not choose a file above, select a preset photo here."
                   aspectRatio="aspect-video"
                   presetOptions={[
                     { label: 'Full Ensemble Vestments', value: '/assets/choir/choir_01.jpg' },
@@ -1812,17 +1887,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 <button
                   type="submit"
                   disabled={isPhotoUploadingToSupabase}
-                  className="px-5 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-2 disabled:opacity-50"
                 >
                   {isPhotoUploadingToSupabase ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Uploading to Supabase...</span>
+                      <span>Sending to Supabase...</span>
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>{editingPhotoId ? 'Save Changes' : 'Upload & Add Photo'}</span>
+                      <span>{editingPhotoId ? 'Save Changes' : 'Upload & Save to Supabase'}</span>
                     </>
                   )}
                 </button>
