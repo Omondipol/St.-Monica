@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Upload, Link as LinkIcon, RotateCcw, Image as ImageIcon, Check } from 'lucide-react';
+import { Upload, Link as LinkIcon, RotateCcw, Image as ImageIcon, Check, Loader2, CloudCheck } from 'lucide-react';
 import { getAssetUrl } from '../utils/assetHelper';
+import { uploadImageToSupabase } from '../lib/supabase';
 
 export interface PresetImageOption {
   label: string;
@@ -39,6 +40,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const [urlInput, setUrlInput] = useState<string>(value);
   const [previewError, setPreviewError] = useState<boolean>(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
 
   const effectiveValue = value || defaultValue || '';
 
@@ -47,7 +50,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     setPreviewError(false);
   }, [value, defaultValue]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -57,15 +60,43 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     }
 
     setUploadedFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        onChange(reader.result);
-        setUrlInput(reader.result);
+    setIsUploading(true);
+    setUploadStatus('Uploading to Supabase Cloud...');
+
+    try {
+      const { url, error } = await uploadImageToSupabase(file, 'photos');
+      if (url) {
+        onChange(url);
+        setUrlInput(url);
         setPreviewError(false);
+        setUploadStatus('Uploaded to Supabase');
+      } else {
+        // Fallback to DataURL so user never loses image
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            onChange(reader.result);
+            setUrlInput(reader.result);
+            setPreviewError(false);
+            setUploadStatus('Loaded');
+          }
+        };
+        reader.readAsDataURL(file);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (_) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          onChange(reader.result);
+          setUrlInput(reader.result);
+          setPreviewError(false);
+          setUploadStatus('Loaded');
+        }
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleApplyUrl = () => {
@@ -159,11 +190,21 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
+              disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60"
             >
-              <Upload className="w-3.5 h-3.5" />
-              <span>Upload Photo</span>
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Uploading to Supabase...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload Photo</span>
+                </>
+              )}
             </button>
 
             <button
@@ -179,7 +220,12 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           {uploadedFileName && (
             <p className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium">
               <Check className="w-3.5 h-3.5" />
-              <span className="truncate max-w-[200px]">Uploaded: {uploadedFileName}</span>
+              <span className="truncate max-w-[200px]">{uploadedFileName}</span>
+              {uploadStatus && (
+                <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.2 rounded font-semibold ml-1">
+                  {uploadStatus}
+                </span>
+              )}
             </p>
           )}
 

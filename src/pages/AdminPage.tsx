@@ -196,6 +196,69 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     reader.readAsDataURL(file);
   };
 
+  const handleSaveLibSong = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!libTitle.trim()) return;
+
+    const payload = {
+      title: libTitle.trim(),
+      composer: libComposer.trim() || 'Traditional',
+      language: libLanguage,
+      categories: libCategories.length > 0 ? libCategories : ['kuingia'],
+      voices: libVoices,
+      lyrics: libLyrics.trim(),
+      pdfUrl: libPdfUrl.trim() || undefined,
+      audioUrl: libAudioUrl.trim() || undefined,
+      notesUrl: libNotesUrl.trim() || undefined,
+      notesFileName: libNotesFileName.trim() || undefined,
+      midiUrl: libMidiUrl.trim() || undefined,
+      midiFileName: libMidiFileName.trim() || undefined,
+      sharingStatus: libSharingStatus,
+      permissionGivenBy: libPermissionGivenBy.trim() || undefined,
+      permissionDate: libPermissionDate.trim() || undefined,
+      externalSourceUrl: libExternalSourceUrl.trim() || undefined
+    };
+
+    if (editingLibSongId) {
+      updateLibrarySong(editingLibSongId, payload);
+      notify(`Library score "${payload.title}" updated!`);
+    } else {
+      addLibrarySong(payload);
+      notify(`Library score "${payload.title}" added to Maktaba ya Noti!`);
+    }
+    setShowLibModal(false);
+  };
+
+  const handleImportCsv = () => {
+    if (!csvSpreadsheetText.trim()) return;
+    const lines = csvSpreadsheetText.trim().split('\n');
+    const newItems: LibrarySong[] = [];
+    lines.forEach((line, idx) => {
+      if (idx === 0 && line.toLowerCase().includes('title')) return;
+      const parts = line.split(',').map(p => p.trim());
+      if (parts[0]) {
+        newItems.push({
+          id: `lib-csv-${Date.now()}-${idx}`,
+          title: parts[0],
+          composer: parts[1] || 'Traditional',
+          language: (parts[2] as any) || 'Kiswahili',
+          categories: parts[3] ? [parts[3].toLowerCase()] : ['kuingia'],
+          voices: (parts[4] as any) || 'SATB',
+          lyrics: '',
+          sharingStatus: 'Public domain',
+          downloadCount: 0,
+          addedDate: new Date().toISOString().split('T')[0]
+        });
+      }
+    });
+    if (newItems.length > 0) {
+      bulkImportLibrarySongs(newItems);
+      notify(`Imported ${newItems.length} scores into Maktaba ya Noti!`);
+      setCsvSpreadsheetText('');
+      setShowBulkSpreadsheetModal(false);
+    }
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = passcode.trim().toLowerCase();
@@ -1587,33 +1650,137 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#EAF4FB] text-[#1058A8] text-[11px] font-bold px-2.5 py-0.5 rounded-full font-source">
+                      {leadersList.length} Leaders & Instructors
+                    </span>
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      Photo Uploads Authorized
+                    </span>
+                  </div>
+                  <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340] mt-1">
                     Trainers & Officials Recognition
                   </h2>
+                  <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
+                    Manage music directors, organists, trainers, and executive officers. Photo uploads are authorized for trainers and officials only.
+                  </p>
                 </div>
                 <button
                   onClick={openAddLeaderModal}
-                  className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Trainer / Official</span>
                 </button>
               </div>
 
+              <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl text-xs text-blue-900 font-source space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>Choirmaster Dynamic Synchronization</span>
+                </p>
+                <p className="text-slate-700">
+                  The photo and name uploaded for the <strong>Choirmaster & Music Director</strong> here are dynamically linked to the "Word from the Choirmaster" greeting on the homepage. Any photo updated here automatically updates the homepage.
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {leadersList.map((leader) => (
-                  <div key={leader.id} className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl shadow-xs space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-[#EAF4FB] flex items-center justify-center font-bold text-lg text-[#1058A8]">
-                        {leader.name.charAt(0)}
+                {leadersList.map((leader) => {
+                  const isChoirmaster = leader.id === 'ldr-director' || 
+                    (leader.role && (leader.role.toLowerCase().includes('choirmaster') || leader.role.toLowerCase().includes('music director')));
+
+                  return (
+                    <div 
+                      key={leader.id} 
+                      className={`p-5 bg-white border rounded-2xl shadow-xs space-y-3.5 flex flex-col justify-between transition-all ${
+                        isChoirmaster ? 'border-[#1058A8] ring-1 ring-[#7EC8F0]/40' : 'border-[#0C2340]/10 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3.5">
+                          {leader.photoUrl ? (
+                            <img
+                              src={getAssetUrl(leader.photoUrl)}
+                              alt={leader.name}
+                              className="w-14 h-14 rounded-full object-cover border-2 border-[#1058A8] shrink-0 shadow-xs"
+                            />
+                          ) : (
+                            <div className="w-14 h-14 rounded-full bg-[#EAF4FB] text-[#1058A8] border border-[#7EC8F0]/40 flex items-center justify-center font-bold text-lg shrink-0">
+                              {leader.name.charAt(0)}
+                            </div>
+                          )}
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                                leader.category === 'trainer' ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-blue-100 text-blue-900 border border-blue-200'
+                              }`}>
+                                {leader.category === 'trainer' ? 'Trainer' : 'Official'}
+                              </span>
+
+                              {isChoirmaster && (
+                                <span className="text-[10px] font-bold bg-[#1058A8] text-white px-2 py-0.5 rounded shadow-2xs">
+                                  🌟 Choirmaster (Homepage Linked)
+                                </span>
+                              )}
+                            </div>
+
+                            <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340] leading-tight truncate">
+                              {leader.name}
+                            </h3>
+                            <span className="text-xs font-bold text-[#1058A8] block font-source">
+                              {leader.role}
+                            </span>
+                            <span className="text-[11px] text-slate-500 font-source block mt-0.5">
+                              {leader.tenure || 'Serving the Parish'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {leader.responsibility && (
+                          <p className="text-xs text-slate-600 font-source line-clamp-2 pt-2 border-t border-slate-100">
+                            {leader.responsibility}
+                          </p>
+                        )}
+
+                        {leader.contact && (
+                          <p className="text-[11px] text-slate-500 font-source">
+                            Contact: <span className="font-semibold text-slate-700">{leader.contact}</span>
+                          </p>
+                        )}
                       </div>
-                      <div>
-                        <h3 className="font-eb-garamond text-base font-bold text-[#0C2340]">{leader.name}</h3>
-                        <span className="text-xs font-bold text-[#1058A8]">{leader.role}</span>
+
+                      <div className="pt-3 border-t border-[#0C2340]/10 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-400 font-source">
+                          {leader.photoUrl ? 'Custom photo uploaded' : 'Default emblem'}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openEditLeaderModal(leader)}
+                            className="px-3 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
+                            <span>Edit Photo & Profile</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm(`Delete leader/trainer "${leader.name}"?`)) {
+                                deleteLeader(leader.id);
+                                notify(`Official/Trainer "${leader.name}" removed.`);
+                              }
+                            }}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                            title="Delete leader"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1903,6 +2070,708 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL: ADD / EDIT TRAINER OR OFFICIAL (WITH SUPABASE PHOTO UPLOADER) */}
+      {isLeaderModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
+              <div>
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                  {editingLeaderId ? 'Edit Trainer / Official Profile' : 'Add New Trainer / Official'}
+                </h3>
+                <p className="text-[11px] text-slate-500 font-source mt-0.5">
+                  Only trainers and officials can have individual portrait photos.
+                </p>
+              </div>
+              <button onClick={() => setIsLeaderModalOpen(false)} className="cursor-pointer">
+                <X className="w-5 h-5 text-[#0C2340]/60" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLeader} className="space-y-4 text-xs font-source">
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={leaderForm.name}
+                  onChange={e => setLeaderForm({ ...leaderForm, name: e.target.value })}
+                  placeholder="e.g. Mwalimu Atebe Mark T."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Official Role (English) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={leaderForm.role}
+                    onChange={e => setLeaderForm({ ...leaderForm, role: e.target.value })}
+                    placeholder="e.g. Music Director & Choirmaster"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Wadhifa Rasmi (Kiswahili)</label>
+                  <input
+                    type="text"
+                    value={leaderForm.roleSw}
+                    onChange={e => setLeaderForm({ ...leaderForm, roleSw: e.target.value })}
+                    placeholder="e.g. Mkurugenzi wa Muziki na Mwalimu Mkuu"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Leadership Category *</label>
+                  <select
+                    value={leaderForm.category}
+                    onChange={e => setLeaderForm({ ...leaderForm, category: e.target.value as any })}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    <option value="trainer">Music Trainer / Instructor</option>
+                    <option value="official">Executive Official / Committee</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Tenure / Years</label>
+                  <input
+                    type="text"
+                    value={leaderForm.tenure}
+                    onChange={e => setLeaderForm({ ...leaderForm, tenure: e.target.value })}
+                    placeholder="Serving the Parish"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Responsibility / Role Summary</label>
+                <textarea
+                  rows={2}
+                  value={leaderForm.responsibility}
+                  onChange={e => setLeaderForm({ ...leaderForm, responsibility: e.target.value })}
+                  placeholder="Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony..."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Contact (Phone or Email)</label>
+                <input
+                  type="text"
+                  value={leaderForm.contact}
+                  onChange={e => setLeaderForm({ ...leaderForm, contact: e.target.value })}
+                  placeholder="0712 345 678"
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              {/* Photo Upload: Connects to Supabase Cloud */}
+              <div className="pt-2">
+                <ImageUploadField
+                  label="Portrait Photograph (Uploads to Supabase Cloud)"
+                  labelSw="Pakia Picha ya Mwalimu / Afisa (Supabase Cloud)"
+                  value={leaderForm.photoUrl}
+                  onChange={val => setLeaderForm(prev => ({ ...prev, photoUrl: val }))}
+                  defaultValue="/assets/choir/choir_leader_02.jpg"
+                  helpText="Upload a sharp portrait from your computer or choose from parish leaders."
+                  aspectRatio="aspect-square"
+                  presets={[
+                    { label: 'Choirmaster Atebe Mark T.', url: '/assets/choir/choir_leader_02.jpg' },
+                    { label: 'Mukomah Leshan (Organist)', url: '/assets/choir/choir_leader_03.jpg' },
+                    { label: 'Peter Otieno (Asst Moderator)', url: '/assets/choir/choir_leader_04.jpg' },
+                    { label: 'Damaris Ndeto (Moderator)', url: '/assets/choir/choir_leader_05.jpg' },
+                    { label: 'Terry Odhiambo (Secretary)', url: '/assets/choir/choir_leader_06.jpg' },
+                    { label: 'Ignatius Kipruto (Asst Secretary)', url: '/assets/choir/choir_leader_07.jpg' },
+                    { label: 'Peris W. Njuguna (Treasurer)', url: '/assets/choir/choir_leader_08.jpg' },
+                  ]}
+                />
+              </div>
+
+              {(leaderForm.role.toLowerCase().includes('choirmaster') || leaderForm.role.toLowerCase().includes('director')) && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] font-source">
+                  🌟 <strong>Homepage Choirmaster Notice:</strong> Because this role includes Choirmaster or Director, this photo and name will automatically synchronize with the homepage greeting ("Word from the Choirmaster").
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsLeaderModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingLeaderId ? 'Update Leader Profile' : 'Save Trainer / Official'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / EDIT REPERTOIRE SONG */}
+      {isSongModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {editingSongId ? 'Edit Repertoire Hymn' : 'Add New Recorded Hymn'}
+              </h3>
+              <button onClick={() => setIsSongModalOpen(false)} className="cursor-pointer">
+                <X className="w-5 h-5 text-[#0C2340]/60" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSong} className="space-y-4 text-xs font-source">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Song Title (English / Latin) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={songForm.title}
+                    onChange={e => setSongForm({ ...songForm, title: e.target.value })}
+                    placeholder="Machozi ya Imani"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Swahili Title</label>
+                  <input
+                    type="text"
+                    value={songForm.titleSwahili}
+                    onChange={e => setSongForm({ ...songForm, titleSwahili: e.target.value })}
+                    placeholder="Machozi ya Imani"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Composer</label>
+                  <input
+                    type="text"
+                    value={songForm.composer}
+                    onChange={e => setSongForm({ ...songForm, composer: e.target.value })}
+                    placeholder="Bernard Mukasa"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Year</label>
+                  <input
+                    type="number"
+                    value={songForm.year}
+                    onChange={e => setSongForm({ ...songForm, year: Number(e.target.value) || 2024 })}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Part of Mass</label>
+                  <select
+                    value={songForm.partOfMass}
+                    onChange={e => setSongForm({ ...songForm, partOfMass: e.target.value as any })}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    <option value="Entrance">Entrance (Kuingia)</option>
+                    <option value="Kyrie">Kyrie (Bwana Utuhurumie)</option>
+                    <option value="Gloria">Gloria (Utukufu)</option>
+                    <option value="Meditation">Meditation / Psalm</option>
+                    <option value="Offertory">Offertory (Sadaka)</option>
+                    <option value="Sanctus">Sanctus (Mtakatifu)</option>
+                    <option value="Agnus Dei">Agnus Dei (Mwana Kondoo)</option>
+                    <option value="Communion">Communion (Ekaristi)</option>
+                    <option value="Thanksgiving">Thanksgiving (Shukrani)</option>
+                    <option value="Recessional">Recessional (Kutoka)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Voicing</label>
+                  <input
+                    type="text"
+                    value={songForm.voicing}
+                    onChange={e => setSongForm({ ...songForm, voicing: e.target.value })}
+                    placeholder="SATB Polyphony"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Musical Key</label>
+                  <input
+                    type="text"
+                    value={songForm.musicalKey}
+                    onChange={e => setSongForm({ ...songForm, musicalKey: e.target.value })}
+                    placeholder="G Major"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Duration</label>
+                  <input
+                    type="text"
+                    value={songForm.duration}
+                    onChange={e => setSongForm({ ...songForm, duration: e.target.value })}
+                    placeholder="4:15"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">YouTube Video URL</label>
+                <input
+                  type="url"
+                  value={songForm.youtubeUrl}
+                  onChange={e => setSongForm({ ...songForm, youtubeUrl: e.target.value })}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Swahili Lyrics (Line by Line)</label>
+                <textarea
+                  rows={3}
+                  value={songForm.lyricsSwahiliText}
+                  onChange={e => setSongForm({ ...songForm, lyricsSwahiliText: e.target.value })}
+                  placeholder="1. Tazama ninakuja Ee Bwana..."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsSongModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingSongId ? 'Update Hymn' : 'Save Repertoire Hymn'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / EDIT SHEET MUSIC SCORE */}
+      {isSheetModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {editingSheetId ? 'Edit Sheet Music Score' : 'Add Sheet Music for Sale'}
+              </h3>
+              <button onClick={() => setIsSheetModalOpen(false)} className="cursor-pointer">
+                <X className="w-5 h-5 text-[#0C2340]/60" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSheet} className="space-y-4 text-xs font-source">
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Score Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={sheetForm.title}
+                  onChange={e => setSheetForm({ ...sheetForm, title: e.target.value })}
+                  placeholder="Machozi ya Imani SATB"
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Composer</label>
+                  <input
+                    type="text"
+                    value={sheetForm.composer}
+                    onChange={e => setSheetForm({ ...sheetForm, composer: e.target.value })}
+                    placeholder="Bernard Mukasa"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Notation Type</label>
+                  <select
+                    value={sheetForm.notationType}
+                    onChange={e => setSheetForm({ ...sheetForm, notationType: e.target.value as any })}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    <option value="Tonic Sol-fa & Staff">Tonic Sol-fa & Staff</option>
+                    <option value="Tonic Sol-fa">Tonic Sol-fa Only</option>
+                    <option value="Staff Notation">Staff Notation Only</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Price in KES *</label>
+                  <input
+                    type="number"
+                    value={sheetForm.priceKes}
+                    onChange={e => setSheetForm({ ...sheetForm, priceKes: Number(e.target.value) || 300 })}
+                    placeholder="300"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Voicing</label>
+                  <input
+                    type="text"
+                    value={sheetForm.voicing}
+                    onChange={e => setSheetForm({ ...sheetForm, voicing: e.target.value })}
+                    placeholder="SATB Choir & Organ"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={sheetForm.description}
+                  onChange={e => setSheetForm({ ...sheetForm, description: e.target.value })}
+                  placeholder="Complete 4-part SATB vocal sheet music in PDF format..."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsSheetModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingSheetId ? 'Update Score' : 'Save Score for Sale'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / EDIT LITURGICAL EVENT */}
+      {isEventModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {editingEventId ? 'Edit Parish Event' : 'Add New Liturgical Event'}
+              </h3>
+              <button onClick={() => setIsEventModalOpen(false)} className="cursor-pointer">
+                <X className="w-5 h-5 text-[#0C2340]/60" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEvent} className="space-y-4 text-xs font-source">
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Event Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={eventForm.title}
+                  onChange={e => setEventForm({ ...eventForm, title: e.target.value })}
+                  placeholder="Feast of St. Monica Solemn Liturgy"
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Date String</label>
+                  <input
+                    type="text"
+                    value={eventForm.fullDate}
+                    onChange={e => setEventForm({ ...eventForm, fullDate: e.target.value })}
+                    placeholder="27th August 2026"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Time</label>
+                  <input
+                    type="text"
+                    value={eventForm.time}
+                    onChange={e => setEventForm({ ...eventForm, time: e.target.value })}
+                    placeholder="10:00 AM – 1:00 PM"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Venue</label>
+                  <input
+                    type="text"
+                    value={eventForm.venue}
+                    onChange={e => setEventForm({ ...eventForm, venue: e.target.value })}
+                    placeholder="St. Monica's Catholic Church"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Category</label>
+                  <input
+                    type="text"
+                    value={eventForm.category}
+                    onChange={e => setEventForm({ ...eventForm, category: e.target.value })}
+                    placeholder="Feast Day / Festival"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={eventForm.description}
+                  onChange={e => setEventForm({ ...eventForm, description: e.target.value })}
+                  placeholder="Solemn high mass led by St. Monica Third Mass Choir..."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEventModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingEventId ? 'Update Event' : 'Save Event'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / EDIT MAKTABA YA NOTI LIBRARY SCORE */}
+      {showLibModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {editingLibSongId ? 'Edit Library Score' : 'Add Song to Maktaba ya Noti'}
+              </h3>
+              <button onClick={() => setShowLibModal(false)} className="cursor-pointer">
+                <X className="w-5 h-5 text-[#0C2340]/60" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLibSong} className="space-y-4 text-xs font-source">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Song Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={libTitle}
+                    onChange={e => setLibTitle(e.target.value)}
+                    placeholder="e.g. Bwana Unibadili"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Composer</label>
+                  <input
+                    type="text"
+                    value={libComposer}
+                    onChange={e => setLibComposer(e.target.value)}
+                    placeholder="Bernard Mukasa"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Language</label>
+                  <select
+                    value={libLanguage}
+                    onChange={e => setLibLanguage(e.target.value as any)}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    <option value="Kiswahili">Kiswahili</option>
+                    <option value="English">English</option>
+                    <option value="Latin">Latin</option>
+                    <option value="Kikuyu">Kikuyu</option>
+                    <option value="Dholuo">Dholuo</option>
+                    <option value="Kalenjin">Kalenjin</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Voices</label>
+                  <select
+                    value={libVoices}
+                    onChange={e => setLibVoices(e.target.value as any)}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    <option value="SATB">SATB (Four Part)</option>
+                    <option value="Unison">Unison</option>
+                    <option value="Solo">Solo</option>
+                    <option value="SSAA">SSAA</option>
+                    <option value="TTBB">TTBB</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Sharing / Copyright Status</label>
+                <select
+                  value={libSharingStatus}
+                  onChange={e => setLibSharingStatus(e.target.value as any)}
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                >
+                  <option value="Public domain">Public domain (Domini ya Umma)</option>
+                  <option value="Shared with permission">Shared with permission (Kwa Idhini)</option>
+                  <option value="Link only">Link only (Kiungo pekee)</option>
+                </select>
+              </div>
+
+              {/* Upload Sheet Music Notes / MIDI */}
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Score File (PDF / Image)</label>
+                  <input
+                    type="file"
+                    accept=".pdf,image/*"
+                    onChange={e => handleUploadFile(e, 'notes')}
+                    className="text-[11px] text-slate-600 block w-full"
+                  />
+                  {libNotesFileName && (
+                    <span className="text-[10px] text-emerald-700 font-semibold block mt-1 truncate">
+                      File: {libNotesFileName}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">MIDI Audio File</label>
+                  <input
+                    type="file"
+                    accept=".mid,.midi,audio/*"
+                    onChange={e => handleUploadFile(e, 'midi')}
+                    className="text-[11px] text-slate-600 block w-full"
+                  />
+                  {libMidiFileName && (
+                    <span className="text-[10px] text-emerald-700 font-semibold block mt-1 truncate">
+                      File: {libMidiFileName}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-[#0C2340] mb-1">Lyrics / Maneno</label>
+                <textarea
+                  rows={2}
+                  value={libLyrics}
+                  onChange={e => setLibLyrics(e.target.value)}
+                  placeholder="1. Ee Bwana unibadili..."
+                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowLibModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingLibSongId ? 'Update Library Score' : 'Save to Library'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: BULK SPREADSHEET IMPORT */}
+      {showBulkSpreadsheetModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 shadow-2xl border border-[#0C2340]/20">
+            <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">Bulk Import Songs (CSV)</h3>
+              <button onClick={() => setShowBulkSpreadsheetModal(false)} className="cursor-pointer">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-600 font-source">
+              Paste comma-separated rows: <code>Title, Composer, Language, Category, Voices</code>
+            </p>
+            <textarea
+              rows={6}
+              value={csvSpreadsheetText}
+              onChange={e => setCsvSpreadsheetText(e.target.value)}
+              placeholder="Title, Composer, Language, Category, Voices&#10;Bwana Unibadili, Bernard Mukasa, Kiswahili, kuingia, SATB"
+              className="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:border-[#1058A8] outline-none"
+            />
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowBulkSpreadsheetModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleImportCsv}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer"
+              >
+                Import CSV Rows
+              </button>
+            </div>
           </div>
         </div>
       )}

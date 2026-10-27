@@ -23,7 +23,9 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
     scriptureQuote,
     updateScriptureQuote,
     choirmasterMessage,
-    updateChoirmasterMessage
+    updateChoirmasterMessage,
+    leadersList,
+    updateLeader
   } = useChoir();
 
   // Active sub-section
@@ -168,7 +170,22 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
   const handleSaveChoirmaster = (e: React.FormEvent) => {
     e.preventDefault();
     updateChoirmasterMessage(choirmasterForm);
-    onNotify(lang === 'sw' ? 'Ujumbe na picha ya Mwalimu wa Kwaya zimehifadhiwa!' : 'Choirmaster message and photo saved live!');
+
+    // Also sync the director/choirmaster leader in Trainers & Officials roster
+    const directorLeader = leadersList?.find(l => 
+      l.id === 'ldr-director' || 
+      (l.role && (l.role.toLowerCase().includes('choirmaster') || l.role.toLowerCase().includes('music director')))
+    );
+    if (directorLeader) {
+      updateLeader(directorLeader.id, {
+        photoUrl: choirmasterForm.image,
+        name: choirmasterForm.name || directorLeader.name,
+        role: choirmasterForm.roleEn || directorLeader.role,
+        roleSw: choirmasterForm.roleSw || directorLeader.roleSw
+      });
+    }
+
+    onNotify(lang === 'sw' ? 'Ujumbe na picha ya Mwalimu wa Kwaya zimehifadhiwa na kuunganishwa!' : 'Choirmaster message and photo saved and synchronized across website!');
   };
 
   const currentSlide = heroSlides?.[selectedSlideIndex] || {
@@ -972,11 +989,19 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
             </div>
 
             <form onSubmit={handleSaveChoirmaster} className="space-y-6">
-              {/* Choirmaster Photo Upload */}
+              {/* Choirmaster Photo Upload & Dynamic Leader Link */}
               <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 space-y-4">
-                <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
-                  Choirmaster / Music Director Portrait Photo
-                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
+                    Choirmaster / Music Director Portrait Photo
+                  </span>
+                  <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 inline-flex items-center gap-1">
+                    <span>🔗 Linked to Trainers & Officials Profile</span>
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-source">
+                  Uploading or updating the Choirmaster's photo here or in the <strong>Trainers & Officials</strong> section automatically updates both the "Word from the Choirmaster" on the homepage and the parish leadership registry.
+                </p>
 
                 <ImageUploadField
                   label="Upload Choirmaster Photo or Enter URL"

@@ -383,6 +383,14 @@ export const AdminMembersTab: React.FC<AdminMembersTabProps> = ({ onNotify }) =>
                   ? 'Dhibiti waimbaji wote wanaoshiriki Misa ya Tatu, sauti zao (Soprano, Alto, Tenor, Bass), tarehe za uanachama, na pakua orodha rasmi ya PDF kwa kumbukumbu ya parokia.'
                   : 'Manage all choristers in St. Monica Third Mass Choir, classify their voice sections (SATB), renew annual memberships, and generate official printable PDF rosters.'}
               </p>
+              <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-[11px] font-semibold text-amber-900 font-source">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span>
+                  {lang === 'sw' 
+                    ? 'Kumbuka: Upakiaji wa picha umeruhusiwa kwa Walimu na Viongozi pekee (sehemu ya Walimu na Viongozi).'
+                    : 'Photo Policy: Member photos restricted. Only Trainers, Choirmasters & Officials have photo uploads.'}
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 shrink-0">

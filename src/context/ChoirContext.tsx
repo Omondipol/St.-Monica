@@ -1834,11 +1834,40 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addLeader = (leader: Omit<ChoirLeader, 'id'>) => {
     const id = `ldr-${Date.now()}`;
-    setLeadersList(prev => [...prev, { ...leader, id }]);
+    const newLeader = { ...leader, id };
+    setLeadersList(prev => [...prev, newLeader]);
+
+    // If new leader is designated as Choirmaster, sync with choirmasterMessage
+    const roleLower = (leader.role || '').toLowerCase();
+    if (roleLower.includes('choirmaster') || roleLower.includes('music director')) {
+      setChoirmasterMessage(prev => ({
+        ...prev,
+        name: leader.name || prev.name,
+        roleEn: leader.role || prev.roleEn,
+        roleSw: leader.roleSw || prev.roleSw,
+        image: leader.photoUrl || prev.image
+      }));
+    }
   };
 
   const updateLeader = (id: string, updated: Partial<ChoirLeader>) => {
-    setLeadersList(prev => prev.map(l => l.id === id ? { ...l, ...updated } : l));
+    setLeadersList(prev => {
+      const updatedList = prev.map(l => l.id === id ? { ...l, ...updated } : l);
+      const target = updatedList.find(l => l.id === id);
+      if (target) {
+        const roleLower = (target.role || '').toLowerCase();
+        if (target.id === 'ldr-director' || roleLower.includes('choirmaster') || roleLower.includes('music director')) {
+          setChoirmasterMessage(prevMsg => ({
+            ...prevMsg,
+            name: target.name || prevMsg.name,
+            roleEn: target.role || prevMsg.roleEn,
+            roleSw: target.roleSw || prevMsg.roleSw,
+            image: target.photoUrl || prevMsg.image
+          }));
+        }
+      }
+      return updatedList;
+    });
   };
 
   const deleteLeader = (id: string) => {

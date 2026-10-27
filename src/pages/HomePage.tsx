@@ -135,8 +135,20 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     scriptureQuote,
     choirmasterMessage,
     massesList,
-    openJoinModal
+    openJoinModal,
+    leadersList
   } = useChoir();
+
+  // Dynamically link Choirmaster profile from Trainers & Officials
+  const choirmasterLeader = leadersList?.find(l => 
+    l.id === 'ldr-director' || 
+    (l.role && (l.role.toLowerCase().includes('choirmaster') || l.role.toLowerCase().includes('music director')))
+  );
+  const choirmasterDisplayPhoto = choirmasterLeader?.photoUrl || choirmasterMessage?.image || '/assets/choir/choir_leader_02.jpg';
+  const choirmasterDisplayName = choirmasterLeader?.name || choirmasterMessage?.name || 'Mwalimu Atebe Mark T.';
+  const choirmasterDisplayRole = lang === 'sw'
+    ? (choirmasterLeader?.roleSw || choirmasterMessage?.roleSw || 'Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya')
+    : (choirmasterLeader?.role || choirmasterMessage?.roleEn || 'Director of Music & Choirmaster');
 
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -1129,12 +1141,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               <div className="pt-2 flex items-center gap-3.5">
                 <img
-                  src={getAssetUrl(
-                    choirmasterMessage?.image && !choirmasterMessage.image.includes('choirmaster_director_1791446339605') && !choirmasterMessage.image.includes('unsplash.com')
-                      ? choirmasterMessage.image
-                      : '/assets/choir/choir_leader_02.jpg'
-                  )}
-                  alt={choirmasterMessage?.name || "Mwalimu Atebe Mark T."}
+                  src={getAssetUrl(choirmasterDisplayPhoto)}
+                  alt={choirmasterDisplayName}
                   width={64}
                   height={64}
                   loading="lazy"
@@ -1142,12 +1150,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 />
                 <div>
                   <strong className="text-base font-bold text-[#0C2340] font-eb-garamond block">
-                    {choirmasterMessage?.name || "Mwalimu Joseph Otieno"}
+                    {choirmasterDisplayName}
                   </strong>
                   <span className="text-sm text-slate-700 font-source block">
-                    {lang === 'sw' 
-                      ? (choirmasterMessage?.roleSw || 'Mkurugenzi wa Muziki na Mwalimu Mkuu wa Kwaya') 
-                      : (choirmasterMessage?.roleEn || 'Director of Music & Choirmaster')}
+                    {choirmasterDisplayRole}
                   </span>
                 </div>
               </div>

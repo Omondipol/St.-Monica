@@ -271,7 +271,7 @@ create policy "Public posts delete" on public.posts for delete using (true);`}
           <div className="space-y-1">
             <p className="font-bold text-amber-950">Supabase API Key Configuration:</p>
             <p>
-              Your project URL is configured to <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">https://kobpqfbgpiwqdmehawsi.supabase.co</code>.
+              Your project URL is configured to <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">https://pzvpbixdefvztffjyrye.supabase.co</code>.
               To enable live cloud saves and real-time syncing, open <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">.env</code> and replace <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">VITE_SUPABASE_ANON_KEY=your_actual_anon_key_here</code> with your project's actual anon public key from the Supabase Project Dashboard (Project Settings → API).
             </p>
           </div>
