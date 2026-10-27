@@ -32,6 +32,128 @@ import { AdminPage } from './pages/AdminPage';
 import { LogoConceptsPage } from './pages/LogoConceptsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 
+// Supabase integration import
+import { supabase } from './lib/supabase';
+
+// Embedded Supabase Photo Uploader View
+function SupabasePhotoUploadView({ onNavigate }: { onNavigate: (route: string) => void }) {
+  const [title, setTitle] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<{ message: string; isError: boolean } | null>(null);
+
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!file || !title.trim()) {
+      setStatus({ message: 'Tafadhali weka maelezo/kichwa cha picha na uchague picha.', isError: true });
+      return;
+    }
+
+    setUploading(true);
+    setStatus({ message: 'Inapakia picha kwenye Supabase Storage...', isError: false });
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+
+      // 1. Upload to Supabase bucket 'photos'
+      const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(uniqueFileName, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      // 2. Obtain Public URL
+      const { data: urlData } = supabase.storage
+        .from('photos')
+        .getPublicUrl(uniqueFileName);
+
+      setStatus({ message: 'Inahifadhi kumbukumbu kwenye kanzidata...', isError: false });
+
+      // 3. Save into Supabase 'gallery' table
+      const { error: dbError } = await supabase
+        .from('gallery')
+        .insert([{ title: title.trim(), image_url: urlData.publicUrl }]);
+
+      if (dbError) throw dbError;
+
+      setTitle('');
+      setFile(null);
+      (e.target as HTMLFormElement).reset();
+      setStatus({ message: 'Picha imepakiwa na kuhifadhiwa kikamilifu!', isError: false });
+    } catch (err: any) {
+      console.error('Upload Error:', err);
+      setStatus({ message: `Hitilafu ya kupakia: ${err.message}`, isError: true });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-[#E5DFD7] p-6 sm:p-8">
+      <div className="flex items-center justify-between pb-4 mb-6 border-b border-[#E5DFD7]">
+        <div>
+          <h2 className="text-xl font-bold text-[#0C2340]">Pakia Picha Mpya</h2>
+          <p className="text-xs text-gray-500 mt-1">Supabase Storage & Database Portal</p>
+        </div>
+        <button
+          onClick={() => onNavigate('about-gallery')}
+          className="text-xs font-semibold text-[#0C2340] hover:text-[#E5A93C] underline cursor-pointer"
+        >
+          Tazama Galari &rarr;
+        </button>
+      </div>
+
+      <form onSubmit={handleUpload} className="space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-2">
+            Jina au Maelezo ya Picha
+          </label>
+          <input
+            type="text"
+            placeholder="Mfano: Misa ya Dominika, Parokia ya St. Monica"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={uploading}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0C2340] text-sm text-[#0C2340]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-2">
+            Chagua Faili ya Picha
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            disabled={uploading}
+            className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#0C2340] file:text-white hover:file:bg-[#1a365d] cursor-pointer"
+          />
+        </div>
+
+        {status && (
+          <div
+            className={`p-3 rounded-lg text-xs font-medium ${
+              status.isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+            }`}
+          >
+            {status.message}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={uploading}
+          className="w-full mt-2 py-3 px-4 bg-[#0C2340] hover:bg-[#1a365d] text-white font-bold text-sm rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {uploading ? 'Inapakia...' : 'Hifadhi Picha'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function ChoirApp() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
     if (typeof window !== 'undefined') {
@@ -40,7 +162,7 @@ function ChoirApp() {
         return 'admin';
       }
       const pathname = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-      if (['admin', 'admin-login', 'portal', 'usimamizi', 'privacy'].includes(pathname)) {
+      if (['admin', 'admin-login', 'portal', 'usimamizi', 'privacy', 'upload', 'pakia-picha'].includes(pathname)) {
         return pathname;
       }
       if (window.location.hash) {
@@ -76,7 +198,7 @@ function ChoirApp() {
           return;
         }
         const pathname = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-        if (['admin', 'admin-login', 'portal', 'usimamizi', 'privacy'].includes(pathname)) {
+        if (['admin', 'admin-login', 'portal', 'usimamizi', 'privacy', 'upload', 'pakia-picha'].includes(pathname)) {
           setCurrentRoute(pathname);
           setNavKey(Date.now());
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -100,7 +222,7 @@ function ChoirApp() {
     };
   }, []);
 
-  // Determine active view with full alias support so navigating back and forth never breaks
+  // Determine active view with full alias support
   const isHome = currentRoute === 'home' || currentRoute === '';
   const isAboutStory = ['about-story', 'about', 'story'].includes(currentRoute);
   const isAboutPatron = ['about-patron', 'patron'].includes(currentRoute);
@@ -118,11 +240,14 @@ function ChoirApp() {
   const isAdmin = ['admin', 'admin-login', 'portal', 'usimamizi'].includes(currentRoute);
   const isLogoConcepts = ['logo-concepts'].includes(currentRoute);
   const isPrivacy = ['privacy', 'privacy-policy'].includes(currentRoute);
+  
+  // Dedicated route for photo uploading
+  const isUpload = ['upload', 'pakia-picha', 'admin-upload'].includes(currentRoute);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#0C2340] flex flex-col font-source selection:bg-[#7EC8F0]/40 selection:text-[#0C2340] w-full max-w-full overflow-x-hidden">
       
-      {/* Skip to Content Link - First focusable element for accessibility */}
+      {/* Skip to Content Link */}
       <a 
         href="#main-content" 
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#E5A93C] focus:text-[#0C2340] focus:font-bold focus:rounded-lg focus:shadow-xl focus:outline-none font-source text-sm"
@@ -194,6 +319,11 @@ function ChoirApp() {
         )}
         {isPrivacy && (
           <PrivacyPage onNavigate={handleNavigate} />
+        )}
+
+        {/* Supabase Media Upload Route */}
+        {isUpload && (
+          <SupabasePhotoUploadView onNavigate={handleNavigate} />
         )}
       </main>
 
