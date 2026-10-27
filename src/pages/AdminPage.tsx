@@ -58,7 +58,7 @@ import { AdminFinancialsTab } from '../components/admin/AdminFinancialsTab';
 import { AdminCoreValuesTab } from '../components/admin/AdminCoreValuesTab';
 import { MediaManager } from '../components/MediaManager';
 import { triggerFileDownload } from '../utils/fileDownload';
-import { supabase } from '../lib/supabase';
+import { supabase, optimizeImageForUpload } from '../lib/supabase';
 
 interface AdminPageProps {
   onNavigateHome: () => void;
@@ -334,20 +334,20 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
   // 2. Choir Statistics & Ministry Numbers State
   const [statsForm, setStatsForm] = useState({
-    membersCount: choirStats?.membersCount ?? 48,
+    membersCount: choirStats?.membersCount ?? 56,
     yearsServing: choirStats?.yearsServing ?? 14,
     repertoireCount: choirStats?.repertoireCount ?? 12,
     sundayMassesPerMonth: choirStats?.sundayMassesPerMonth ?? 4,
     foundedYear: choirStats?.foundedYear ?? 2012,
     parish: choirStats?.parish ?? "St. Monica's Catholic Church, Nakuru",
-    churchAddress: choirStats?.churchAddress ?? "Section 58, Off Kanu Street, Nakuru, Kenya",
+    churchAddress: choirStats?.churchAddress ?? "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
     mpesaTill: choirStats?.mpesaTill ?? "8421092"
   });
 
   const handleSaveStats = (e: React.FormEvent) => {
     e.preventDefault();
     updateChoirStats({
-      membersCount: Number(statsForm.membersCount) || 48,
+      membersCount: Number(statsForm.membersCount) || 56,
       yearsServing: Number(statsForm.yearsServing) || 14,
       repertoireCount: Number(statsForm.repertoireCount) || 12,
       sundayMassesPerMonth: Number(statsForm.sundayMassesPerMonth) || 4,
@@ -741,11 +741,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     titleSw: '',
     description: '',
     descriptionSw: '',
-    year: '2026',
+    year: '',
     imageKey: 'choir_singing_moment' as ChoirGroupPhoto['imageKey'],
     customUrl: '',
-    occasion: 'Sunday High Mass',
-    occasionSw: 'Misa Kuu ya Jumapili'
+    occasion: 'Sunday Mass',
+    occasionSw: 'Misa ya Jumapili'
   });
 
   const openAddPhotoModal = () => {
@@ -756,11 +756,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       titleSw: '',
       description: '',
       descriptionSw: '',
-      year: '2026',
+      year: '',
       imageKey: 'choir_singing_moment',
       customUrl: '',
-      occasion: 'Sunday High Mass',
-      occasionSw: 'Misa Kuu ya Jumapili'
+      occasion: 'Sunday Mass',
+      occasionSw: 'Misa ya Jumapili'
     });
     setIsPhotoModalOpen(true);
   };
@@ -773,7 +773,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       titleSw: photo.titleSw || photo.title,
       description: photo.description,
       descriptionSw: photo.descriptionSw || photo.description,
-      year: photo.year,
+      year: photo.year || '',
       imageKey: photo.imageKey,
       customUrl: photo.customUrl || '',
       occasion: photo.occasion,
@@ -797,14 +797,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       // Case 1: Physical File Selected from Device
       if (selectedPhotoFile) {
-        notify('Inapakia faili kwenye Supabase Storage...');
-        const fileExt = selectedPhotoFile.name.split('.').pop() || 'jpg';
-        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+        notify('Inapakia picha...');
+        const optimized = await optimizeImageForUpload(selectedPhotoFile, 2000, 0.85);
+        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.jpg`;
 
         const { error: uploadError } = await supabase.storage
           .from('photos')
-          .upload(cleanFileName, selectedPhotoFile, {
-            contentType: selectedPhotoFile.type,
+          .upload(cleanFileName, optimized.blob, {
+            contentType: optimized.contentType,
             cacheControl: '3600',
             upsert: false
           });
@@ -821,17 +821,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       }
       // Case 2: Base64 or Blob Data URL from ImageUploadField
       else if (finalPublicUrl.startsWith('data:image/') || finalPublicUrl.startsWith('blob:')) {
-        notify('Inachakata picha kwenda Supabase...');
+        notify('Inachakata picha...');
         const res = await fetch(finalPublicUrl);
         const blob = await res.blob();
-
-        const fileExt = blob.type.split('/')[1] || 'jpg';
-        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+        const optimized = await optimizeImageForUpload(blob, 2000, 0.85);
+        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.jpg`;
 
         const { error: uploadError } = await supabase.storage
           .from('photos')
-          .upload(cleanFileName, blob, {
-            contentType: blob.type,
+          .upload(cleanFileName, optimized.blob, {
+            contentType: optimized.contentType,
             cacheControl: '3600',
             upsert: false
           });
@@ -849,7 +848,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       // Check if image link was resolved
       if (!finalPublicUrl) {
-        alert('Tafadhali chagua picha kutoka kwa kompyuta yako (Please choose a photo from your computer).');
+        alert('Tafadhali chagua picha (Please choose a photo).');
         setIsPhotoUploadingToSupabase(false);
         return;
       }
@@ -874,7 +873,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         titleSw: photoForm.titleSw.trim() || photoForm.title.trim(),
         description: photoForm.description.trim(),
         descriptionSw: photoForm.descriptionSw.trim() || photoForm.description.trim(),
-        year: photoForm.year.trim() || '2026',
+        year: photoForm.year.trim() || '',
         imageKey: photoForm.imageKey,
         customUrl: finalPublicUrl,
         occasion: photoForm.occasion.trim(),
@@ -1650,19 +1649,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-[#EAF4FB] text-[#1058A8] text-[11px] font-bold px-2.5 py-0.5 rounded-full font-source">
-                      {leadersList.length} Leaders & Instructors
-                    </span>
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                      Photo Uploads Authorized
-                    </span>
-                  </div>
-                  <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340] mt-1">
-                    Trainers & Officials Recognition
+                  <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+                    Trainers and Officials
                   </h2>
                   <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                    Manage music directors, organists, trainers, and executive officers. Photo uploads are authorized for trainers and officials only.
+                    Music directors, organists, trainers, and executive committee members.
                   </p>
                 </div>
                 <button
@@ -1674,14 +1665,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </button>
               </div>
 
-              <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl text-xs text-blue-900 font-source space-y-1">
-                <p className="font-bold flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>Choirmaster Dynamic Synchronization</span>
-                </p>
-                <p className="text-slate-700">
-                  The photo and name uploaded for the <strong>Choirmaster & Music Director</strong> here are dynamically linked to the "Word from the Choirmaster" greeting on the homepage. Any photo updated here automatically updates the homepage.
-                </p>
+              <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl text-xs text-blue-900 font-source">
+                This photo and name also appear in "A Word from the Choirmaster" on the home page.
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1808,7 +1793,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Supabase Cloud Media (Realtime)</span>
+                  <span>Photos</span>
                 </button>
               </div>
 
@@ -1822,7 +1807,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                         Choir Group Gallery & Ministry Photos
                       </h2>
                       <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                        Upload direct files to Supabase Cloud or link existing asset photographs.
+                        Add photos from your phone or computer.
                       </p>
                     </div>
                     <button
@@ -1842,10 +1827,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                             src={getAssetUrl(photo.customUrl || '/assets/choir/choir_01.jpg')}
                             alt={photo.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
-                          <span className="absolute top-2 left-2 bg-[#0C2340]/90 text-white text-xs px-2.5 py-0.5 rounded-lg shadow-xs">
-                            {photo.year}
-                          </span>
+                          {photo.year && photo.year.trim() !== '' && photo.year.trim() !== '2024' && (
+                            <span className="absolute top-2 left-2 bg-[#0C2340]/90 text-white text-xs px-2.5 py-0.5 rounded-lg shadow-xs">
+                              {photo.year}
+                            </span>
+                          )}
                         </div>
                         <div className="p-4 space-y-1">
                           <h4 className="font-eb-garamond font-bold text-[#0C2340] text-sm">{photo.title}</h4>
@@ -1935,7 +1923,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                {editingPhotoId ? 'Edit Choir Group Photo' : 'Upload Group Photo to Supabase'}
+                {editingPhotoId ? 'Edit Choir Group Photo' : 'Add Photo'}
               </h3>
               <button onClick={() => setIsPhotoModalOpen(false)} className="cursor-pointer">
                 <X className="w-5 h-5 text-[#0C2340]/60" />
@@ -1950,7 +1938,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   required
                   value={photoForm.title}
                   onChange={e => setPhotoForm({ ...photoForm, title: e.target.value })}
-                  placeholder="St. Monica Choir in Full Vestments"
+                  placeholder="e.g. The choir after Sunday Mass"
                   className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                 />
               </div>
@@ -1962,17 +1950,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     type="text"
                     value={photoForm.occasion}
                     onChange={e => setPhotoForm({ ...photoForm, occasion: e.target.value })}
-                    placeholder="Patronal Feast 27 August"
+                    placeholder="e.g. Sunday Mass or Thanksgiving"
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Year</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">Date or event (optional)</label>
                   <input
                     type="text"
                     value={photoForm.year}
                     onChange={e => setPhotoForm({ ...photoForm, year: e.target.value })}
-                    placeholder="2026"
+                    placeholder="e.g. Easter 2026 or 15 Aug"
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
                 </div>
@@ -1984,7 +1972,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   rows={2}
                   value={photoForm.description}
                   onChange={e => setPhotoForm({ ...photoForm, description: e.target.value })}
-                  placeholder="The whole choir gathered at the sanctuary steps..."
+                  placeholder="The choir gathered after Mass..."
                   className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                 />
               </div>
@@ -1993,7 +1981,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-2">
                 <label className="block font-bold text-[#0C2340] flex items-center gap-1.5">
                   <Upload className="w-3.5 h-3.5 text-[#1058A8]" />
-                  <span>Choose Photo File from Laptop *</span>
+                  <span>Choose photo from your phone or computer *</span>
                 </label>
                 <input
                   type="file"
@@ -2177,28 +2165,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               {/* Photo Upload: Connects to Supabase Cloud */}
               <div className="pt-2">
                 <ImageUploadField
-                  label="Portrait Photograph (Uploads to Supabase Cloud)"
-                  labelSw="Pakia Picha ya Mwalimu / Afisa (Supabase Cloud)"
+                  label="Portrait Photograph"
+                  labelSw="Picha ya Mwalimu au Afisa"
                   value={leaderForm.photoUrl}
                   onChange={val => setLeaderForm(prev => ({ ...prev, photoUrl: val }))}
                   defaultValue="/assets/choir/choirmaster_director.jpg"
-                  helpText="Upload a sharp portrait from your computer or choose from parish leaders."
+                  helpText="Upload a clear portrait from your phone or computer."
                   aspectRatio="aspect-square"
-                  presets={[
-                    { label: 'Choirmaster Atebe Mark T.', url: '/assets/choir/choirmaster_director.jpg' },
-                    { label: 'Mukomah Leshan (Organist)', url: '/assets/choir/choir_leader_03.jpg' },
-                    { label: 'Peter Otieno (Asst Moderator)', url: '/assets/choir/choir_leader_04.jpg' },
-                    { label: 'Damaris Ndeto (Moderator)', url: '/assets/choir/choir_leader_05.jpg' },
-                    { label: 'Terry Odhiambo (Secretary)', url: '/assets/choir/choir_leader_06.jpg' },
-                    { label: 'Ignatius Kipruto (Asst Secretary)', url: '/assets/choir/choir_leader_07.jpg' },
-                    { label: 'Peris W. Njuguna (Treasurer)', url: '/assets/choir/choir_leader_08.jpg' },
-                  ]}
                 />
               </div>
 
               {(leaderForm.role.toLowerCase().includes('choirmaster') || leaderForm.role.toLowerCase().includes('director')) && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] font-source">
-                  🌟 <strong>Homepage Choirmaster Notice:</strong> Because this role includes Choirmaster or Director, this photo and name will automatically synchronize with the homepage greeting ("Word from the Choirmaster").
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-xs font-source">
+                  This photo and name also appear in "A Word from the Choirmaster" on the home page.
                 </div>
               )}
 

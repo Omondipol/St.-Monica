@@ -46,8 +46,8 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
           </h1>
           <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
             {lang === 'sw'
-              ? 'Waimbaji wote arobaini na nane wa Kwaya ya Misa ya Tatu katika sare za kiliturujia na Misa.'
-              : 'The unified forty-eight choristers of St. Monica Third Mass Choir in liturgical vestments and Holy Mass.'}
+              ? 'Waimbaji wa Kwaya ya Misa ya Tatu katika sare za kwaya na Misa ya Jumapili.'
+              : 'Choristers of St. Monica Third Mass Choir in liturgical vestments and parish events.'}
           </p>
         </div>
         <AfricanGeometricBorder className="relative z-10" />
@@ -61,13 +61,13 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
         <div className="lg:col-span-7 aspect-16/10 relative overflow-hidden bg-slate-900">
           <img
             src={getAssetUrl('/assets/choir/choir_01.jpg')}
-            alt="St. Monica Catholic Choir in Full Vestments"
+            alt="St. Monica Catholic Choir"
             className="w-full h-full object-cover object-center"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/80 via-transparent to-transparent" />
           <span className="absolute bottom-4 left-4 bg-[#1058A8] text-white font-source text-xs px-3.5 py-1.5 rounded-xl font-semibold shadow-xs">
-            {lang === 'sw' ? 'Kwaya Nzima ya Mtakatifu Monika' : 'Full Ensemble — 48 Choristers'}
+            {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'Third Mass Choir, St. Monica Parish'}
           </span>
         </div>
 
@@ -81,8 +81,8 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
             </h2>
             <p className="text-sm text-[#0C2340]/80 font-source leading-relaxed">
               {lang === 'sw'
-                ? 'Katika Kwaya ya Mtakatifu Monika, hatutazami uimbaji kama wa mtu binafsi au maonyesho ya soloists. Kila muumini na mwimbaji huvaa sare sawa za heshima, akisimama mbele ya Altare kwa unyenyekevu kutumikia sala ya kanisa zima.'
-                : 'At St. Monica Catholic Choir, liturgical singing is never an individual spectacle or solo showcase. Every singer stands unified in dignity before the Holy Altar, blending forty-eight voices into a single reverent prayer for the congregation.'}
+                ? 'Katika Kwaya ya Mtakatifu Monika, waimbaji wote huvaa sare za heshima na kusimama pamoja mbele ya Altare kumwimbia na kumsifu Mungu.'
+                : 'At St. Monica Catholic Choir, singers stand united in dignity before the altar, singing four-part sacred music for Sunday Mass.'}
             </p>
           </div>
 
@@ -152,12 +152,15 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
                 <img
                   src={getImageSrc(photo.imageKey, photo.customUrl)}
                   alt={photo.title}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
-                <span className="absolute top-3 left-3 bg-[#0C2340]/90 text-white text-[11px] font-source px-2.5 py-0.5 rounded-lg font-semibold tabular-nums shadow-xs">
-                  {photo.year}
-                </span>
+                {photo.year && photo.year.trim() !== '' && photo.year.trim() !== '2024' && (
+                  <span className="absolute top-3 left-3 bg-[#0C2340]/90 text-white text-[11px] font-source px-2.5 py-0.5 rounded-lg font-semibold tabular-nums shadow-xs">
+                    {photo.year}
+                  </span>
+                )}
               </div>
 
               <div className="p-5 space-y-2">

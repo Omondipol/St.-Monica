@@ -407,7 +407,7 @@ export const ContactPage: React.FC = () => {
                   {lang === 'sw' ? 'Mahali pa kanisa' : 'Church address'}
                 </span>
                 <span className="text-slate-800 font-medium block mt-0.5 leading-relaxed">
-                  St. Monica Catholic Church, Section 58, Nakuru (Lanet Rd / Off Old Nairobi Rd)
+                  St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya
                 </span>
               </div>
 

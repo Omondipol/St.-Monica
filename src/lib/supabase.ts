@@ -95,7 +95,81 @@ function createSafeSupabaseClient(): SupabaseClient {
 export const supabase = createSafeSupabaseClient();
 
 /**
+ * Automatically resize & optimize high-resolution images on the client
+ * to a sensible maximum dimension (~2000px) with 85% JPEG quality before upload.
+ */
+export async function optimizeImageForUpload(
+  file: File | Blob, 
+  maxWidth = 2000, 
+  quality = 0.85
+): Promise<{ blob: Blob; contentType: string }> {
+  if (file.type && (file.type.includes('svg') || file.type.includes('gif'))) {
+    return { blob: file, contentType: file.type || 'image/svg+xml' };
+  }
+
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return { blob: file, contentType: file.type || 'image/jpeg' };
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width <= maxWidth && height <= maxWidth && file.size < 1.5 * 1024 * 1024) {
+          resolve({ blob: file, contentType: file.type || 'image/jpeg' });
+          return;
+        }
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxWidth) {
+            width = Math.round((width * maxWidth) / height);
+            height = maxWidth;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve({ blob: file, contentType: file.type || 'image/jpeg' });
+          return;
+        }
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            resolve({ blob: blob || file, contentType: 'image/jpeg' });
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve({ blob: file, contentType: file.type || 'image/jpeg' });
+      };
+      img.src = url;
+    } catch (_) {
+      resolve({ blob: file, contentType: file.type || 'image/jpeg' });
+    }
+  });
+}
+
+/**
  * Upload an image or file to Supabase Cloud Storage
+ * Automatically optimizes large phone photos to max 2000px before uploading.
  * Tries 'photos' bucket first, then 'app-images' bucket
  */
 export async function uploadImageToSupabase(
@@ -104,16 +178,19 @@ export async function uploadImageToSupabase(
   customFileName?: string
 ): Promise<{ url: string; error?: string }> {
   try {
+    const optimized = await optimizeImageForUpload(file);
+    const fileToUpload = optimized.blob;
+    const contentType = optimized.contentType;
+
     const ext = file instanceof File && file.name.includes('.')
       ? file.name.split('.').pop()
-      : (file.type ? file.type.split('/')[1] : 'jpg') || 'jpg';
+      : (contentType ? contentType.split('/')[1] : 'jpg') || 'jpg';
 
     const safeName = customFileName
       ? customFileName.replace(/[^a-zA-Z0-9._-]/g, '')
       : `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
 
     const filePath = `${folder}/${safeName}`;
-    const contentType = file.type || 'image/jpeg';
 
     const bucketsToTry = ['photos', 'app-images'];
     let lastError: any = null;
@@ -122,7 +199,7 @@ export async function uploadImageToSupabase(
       try {
         const { error: uploadErr } = await supabase.storage
           .from(bucket)
-          .upload(filePath, file, {
+          .upload(filePath, fileToUpload, {
             contentType,
             cacheControl: '3600',
             upsert: true

@@ -1260,5 +1260,95 @@ Nisikilize unijibu sala yangu.`,
     addedDate: '2024-06-15',
     solfaNotes: true,
     hasAudio: true
+  },
+  {
+    id: 'lib-49',
+    title: 'Tantum Ergo Sacramentum',
+    composer: 'St. Thomas Aquinas / Gregorian Chant',
+    language: 'Latin',
+    categories: ['komunyo', 'tafakari'],
+    season: 'Kawaida / Ordinary',
+    voices: 'SATB',
+    lyrics: `1. Tantum ergo Sacramentum
+Veneremur cernui:
+Et antiquum documentum
+Novo cedat ritui:
+Praestet fides supplementum
+Sensuum defectui.
+
+2. Genitori, Genitoque
+Laus et iubilatio,
+Salus, honor, virtus quoque
+Sit et benedictio:
+Procedenti ab utroque
+Compar sit laudatio. Amen.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 310,
+    addedDate: '2024-11-10',
+    solfaNotes: true,
+    hasAudio: false
+  },
+  {
+    id: 'lib-50',
+    title: 'Ave Verum Corpus',
+    composer: 'Wolfgang Amadeus Mozart (K. 618)',
+    language: 'Latin',
+    categories: ['komunyo', 'tafakari'],
+    season: 'Kwaresima / Lent',
+    voices: 'SATB',
+    lyrics: `Ave verum Corpus natum
+De Maria Virgine:
+Vere passum, immolatum
+In cruce pro homine:
+Cujus latus perforatum
+Unda fluxit et sanguine:
+Esto nobis praegustatum
+In mortis examine.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 420,
+    addedDate: '2024-11-15',
+    solfaNotes: true,
+    hasAudio: false
+  },
+  {
+    id: 'lib-51',
+    title: 'Msalaba wa Bwana Wangu',
+    composer: 'Traditional Swahili Catholic Lenten Hymn',
+    language: 'Kiswahili',
+    categories: ['tafakari'],
+    season: 'Kwaresima / Lent',
+    voices: 'SATB',
+    lyrics: `1. Msalaba wa Bwana wangu, ndio wokovu wangu,
+Pale Yesu aliponifia kwa upendo mkuu;
+Ee Bwana unihurumie, ninatubu dhambi zangu,
+Nijalie neema ya kusimama imara katika imani.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 260,
+    addedDate: '2024-11-20',
+    solfaNotes: true,
+    hasAudio: false
+  },
+  {
+    id: 'lib-52',
+    title: 'Kaa Nami Bwana (Abide with Me)',
+    composer: 'William H. Monk / Henry F. Lyte (Swahili)',
+    language: 'Kiswahili',
+    categories: ['kutoka', 'tafakari'],
+    season: 'Kawaida / Ordinary',
+    voices: 'SATB',
+    lyrics: `1. Kaa nami, ni usiku tena,
+Giza linaingia, Bwana kaa nami;
+Msaada mwingine sina,
+Nakuomba mwokozi, ukae nami.
+
+2. Maisha yanapita haraka sana,
+Mambo ya dunia hii yatatoweka;
+Wewe usiyebadilika kamwe,
+Kaa nami Bwana katika maisha yangu yote.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 385,
+    addedDate: '2024-11-28',
+    solfaNotes: true,
+    hasAudio: false
   }
 ];

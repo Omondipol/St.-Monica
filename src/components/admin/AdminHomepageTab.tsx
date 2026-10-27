@@ -34,9 +34,9 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
 
   // Logo preset options
   const logoPresets: PresetImageOption[] = [
-    { label: 'Transparent Gold Seal (Official)', url: './logo/st_monica_seal_final_transparent.png' },
-    { label: 'High-Res Circular Seal (PNG)', url: './logo/st_monica_choir_seal.png' },
-    { label: 'Vector Heraldic Seal (SVG)', url: './logo/st_monica_choir_seal.svg' }
+    { label: 'Transparent Gold Seal (Official)', url: '/logo/st_monica_seal_final_transparent.png' },
+    { label: 'High-Res Circular Seal (PNG)', url: '/logo/st_monica_choir_seal.png' },
+    { label: 'Vector Heraldic Seal (SVG)', url: '/logo/st_monica_choir_seal.svg' }
   ];
 
   // Authentic Choir photo presets for hero & backgrounds
@@ -311,18 +311,14 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   {lang === 'sw' ? 'Muonekano wa Sasa' : 'Logo Preview'}
                 </span>
                 <div className="p-3 bg-[#0C1420] rounded-2xl border border-amber-400/20 shadow-md w-28 h-28 flex items-center justify-center">
-                  {logoInput ? (
-                    <img
-                      src={logoInput}
-                      alt="Selected Choir Logo"
-                      className="w-20 h-20 object-contain drop-shadow"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <ChoirLogo size={96} showText={false} />
-                  )}
+                  <img
+                    src={getAssetUrl(logoInput || '/logo/st_monica_seal_final_transparent.png')}
+                    alt="Selected Choir Logo"
+                    className="w-20 h-20 object-contain drop-shadow"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = getAssetUrl('/logo/st_monica_seal_final_transparent.png');
+                    }}
+                  />
                 </div>
                 <div className="pt-1">
                   <strong className="text-sm font-bold text-[#0C2340] font-eb-garamond block">
@@ -341,7 +337,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   labelSw={lang === 'sw' ? 'Pakia nembo mpya au chagua hapa chini' : undefined}
                   value={logoInput}
                   onChange={setLogoInput}
-                  defaultValue="./logo/st_monica_seal_final_transparent.png"
+                  defaultValue="/logo/st_monica_seal_final_transparent.png"
                   helpText={lang === 'sw' ? 'Badilisha nembo inayoonekana kwenye tovuti na nyaraka zote.' : 'Change the logo shown on the website and printed documents.'}
                   presets={logoPresets}
                   aspectRatio="aspect-square"

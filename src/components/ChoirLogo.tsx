@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Music, Download, Check, Sparkles } from 'lucide-react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export interface ChoirLogoProps {
   size?: number;
@@ -137,13 +138,13 @@ export const ChoirLogo: React.FC<ChoirLogoProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const effectiveSrc = customLogoUrl || "./logo/st_monica_seal_final_transparent.png";
+  const effectiveSrc = getAssetUrl(customLogoUrl || "/logo/st_monica_seal_final_transparent.png");
 
   // We load the custom logo or the official transparent PNG seal with high-DPI srcset, falling back to SVG vector
   const logoGraphic = !imageError ? (
     <img
       src={effectiveSrc}
-      srcSet={!customLogoUrl ? "./logo/st_monica_seal_final_transparent.png 1x, ./logo/st_monica_choir_seal.png 2x" : undefined}
+      srcSet={!customLogoUrl ? `${getAssetUrl('/logo/st_monica_seal_final_transparent.png')} 1x, ${getAssetUrl('/logo/st_monica_choir_seal.png')} 2x` : undefined}
       alt="St. Monica Third Mass Choir Official Seal"
       width={size}
       height={size}
