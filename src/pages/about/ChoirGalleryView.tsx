@@ -5,8 +5,7 @@ import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170
 import cathedralImg from '../../assets/images/nakuru_parish_cathedral_1791356761479.jpg';
 import hymnalImg from '../../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { ChoirLogo } from '../../components/ChoirLogo';
-import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';
-import { ExternalLink, UserPlus, Sparkles } from 'lucide-react';
+import { ExternalLink, UserPlus } from 'lucide-react';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../../utils/assetHelper';

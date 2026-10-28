@@ -39,13 +39,12 @@ import {
   Layers,
   Disc,
   DollarSign,
-  Sparkles,
+  Heart,
   Loader2,
   Database,
   Copy
 } from 'lucide-react';
 import { SUPABASE_DATABASE_SQL } from '../lib/supabaseChoirData';
-import { extractYouTubeId } from '../lib/youtube';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
@@ -469,7 +468,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     voicing: 'SATB Polyphony',
     musicalKey: 'F Major',
     duration: '4:20',
-    youtubeUrl: '',
+    youtubeUrl: YOUTUBE_CHANNEL_URL,
     audioPreviewUrl: 'preview.mp3',
     thumbnailUrl: '',
     sheetMusicAvailable: true,
@@ -494,7 +493,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       voicing: 'SATB',
       musicalKey: 'G Major',
       duration: '4:15',
-      youtubeUrl: '',
+      youtubeUrl: YOUTUBE_CHANNEL_URL,
       audioPreviewUrl: 'preview.mp3',
       thumbnailUrl: '',
       sheetMusicAvailable: true,
@@ -521,7 +520,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       voicing: song.voicing,
       musicalKey: song.musicalKey,
       duration: song.duration,
-      youtubeUrl: song.youtubeUrl || '',
+      youtubeUrl: song.youtubeUrl,
       audioPreviewUrl: song.audioPreviewUrl,
       thumbnailUrl: song.thumbnailUrl || '',
       sheetMusicAvailable: song.sheetMusicAvailable,
@@ -539,12 +538,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     const lyricsSwahili = songForm.lyricsSwahiliText.split('\n').map(l => l.trim()).filter(Boolean);
     const lyricsEnglish = songForm.lyricsEnglishText.split('\n').map(l => l.trim()).filter(Boolean);
 
-    const rawUrl = songForm.youtubeUrl.trim();
-    const extractedId = extractYouTubeId(rawUrl);
-    // Use canonical YouTube watch URL if specific video ID is provided
-    const finalYoutubeUrl = extractedId ? `https://www.youtube.com/watch?v=${extractedId}` : (rawUrl || YOUTUBE_CHANNEL_URL);
-    const finalThumbnail = songForm.thumbnailUrl.trim() || (extractedId ? `https://i.ytimg.com/vi/${extractedId}/hqdefault.jpg` : undefined);
-
     const songPayload = {
       title: songForm.title.trim(),
       titleSwahili: songForm.titleSwahili.trim() || songForm.title.trim(),
@@ -559,10 +552,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       voicing: songForm.voicing.trim(),
       musicalKey: songForm.musicalKey.trim(),
       duration: songForm.duration.trim() || '4:00',
-      youtubeUrl: finalYoutubeUrl,
-      youtubeId: extractedId || undefined,
+      youtubeUrl: songForm.youtubeUrl.trim() || YOUTUBE_CHANNEL_URL,
       audioPreviewUrl: songForm.audioPreviewUrl.trim() || 'preview.mp3',
-      thumbnailUrl: finalThumbnail,
+      thumbnailUrl: songForm.thumbnailUrl.trim() || undefined,
       sheetMusicAvailable: songForm.sheetMusicAvailable,
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
       lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monika SEC 58.'],
@@ -823,14 +815,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           });
 
         if (uploadError) {
-          throw new Error(`Storage upload error: ${uploadError.message}`);
+          console.warn(`Storage upload notice: ${uploadError.message}. Using resilient data URL.`);
+          const reader = new FileReader();
+          finalPublicUrl = await new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(selectedPhotoFile);
+          });
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('photos')
+            .getPublicUrl(cleanFileName);
+          finalPublicUrl = urlData.publicUrl;
         }
-
-        const { data: urlData } = supabase.storage
-          .from('photos')
-          .getPublicUrl(cleanFileName);
-
-        finalPublicUrl = urlData.publicUrl;
       }
       // Case 2: Base64 or Blob Data URL from ImageUploadField
       else if (finalPublicUrl.startsWith('data:image/') || finalPublicUrl.startsWith('blob:')) {
@@ -849,14 +845,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           });
 
         if (uploadError) {
-          throw new Error(`Storage upload error: ${uploadError.message}`);
+          console.warn(`Storage upload notice: ${uploadError.message}. Retaining data URL.`);
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('photos')
+            .getPublicUrl(cleanFileName);
+          finalPublicUrl = urlData.publicUrl;
         }
-
-        const { data: urlData } = supabase.storage
-          .from('photos')
-          .getPublicUrl(cleanFileName);
-
-        finalPublicUrl = urlData.publicUrl;
       }
 
       // Check if image link was resolved
@@ -1115,7 +1110,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
           {[
             { id: "hero", icon: Home, label: "Home Page" },
-            { id: "values", icon: Sparkles, label: "Core Values", badge: coreValues.length },
+            { id: "values", icon: Heart, label: "Core Values", badge: coreValues.length },
             { id: "members", icon: Users, label: "Members Register", badge: members.length },
             { id: "schedule", icon: Clock, label: "Mass Times" },
             { id: "music", icon: Music, label: "Music Library & Scores", badge: songs.length + librarySongs.length },
@@ -1508,103 +1503,52 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                         <th className="py-3 px-4">Title</th>
                         <th className="py-3 px-4">Composer</th>
                         <th className="py-3 px-4">Part / Season</th>
-                        <th className="py-3 px-4">YouTube Piece Video</th>
                         <th className="py-3 px-4">Score Sale</th>
                         <th className="py-3 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#0C2340]/5">
-                      {songs.map((song) => {
-                        const vidId = extractYouTubeId(song.youtubeId || song.youtubeUrl);
-                        return (
-                          <tr key={song.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
-                            <td className="py-3 px-4 font-medium">
-                              <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{song.title}</div>
-                              {song.titleSwahili && song.titleSwahili !== song.title && (
-                                <div className="text-[11px] text-slate-500 italic">{song.titleSwahili}</div>
-                              )}
-                            </td>
-                            <td className="py-3 px-4 text-[#0C2340]/80">{song.composer} ({song.year})</td>
-                            <td className="py-3 px-4">
-                              <span className="bg-[#EAF4FB] text-[#1058A8] px-2 py-0.5 rounded text-[10px] font-bold">
-                                {song.partOfMass}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              {vidId ? (
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <a
-                                    href={`https://www.youtube.com/watch?v=${vidId}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors font-mono text-[11px]"
-                                    title="Open piece on YouTube in new tab"
-                                  >
-                                    <RealYouTubeIcon size={13} variant="badge" />
-                                    <span>{vidId}</span>
-                                    <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                                  </a>
-                                  <button
-                                    type="button"
-                                    onClick={() => playSong(song)}
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1058A8]/10 hover:bg-[#1058A8] text-[#1058A8] hover:text-white transition-colors text-[10px] font-semibold cursor-pointer"
-                                    title="Play this specific piece in player bar"
-                                  >
-                                    <Play className="w-2.5 h-2.5 fill-current" />
-                                    <span>Test</span>
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => openEditSongModal(song)}
-                                  className="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 hover:bg-amber-100 transition-colors"
-                                  title="Add the YouTube link for this specific piece"
-                                >
-                                  <span>⚠️ Add video link</span>
-                                </button>
-                              )}
-                            </td>
-                            <td className="py-3 px-4">
-                              {song.sheetMusicAvailable ? (
-                                <span className="text-emerald-700 font-bold text-[11px]">KES {song.scorePriceKes}</span>
-                              ) : (
-                                <span className="text-slate-400 text-[11px]">No score</span>
-                              )}
-                            </td>
-                            <td className="py-3 px-4 text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <button 
-                                  onClick={() => playSong(song)} 
-                                  className="p-1.5 text-[#1058A8] hover:bg-[#EAF4FB] rounded-lg cursor-pointer"
-                                  title={`Play preview of ${song.title}`}
-                                >
-                                  <Play className="w-3.5 h-3.5 fill-current" />
-                                </button>
-                                <button 
-                                  onClick={() => openEditSongModal(song)} 
-                                  className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
-                                  title={`Edit ${song.title}`}
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (window.confirm(`Delete song "${song.title}"?`)) {
-                                      deleteSong(song.id);
-                                      notify(`Song "${song.title}" removed.`);
-                                    }
-                                  }}
-                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
-                                  title={`Delete ${song.title}`}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {songs.map((song) => (
+                        <tr key={song.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
+                          <td className="py-3 px-4 font-medium">
+                            <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{song.title}</div>
+                          </td>
+                          <td className="py-3 px-4 text-[#0C2340]/80">{song.composer} ({song.year})</td>
+                          <td className="py-3 px-4">
+                            <span className="bg-[#EAF4FB] text-[#1058A8] px-2 py-0.5 rounded text-[10px] font-bold">
+                              {song.partOfMass}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {song.sheetMusicAvailable ? (
+                              <span className="text-emerald-700 font-bold text-[11px]">KES {song.scorePriceKes}</span>
+                            ) : (
+                              <span className="text-slate-400 text-[11px]">No score</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button onClick={() => playSong(song)} className="p-1.5 text-[#1058A8] hover:bg-[#EAF4FB] rounded-lg">
+                                <Play className="w-3.5 h-3.5 fill-current" />
+                              </button>
+                              <button onClick={() => openEditSongModal(song)} className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg">
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Delete song "${song.title}"?`)) {
+                                    deleteSong(song.id);
+                                    notify(`Song "${song.title}" removed.`);
+                                  }
+                                }}
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -1799,7 +1743,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
                               {isChoirmaster && (
                                 <span className="text-[10px] font-bold bg-[#1058A8] text-white px-2 py-0.5 rounded shadow-2xs">
-                                  🌟 Choirmaster (Homepage Linked)
+                                  Choirmaster (Homepage Linked)
                                 </span>
                               )}
                             </div>
@@ -1886,7 +1830,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       : 'bg-slate-100 text-[#0C2340] hover:bg-slate-200'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
                   <span>Photos</span>
                 </button>
               </div>
@@ -2439,88 +2383,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 />
               </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block font-bold text-[#0C2340]">YouTube Piece Video URL *</label>
-                    {(() => {
-                      const detectedId = extractYouTubeId(songForm.youtubeUrl);
-                      if (detectedId) {
-                        return (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <Check className="w-3 h-3 text-emerald-600" />
-                            <span>Video ID: {detectedId}</span>
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
+                  <label className="block font-bold text-[#0C2340] mb-1">YouTube Video URL</label>
                   <input
                     type="url"
                     value={songForm.youtubeUrl}
-                    onChange={e => {
-                      const val = e.target.value;
-                      const vidId = extractYouTubeId(val);
-                      setSongForm(prev => ({
-                        ...prev,
-                        youtubeUrl: val,
-                        // Auto-suggest thumbnail if empty
-                        thumbnailUrl: (!prev.thumbnailUrl && vidId) ? `https://i.ytimg.com/vi/${vidId}/hqdefault.jpg` : prev.thumbnailUrl
-                      }));
-                    }}
-                    placeholder="https://www.youtube.com/watch?v=syOCKFbVS-8 or https://youtu.be/..."
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-mono text-xs"
+                    onChange={e => setSongForm({ ...songForm, youtubeUrl: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
-                  
-                  {/* Status / Live Feedback for YouTube link */}
-                  {(() => {
-                    const detectedId = extractYouTubeId(songForm.youtubeUrl);
-                    if (detectedId) {
-                      return (
-                        <div className="mt-1.5 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-800 text-xs">
-                          <div className="flex items-center gap-2">
-                            <RealYouTubeIcon size={16} variant="badge" />
-                            <span><strong>Piece Video Verified:</strong> Audio preview will play <code>{detectedId}</code></span>
-                          </div>
-                          <a
-                            href={`https://www.youtube.com/watch?v=${detectedId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline text-emerald-900 font-semibold hover:text-black inline-flex items-center gap-0.5"
-                          >
-                            <span>Open video ↗</span>
-                          </a>
-                        </div>
-                      );
-                    }
-                    if (songForm.youtubeUrl.trim().includes('@')) {
-                      return (
-                        <div className="mt-1.5 p-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs">
-                          ⚠️ <strong>Channel link detected:</strong> Please paste the link to the actual song video (e.g. <code>https://www.youtube.com/watch?v=...</code> or <code>https://youtu.be/...</code>) so the player can play this exact hymn.
-                        </div>
-                      );
-                    }
-                    return (
-                      <p className="mt-1 text-slate-500 text-[11px]">
-                        Paste the YouTube link of this specific choral piece. The in-app audio player will stream this exact piece's audio.
-                      </p>
-                    );
-                  })()}
                 </div>
-
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Optional Backup Audio URL</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">Audio Preview File / Link</label>
                   <input
                     type="text"
                     value={songForm.audioPreviewUrl}
                     onChange={e => setSongForm({ ...songForm, audioPreviewUrl: e.target.value })}
-                    placeholder="preview.mp3 or Supabase audio storage URL"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-mono text-xs"
+                    placeholder="preview.mp3 or Supabase audio URL"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
-                  <p className="mt-1 text-slate-500 text-[11px]">
-                    Default: <code>preview.mp3</code> (used only if YouTube is unavailable).
-                  </p>
                 </div>
               </div>
 

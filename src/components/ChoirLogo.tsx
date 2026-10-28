@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { Music, Download, Check, Sparkles } from 'lucide-react';
+import { Music, Download, Check } from 'lucide-react';
 import { getAssetUrl } from '../utils/assetHelper';
 
 export interface ChoirLogoProps {
@@ -256,7 +256,7 @@ const LogoInspectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300/60 text-[11px] font-bold tracking-wide uppercase font-source">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <Music className="w-3.5 h-3.5 text-amber-600" />
               <span>{lang === 'sw' ? 'Nembo Rasmi ya Kwaya' : 'Official Choir Seal'}</span>
             </div>
             <h3 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">

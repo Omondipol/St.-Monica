@@ -4,7 +4,7 @@ import { INITIAL_LEADERS, ChoirLeader } from '../../data/choirContent';
 import { AboutNavTabs } from '../../components/AboutNavTabs';
 import { AfricanGeometricBorder } from '../../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../../utils/assetHelper';
-import { ZoomIn, X, Music, Award, Calendar, Sparkles } from 'lucide-react';
+import { ZoomIn, X, Music, Award, Calendar } from 'lucide-react';
 
 interface LeadershipViewProps {
   onNavigate?: (route: string) => void;

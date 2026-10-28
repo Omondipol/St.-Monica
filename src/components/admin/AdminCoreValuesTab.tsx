@@ -3,7 +3,6 @@ import { useChoir } from '../../context/ChoirContext';
 import { CoreValueItem, ALL_EIGHT_VIRTUES_CATALOG, DEFAULT_CORE_VALUES } from '../../data/choirContent';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
 import { 
-  Sparkles, 
   Plus, 
   Edit3, 
   Trash2, 
@@ -190,7 +189,7 @@ export const AdminCoreValuesTab: React.FC<AdminCoreValuesTabProps> = ({ onNotify
       <div className="bg-[#FAF8F5] border border-[#0C2340]/10 rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <BookOpen className="w-4 h-4 text-[#1058A8]" />
             <h3 className="font-eb-garamond text-base sm:text-lg font-bold text-[#0C2340]">
               Official 8 Catholic Virtues Reference Catalog
             </h3>

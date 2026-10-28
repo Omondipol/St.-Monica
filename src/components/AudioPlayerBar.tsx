@@ -4,7 +4,6 @@ import { Play, Pause, ChevronUp, ChevronDown } from 'lucide-react';
 import { RealAudioWaveform } from './RealAudioWaveform';
 import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
-import { getYouTubeWatchUrl } from '../lib/youtube';
 
 export const AudioPlayerBar: React.FC = () => {
   const { 
@@ -43,7 +42,7 @@ export const AudioPlayerBar: React.FC = () => {
   }, []);
 
   const formattedCurrent = formatTime(currentTimeSeconds);
-  const youtubeUrl = getYouTubeWatchUrl(currentSong.youtubeId || currentSong.youtubeUrl);
+  const youtubeUrl = currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL;
   const isPreviewComplete = currentTimeSeconds >= 40;
 
   const shouldBeCircle = (isScrolledDown && !isManuallyExpanded) || isManuallyCollapsed;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Song, SheetMusicItem, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../data/choirContent';
-import { getYouTubeWatchUrl } from '../lib/youtube';
 import { 
   Play, 
   Pause, 
@@ -380,7 +379,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                   <span>{lang === 'sw' ? 'Tazama Video Ndani ya Wavuti' : 'Watch Video In-App'}</span>
                 </button>
                 <a
-                  href={getYouTubeWatchUrl(song.youtubeId || song.youtubeUrl)}
+                  href={song.youtubeUrl || YOUTUBE_CHANNEL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setOpenRowMenuId(null)}
@@ -419,7 +418,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard?.writeText(getYouTubeWatchUrl(song.youtubeId || song.youtubeUrl));
+                    navigator.clipboard?.writeText(song.youtubeUrl || window.location.href);
                     setOpenRowMenuId(null);
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-[#0C2340] hover:bg-[#FAF8F5] transition-colors text-left cursor-pointer border-t border-[#0C2340]/10"

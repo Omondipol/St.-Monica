@@ -1,7 +1,6 @@
 import { supabase, resolveSupabaseUrl, resolveSupabaseAnonKey } from './supabase';
 import { Song, Album, SheetMusicItem, ChoirGroupPhoto } from '../data/choirContent';
 import { ChoirMember } from '../data/membersData';
-import { extractYouTubeId } from './youtube';
 
 const STORAGE_BUCKET = 'photos';
 
@@ -80,9 +79,8 @@ function mapRowToSong(row: any): Song {
     musicalKey: row.musical_key || 'G Major',
     duration: row.duration || '4:00',
     youtubeUrl: row.youtube_url || '',
-    youtubeId: row.youtube_id || extractYouTubeId(row.youtube_url) || undefined,
     audioPreviewUrl: row.audio_preview_url || 'preview.mp3',
-    thumbnailUrl: row.thumbnail_url || (extractYouTubeId(row.youtube_url) ? `https://i.ytimg.com/vi/${extractYouTubeId(row.youtube_url)}/hqdefault.jpg` : undefined),
+    thumbnailUrl: row.thumbnail_url || undefined,
     sheetMusicAvailable: Boolean(row.sheet_music_available),
     scorePriceKes: Number(row.score_price_kes) || 300,
     lyricsSwahili: Array.isArray(row.lyrics_swahili) ? row.lyrics_swahili : [],
@@ -97,7 +95,6 @@ function mapRowToSong(row: any): Song {
  * Transform a frontend Song to database row
  */
 function mapSongToRow(song: Song): any {
-  const resolvedId = song.youtubeId || extractYouTubeId(song.youtubeUrl) || undefined;
   return {
     id: song.id,
     title: song.title,
@@ -114,9 +111,8 @@ function mapSongToRow(song: Song): any {
     musical_key: song.musicalKey,
     duration: song.duration,
     youtube_url: song.youtubeUrl,
-    youtube_id: resolvedId || null,
     audio_preview_url: song.audioPreviewUrl,
-    thumbnail_url: song.thumbnailUrl || (resolvedId ? `https://i.ytimg.com/vi/${resolvedId}/hqdefault.jpg` : null),
+    thumbnail_url: song.thumbnailUrl,
     sheet_music_available: song.sheetMusicAvailable,
     score_price_kes: song.scorePriceKes,
     lyrics_swahili: song.lyricsSwahili || [],
@@ -292,7 +288,6 @@ CREATE TABLE IF NOT EXISTS public.songs (
   musical_key TEXT,
   duration TEXT DEFAULT '4:00',
   youtube_url TEXT,
-  youtube_id TEXT,
   audio_preview_url TEXT,
   thumbnail_url TEXT,
   sheet_music_available BOOLEAN DEFAULT false,

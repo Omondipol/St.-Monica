@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Maximize2, ExternalLink } from 'lucide-react';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
-import { extractYouTubeId } from '../lib/youtube';
 
 declare global {
   interface Window {
@@ -67,9 +66,8 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
       }
 
       try {
-        const initialVideoId = extractYouTubeId(currentSong.youtubeId || currentSong.youtubeUrl) || 'syOCKFbVS-8';
         const player = new window.YT.Player('st-monica-yt-audio-player', {
-          videoId: initialVideoId,
+          videoId: currentSong.youtubeId || 'syOCKFbVS-8',
           playerVars: {
             autoplay: 0,
             controls: 0,        // Hide YouTube's own controls, progress bar, title bar
@@ -142,48 +140,34 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
   }, []);
 
   // Sync song changes immediately to YouTube player
-  const lastLoadedSongIdRef = useRef<string>(currentSong.id);
-  const lastLoadedVideoIdRef = useRef<string>(extractYouTubeId(currentSong.youtubeId || currentSong.youtubeUrl) || '');
-
+  const lastLoadedVideoIdRef = useRef<string>(currentSong.youtubeId || '');
   useEffect(() => {
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
 
-    const targetId = extractYouTubeId(currentSong.youtubeId || currentSong.youtubeUrl);
-    const songChanged = lastLoadedSongIdRef.current !== currentSong.id;
-    const videoChanged = lastLoadedVideoIdRef.current !== (targetId || '');
-
-    if (songChanged || videoChanged) {
-      lastLoadedSongIdRef.current = currentSong.id;
-      lastLoadedVideoIdRef.current = targetId || '';
-
-      if (targetId) {
-        try {
-          if (isPlaying) {
-            player.loadVideoById({
-              videoId: targetId,
-              startSeconds: 0
-            });
-            player.unMute();
-            player.setVolume(isMuted ? 0 : Math.round(volume * 100));
-            player.playVideo();
-          } else {
-            player.cueVideoById({
-              videoId: targetId,
-              startSeconds: 0
-            });
-          }
-        } catch (err) {
-          console.warn('Error syncing video ID:', err);
+    const targetId = currentSong.youtubeId || 'syOCKFbVS-8';
+    if (lastLoadedVideoIdRef.current !== targetId) {
+      lastLoadedVideoIdRef.current = targetId;
+      try {
+        if (isPlaying) {
+          player.loadVideoById({
+            videoId: targetId,
+            startSeconds: 0
+          });
+          player.unMute();
+          player.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          player.playVideo();
+        } else {
+          player.cueVideoById({
+            videoId: targetId,
+            startSeconds: 0
+          });
         }
-      } else {
-        // Song has no valid video ID
-        try {
-          player.pauseVideo();
-        } catch (_) {}
+      } catch (err) {
+        console.warn('Error syncing video ID:', err);
       }
     }
-  }, [currentSong.id, currentSong.youtubeId, currentSong.youtubeUrl, isPlayerReady, isPlaying, isMuted, volume]);
+  }, [currentSong.youtubeId, isPlayerReady, isPlaying, isMuted, volume]);
 
   // Sync isPlaying state to YouTube player
   useEffect(() => {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Play, Pause, Music, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Play, Pause, Music } from 'lucide-react';
 import { useChoir } from '../context/ChoirContext';
 
 type VoicePart = 'soprano' | 'alto' | 'tenor' | 'bass' | 'all';

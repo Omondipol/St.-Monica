@@ -45,7 +45,6 @@ import {
   saveCatalogToSupabase,
   loadCatalogFromSupabase
 } from '../lib/supabaseChoirData';
-import { extractYouTubeId } from '../lib/youtube';
 
 export interface CartItem {
   product: ProductItem;
@@ -412,16 +411,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const clean = parsed
-            .filter(s => s.id !== 'song-tutangaze' && s.id !== 'song-rejoice' && s.id !== 'song-monica')
-            .map(s => {
-              const ytId = s.youtubeId || extractYouTubeId(s.youtubeUrl) || undefined;
-              return {
-                ...s,
-                youtubeId: ytId,
-                thumbnailUrl: s.thumbnailUrl || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : undefined)
-              };
-            });
+          const clean = parsed.filter(s => s.id !== 'song-tutangaze' && s.id !== 'song-rejoice' && s.id !== 'song-monica');
           if (clean.length > 0) return clean;
         }
       }
@@ -447,18 +437,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadSongsFromSupabase().then((remoteSongs) => {
       if (isMounted && remoteSongs && remoteSongs.length > 0) {
         setSongs(prev => {
-          const normalizedRemote = remoteSongs.map(s => {
-            const ytId = s.youtubeId || extractYouTubeId(s.youtubeUrl) || undefined;
-            return {
-              ...s,
-              youtubeId: ytId,
-              thumbnailUrl: s.thumbnailUrl || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : undefined)
-            };
-          });
-          const remoteIds = new Set(normalizedRemote.map(s => s.id));
+          const remoteIds = new Set(remoteSongs.map(s => s.id));
           const localOnly = prev.filter(s => !remoteIds.has(s.id));
           const initialMissing = INITIAL_SONGS_CATALOG.filter(s => !remoteIds.has(s.id) && !localOnly.some(l => l.id === s.id));
-          const merged = [...normalizedRemote, ...localOnly, ...initialMissing];
+          const merged = [...remoteSongs, ...localOnly, ...initialMissing];
           try {
             localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(merged));
           } catch (_) {}
@@ -933,24 +915,6 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateFooterContact = (updated: Partial<FooterContactConfig>) => {
     setFooterContact(prev => ({ ...prev, ...updated }));
-    if (updated.rehearsalsEn || updated.rehearsalsSw) {
-      setMassSchedule(prev => ({
-        ...prev,
-        rehearsals: updated.rehearsalsEn ?? prev.rehearsals,
-        rehearsalsSw: updated.rehearsalsSw ?? prev.rehearsalsSw
-      }));
-      setChoirStats(prev => ({
-        ...prev,
-        rehearsalSchedule: updated.rehearsalsEn ?? prev.rehearsalSchedule,
-        rehearsalScheduleSw: updated.rehearsalsSw ?? prev.rehearsalScheduleSw
-      }));
-    }
-    if (updated.whatsapp) {
-      setChoirStats(prev => ({
-        ...prev,
-        whatsappUrl: updated.whatsapp ?? prev.whatsappUrl
-      }));
-    }
   };
 
   // 7n. About Page Everything
@@ -1561,22 +1525,17 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audio.currentTime = 0;
     }
 
-    // Play actual authentic choir voices from YouTube for this specific piece
-    const videoId = extractYouTubeId(song.youtubeId || song.youtubeUrl);
+    // Play actual authentic choir voices from YouTube channel
     if (ytPlayerRef.current) {
       try {
         if (typeof ytPlayerRef.current.loadVideoById === 'function') {
-          if (videoId) {
-            ytPlayerRef.current.loadVideoById({
-              videoId: videoId,
-              startSeconds: 0
-            });
-            ytPlayerRef.current.unMute();
-            ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
-            ytPlayerRef.current.playVideo();
-          } else {
-            console.warn('No YouTube video ID found for song:', song.title);
-          }
+          ytPlayerRef.current.loadVideoById({
+            videoId: song.youtubeId || 'syOCKFbVS-8',
+            startSeconds: 0
+          });
+          ytPlayerRef.current.unMute();
+          ytPlayerRef.current.setVolume(isMuted ? 0 : Math.round(volume * 100));
+          ytPlayerRef.current.playVideo();
         }
       } catch (e) {
         console.warn('YouTube playSong warning:', e);
@@ -1888,13 +1847,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Admin CRUD Functions — synced to Supabase & localStorage
   const addSong = (newSong: Omit<Song, 'id'>) => {
     const id = `song-${Date.now()}`;
-    const ytId = newSong.youtubeId || extractYouTubeId(newSong.youtubeUrl) || undefined;
-    const song: Song = {
-      ...newSong,
-      id,
-      youtubeId: ytId,
-      thumbnailUrl: newSong.thumbnailUrl || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : undefined)
-    };
+    const song: Song = { ...newSong, id };
     setSongs(prev => {
       const updated = [song, ...prev];
       try {
@@ -1907,18 +1860,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateSong = (id: string, updated: Partial<Song>) => {
     setSongs(prev => {
-      const updatedList = prev.map(s => {
-        if (s.id === id) {
-          const merged = { ...s, ...updated };
-          const ytId = merged.youtubeId || extractYouTubeId(merged.youtubeUrl) || undefined;
-          return {
-            ...merged,
-            youtubeId: ytId,
-            thumbnailUrl: merged.thumbnailUrl || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : undefined)
-          };
-        }
-        return s;
-      });
+      const updatedList = prev.map(s => s.id === id ? { ...s, ...updated } : s);
       const updatedSong = updatedList.find(s => s.id === id);
       try {
         localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(updatedList));
@@ -1929,15 +1871,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return updatedList;
     });
     if (currentSong.id === id) {
-      setCurrentSong(prev => {
-        const merged = { ...prev, ...updated };
-        const ytId = merged.youtubeId || extractYouTubeId(merged.youtubeUrl) || undefined;
-        return {
-          ...merged,
-          youtubeId: ytId,
-          thumbnailUrl: merged.thumbnailUrl || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : undefined)
-        };
-      });
+      setCurrentSong(prev => ({ ...prev, ...updated }));
     }
   };
 
@@ -2072,40 +2006,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Site Configuration & Stats Mutations
   const updateChoirStats = (updated: Partial<typeof CHOIR_STATS>) => {
     setChoirStats(prev => ({ ...prev, ...updated }));
-    if (updated.rehearsalSchedule || updated.rehearsalScheduleSw) {
-      setFooterContact(prev => ({
-        ...prev,
-        rehearsalsEn: updated.rehearsalSchedule ?? prev.rehearsalsEn,
-        rehearsalsSw: updated.rehearsalScheduleSw ?? prev.rehearsalsSw
-      }));
-      setMassSchedule(prev => ({
-        ...prev,
-        rehearsals: updated.rehearsalSchedule ?? prev.rehearsals,
-        rehearsalsSw: updated.rehearsalScheduleSw ?? prev.rehearsalsSw
-      }));
-    }
-    if (updated.whatsappUrl) {
-      setFooterContact(prev => ({
-        ...prev,
-        whatsapp: updated.whatsappUrl ?? prev.whatsapp
-      }));
-    }
   };
 
   const updateMassSchedule = (updated: Partial<ChoirContextType['massSchedule']>) => {
     setMassSchedule(prev => ({ ...prev, ...updated }));
-    if (updated.rehearsals || updated.rehearsalsSw) {
-      setFooterContact(prev => ({
-        ...prev,
-        rehearsalsEn: updated.rehearsals ?? prev.rehearsalsEn,
-        rehearsalsSw: updated.rehearsalsSw ?? prev.rehearsalsSw
-      }));
-      setChoirStats(prev => ({
-        ...prev,
-        rehearsalSchedule: updated.rehearsals ?? prev.rehearsalSchedule,
-        rehearsalScheduleSw: updated.rehearsalsSw ?? prev.rehearsalScheduleSw
-      }));
-    }
   };
 
   const updateSiteNotice = (updated: Partial<ChoirContextType['siteNotice']>) => {

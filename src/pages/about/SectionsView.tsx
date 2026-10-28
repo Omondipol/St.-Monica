@@ -10,7 +10,6 @@ import {
   Calendar, 
   ShieldCheck, 
   CheckCircle2, 
-  Sparkles, 
   ChevronRight, 
   CreditCard,
   Clock,

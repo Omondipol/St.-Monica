@@ -7,7 +7,7 @@ export interface LibraryCategory {
   descriptionSw: string;
   descriptionEn: string;
   themeColor: string;
-  motif: 'cross' | 'bread' | 'cup' | 'dove' | 'candle' | 'water' | 'ring' | 'crown' | 'harp' | 'book' | 'star' | 'incense';
+  motif: 'cross' | 'bread' | 'cup' | 'dove' | 'candle' | 'water' | 'ring' | 'crown' | 'harp' | 'book' | 'incense';
 }
 
 export interface LibrarySong {
@@ -93,7 +93,7 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
     descriptionSw: 'Kipindi cha kutarajia na kujiandaa kwa ujio wa Mwokozi.',
     descriptionEn: 'Solemn anticipation and spiritual preparation for the coming of Christ.',
     themeColor: '#1058A8',
-    motif: 'star'
+    motif: 'candle'
   },
   {
     id: 'noeli',
@@ -102,7 +102,7 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
     descriptionSw: 'Nyimbo za shangwe ya kuzaliwa kwa Bwana wetu Yesu Kristo.',
     descriptionEn: 'Joyous hymns celebrating the Nativity and Incarnation.',
     themeColor: '#1058A8',
-    motif: 'star'
+    motif: 'cross'
   },
   {
     id: 'kwaresima',

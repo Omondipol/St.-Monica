@@ -6,7 +6,6 @@ import {
   Image as ImageIcon, 
   Trash2, 
   RefreshCw, 
-  Sparkles, 
   KeyRound, 
   Calendar,
   CheckCircle2,
@@ -173,7 +172,7 @@ export const MediaManager: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-white/10 text-amber-300">
-              <Sparkles className="w-4 h-4" />
+              <Database className="w-4 h-4" />
             </span>
             <span className="text-xs font-bold text-amber-300 tracking-wider uppercase font-source">
               Supabase Realtime Cloud Sync

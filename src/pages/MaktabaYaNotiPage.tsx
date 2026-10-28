@@ -20,7 +20,7 @@ import {
   Pause,
   LayoutGrid,
   ListFilter,
-  Sparkles
+  BookOpen
 } from 'lucide-react';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
@@ -278,10 +278,11 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
             <line x1="40" y1="34" x2="40" y2="22" /><line x1="40" y1="20" x2="40" y2="17" />
           </svg>
         );
-      case 'noeli': // a star over a manger
+      case 'noeli': // Christ child in manger beneath the Holy Cross
         return (
           <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke={strokeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M28 8l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" />
+            <line x1="28" y1="6" x2="28" y2="16" />
+            <line x1="23" y1="10" x2="33" y2="10" />
             <path d="M16 32l12 6 12-6-4 12H20l-4-12z" />
             <path d="M20 44l-4 6M36 44l4 6" />
             <path d="M24 34c2-2 6-2 8 0" />
@@ -698,7 +699,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
                   {/* Liturgical Group Pills */}
                   <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#1058A8] font-source flex items-center gap-1 shrink-0 mr-1">
-                      <Sparkles className="w-3 h-3" />
+                      <BookOpen className="w-3 h-3" />
                       <span>{lang === 'sw' ? 'Majira:' : 'Groups:'}</span>
                     </span>
 

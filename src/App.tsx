@@ -56,24 +56,32 @@ function SupabasePhotoUploadView({ onNavigate }: { onNavigate: (route: string) =
       const fileExt = file.name.split('.').pop();
       const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
 
-      // 1. Upload to Supabase bucket 'photos'
+      let imageUrl = '';
       const { error: uploadError } = await supabase.storage
         .from('photos')
         .upload(uniqueFileName, file, { cacheControl: '3600', upsert: false });
 
-      if (uploadError) throw uploadError;
-
-      // 2. Obtain Public URL
-      const { data: urlData } = supabase.storage
-        .from('photos')
-        .getPublicUrl(uniqueFileName);
+      if (uploadError) {
+        console.warn('Supabase Storage notice:', uploadError.message);
+        // Fallback to data URL so the image still displays and can be recorded in the gallery table
+        const reader = new FileReader();
+        imageUrl = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      } else {
+        const { data: urlData } = supabase.storage
+          .from('photos')
+          .getPublicUrl(uniqueFileName);
+        imageUrl = urlData.publicUrl;
+      }
 
       setStatus({ message: 'Inahifadhi kumbukumbu kwenye kanzidata...', isError: false });
 
       // 3. Save into Supabase 'gallery' table
       const { error: dbError } = await supabase
         .from('gallery')
-        .insert([{ title: title.trim(), image_url: urlData.publicUrl }]);
+        .insert([{ title: title.trim(), image_url: imageUrl }]);
 
       if (dbError) throw dbError;
 

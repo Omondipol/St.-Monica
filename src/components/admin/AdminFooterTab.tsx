@@ -29,14 +29,6 @@ export const AdminFooterTab: React.FC<AdminFooterTabProps> = ({ onNotify }) => {
     rehearsalsSw: footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || 'Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
   });
 
-  React.useEffect(() => {
-    setForm(prev => ({
-      ...prev,
-      rehearsalsEn: footerContact?.rehearsalsEn || massSchedule?.rehearsals || choirStats?.rehearsalSchedule || prev.rehearsalsEn,
-      rehearsalsSw: footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || choirStats?.rehearsalScheduleSw || prev.rehearsalsSw
-    }));
-  }, [footerContact?.rehearsalsEn, footerContact?.rehearsalsSw, massSchedule?.rehearsals, massSchedule?.rehearsalsSw, choirStats?.rehearsalSchedule, choirStats?.rehearsalScheduleSw]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateFooterContact({
@@ -56,9 +48,7 @@ export const AdminFooterTab: React.FC<AdminFooterTabProps> = ({ onNotify }) => {
       churchAddress: form.churchAddress.trim(),
       mapsUrl: form.mapsUrl.trim(),
       whatsappUrl: form.whatsapp.trim(),
-      mpesaTill: form.mpesaTill.trim(),
-      rehearsalSchedule: form.rehearsalsEn.trim(),
-      rehearsalScheduleSw: form.rehearsalsSw.trim()
+      mpesaTill: form.mpesaTill.trim()
     });
 
     updateMassSchedule({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
-import { Sparkles, Heart, Shield, Award, BookOpen, ChevronRight } from 'lucide-react';
+import { Heart, Shield, Award, BookOpen, ChevronRight } from 'lucide-react';
 
 interface CoreValuesSectionProps {
   onNavigate?: (route: string) => void;
@@ -39,7 +39,7 @@ export const CoreValuesSection: React.FC<CoreValuesSectionProps> = ({ onNavigate
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1058A8]/10 text-[#1058A8] border border-[#1058A8]/20 text-xs font-bold uppercase tracking-widest font-source">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <Heart className="w-3.5 h-3.5 text-[#1058A8]" />
             <span>{lang === 'sw' ? 'Fadhila za Kiliturujia' : 'Catholic Liturgical Virtues'}</span>
           </div>
 

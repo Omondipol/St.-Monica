@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
-import { getYouTubeWatchUrl } from '../lib/youtube';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { getAssetUrl } from '../utils/assetHelper';
@@ -44,7 +43,7 @@ export const SongCutoffModal: React.FC = () => {
 
   if (!isIntroCutoffOpen) return null;
 
-  const fullYoutubeUrl = getYouTubeWatchUrl(currentSong.youtubeId || currentSong.youtubeUrl);
+  const fullYoutubeUrl = currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL;
 
   // Clean cover photo with no text on it
   const cleanCoverPhoto = currentSong.id === 'song-nimzima' || currentSong.id === 'song-jumuiya'

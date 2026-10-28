@@ -18,8 +18,7 @@ import {
   Music,
   BookOpen,
   ZoomIn,
-  X,
-  Sparkles
+  X
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { CoreValuesSection } from '../components/CoreValuesSection';

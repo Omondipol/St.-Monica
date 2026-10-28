@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';
-import { ChoirLogo } from '../ChoirLogo';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
-import { Save, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw, Sparkles, Eye } from 'lucide-react';
+import { Save, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw, Eye } from 'lucide-react';
 import { getAssetUrl } from '../../utils/assetHelper';
 
 interface AdminHomepageTabProps {
