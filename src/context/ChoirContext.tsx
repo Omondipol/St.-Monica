@@ -45,6 +45,7 @@ import {
   saveCatalogToSupabase,
   loadCatalogFromSupabase
 } from '../lib/supabaseChoirData';
+import { getSongYouTubeId, extractYouTubeVideoId } from '../utils/assetHelper';
 
 export interface CartItem {
   product: ProductItem;
@@ -1529,8 +1530,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (ytPlayerRef.current) {
       try {
         if (typeof ytPlayerRef.current.loadVideoById === 'function') {
+          const effectiveVideoId = getSongYouTubeId(song);
           ytPlayerRef.current.loadVideoById({
-            videoId: song.youtubeId || 'syOCKFbVS-8',
+            videoId: effectiveVideoId,
             startSeconds: 0
           });
           ytPlayerRef.current.unMute();
@@ -1847,7 +1849,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Admin CRUD Functions — synced to Supabase & localStorage
   const addSong = (newSong: Omit<Song, 'id'>) => {
     const id = `song-${Date.now()}`;
-    const song: Song = { ...newSong, id };
+    const ytId = extractYouTubeVideoId(newSong.youtubeUrl) || newSong.youtubeId || 'syOCKFbVS-8';
+    const song: Song = { 
+      ...newSong, 
+      id,
+      youtubeId: ytId,
+      thumbnailUrl: newSong.thumbnailUrl || `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`
+    };
     setSongs(prev => {
       const updated = [song, ...prev];
       try {
@@ -1859,8 +1867,25 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateSong = (id: string, updated: Partial<Song>) => {
+    let resolvedYtId = '';
+    if (updated.youtubeUrl || updated.youtubeId) {
+      resolvedYtId = extractYouTubeVideoId(updated.youtubeUrl) || updated.youtubeId || '';
+    }
+
     setSongs(prev => {
-      const updatedList = prev.map(s => s.id === id ? { ...s, ...updated } : s);
+      const updatedList = prev.map(s => {
+        if (s.id === id) {
+          const merged = { ...s, ...updated };
+          if (resolvedYtId) {
+            merged.youtubeId = resolvedYtId;
+            if (!updated.thumbnailUrl && resolvedYtId) {
+              merged.thumbnailUrl = `https://i.ytimg.com/vi/${resolvedYtId}/hqdefault.jpg`;
+            }
+          }
+          return merged;
+        }
+        return s;
+      });
       const updatedSong = updatedList.find(s => s.id === id);
       try {
         localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(updatedList));
@@ -1871,7 +1896,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return updatedList;
     });
     if (currentSong.id === id) {
-      setCurrentSong(prev => ({ ...prev, ...updated }));
+      setCurrentSong(prev => {
+        const merged = { ...prev, ...updated };
+        if (resolvedYtId) {
+          merged.youtubeId = resolvedYtId;
+        }
+        return merged;
+      });
     }
   };
 

@@ -3,6 +3,7 @@ import { useChoir } from '../context/ChoirContext';
 import { X, ExternalLink, Music } from 'lucide-react';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../data/choirContent';
+import { getSongYouTubeId } from '../utils/assetHelper';
 
 export const YouTubePlayerModal: React.FC = () => {
   const { 
@@ -27,13 +28,7 @@ export const YouTubePlayerModal: React.FC = () => {
 
   if (!isYoutubeModalOpen || !currentSong) return null;
 
-  const videoId = currentSong.youtubeId || (
-    currentSong.youtubeUrl?.includes('youtu.be/')
-      ? currentSong.youtubeUrl.split('youtu.be/')[1]?.split('?')[0]
-      : currentSong.youtubeUrl?.includes('watch?v=')
-        ? currentSong.youtubeUrl.split('watch?v=')[1]?.split('&')[0]
-        : null
-  );
+  const videoId = getSongYouTubeId(currentSong);
 
   return (
     <div 

@@ -42,7 +42,8 @@ import {
   Heart,
   Loader2,
   Database,
-  Copy
+  Copy,
+  Award
 } from 'lucide-react';
 import { SUPABASE_DATABASE_SQL } from '../lib/supabaseChoirData';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
@@ -50,7 +51,7 @@ import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { LIBRARY_CATEGORIES, LibrarySong } from '../data/libraryData';
 import { ImageUploadField } from '../components/ImageUploadField';
-import { getAssetUrl } from '../utils/assetHelper';
+import { getAssetUrl, extractYouTubeVideoId, getSongYouTubeId } from '../utils/assetHelper';
 import { AdminHomepageTab } from '../components/admin/AdminHomepageTab';
 import { AdminMassesTab } from '../components/admin/AdminMassesTab';
 import { AdminFooterTab } from '../components/admin/AdminFooterTab';
@@ -538,6 +539,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     const lyricsSwahili = songForm.lyricsSwahiliText.split('\n').map(l => l.trim()).filter(Boolean);
     const lyricsEnglish = songForm.lyricsEnglishText.split('\n').map(l => l.trim()).filter(Boolean);
 
+    const cleanYtUrl = songForm.youtubeUrl.trim() || YOUTUBE_CHANNEL_URL;
+    const extractedYtId = extractYouTubeVideoId(cleanYtUrl) || 'syOCKFbVS-8';
+
     const songPayload = {
       title: songForm.title.trim(),
       titleSwahili: songForm.titleSwahili.trim() || songForm.title.trim(),
@@ -552,9 +556,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       voicing: songForm.voicing.trim(),
       musicalKey: songForm.musicalKey.trim(),
       duration: songForm.duration.trim() || '4:00',
-      youtubeUrl: songForm.youtubeUrl.trim() || YOUTUBE_CHANNEL_URL,
+      youtubeUrl: cleanYtUrl,
+      youtubeId: extractedYtId,
       audioPreviewUrl: songForm.audioPreviewUrl.trim() || 'preview.mp3',
-      thumbnailUrl: songForm.thumbnailUrl.trim() || undefined,
+      thumbnailUrl: songForm.thumbnailUrl.trim() || `https://i.ytimg.com/vi/${extractedYtId}/hqdefault.jpg`,
       sheetMusicAvailable: songForm.sheetMusicAvailable,
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
       lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monika SEC 58.'],
@@ -1109,39 +1114,30 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           </div>
 
           {[
-            { id: "hero", icon: Home, label: "Home Page" },
+            { id: "hero", icon: Home, label: "Home Page (Mwanzo)" },
+            { id: "about", icon: BookOpen, label: "About: Our Story & Patron" },
+            { id: "leaders", icon: Award, label: "About: Leadership & Trainers", badge: leadersList.length },
+            { id: "photos", icon: ImageIcon, label: "About: Choir Gallery", badge: groupPhotosList.length },
+            { id: "songs", icon: Play, label: "Music: Songs & Audio Previews", badge: songs.length },
+            { id: "library", icon: Music, label: "Music: Maktaba ya Noti", badge: librarySongs.length },
+            { id: "albums", icon: Disc, label: "Music: Albums", badge: albums.length },
             { id: "values", icon: Heart, label: "Core Values", badge: coreValues.length },
-            { id: "members", icon: Users, label: "Members Register", badge: members.length },
-            { id: "schedule", icon: Clock, label: "Mass Times" },
-            { id: "music", icon: Music, label: "Music Library & Scores", badge: songs.length + librarySongs.length },
+            { id: "schedule", icon: Clock, label: "Mass Times & Schedule" },
+            { id: "members", icon: Users, label: "Members Register & Sections", badge: members.length },
             { id: "events", icon: Calendar, label: "Parish Events", badge: eventsList.length },
-            { id: "financials", icon: DollarSign, label: "Contributions", badge: transactions.length },
-            { id: "footer", icon: Phone, label: "Contacts & Footer" },
-            { id: "backup", icon: Settings, label: "Backup & Reset" }
+            { id: "financials", icon: DollarSign, label: "Contributions & Support", badge: transactions.length },
+            { id: "footer", icon: Phone, label: "Contact Us & Footer" },
+            { id: "backup", icon: Settings, label: "System Backup & Reset" }
           ].map(item => {
             const Icon = item.icon;
-            const isItemActive = item.id === "music"
-              ? ["library", "albums", "songs", "sheet"].includes(activeTab)
-              : item.id === "members"
-              ? ["members", "leaders", "photos", "about", "stats"].includes(activeTab)
-              : activeTab === item.id;
+            const isItemActive = activeTab === item.id;
 
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => {
-                  if (item.id === "music") {
-                    if (!["library", "albums", "songs", "sheet"].includes(activeTab)) {
-                      setActiveTab("library");
-                    }
-                  } else if (item.id === "members") {
-                    if (!["members", "leaders", "photos", "about", "stats"].includes(activeTab)) {
-                      setActiveTab("members");
-                    }
-                  } else {
-                    setActiveTab(item.id as any);
-                  }
+                  setActiveTab(item.id as any);
                 }}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   isItemActive
@@ -1149,12 +1145,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 ${isItemActive ? "text-amber-300" : "text-slate-400"}`} />
-                  <span>{item.label}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon className={`w-4 h-4 shrink-0 ${isItemActive ? "text-amber-300" : "text-slate-400"}`} />
+                  <span className="truncate">{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tabular-nums ${
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tabular-nums shrink-0 ml-1.5 ${
                     isItemActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
                   }`}>
                     {item.badge}
@@ -1168,9 +1164,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         {/* MAIN WORKSPACE */}
         <main className="lg:col-span-9 space-y-5">
           
-          {/* Sub-tabs within Music */}
+          {/* Sub-tabs within Music Group */}
           {["library", "albums", "songs", "sheet"].includes(activeTab) && (
             <div className="bg-white border border-[#0C2340]/10 p-2 rounded-2xl flex flex-wrap items-center gap-2 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab("songs")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  activeTab === "songs" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                Songs & Audio Previews ({songs.length})
+              </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("library")}
@@ -1178,7 +1183,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "library" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                Music Library ({librarySongs.length})
+                Maktaba ya Noti ({librarySongs.length})
               </button>
               <button
                 type="button"
@@ -1188,15 +1193,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 }`}
               >
                 Albums ({albums.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("songs")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "songs" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Recorded Hymns ({songs.length})
               </button>
               <button
                 type="button"
@@ -1210,17 +1206,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             </div>
           )}
 
-          {/* Sub-tabs within Members */}
+          {/* Sub-tabs within About & Members Group */}
           {["members", "leaders", "photos", "about", "stats"].includes(activeTab) && (
             <div className="bg-white border border-[#0C2340]/10 p-2 rounded-2xl flex flex-wrap items-center gap-2 shadow-xs">
               <button
                 type="button"
-                onClick={() => setActiveTab("members")}
+                onClick={() => setActiveTab("about")}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "members" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
+                  activeTab === "about" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                Members Register ({members.length})
+                Our Story & Patron Saint
               </button>
               <button
                 type="button"
@@ -1229,7 +1225,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "leaders" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                Trainers & Officials ({leadersList.length})
+                Leadership & Trainers ({leadersList.length})
               </button>
               <button
                 type="button"
@@ -1238,16 +1234,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   activeTab === "photos" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                Photo Gallery ({groupPhotosList.length})
+                Choir Gallery ({groupPhotosList.length})
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab("about")}
+                onClick={() => setActiveTab("members")}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "about" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
+                  activeTab === "members" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                Our Story & Patron
+                Members Register & Sections ({members.length})
               </button>
             </div>
           )}
@@ -1450,10 +1446,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
-                    Choir Repertoire & YouTube Releases
+                    Music: Songs & Audio Previews (Nyimbo za Kwaya)
                   </h2>
                   <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                    Manage songs shown on the music page and linked to {YOUTUBE_CHANNEL_HANDLE}.
+                    Configure choir songs shown on the main Music page. Every uploaded YouTube link will sing as the live audio preview on the website.
                   </p>
                 </div>
                 <button
@@ -1503,6 +1499,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                         <th className="py-3 px-4">Title</th>
                         <th className="py-3 px-4">Composer</th>
                         <th className="py-3 px-4">Part / Season</th>
+                        <th className="py-3 px-4">YouTube Audio Preview</th>
                         <th className="py-3 px-4">Score Sale</th>
                         <th className="py-3 px-4 text-right">Actions</th>
                       </tr>
@@ -1520,6 +1517,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                             </span>
                           </td>
                           <td className="py-3 px-4">
+                            <div className="flex items-center gap-1.5">
+                              <RealYouTubeIcon className="w-3.5 h-3.5 shrink-0" />
+                              <span className="font-mono text-[11px] text-[#1058A8] font-bold truncate max-w-[140px]" title={song.youtubeUrl || getSongYouTubeId(song)}>
+                                {getSongYouTubeId(song)}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
                             {song.sheetMusicAvailable ? (
                               <span className="text-emerald-700 font-bold text-[11px]">KES {song.scorePriceKes}</span>
                             ) : (
@@ -1528,10 +1533,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                           </td>
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
-                              <button onClick={() => playSong(song)} className="p-1.5 text-[#1058A8] hover:bg-[#EAF4FB] rounded-lg">
+                              <button 
+                                onClick={() => playSong(song)} 
+                                title="Play uploaded YouTube preview directly"
+                                className="p-1.5 text-[#1058A8] hover:bg-[#EAF4FB] rounded-lg transition-colors cursor-pointer"
+                              >
                                 <Play className="w-3.5 h-3.5 fill-current" />
                               </button>
-                              <button onClick={() => openEditSongModal(song)} className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg">
+                              <button 
+                                onClick={() => openEditSongModal(song)} 
+                                title="Edit song and YouTube preview"
+                                className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                              >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
                               <button
@@ -2385,14 +2398,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">YouTube Video URL</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">YouTube Video Link (Live Audio Preview)</label>
                   <input
                     type="url"
                     value={songForm.youtubeUrl}
                     onChange={e => setSongForm({ ...songForm, youtubeUrl: e.target.value })}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                    placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none text-xs"
                   />
+                  <div className="text-[11px] text-slate-500 mt-1 font-source flex items-center justify-between">
+                    <span>This video link will sing as the live audio preview on the website.</span>
+                    {extractYouTubeVideoId(songForm.youtubeUrl) && (
+                      <span className="font-mono text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                        ID: {extractYouTubeVideoId(songForm.youtubeUrl)}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block font-bold text-[#0C2340] mb-1">Audio Preview File / Link</label>
