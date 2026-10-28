@@ -32,6 +32,31 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const currentRehearsalEn = (
+    footerContact?.rehearsalsEn || 
+    massSchedule?.rehearsals || 
+    choirStats?.rehearsalSchedule || 
+    'Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)'
+  ).trim();
+
+  const currentRehearsalSw = (
+    footerContact?.rehearsalsSw || 
+    massSchedule?.rehearsalsSw || 
+    choirStats?.rehearsalScheduleSw || 
+    'Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
+  ).trim();
+
+  // If text already begins with "Rehearsals" or "Mazoezi", use directly; otherwise format cleanly
+  const rehearsalInvitationTextEn = currentRehearsalEn.toLowerCase().startsWith('rehearsal')
+    ? currentRehearsalEn
+    : `Rehearsals: ${currentRehearsalEn}`;
+
+  const rehearsalInvitationTextSw = currentRehearsalSw.toLowerCase().startsWith('mazoezi')
+    ? currentRehearsalSw
+    : `Mazoezi ya kwaya: ${currentRehearsalSw}`;
+
+  const whatsappUrl = footerContact?.whatsapp || choirStats?.whatsappUrl || CHOIR_STATS.whatsappUrl;
+
   return (
     <footer 
       aria-label="Choir Page Footer"
@@ -49,9 +74,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               {lang === 'sw' ? 'Imba Nasi Mtakatifu Monika' : 'Sing with us at St. Monica'}
             </h3>
             <p className="text-sm sm:text-base text-slate-200 font-source max-w-2xl leading-relaxed">
-              {lang === 'sw'
-                ? `Mazoezi ya kwaya: ${CHOIR_STATS.rehearsalScheduleSw}`
-                : `Rehearsals every Wednesday and Friday evening (5:30 PM – 7:30 PM) in the parish hall, Section 58.`}
+              {lang === 'sw' ? rehearsalInvitationTextSw : rehearsalInvitationTextEn}
             </p>
             <p className="text-xs sm:text-sm text-[#7EC8F0] font-source font-medium">
               {lang === 'sw' ? 'Sauti zote zinakaribishwa kwenye majaribio ya kujiunga.' : 'All voices are welcome to audition.'}
@@ -61,7 +84,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
             {/* Green Chat on WhatsApp button */}
             <a
-              href={CHOIR_STATS.whatsappUrl}
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chat with choir on WhatsApp"

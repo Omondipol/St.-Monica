@@ -23,6 +23,7 @@ import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
+import { getYouTubeWatchUrl } from '../lib/youtube';
 
 export const NowPlayingModal: React.FC = () => {
   const {
@@ -97,7 +98,7 @@ export const NowPlayingModal: React.FC = () => {
   const currentIndex = songs.findIndex(s => s.id === currentSong.id);
   const formattedCurrent = formatTime(currentTimeSeconds);
   const fullDuration = currentSong.duration || '4:36';
-  const youtubeUrl = currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL;
+  const youtubeUrl = getYouTubeWatchUrl(currentSong.youtubeId || currentSong.youtubeUrl);
   const showSupportPrompt = (currentTimeSeconds >= 39.8 || isIntroCutoffOpen) && !isPromptDismissed;
 
   // Mobile swipe down to close

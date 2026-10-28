@@ -18,7 +18,9 @@ export const AdminMassesTab: React.FC<AdminMassesTabProps> = ({ onNotify }) => {
     massSchedule,
     updateMassSchedule,
     footerContact,
-    updateFooterContact
+    updateFooterContact,
+    choirStats,
+    updateChoirStats
   } = useChoir();
 
   // Modal / Form state for adding/editing a Mass
@@ -36,11 +38,21 @@ export const AdminMassesTab: React.FC<AdminMassesTabProps> = ({ onNotify }) => {
 
   // Rehearsals state
   const [rehearsalsEn, setRehearsalsEn] = useState<string>(
-    footerContact?.rehearsalsEn || massSchedule?.rehearsals || 'Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)'
+    footerContact?.rehearsalsEn || massSchedule?.rehearsals || choirStats?.rehearsalSchedule || 'Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)'
   );
   const [rehearsalsSw, setRehearsalsSw] = useState<string>(
-    footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || 'Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
+    footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || choirStats?.rehearsalScheduleSw || 'Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
   );
+
+  React.useEffect(() => {
+    const valEn = footerContact?.rehearsalsEn || massSchedule?.rehearsals || choirStats?.rehearsalSchedule;
+    if (valEn) setRehearsalsEn(valEn);
+  }, [footerContact?.rehearsalsEn, massSchedule?.rehearsals, choirStats?.rehearsalSchedule]);
+
+  React.useEffect(() => {
+    const valSw = footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || choirStats?.rehearsalScheduleSw;
+    if (valSw) setRehearsalsSw(valSw);
+  }, [footerContact?.rehearsalsSw, massSchedule?.rehearsalsSw, choirStats?.rehearsalScheduleSw]);
 
   const openAddMass = () => {
     setEditingMassId(null);
@@ -115,6 +127,10 @@ export const AdminMassesTab: React.FC<AdminMassesTabProps> = ({ onNotify }) => {
     updateMassSchedule({
       rehearsals: rehearsalsEn.trim(),
       rehearsalsSw: rehearsalsSw.trim()
+    });
+    updateChoirStats({
+      rehearsalSchedule: rehearsalsEn.trim(),
+      rehearsalScheduleSw: rehearsalsSw.trim()
     });
     onNotify(lang === 'sw' ? 'Ratiba ya mazoezi imehifadhiwa!' : 'Rehearsal schedule updated live!');
   };
