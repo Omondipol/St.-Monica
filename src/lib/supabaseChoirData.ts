@@ -245,6 +245,64 @@ export async function loadGalleryPhotosFromSupabase(): Promise<ChoirGroupPhoto[]
 }
 
 /**
+ * Delete a photo from Supabase 'gallery' database table and from Supabase storage if it was stored there
+ */
+export async function deleteGalleryPhotoFromSupabase(photoId: string, customUrl?: string): Promise<boolean> {
+  let deleted = false;
+
+  // 1. Delete by numeric ID if id was formatted like `supabase-photo-${num}`
+  if (photoId.startsWith('supabase-photo-')) {
+    const rawId = photoId.replace('supabase-photo-', '');
+    const numId = parseInt(rawId, 10);
+    if (!isNaN(numId)) {
+      try {
+        const { error } = await supabase.from('gallery').delete().eq('id', numId);
+        if (!error) deleted = true;
+      } catch (err) {
+        console.warn('[Supabase DB] Error deleting photo by numeric id:', err);
+      }
+    }
+  }
+
+  // 2. Also delete from 'gallery' by image_url if provided
+  if (customUrl) {
+    try {
+      const { error } = await supabase.from('gallery').delete().eq('image_url', customUrl);
+      if (!error) deleted = true;
+    } catch (err) {
+      console.warn('[Supabase DB] Error deleting photo by image_url:', err);
+    }
+  }
+
+  // 3. If photo was uploaded into Supabase storage bucket 'photos', delete the actual file
+  if (customUrl && customUrl.includes('/storage/v1/object/public/photos/')) {
+    try {
+      const parts = customUrl.split('/storage/v1/object/public/photos/');
+      if (parts[1]) {
+        const filePath = decodeURIComponent(parts[1]);
+        await supabase.storage.from(STORAGE_BUCKET).remove([filePath]);
+      }
+    } catch (err) {
+      console.warn('[Supabase Storage] Error deleting file from bucket:', err);
+    }
+  }
+
+  return deleted;
+}
+
+/**
+ * Save / sync the full group photos catalog to Supabase Storage
+ */
+export async function saveGroupPhotosToSupabase(allPhotos: ChoirGroupPhoto[]): Promise<boolean> {
+  try {
+    const res = await uploadJsonToSupabaseStorage('photos.json', allPhotos);
+    return Boolean(res.url);
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
  * Save Albums, Sheet Music, or Members catalog to Supabase
  */
 export async function saveCatalogToSupabase(name: string, data: any): Promise<boolean> {

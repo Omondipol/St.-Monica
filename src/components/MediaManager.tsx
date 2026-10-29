@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, uploadImageToSupabase } from '../lib/supabase';
+import { useChoir } from '../context/ChoirContext';
 import { 
   Upload, 
   AlertCircle, 
@@ -22,6 +23,7 @@ export interface PostItem {
 }
 
 export const MediaManager: React.FC = () => {
+  const { deleteGroupPhoto, addGroupPhoto } = useChoir();
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('Ready');
@@ -32,26 +34,55 @@ export const MediaManager: React.FC = () => {
   const [copiedSql, setCopiedSql] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch posts from Supabase
+  // Fetch posts from Supabase (combines gallery table and posts table)
   const loadPosts = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      // 1. Try 'gallery' table
+      const { data: galleryData } = await supabase
+        .from('gallery')
+        .select('*')
+        .order('id', { ascending: false });
+
+      // 2. Try 'posts' table
+      const { data: postsData } = await supabase
         .from('posts')
         .select('*')
         .order('id', { ascending: false });
 
-      if (error) {
-        // If table doesn't exist yet or connection fails
-        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
-          setStatus('Notice: "posts" table does not exist in Supabase yet.');
-        } else {
-          setStatus(`Sync notice: ${error.message}`);
+      const combined: PostItem[] = [];
+      const seenUrls = new Set<string>();
+
+      if (galleryData && Array.isArray(galleryData)) {
+        for (const g of galleryData) {
+          if (g.image_url && !seenUrls.has(g.image_url)) {
+            seenUrls.add(g.image_url);
+            combined.push({
+              id: Number(g.id),
+              title: g.title || 'Choir Photo',
+              image_url: g.image_url,
+              created_at: g.created_at || new Date().toISOString()
+            });
+          }
         }
-      } else if (data) {
-        setPosts(data as PostItem[]);
-        setStatus('Synced with Supabase');
       }
+
+      if (postsData && Array.isArray(postsData)) {
+        for (const p of postsData) {
+          if (p.image_url && !seenUrls.has(p.image_url)) {
+            seenUrls.add(p.image_url);
+            combined.push({
+              id: Number(p.id),
+              title: p.title || 'Post Image',
+              image_url: p.image_url,
+              created_at: p.created_at || new Date().toISOString()
+            });
+          }
+        }
+      }
+
+      setPosts(combined);
+      setStatus(combined.length > 0 ? 'Synced with Supabase Cloud' : 'Ready');
     } catch (err: any) {
       setStatus(err?.message || 'Connection error');
     } finally {
@@ -62,8 +93,15 @@ export const MediaManager: React.FC = () => {
   useEffect(() => {
     loadPosts();
 
-    // Subscribe to live database updates
-    const channel = supabase
+    // Subscribe to live database updates on gallery and posts
+    const galChannel = supabase
+      .channel('public:gallery')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, () => {
+        loadPosts();
+      })
+      .subscribe();
+
+    const postChannel = supabase
       .channel('public:posts')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
         loadPosts();
@@ -71,7 +109,8 @@ export const MediaManager: React.FC = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(galChannel);
+      supabase.removeChannel(postChannel);
     };
   }, []);
 
@@ -81,38 +120,45 @@ export const MediaManager: React.FC = () => {
     if (!file) return;
 
     setStatus('Uploading image to Supabase...');
-    const filePath = `uploads/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '')}`;
+    const recordTitle = title.trim() || file.name;
 
     try {
-      const { error: uploadError } = await supabase.storage
-        .from('app-images')
-        .upload(filePath, file);
+      const { url, error: uploadError } = await uploadImageToSupabase(file, 'uploads');
 
-      if (uploadError) {
-        setStatus(`Upload error: ${uploadError.message}`);
+      if (uploadError || !url) {
+        setStatus(`Upload error: ${uploadError || 'Failed to upload'}`);
         return;
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from('app-images')
-        .getPublicUrl(filePath);
+      setStatus('Saving to Supabase gallery...');
+      
+      // Insert into gallery table
+      try {
+        const { data: gData } = await supabase
+          .from('gallery')
+          .insert([{ title: recordTitle, image_url: url }])
+          .select();
+        if (gData && gData[0]) {
+          setActiveId(Number(gData[0].id));
+        }
+      } catch (_) {}
 
-      setStatus('Saving record...');
-      const recordTitle = title.trim() || file.name;
+      // Also sync into Choir Context so it appears on the website immediately
+      addGroupPhoto({
+        title: recordTitle,
+        titleSw: recordTitle,
+        imageKey: 'choir_singing_moment',
+        customUrl: url,
+        year: new Date().getFullYear().toString(),
+        occasion: 'Picha ya Kwaya',
+        occasionSw: 'Picha ya Kwaya',
+        description: recordTitle,
+        descriptionSw: recordTitle
+      });
 
-      const { data, error: dbError } = await supabase
-        .from('posts')
-        .insert([{ title: recordTitle, image_url: publicUrlData.publicUrl }])
-        .select();
-
-      if (dbError) {
-        setStatus(`Database error: ${dbError.message}`);
-      } else if (data && data[0]) {
-        setActiveId(data[0].id);
-        setStatus('Saved automatically to Supabase!');
-        loadPosts();
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      }
+      setStatus('Saved automatically to Supabase & Choir Gallery!');
+      loadPosts();
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err: any) {
       setStatus(`Error: ${err?.message || 'Failed to upload'}`);
     }
@@ -127,22 +173,10 @@ export const MediaManager: React.FC = () => {
       setStatus('Saving text...');
       try {
         if (activeId) {
-          const { error } = await supabase.from('posts').update({ title }).eq('id', activeId);
-          if (error) {
-            setStatus(`Update note: ${error.message}`);
-          } else {
-            setStatus('All changes saved!');
-            loadPosts();
-          }
-        } else {
-          const { data, error } = await supabase.from('posts').insert([{ title }]).select();
-          if (error) {
-            setStatus(`Save note: ${error.message}`);
-          } else if (data && data[0]) {
-            setActiveId(data[0].id);
-            setStatus('All changes saved!');
-            loadPosts();
-          }
+          await supabase.from('gallery').update({ title }).eq('id', activeId);
+          await supabase.from('posts').update({ title }).eq('id', activeId);
+          setStatus('All changes saved!');
+          loadPosts();
         }
       } catch (err: any) {
         setStatus(`Error saving: ${err?.message}`);
@@ -153,16 +187,50 @@ export const MediaManager: React.FC = () => {
   }, [title, activeId]);
 
   const handleDeletePost = async (id: number) => {
-    if (!window.confirm('Delete this media post from Supabase?')) return;
-    setStatus('Deleting...');
-    const { error } = await supabase.from('posts').delete().eq('id', id);
-    if (!error) {
-      setStatus('Post deleted');
-      if (activeId === id) setActiveId(null);
-      loadPosts();
+    const targetPost = posts.find(p => p.id === id);
+    if (!window.confirm(`Delete "${targetPost?.title || 'this media item'}" permanently?`)) return;
+
+    setStatus('Deleting from Supabase...');
+
+    // 1. Delete from Supabase 'gallery' database table
+    try {
+      await supabase.from('gallery').delete().eq('id', id);
+    } catch (_) {}
+
+    // 2. Delete from Supabase 'posts' database table
+    try {
+      await supabase.from('posts').delete().eq('id', id);
+    } catch (_) {}
+
+    // 3. Delete from Supabase Storage buckets if URL is available
+    if (targetPost?.image_url) {
+      try {
+        await supabase.from('gallery').delete().eq('image_url', targetPost.image_url);
+        await supabase.from('posts').delete().eq('image_url', targetPost.image_url);
+
+        if (targetPost.image_url.includes('/storage/v1/object/public/photos/')) {
+          const parts = targetPost.image_url.split('/storage/v1/object/public/photos/');
+          if (parts[1]) {
+            await supabase.storage.from('photos').remove([decodeURIComponent(parts[1])]);
+          }
+        }
+        if (targetPost.image_url.includes('/storage/v1/object/public/app-images/')) {
+          const parts = targetPost.image_url.split('/storage/v1/object/public/app-images/');
+          if (parts[1]) {
+            await supabase.storage.from('app-images').remove([decodeURIComponent(parts[1])]);
+          }
+        }
+      } catch (_) {}
+
+      // 4. Also remove from ChoirContext gallery state so it immediately disappears everywhere
+      deleteGroupPhoto(`supabase-photo-${id}`);
     } else {
-      setStatus(`Delete error: ${error.message}`);
+      deleteGroupPhoto(`supabase-photo-${id}`);
     }
+
+    setStatus('Post permanently deleted from Supabase & site');
+    if (activeId === id) setActiveId(null);
+    loadPosts();
   };
 
   return (

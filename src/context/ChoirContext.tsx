@@ -42,6 +42,8 @@ import {
   saveSongToSupabase,
   deleteSongFromSupabase,
   loadGalleryPhotosFromSupabase,
+  deleteGalleryPhotoFromSupabase,
+  saveGroupPhotosToSupabase,
   saveCatalogToSupabase,
   loadCatalogFromSupabase
 } from '../lib/supabaseChoirData';
@@ -372,7 +374,9 @@ const STORAGE_KEYS = {
   ABOUT_CONFIG: 'st_monica_about_config_v6',
   ALBUMS: 'st_monica_albums_v6',
   TRANSACTIONS: 'st_monica_transactions_v6',
-  CORE_VALUES: 'st_monica_core_values_v1'
+  CORE_VALUES: 'st_monica_core_values_v1',
+  DELETED_PHOTO_IDS: 'st_monica_deleted_photo_ids_v2',
+  DELETED_SONG_IDS: 'st_monica_deleted_song_ids_v2'
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -444,10 +448,16 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadSongsFromSupabase().then((remoteSongs) => {
       if (isMounted && remoteSongs && remoteSongs.length > 0) {
         setSongs(prev => {
-          const remoteIds = new Set(remoteSongs.map(s => s.id));
-          const localOnly = prev.filter(s => !remoteIds.has(s.id));
-          const initialMissing = INITIAL_SONGS_CATALOG.filter(s => !remoteIds.has(s.id) && !localOnly.some(l => l.id === s.id));
-          const merged = [...remoteSongs, ...localOnly, ...initialMissing];
+          let deletedSongIds: string[] = [];
+          try {
+            const raw = localStorage.getItem(STORAGE_KEYS.DELETED_SONG_IDS);
+            if (raw) deletedSongIds = JSON.parse(raw);
+          } catch (_) {}
+          const activeRemote = remoteSongs.filter(s => !deletedSongIds.includes(s.id));
+          const remoteIds = new Set(activeRemote.map(s => s.id));
+          const localOnly = prev.filter(s => !remoteIds.has(s.id) && !deletedSongIds.includes(s.id));
+          const initialMissing = INITIAL_SONGS_CATALOG.filter(s => !remoteIds.has(s.id) && !localOnly.some(l => l.id === s.id) && !deletedSongIds.includes(s.id));
+          const merged = [...activeRemote, ...localOnly, ...initialMissing];
           try {
             localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(merged));
           } catch (_) {}
@@ -460,9 +470,17 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadGalleryPhotosFromSupabase().then((remotePhotos) => {
       if (isMounted && remotePhotos && remotePhotos.length > 0) {
         setGroupPhotosList(prev => {
+          let deletedIds: string[] = [];
+          try {
+            const raw = localStorage.getItem(STORAGE_KEYS.DELETED_PHOTO_IDS);
+            if (raw) deletedIds = JSON.parse(raw);
+          } catch (_) {}
+          const activeRemote = remotePhotos.filter(
+            p => !deletedIds.includes(p.id) && (!p.customUrl || !deletedIds.includes(p.customUrl))
+          );
           const existingIds = new Set(prev.map(p => p.id));
           const existingUrls = new Set(prev.map(p => p.customUrl).filter(Boolean));
-          const newPhotos = remotePhotos.filter(p => !existingIds.has(p.id) && !existingUrls.has(p.customUrl));
+          const newPhotos = activeRemote.filter(p => !existingIds.has(p.id) && !existingUrls.has(p.customUrl));
           if (newPhotos.length === 0) return prev;
           const merged = [...newPhotos, ...prev];
           try {
@@ -470,6 +488,28 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           } catch (_) {}
           return merged;
         });
+      }
+    });
+
+    // Optionally hydrate other catalogs from Supabase if stored
+    loadCatalogFromSupabase<SheetMusicItem[]>('sheet_music').then(remoteSheets => {
+      if (isMounted && remoteSheets && Array.isArray(remoteSheets) && remoteSheets.length > 0) {
+        setSheetMusicList(remoteSheets);
+      }
+    });
+    loadCatalogFromSupabase<ChoirLeader[]>('leaders').then(remoteLeaders => {
+      if (isMounted && remoteLeaders && Array.isArray(remoteLeaders) && remoteLeaders.length > 0) {
+        setLeadersList(remoteLeaders);
+      }
+    });
+    loadCatalogFromSupabase<EventItem[]>('events').then(remoteEvents => {
+      if (isMounted && remoteEvents && Array.isArray(remoteEvents) && remoteEvents.length > 0) {
+        setEventsList(remoteEvents);
+      }
+    });
+    loadCatalogFromSupabase<MassItem[]>('masses').then(remoteMasses => {
+      if (isMounted && remoteMasses && Array.isArray(remoteMasses) && remoteMasses.length > 0) {
+        setMassesList(remoteMasses);
       }
     });
 
@@ -534,11 +574,16 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [groupPhotosList, setGroupPhotosList] = useState<ChoirGroupPhoto[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PHOTOS);
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (parsed.some((p: ChoirGroupPhoto) => !p.customUrl || p.customUrl.includes('unsplash') || p.id === 'grp-vestment-2024' || p.title === 'Kwaya Nzima ya Mtakatifu Monika Altaroni')) {
-            return INITIAL_GROUP_PHOTOS;
+        if (Array.isArray(parsed)) {
+          let deletedIds: string[] = [];
+          try {
+            const raw = localStorage.getItem(STORAGE_KEYS.DELETED_PHOTO_IDS);
+            if (raw) deletedIds = JSON.parse(raw);
+          } catch (_) {}
+          if (deletedIds.length > 0) {
+            return parsed.filter(p => !deletedIds.includes(p.id) && (!p.customUrl || !deletedIds.includes(p.customUrl)));
           }
           return parsed;
         }
@@ -890,15 +935,30 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addMass = (mass: Omit<MassItem, 'id'>) => {
     const id = `mass-${Date.now()}`;
-    setMassesList(prev => [...prev, { ...mass, id }]);
+    setMassesList(prev => {
+      const updated = [...prev, { ...mass, id }];
+      try { localStorage.setItem(STORAGE_KEYS.MASSES_LIST, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('masses', updated);
+      return updated;
+    });
   };
 
   const updateMass = (id: string, updated: Partial<MassItem>) => {
-    setMassesList(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+    setMassesList(prev => {
+      const updatedList = prev.map(m => m.id === id ? { ...m, ...updated } : m);
+      try { localStorage.setItem(STORAGE_KEYS.MASSES_LIST, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('masses', updatedList);
+      return updatedList;
+    });
   };
 
   const deleteMass = (id: string) => {
-    setMassesList(prev => prev.filter(m => m.id !== id));
+    setMassesList(prev => {
+      const filtered = prev.filter(m => m.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.MASSES_LIST, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('masses', filtered);
+      return filtered;
+    });
   };
 
   // 7m. Footer & Contact Info
@@ -1032,31 +1092,46 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       status: 'active'
     };
 
-    setMembers(prev => [newMem, ...prev]);
+    setMembers(prev => {
+      const updated = [newMem, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('members', updated);
+      return updated;
+    });
     return newMem;
   };
 
   const renewMember = (id: string, paymentRef?: string) => {
-    setMembers(prev => prev.map(m => {
-      if (m.id === id) {
-        const newReg = new Date();
-        const newExpiry = new Date(newReg);
-        newExpiry.setFullYear(newExpiry.getFullYear() + 1);
-        return {
-          ...m,
-          registeredAt: newReg.toISOString(),
-          expiresAt: newExpiry.toISOString(),
-          renewalFeePaid: 500,
-          paymentReference: paymentRef || `MPESA-RENEW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-          status: 'active'
-        };
-      }
-      return m;
-    }));
+    setMembers(prev => {
+      const updatedList = prev.map(m => {
+        if (m.id === id) {
+          const newReg = new Date();
+          const newExpiry = new Date(newReg);
+          newExpiry.setFullYear(newExpiry.getFullYear() + 1);
+          return {
+            ...m,
+            registeredAt: newReg.toISOString(),
+            expiresAt: newExpiry.toISOString(),
+            renewalFeePaid: 500,
+            paymentReference: paymentRef || `MPESA-RENEW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            status: 'active' as const
+          };
+        }
+        return m;
+      });
+      try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('members', updatedList);
+      return updatedList;
+    });
   };
 
   const deleteMember = (id: string) => {
-    setMembers(prev => prev.filter(m => m.id !== id));
+    setMembers(prev => {
+      const filtered = prev.filter(m => m.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('members', filtered);
+      return filtered;
+    });
   };
 
   const addMember = (data: Omit<ChoirMember, 'id'>) => {
@@ -1064,11 +1139,21 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ...data,
       id: `mem-${data.voice.slice(0, 3)}-${Date.now()}`
     };
-    setMembers(prev => [newMem, ...prev]);
+    setMembers(prev => {
+      const updated = [newMem, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('members', updated);
+      return updated;
+    });
   };
 
   const updateMember = (id: string, updated: Partial<ChoirMember>) => {
-    setMembers(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+    setMembers(prev => {
+      const updatedList = prev.map(m => m.id === id ? { ...m, ...updated } : m);
+      try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('members', updatedList);
+      return updatedList;
+    });
   };
 
   // 7g. Official Albums & Recordings
@@ -1091,15 +1176,30 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ...newAlb,
       id: `album-${Date.now()}`
     };
-    setAlbums(prev => [alb, ...prev]);
+    setAlbums(prev => {
+      const updated = [alb, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('albums', updated);
+      return updated;
+    });
   };
 
   const updateAlbum = (id: string, updated: Partial<Album>) => {
-    setAlbums(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a));
+    setAlbums(prev => {
+      const updatedList = prev.map(a => a.id === id ? { ...a, ...updated } : a);
+      try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('albums', updatedList);
+      return updatedList;
+    });
   };
 
   const deleteAlbum = (id: string) => {
-    setAlbums(prev => prev.filter(a => a.id !== id));
+    setAlbums(prev => {
+      const filtered = prev.filter(a => a.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('albums', filtered);
+      return filtered;
+    });
   };
 
   // 7h. Contributions & Supporters Transactions Ledger
@@ -1955,6 +2055,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const filtered = prev.filter(s => s.id !== id);
       try {
         localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(filtered));
+        const raw = localStorage.getItem(STORAGE_KEYS.DELETED_SONG_IDS);
+        const deleted: string[] = raw ? JSON.parse(raw) : [];
+        if (!deleted.includes(id)) deleted.push(id);
+        localStorage.setItem(STORAGE_KEYS.DELETED_SONG_IDS, JSON.stringify(deleted));
       } catch (_) {}
       deleteSongFromSupabase(id, filtered);
       if (currentSong.id === id && filtered.length > 0) {
@@ -1966,21 +2070,41 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addSheetMusic = (item: Omit<SheetMusicItem, 'id'>) => {
     const id = `sheet-${Date.now()}`;
-    setSheetMusicList(prev => [{ ...item, id }, ...prev]);
+    setSheetMusicList(prev => {
+      const updated = [{ ...item, id }, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.SHEET, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('sheet_music', updated);
+      return updated;
+    });
   };
 
   const updateSheetMusic = (id: string, updated: Partial<SheetMusicItem>) => {
-    setSheetMusicList(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
+    setSheetMusicList(prev => {
+      const updatedList = prev.map(m => m.id === id ? { ...m, ...updated } : m);
+      try { localStorage.setItem(STORAGE_KEYS.SHEET, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('sheet_music', updatedList);
+      return updatedList;
+    });
   };
 
   const deleteSheetMusic = (id: string) => {
-    setSheetMusicList(prev => prev.filter(m => m.id !== id));
+    setSheetMusicList(prev => {
+      const filtered = prev.filter(m => m.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.SHEET, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('sheet_music', filtered);
+      return filtered;
+    });
   };
 
   const addLeader = (leader: Omit<ChoirLeader, 'id'>) => {
     const id = `ldr-${Date.now()}`;
     const newLeader = { ...leader, id };
-    setLeadersList(prev => [...prev, newLeader]);
+    setLeadersList(prev => {
+      const updated = [...prev, newLeader];
+      try { localStorage.setItem(STORAGE_KEYS.LEADERS, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('leaders', updated);
+      return updated;
+    });
 
     // If new leader is designated as Choirmaster, sync with choirmasterMessage
     const roleLower = (leader.role || '').toLowerCase();
@@ -1998,6 +2122,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateLeader = (id: string, updated: Partial<ChoirLeader>) => {
     setLeadersList(prev => {
       const updatedList = prev.map(l => l.id === id ? { ...l, ...updated } : l);
+      try { localStorage.setItem(STORAGE_KEYS.LEADERS, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('leaders', updatedList);
       const target = updatedList.find(l => l.id === id);
       if (target) {
         const roleLower = (target.role || '').toLowerCase();
@@ -2016,20 +2142,54 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteLeader = (id: string) => {
-    setLeadersList(prev => prev.filter(l => l.id !== id));
+    setLeadersList(prev => {
+      const filtered = prev.filter(l => l.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.LEADERS, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('leaders', filtered);
+      return filtered;
+    });
   };
 
   const addGroupPhoto = (photo: Omit<ChoirGroupPhoto, 'id'>) => {
     const id = `grp-${Date.now()}`;
-    setGroupPhotosList(prev => [{ ...photo, id }, ...prev]);
+    const newPhoto: ChoirGroupPhoto = { ...photo, id };
+    setGroupPhotosList(prev => {
+      const updated = [newPhoto, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.PHOTOS, JSON.stringify(updated)); } catch (_) {}
+      saveGroupPhotosToSupabase(updated);
+      return updated;
+    });
   };
 
   const updateGroupPhoto = (id: string, updated: Partial<ChoirGroupPhoto>) => {
-    setGroupPhotosList(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p));
+    setGroupPhotosList(prev => {
+      const updatedList = prev.map(p => p.id === id ? { ...p, ...updated } : p);
+      try { localStorage.setItem(STORAGE_KEYS.PHOTOS, JSON.stringify(updatedList)); } catch (_) {}
+      saveGroupPhotosToSupabase(updatedList);
+      return updatedList;
+    });
   };
 
   const deleteGroupPhoto = (id: string) => {
-    setGroupPhotosList(prev => prev.filter(p => p.id !== id));
+    setGroupPhotosList(prev => {
+      const photoToDelete = prev.find(p => p.id === id);
+      const filtered = prev.filter(p => p.id !== id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.PHOTOS, JSON.stringify(filtered));
+        const raw = localStorage.getItem(STORAGE_KEYS.DELETED_PHOTO_IDS);
+        const deleted: string[] = raw ? JSON.parse(raw) : [];
+        if (!deleted.includes(id)) deleted.push(id);
+        if (photoToDelete?.customUrl && !deleted.includes(photoToDelete.customUrl)) {
+          deleted.push(photoToDelete.customUrl);
+        }
+        localStorage.setItem(STORAGE_KEYS.DELETED_PHOTO_IDS, JSON.stringify(deleted));
+      } catch (_) {}
+
+      // Delete from Supabase gallery table and storage bucket photos, plus update photos.json
+      deleteGalleryPhotoFromSupabase(id, photoToDelete?.customUrl);
+      saveGroupPhotosToSupabase(filtered);
+      return filtered;
+    });
   };
 
   // Maktaba ya Noti Library CRUD Functions
@@ -2041,41 +2201,79 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       downloadCount: 0,
       addedDate: new Date().toISOString().split('T')[0]
     };
-    setLibrarySongs(prev => [song, ...prev]);
+    setLibrarySongs(prev => {
+      const updated = [song, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('library_songs', updated);
+      return updated;
+    });
   };
 
   const updateLibrarySong = (id: string, updated: Partial<LibrarySong>) => {
-    setLibrarySongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+    setLibrarySongs(prev => {
+      const updatedList = prev.map(s => s.id === id ? { ...s, ...updated } : s);
+      try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('library_songs', updatedList);
+      return updatedList;
+    });
   };
 
   const deleteLibrarySong = (id: string) => {
-    setLibrarySongs(prev => prev.filter(s => s.id !== id));
+    setLibrarySongs(prev => {
+      const filtered = prev.filter(s => s.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('library_songs', filtered);
+      return filtered;
+    });
   };
 
   const bulkImportLibrarySongs = (newSongs: LibrarySong[]) => {
     setLibrarySongs(prev => {
       const existingIds = new Set(prev.map(s => s.id));
       const additions = newSongs.filter(s => !existingIds.has(s.id));
-      return [...additions, ...prev];
+      const updated = [...additions, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('library_songs', updated);
+      return updated;
     });
   };
 
   const incrementDownloadCount = (id: string) => {
-    setLibrarySongs(prev => prev.map(s => s.id === id ? { ...s, downloadCount: (s.downloadCount || 0) + 1 } : s));
+    setLibrarySongs(prev => {
+      const updated = prev.map(s => s.id === id ? { ...s, downloadCount: (s.downloadCount || 0) + 1 } : s);
+      try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('library_songs', updated);
+      return updated;
+    });
   };
 
   // Events CRUD
   const addEvent = (event: Omit<EventItem, 'id'>) => {
     const id = `evt-${Date.now()}`;
-    setEventsList(prev => [{ ...event, id }, ...prev]);
+    setEventsList(prev => {
+      const updated = [{ ...event, id }, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(updated)); } catch (_) {}
+      saveCatalogToSupabase('events', updated);
+      return updated;
+    });
   };
 
   const updateEvent = (id: string, updated: Partial<EventItem>) => {
-    setEventsList(prev => prev.map(e => e.id === id ? { ...e, ...updated } : e));
+    setEventsList(prev => {
+      const updatedList = prev.map(e => e.id === id ? { ...e, ...updated } : e);
+      try { localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(updatedList)); } catch (_) {}
+      saveCatalogToSupabase('events', updatedList);
+      return updatedList;
+    });
   };
 
   const deleteEvent = (id: string) => {
-    setEventsList(prev => prev.filter(e => e.id !== id));
+    setEventsList(prev => {
+      const filtered = prev.filter(e => e.id !== id);
+      try { localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(filtered)); } catch (_) {}
+      saveCatalogToSupabase('events', filtered);
+      return filtered;
+    });
   };
 
   // Site Configuration & Stats Mutations

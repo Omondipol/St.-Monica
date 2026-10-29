@@ -17,7 +17,7 @@ interface ChoirGalleryViewProps {
 export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate = () => {} }) => {
   const { lang, groupPhotosList, openJoinModal } = useChoir();
 
-  const photosToDisplay = groupPhotosList && groupPhotosList.length > 0 ? groupPhotosList : INITIAL_GROUP_PHOTOS;
+  const photosToDisplay = groupPhotosList || [];
 
   const getImageSrc = (imageKey: string, customUrl?: string) => {
     if (customUrl) return getAssetUrl(customUrl);
@@ -141,46 +141,59 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {photosToDisplay.map((photo) => (
-            <div
-              key={photo.id}
-              className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden hover:border-[#1058A8]/40 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all flex flex-col justify-between"
-            >
-              <div className="aspect-4/3 relative overflow-hidden bg-slate-100">
-                <img
-                  src={getImageSrc(photo.imageKey, photo.customUrl)}
-                  alt={photo.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                {photo.year && photo.year.trim() !== '' && photo.year.trim() !== '2024' && (
-                  <span className="absolute top-3 left-3 bg-[#0C2340]/90 text-white text-[11px] font-source px-2.5 py-0.5 rounded-lg font-semibold tabular-nums shadow-xs">
-                    {photo.year}
-                  </span>
-                )}
-              </div>
+        {photosToDisplay.length === 0 ? (
+          <div className="text-center py-14 px-6 bg-white/95 border border-[#0C2340]/10 rounded-2xl space-y-2 shadow-xs">
+            <h4 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+              {lang === 'sw' ? 'Hakuna Picha Kwenye Matunzio Kwa Sasa' : 'No Photographs in Gallery Currently'}
+            </h4>
+            <p className="text-xs text-slate-500 font-source max-w-md mx-auto">
+              {lang === 'sw'
+                ? 'Picha zote za matunzio zimeondolewa au bado hazijawekwa. Unaweza kupakia picha mpya kwenye paneli ya Admin.'
+                : 'All gallery photos have been removed or none have been published yet. You can upload new photographs from the Admin panel.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {photosToDisplay.map((photo) => (
+              <div
+                key={photo.id}
+                className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden hover:border-[#1058A8]/40 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all flex flex-col justify-between"
+              >
+                <div className="aspect-4/3 relative overflow-hidden bg-slate-100">
+                  <img
+                    src={getImageSrc(photo.imageKey, photo.customUrl)}
+                    alt={photo.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                  {photo.year && photo.year.trim() !== '' && photo.year.trim() !== '2024' && (
+                    <span className="absolute top-3 left-3 bg-[#0C2340]/90 text-white text-[11px] font-source px-2.5 py-0.5 rounded-lg font-semibold tabular-nums shadow-xs">
+                      {photo.year}
+                    </span>
+                  )}
+                </div>
 
-              <div className="p-5 space-y-2">
-                <span className="text-xs font-semibold text-[#1058A8] font-source block">
-                  {photo.occasion || photo.occasionSw}
-                </span>
-                <h4 className="font-eb-garamond text-xl font-bold text-[#0C2340] leading-snug">
-                  {photo.title || photo.titleSw}
-                </h4>
-                <p className="text-xs text-[#0C2340]/85 font-source leading-relaxed">
-                  {photo.description}
-                </p>
-                {lang === 'sw' && photo.descriptionSw && photo.descriptionSw !== photo.description && (
-                  <p className="text-[11px] text-slate-500 font-source italic pt-1 border-t border-slate-100">
-                    {photo.descriptionSw}
+                <div className="p-5 space-y-2">
+                  <span className="text-xs font-semibold text-[#1058A8] font-source block">
+                    {photo.occasion || photo.occasionSw}
+                  </span>
+                  <h4 className="font-eb-garamond text-xl font-bold text-[#0C2340] leading-snug">
+                    {photo.title || photo.titleSw}
+                  </h4>
+                  <p className="text-xs text-[#0C2340]/85 font-source leading-relaxed">
+                    {photo.description}
                   </p>
-                )}
+                  {lang === 'sw' && photo.descriptionSw && photo.descriptionSw !== photo.description && (
+                    <p className="text-[11px] text-slate-500 font-source italic pt-1 border-t border-slate-100">
+                      {photo.descriptionSw}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
