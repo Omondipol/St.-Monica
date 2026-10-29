@@ -17,6 +17,14 @@ export default defineConfig(({ command }) => {
         '@': path.resolve('.'),
       },
     },
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
+        process.env.VITE_SUPABASE_URL || 'https://pzvpbixdefvztffjyrye.supabase.co'
+      ),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
+        process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_qI6m1zfFhj0-PmK6aVp89w_pDGhrt33'
+      ),
+    },
     server: {
       host: '0.0.0.0',
       port: 3000,
