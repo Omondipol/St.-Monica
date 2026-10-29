@@ -1,5 +1,6 @@
 import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
+import { supabase } from '../../lib/supabase';
 import { INITIAL_GROUP_PHOTOS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../../data/choirContent';
 import choirHeroImg from '../../assets/images/choir_singing_moment_1791356740170.jpg';
 import cathedralImg from '../../assets/images/nakuru_parish_cathedral_1791356761479.jpg';

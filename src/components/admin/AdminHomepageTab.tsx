@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useChoir } from '../../context/ChoirContext';
+import { supabase } from '../../lib/supabase';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
 import { Save, Image as ImageIcon, BookOpen, User, Church, Layers, Check, RotateCcw, Eye } from 'lucide-react';

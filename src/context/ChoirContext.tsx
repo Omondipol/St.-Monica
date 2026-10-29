@@ -37,6 +37,7 @@ import {
 } from '../data/choirContent';
 import { LibrarySong, INITIAL_LIBRARY_SONGS } from '../data/libraryData';
 import { ChoirMember, INITIAL_MEMBERS, isMemberActive } from '../data/membersData';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   loadSongsFromSupabase,
   saveSongToSupabase,

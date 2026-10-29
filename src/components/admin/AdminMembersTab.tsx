@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useChoir } from '../../context/ChoirContext';
+import { supabase } from '../../lib/supabase';
 import { ChoirMember, isMemberActive } from '../../data/membersData';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
 import { 

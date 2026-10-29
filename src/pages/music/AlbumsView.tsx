@@ -1,5 +1,6 @@
 import React from 'react';
 import { useChoir } from '../../context/ChoirContext';
+import { supabase } from '../../lib/supabase';
 import { INITIAL_ALBUMS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../../data/choirContent';
 import { Play, ShoppingBag, ExternalLink } from 'lucide-react';
 import { RealYouTubeIcon } from '../../components/RealYouTubeIcon';

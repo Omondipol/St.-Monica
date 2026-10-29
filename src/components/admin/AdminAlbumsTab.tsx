@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useChoir } from '../../context/ChoirContext';
+import { supabase } from '../../lib/supabase';
 import { Album } from '../../data/choirContent';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
 import { ImageUploadField, PresetImageOption } from '../ImageUploadField';

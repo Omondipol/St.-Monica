@@ -94,6 +94,19 @@ function createSafeSupabaseClient(): SupabaseClient {
 
 export const supabase = createSafeSupabaseClient();
 
+// Ensure the configured Supabase client is also safely attached to window for browser scope compatibility
+if (typeof window !== 'undefined') {
+  (window as any).supabase = supabase;
+}
+
+declare global {
+  interface Window {
+    supabase?: SupabaseClient;
+  }
+}
+
+export default supabase;
+
 /**
  * Automatically resize & optimize high-resolution images on the client
  * to a sensible maximum dimension (~2000px) with 85% JPEG quality before upload.

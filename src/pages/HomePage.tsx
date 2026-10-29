@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChoir } from '../context/ChoirContext';
+import { supabase } from '../lib/supabase';
 import { 
   CHOIR_STATS, 
   YOUTUBE_CHANNEL_URL, 

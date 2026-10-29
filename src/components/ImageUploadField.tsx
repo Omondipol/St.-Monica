@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Link as LinkIcon, RotateCcw, Image as ImageIcon, Check, Loader2, CloudCheck } from 'lucide-react';
 import { getAssetUrl } from '../utils/assetHelper';
-import { uploadImageToSupabase } from '../lib/supabase';
+import { supabase, uploadImageToSupabase } from '../lib/supabase';
 
 export interface PresetImageOption {
   label: string;
