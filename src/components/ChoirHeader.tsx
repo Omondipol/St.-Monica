@@ -167,28 +167,56 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
       className="sticky top-0 z-50 w-full max-w-full bg-[#1C1E24] text-white border-b border-black/40 shadow-md site-header header-container"
     >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 relative h-full">
-        <div className="flex items-center justify-between h-[84px] sm:h-[94px] lg:h-[102px] gap-2 sm:gap-4 header-inner">
+        <div className="flex items-center justify-between h-[86px] sm:h-[94px] lg:h-[102px] gap-2 sm:gap-3 header-inner">
           
           {/* Left: Brand with Official Seal prominent and cleanly proportioned */}
-          <div className="flex items-center min-w-0 flex-1 mr-1 sm:mr-4 pl-1 sm:pl-2">
+          <div className="flex items-center min-w-0 flex-1 mr-1 sm:mr-3 pl-0.5 sm:pl-2">
             <button 
               onClick={() => navigateTo('home')} 
-              className="flex items-center gap-3 sm:gap-4 cursor-pointer text-left focus:outline-none group py-1 min-w-0 max-w-full"
+              className="flex items-center gap-2 xs:gap-2.5 sm:gap-3.5 cursor-pointer text-left focus:outline-none group py-1 min-w-0 max-w-full"
               aria-label="Home page"
             >
-              <div className="shrink-0 w-[72px] h-[72px] sm:w-[84px] sm:h-[84px] lg:w-[94px] lg:h-[94px] flex items-center justify-center header-logo-wrap">
+              <div className="shrink-0 w-[54px] h-[54px] xs:w-[58px] xs:h-[58px] sm:w-[77px] sm:h-[77px] lg:w-[74px] lg:h-[74px] xl:w-[90px] xl:h-[90px] 2xl:w-[102px] 2xl:h-[102px] flex items-center justify-center header-logo-wrap">
                 <ChoirLogo 
-                  size={94} 
+                  size={102} 
                   variant="simplified"
-                  className="w-[72px] h-[72px] sm:w-[84px] sm:h-[84px] lg:w-[94px] lg:h-[94px] header-logo group-hover:scale-105 transition-transform drop-shadow-lg rounded-full ring-1 ring-amber-400/35" 
+                  className="w-[54px] h-[54px] xs:w-[58px] xs:h-[58px] sm:w-[77px] sm:h-[77px] lg:w-[74px] lg:h-[74px] xl:w-[90px] xl:h-[90px] 2xl:w-[102px] 2xl:h-[102px] header-logo group-hover:scale-105 transition-transform drop-shadow-lg rounded-full ring-1 ring-amber-400/35" 
                 />
               </div>
 
               <div className="flex flex-col min-w-0 flex-1 justify-center">
-                <span className="font-eb-garamond text-xl sm:text-2xl lg:text-[1.72rem] font-bold text-white group-hover:text-[#7EC8F0] transition-colors leading-tight tracking-tight truncate header-name">
-                  {lang === 'sw' ? 'Kwaya ya Misa ya Tatu · Mt. Monika' : 'St. Monica Third Mass Choir'}
+                <span className="font-eb-garamond text-[15px] xs:text-[16px] sm:text-xl lg:text-[1.10rem] xl:text-[1.36rem] 2xl:text-[1.62rem] font-bold text-white group-hover:text-[#7EC8F0] transition-colors leading-[1.16] tracking-tight header-name">
+                  {lang === 'sw' ? (
+                    <>
+                      <span className="hidden sm:inline whitespace-nowrap">
+                        Kwaya ya Misa ya Tatu · Mt. Monika
+                      </span>
+                      <span className="sm:hidden flex flex-col leading-tight">
+                        <span className="font-bold text-[14px] xs:text-[15px] leading-tight text-white whitespace-nowrap">
+                          Kwaya ya Misa ya Tatu
+                        </span>
+                        <span className="text-[12px] font-semibold text-[#E5A93C] leading-none mt-0.5 whitespace-nowrap">
+                          Mt. Monika · Nakuru
+                        </span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline whitespace-nowrap">
+                        St. Monica Third Mass Choir
+                      </span>
+                      <span className="sm:hidden flex flex-col leading-tight">
+                        <span className="font-bold text-[14px] xs:text-[15px] leading-tight text-white whitespace-nowrap">
+                          St. Monica 3rd Mass Choir
+                        </span>
+                        <span className="text-[12px] font-semibold text-[#E5A93C] leading-none mt-0.5 whitespace-nowrap">
+                          Section 58 · Nakuru
+                        </span>
+                      </span>
+                    </>
+                  )}
                 </span>
-                <span className="text-xs sm:text-sm lg:text-[0.95rem] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate header-tagline">
+                <span className="text-[10px] xs:text-[11px] sm:text-xs lg:text-[0.80rem] xl:text-[0.90rem] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate header-tagline">
                   {lang === 'sw' ? 'Section 58 · Jimbo Katoliki la Nakuru' : 'Section 58 · Catholic Diocese of Nakuru'}
                 </span>
               </div>
@@ -196,18 +224,18 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
           </div>
 
           {/* Center: Desktop Navigation with Professional Popups */}
-          <nav className="hidden lg:flex items-center gap-1.5 text-[13px] font-medium text-white/90 h-full">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 text-[12px] xl:text-[13px] font-medium text-white/90 h-full">
             
             {/* Home */}
             <button
               onClick={() => navigateTo('home')}
-              className={`relative px-3.5 py-2 rounded-lg transition-colors cursor-pointer ${
+              className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 rounded-lg transition-colors cursor-pointer ${
                 currentRoute === 'home' ? 'text-white font-bold bg-white/10' : 'hover:text-white hover:bg-white/5'
               }`}
             >
               <span>{lang === 'sw' ? 'Mwanzo' : 'Home'}</span>
               {currentRoute === 'home' && (
-                <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
+                <span className="absolute bottom-1 left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
               )}
             </button>
 
@@ -219,7 +247,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             >
               <button
                 onClick={() => setAboutDropdownOpen(prev => !prev)}
-                className={`relative px-3.5 py-2 rounded-[12px] transition-colors cursor-pointer flex items-center gap-1.5 ${
+                className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 rounded-[12px] transition-colors cursor-pointer flex items-center gap-1 xl:gap-1.5 ${
                   currentRoute.startsWith('about-') ? 'text-white font-bold bg-white/10' : 'hover:text-white hover:bg-white/5'
                 }`}
                 aria-expanded={aboutDropdownOpen}
@@ -228,7 +256,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 <span>{lang === 'sw' ? 'Kuhusu Kwaya' : 'About'}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-[#7EC8F0] transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
                 {currentRoute.startsWith('about-') && (
-                  <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
+                  <span className="absolute bottom-1 left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
                 )}
               </button>
 
@@ -376,7 +404,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             >
               <button
                 onClick={() => setMusicDropdownOpen(prev => !prev)}
-                className={`relative px-3.5 py-2 rounded-[12px] transition-colors cursor-pointer flex items-center gap-1.5 ${
+                className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 rounded-[12px] transition-colors cursor-pointer flex items-center gap-1 xl:gap-1.5 ${
                   currentRoute.startsWith('music-') || currentRoute === 'shop' ? 'text-white font-bold bg-white/10' : 'hover:text-white hover:bg-white/5'
                 }`}
                 aria-expanded={musicDropdownOpen}
@@ -385,7 +413,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 <span>{lang === 'sw' ? 'Muziki' : 'Music'}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-[#7EC8F0] transition-transform duration-200 ${musicDropdownOpen ? 'rotate-180' : ''}`} />
                 {(currentRoute.startsWith('music-') || currentRoute === 'shop') && (
-                  <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
+                  <span className="absolute bottom-1 left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
                 )}
               </button>
 
@@ -403,37 +431,37 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             {/* Events */}
             <button
               onClick={() => navigateTo('events')}
-              className={`relative px-3.5 py-2 rounded-lg transition-colors cursor-pointer ${
+              className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 rounded-lg transition-colors cursor-pointer ${
                 currentRoute === 'events' ? 'text-white font-bold bg-white/10' : 'hover:text-white hover:bg-white/5'
               }`}
             >
               <span>{lang === 'sw' ? 'Matukio' : 'Events'}</span>
               {currentRoute === 'events' && (
-                <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
+                <span className="absolute bottom-1 left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
               )}
             </button>
 
             {/* Contact Us - Plain text link in main menu */}
             <button
               onClick={() => navigateTo('contact')}
-              className={`relative px-3.5 py-2 rounded-lg transition-colors cursor-pointer ${
+              className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 rounded-lg transition-colors cursor-pointer ${
                 currentRoute === 'contact' ? 'text-white font-bold bg-white/10' : 'hover:text-white hover:bg-white/5'
               }`}
             >
               <span>{lang === 'sw' ? 'Wasiliana Nasi' : 'Contact Us'}</span>
               {currentRoute === 'contact' && (
-                <span className="absolute bottom-1 left-3.5 right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
+                <span className="absolute bottom-1 left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 h-0.5 bg-[#7EC8F0] rounded-full" />
               )}
             </button>
           </nav>
 
           {/* Right Action Zone */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             
-            {/* Single Filled Blue Button: Support Choir (visible on sm and larger screens to keep mobile header clean) */}
+            {/* Single Filled Blue Button: Support Choir */}
             <button
               onClick={() => openSupportModal()}
-              className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] border border-[#7EC8F0]/30 rounded-[12px] transition-all shadow-xs cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
+              className="hidden sm:inline-flex items-center justify-center px-3 xl:px-4 py-1.5 xl:py-2 text-[11px] xl:text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] border border-[#7EC8F0]/30 rounded-[12px] transition-all shadow-xs cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
               title={lang === 'sw' ? 'Unga Mkono Kwaya Yetu' : 'Support St. Monica Choir'}
             >
               <span>{lang === 'sw' ? 'Unga Mkono Kwaya' : 'Support Choir'}</span>
@@ -495,6 +523,12 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
             </button>
           </div>
         </div>
+
+        {/* Subtle, crisp liturgical border line spanning 100% width */}
+        <div 
+          aria-hidden="true" 
+          className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#1058A8] via-[#E5A93C] to-[#1058A8] opacity-85 pointer-events-none" 
+        />
 
         {/* Music Dropdown Panel: Shared 580px design, at least 32px inside right edge */}
         <div 

@@ -283,6 +283,12 @@ interface ChoirContextType {
   updateMass: (id: string, updated: Partial<MassItem>) => void;
   deleteMass: (id: string) => void;
 
+  // Synced Rehearsal & Mass Schedule Helpers
+  currentRehearsalsEn: string;
+  currentRehearsalsSw: string;
+  sundayMassesSummaryEn: string;
+  sundayMassesSummarySw: string;
+
   // Footer & Contact Info
   footerContact: FooterContactConfig;
   updateFooterContact: (updated: Partial<FooterContactConfig>) => void;
@@ -916,6 +922,18 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateFooterContact = (updated: Partial<FooterContactConfig>) => {
     setFooterContact(prev => ({ ...prev, ...updated }));
+    if (updated.rehearsalsEn || updated.rehearsalsSw) {
+      setMassSchedule(prev => ({
+        ...prev,
+        rehearsals: updated.rehearsalsEn || prev.rehearsals,
+        rehearsalsSw: updated.rehearsalsSw || prev.rehearsalsSw,
+      }));
+      setChoirStats(prev => ({
+        ...prev,
+        rehearsalSchedule: updated.rehearsalsEn || prev.rehearsalSchedule,
+        rehearsalScheduleSw: updated.rehearsalsSw || prev.rehearsalScheduleSw,
+      }));
+    }
   };
 
   // 7n. About Page Everything
@@ -2067,6 +2085,18 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateMassSchedule = (updated: Partial<ChoirContextType['massSchedule']>) => {
     setMassSchedule(prev => ({ ...prev, ...updated }));
+    if (updated.rehearsals || updated.rehearsalsSw) {
+      setFooterContact(prev => ({
+        ...prev,
+        rehearsalsEn: updated.rehearsals || prev.rehearsalsEn,
+        rehearsalsSw: updated.rehearsalsSw || prev.rehearsalsSw,
+      }));
+      setChoirStats(prev => ({
+        ...prev,
+        rehearsalSchedule: updated.rehearsals || prev.rehearsalSchedule,
+        rehearsalScheduleSw: updated.rehearsalsSw || prev.rehearsalScheduleSw,
+      }));
+    }
   };
 
   const updateSiteNotice = (updated: Partial<ChoirContextType['siteNotice']>) => {
@@ -2195,6 +2225,18 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return false;
     }
   };
+
+  // Synced Rehearsal and Mass Schedule Helpers - reactive across all pages and components
+  const currentRehearsalsEn = (footerContact?.rehearsalsEn || massSchedule?.rehearsals || choirStats?.rehearsalSchedule || CHOIR_STATS.rehearsalSchedule).trim();
+  const currentRehearsalsSw = (footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || choirStats?.rehearsalScheduleSw || CHOIR_STATS.rehearsalScheduleSw).trim();
+
+  const sundayMassesSummaryEn = massesList && massesList.length > 0
+    ? massesList.map(m => `${m.time} (${m.title})`).join(', ')
+    : (choirStats?.massTimesSunday || CHOIR_STATS.massTimesSunday);
+
+  const sundayMassesSummarySw = massesList && massesList.length > 0
+    ? massesList.map(m => `${m.time} (${m.titleSw || m.title})`).join(', ')
+    : (choirStats?.massTimesSundaySw || CHOIR_STATS.massTimesSundaySw);
 
   return (
     <ChoirContext.Provider
@@ -2356,6 +2398,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addMass,
         updateMass,
         deleteMass,
+
+        // Synced Rehearsal & Mass Schedule Helpers
+        currentRehearsalsEn,
+        currentRehearsalsSw,
+        sundayMassesSummaryEn,
+        sundayMassesSummarySw,
 
         // Footer & Contact Info
         footerContact,
@@ -2554,6 +2602,10 @@ export const useChoir = (): ChoirContextType => {
       addMass: () => {},
       updateMass: () => {},
       deleteMass: () => {},
+      currentRehearsalsEn: CHOIR_STATS.rehearsalSchedule,
+      currentRehearsalsSw: CHOIR_STATS.rehearsalScheduleSw,
+      sundayMassesSummaryEn: CHOIR_STATS.massTimesSunday,
+      sundayMassesSummarySw: CHOIR_STATS.massTimesSundaySw,
       footerContact: DEFAULT_FOOTER_CONTACT,
       updateFooterContact: () => {},
       aboutPageConfig: DEFAULT_ABOUT_CONFIG,

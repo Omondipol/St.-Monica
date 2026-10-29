@@ -7,7 +7,13 @@ import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../utils/assetHelper';
 
 export const ContactPage: React.FC = () => {
-  const { lang } = useChoir();
+  const { 
+    lang, 
+    currentRehearsalsEn, 
+    currentRehearsalsSw, 
+    sundayMassesSummaryEn, 
+    sundayMassesSummarySw 
+  } = useChoir();
 
   // Form states
   const [name, setName] = useState('');
@@ -418,7 +424,7 @@ export const ContactPage: React.FC = () => {
                     {lang === 'sw' ? 'Misa za Jumapili' : 'Sunday Masses'}
                   </span>
                   <span className="text-slate-800 font-medium block mt-0.5 tabular-nums">
-                    {lang === 'sw' ? CHOIR_STATS.massTimesSundaySw : CHOIR_STATS.massTimesSunday}
+                    {lang === 'sw' ? sundayMassesSummarySw : sundayMassesSummaryEn}
                   </span>
                 </div>
                 <div>
@@ -426,7 +432,7 @@ export const ContactPage: React.FC = () => {
                     {lang === 'sw' ? 'Mazoezi ya kwaya' : 'Choir rehearsals'}
                   </span>
                   <span className="text-slate-800 font-medium block mt-0.5 tabular-nums">
-                    {lang === 'sw' ? CHOIR_STATS.rehearsalScheduleSw : CHOIR_STATS.rehearsalSchedule}
+                    {lang === 'sw' ? currentRehearsalsSw : currentRehearsalsEn}
                   </span>
                 </div>
               </div>

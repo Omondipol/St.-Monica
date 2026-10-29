@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChoir } from '../../context/ChoirContext';
 import { MassItem } from '../../data/choirContent';
 import { AfricanGeometricBorder } from '../AfricanGeometricBorder';
@@ -18,7 +18,9 @@ export const AdminMassesTab: React.FC<AdminMassesTabProps> = ({ onNotify }) => {
     massSchedule,
     updateMassSchedule,
     footerContact,
-    updateFooterContact
+    updateFooterContact,
+    currentRehearsalsEn,
+    currentRehearsalsSw
   } = useChoir();
 
   // Modal / Form state for adding/editing a Mass
@@ -35,12 +37,16 @@ export const AdminMassesTab: React.FC<AdminMassesTabProps> = ({ onNotify }) => {
   });
 
   // Rehearsals state
-  const [rehearsalsEn, setRehearsalsEn] = useState<string>(
-    footerContact?.rehearsalsEn || massSchedule?.rehearsals || 'Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)'
-  );
-  const [rehearsalsSw, setRehearsalsSw] = useState<string>(
-    footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || 'Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
-  );
+  const [rehearsalsEn, setRehearsalsEn] = useState<string>(currentRehearsalsEn);
+  const [rehearsalsSw, setRehearsalsSw] = useState<string>(currentRehearsalsSw);
+
+  useEffect(() => {
+    setRehearsalsEn(currentRehearsalsEn);
+  }, [currentRehearsalsEn]);
+
+  useEffect(() => {
+    setRehearsalsSw(currentRehearsalsSw);
+  }, [currentRehearsalsSw]);
 
   const openAddMass = () => {
     setEditingMassId(null);

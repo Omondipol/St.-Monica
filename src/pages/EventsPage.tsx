@@ -7,7 +7,7 @@ import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../utils/assetHelper';
 
 export const EventsPage: React.FC = () => {
-  const { lang, eventsList } = useChoir();
+  const { lang, eventsList, massesList, currentRehearsalsEn, currentRehearsalsSw } = useChoir();
 
   const allEvents: EventItem[] = eventsList && eventsList.length > 0 ? eventsList : INITIAL_EVENTS;
 
@@ -174,23 +174,43 @@ export const EventsPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-[14px] font-source">
-          <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
-            <span className="text-[13px] font-semibold text-slate-500 block">Mass 1</span>
-            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">7:00 AM (Dawn Liturgy)</strong>
-            <p className="text-slate-600 text-xs">Solemn morning Eucharistic prayer for early parishioners.</p>
-          </div>
+          {massesList && massesList.length > 0 ? (
+            massesList.map((m, idx) => (
+              <div 
+                key={m.id} 
+                className={`p-4 rounded-[12px] border space-y-1 ${
+                  m.isSungMass 
+                    ? 'bg-[#EAF4FB] border-[#1058A8]/40 shadow-sm' 
+                    : 'bg-[#FAF8F5] border-[#0C2340]/10'
+                }`}
+              >
+                <span className={`text-[13px] font-semibold block ${m.isSungMass ? 'text-[#1058A8] font-bold' : 'text-slate-500'}`}>
+                  {m.isSungMass ? (lang === 'sw' ? 'Misa Inayoimbwa · Kwaya Kuu' : 'Sunday Sung Mass · Main Choir') : `Mass ${idx + 1}`}
+                </span>
+                <strong className={`text-base font-bold block font-fraunces tabular-nums ${m.isSungMass ? 'text-[#1058A8]' : 'text-[#0C2340]'}`}>
+                  {m.time} ({lang === 'sw' ? (m.titleSw || m.title) : m.title})
+                </strong>
+                {(m.desc || m.descSw) && (
+                  <p className={`text-xs ${m.isSungMass ? 'text-slate-700 font-medium' : 'text-slate-600'}`}>
+                    {lang === 'sw' ? (m.descSw || m.desc) : m.desc}
+                  </p>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="p-4 bg-[#EAF4FB] rounded-[12px] border border-[#1058A8]/40 space-y-1">
+              <span className="text-[13px] font-bold text-[#1058A8] block">Sunday Sung Mass</span>
+              <strong className="text-base font-bold text-[#1058A8] block font-fraunces tabular-nums">10:00 AM</strong>
+            </div>
+          )}
+        </div>
 
-          <div className="p-4 bg-[#FAF8F5] rounded-[12px] border border-[#0C2340]/10 space-y-1">
-            <span className="text-[13px] font-semibold text-slate-500 block">Mass 2</span>
-            <strong className="text-base font-bold text-[#0C2340] block font-fraunces tabular-nums">8:30 AM (Kiswahili Liturgy)</strong>
-            <p className="text-slate-600 text-xs">Morning parish Eucharistic liturgy with congregational hymns.</p>
+        <div className="pt-3 border-t border-[#0C2340]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm font-source">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#0C2340]">{lang === 'sw' ? 'Mazoezi ya Kwaya:' : 'Choir Rehearsals:'}</span>
+            <span className="text-slate-700 font-medium">{lang === 'sw' ? currentRehearsalsSw : currentRehearsalsEn}</span>
           </div>
-
-          <div className="p-4 bg-[#EAF4FB] rounded-[12px] border border-[#1058A8]/40 space-y-1 shadow-sm">
-            <span className="text-[13px] font-bold text-[#1058A8] block">Mass 3 · Main Choir Ministry</span>
-            <strong className="text-base font-bold text-[#1058A8] block font-fraunces tabular-nums">10:00 AM (Sunday Sung Mass)</strong>
-            <p className="text-slate-700 text-xs font-medium">St. Monica Third Mass Choir leads solemn four-part SATB liturgy.</p>
-          </div>
+          <span className="text-xs text-slate-500 italic">{lang === 'sw' ? 'Ukumbi wa Parokia, Section 58' : 'Parish Hall, Section 58'}</span>
         </div>
       </section>
 

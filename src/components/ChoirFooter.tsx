@@ -21,7 +21,15 @@ interface ChoirFooterProps {
 }
 
 export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
-  const { lang, footerContact, choirStats, massesList, massSchedule } = useChoir();
+  const { 
+    lang, 
+    footerContact, 
+    choirStats, 
+    massesList, 
+    massSchedule,
+    currentRehearsalsEn,
+    currentRehearsalsSw
+  } = useChoir();
 
   // Collapsible accordion sections for phone screens (closed by default)
   const [mobileExploreOpen, setMobileExploreOpen] = useState(false);
@@ -50,8 +58,8 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             </h3>
             <p className="text-sm sm:text-base text-slate-200 font-source max-w-2xl leading-relaxed">
               {lang === 'sw'
-                ? `Mazoezi ya kwaya: ${CHOIR_STATS.rehearsalScheduleSw}`
-                : `Rehearsals every Wednesday and Friday evening (5:30 PM – 7:30 PM) in the parish hall, Section 58.`}
+                ? `Mazoezi ya kwaya: ${currentRehearsalsSw}`
+                : `Rehearsals ${currentRehearsalsEn}.`}
             </p>
             <p className="text-xs sm:text-sm text-[#7EC8F0] font-source font-medium">
               {lang === 'sw' ? 'Sauti zote zinakaribishwa kumsifu Bwana.' : 'All voices are welcome to praise the Lord.'}
@@ -232,7 +240,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             <div className={`space-y-3 text-sm text-[#B8C7D9] ${mobileServiceOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               {massesList && massesList.length > 0 ? (
-                massesList.slice(0, 3).map((m) => (
+                massesList.map((m) => (
                   <div key={m.id}>
                     <strong className="text-white block font-medium">
                       {lang === 'sw' ? (m.titleSw || m.title) : m.title}
@@ -251,9 +259,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <div>
                 <strong className="text-white block font-medium">{lang === 'sw' ? 'Mazoezi ya Kwaya' : 'Choir Rehearsals'}</strong>
                 <span className="text-[#B8C7D9] text-xs tabular-nums">
-                  {lang === 'sw' 
-                    ? (footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku") 
-                    : (footerContact?.rehearsalsEn || massSchedule?.rehearsals || "Wed & Fri: 5:30 PM – 7:30 PM")}
+                  {lang === 'sw' ? currentRehearsalsSw : currentRehearsalsEn}
                 </span>
               </div>
               <div>

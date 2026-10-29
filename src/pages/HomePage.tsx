@@ -138,7 +138,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     choirmasterMessage,
     massesList,
     openJoinModal,
-    leadersList
+    leadersList,
+    currentRehearsalsEn,
+    currentRehearsalsSw
   } = useChoir();
 
   // Dynamically link Choirmaster profile from Trainers & Officials
@@ -761,7 +763,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 {lang === 'sw' ? (siteNotice.badgeSw || 'Tangazo') : (siteNotice.badgeEn || 'Notice')}
               </span>
               <p className="font-medium text-white/95 truncate">
-                {lang === 'sw' ? siteNotice.textSw : siteNotice.textEn}
+                {lang === 'sw' 
+                  ? (siteNotice.textSw?.includes('Mazoezi') || siteNotice.textSw?.includes('11:30')
+                      ? `Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika. Mazoezi ya kwaya: ${currentRehearsalsSw}.`
+                      : siteNotice.textSw)
+                  : (siteNotice.textEn?.includes('rehearsals') || siteNotice.textEn?.includes('5:30')
+                      ? `Welcome to St. Monica Third Mass Choir official website. Choir rehearsals: ${currentRehearsalsEn}.`
+                      : siteNotice.textEn)}
               </p>
             </div>
             <button
@@ -1270,6 +1278,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </ul>
 
               <div className="pt-2 text-xs text-slate-700 font-source space-y-2.5">
+                <div className="flex items-start gap-2 pb-2 border-b border-[#0C2340]/10">
+                  <Clock className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-slate-900 block">
+                      {lang === 'sw' ? 'Mazoezi ya Kwaya' : 'Choir Rehearsals'}
+                    </span>
+                    <span className="text-slate-600 block mt-0.5 font-medium">
+                      {lang === 'sw' ? currentRehearsalsSw : currentRehearsalsEn}
+                    </span>
+                  </div>
+                </div>
+
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
                   <div>
