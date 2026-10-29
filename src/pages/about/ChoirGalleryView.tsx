@@ -15,9 +15,17 @@ interface ChoirGalleryViewProps {
 }
 
 export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, groupPhotosList, openJoinModal } = useChoir();
+  const { lang, groupPhotosList, leadersList, openJoinModal } = useChoir();
 
-  const photosToDisplay = groupPhotosList || [];
+  const leaderPhotoUrls = new Set(
+    (leadersList || [])
+      .map(l => l.photoUrl)
+      .filter((url): url is string => Boolean(url && typeof url === 'string' && url.trim().length > 0))
+  );
+
+  const photosToDisplay = (groupPhotosList || []).filter(
+    p => !leaderPhotoUrls.has(p.customUrl || '') && !leaderPhotoUrls.has(p.id)
+  );
 
   const getImageSrc = (imageKey: string, customUrl?: string) => {
     if (customUrl) return getAssetUrl(customUrl);

@@ -208,15 +208,6 @@ export async function uploadImageToSupabase(
         if (!uploadErr) {
           const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
           if (data?.publicUrl) {
-            // Also attempt to register record in Supabase database tables (gallery first, then posts)
-            try {
-              const recordTitle = file instanceof File ? file.name : 'Uploaded Media';
-              const { error: galErr } = await supabase.from('gallery').insert([{ title: recordTitle, image_url: data.publicUrl }]);
-              if (galErr) {
-                await supabase.from('posts').insert([{ title: recordTitle, image_url: data.publicUrl }]);
-              }
-            } catch (_) {}
-
             return { url: data.publicUrl };
           }
         } else {

@@ -475,14 +475,30 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const raw = localStorage.getItem(STORAGE_KEYS.DELETED_PHOTO_IDS);
             if (raw) deletedIds = JSON.parse(raw);
           } catch (_) {}
+
+          // Collect all leader and trainer photo URLs so they NEVER leak into choir gallery
+          const leaderPhotoUrls = new Set<string>();
+          INITIAL_LEADERS.forEach(l => { if (l.photoUrl) leaderPhotoUrls.add(l.photoUrl); });
+          try {
+            const savedLeaders = localStorage.getItem(STORAGE_KEYS.LEADERS);
+            if (savedLeaders) {
+              const parsedL: ChoirLeader[] = JSON.parse(savedLeaders);
+              if (Array.isArray(parsedL)) {
+                parsedL.forEach(l => { if (l.photoUrl) leaderPhotoUrls.add(l.photoUrl); });
+              }
+            }
+          } catch (_) {}
+
           const activeRemote = remotePhotos.filter(
-            p => !deletedIds.includes(p.id) && (!p.customUrl || !deletedIds.includes(p.customUrl))
+            p => !deletedIds.includes(p.id) &&
+                 (!p.customUrl || (!deletedIds.includes(p.customUrl) && !leaderPhotoUrls.has(p.customUrl)))
           );
           const existingIds = new Set(prev.map(p => p.id));
           const existingUrls = new Set(prev.map(p => p.customUrl).filter(Boolean));
           const newPhotos = activeRemote.filter(p => !existingIds.has(p.id) && !existingUrls.has(p.customUrl));
-          if (newPhotos.length === 0) return prev;
-          const merged = [...newPhotos, ...prev];
+          const cleanedPrev = prev.filter(p => !p.customUrl || !leaderPhotoUrls.has(p.customUrl));
+          if (newPhotos.length === 0) return cleanedPrev;
+          const merged = [...newPhotos, ...cleanedPrev];
           try {
             localStorage.setItem(STORAGE_KEYS.PHOTOS, JSON.stringify(merged));
           } catch (_) {}
@@ -573,6 +589,18 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // 6. Group Photos
   const [groupPhotosList, setGroupPhotosList] = useState<ChoirGroupPhoto[]>(() => {
     try {
+      const leaderPhotoUrls = new Set<string>();
+      INITIAL_LEADERS.forEach(l => { if (l.photoUrl) leaderPhotoUrls.add(l.photoUrl); });
+      try {
+        const savedLeaders = localStorage.getItem(STORAGE_KEYS.LEADERS);
+        if (savedLeaders) {
+          const parsedL: ChoirLeader[] = JSON.parse(savedLeaders);
+          if (Array.isArray(parsedL)) {
+            parsedL.forEach(l => { if (l.photoUrl) leaderPhotoUrls.add(l.photoUrl); });
+          }
+        }
+      } catch (_) {}
+
       const saved = localStorage.getItem(STORAGE_KEYS.PHOTOS);
       if (saved !== null) {
         const parsed = JSON.parse(saved);
@@ -582,10 +610,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const raw = localStorage.getItem(STORAGE_KEYS.DELETED_PHOTO_IDS);
             if (raw) deletedIds = JSON.parse(raw);
           } catch (_) {}
-          if (deletedIds.length > 0) {
-            return parsed.filter(p => !deletedIds.includes(p.id) && (!p.customUrl || !deletedIds.includes(p.customUrl)));
-          }
-          return parsed;
+          return parsed.filter(p =>
+            !deletedIds.includes(p.id) &&
+            (!p.customUrl || (!deletedIds.includes(p.customUrl) && !leaderPhotoUrls.has(p.customUrl)))
+          );
         }
       }
     } catch (e) {

@@ -1833,7 +1833,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       : 'bg-slate-100 text-[#0C2340] hover:bg-slate-200'
                   }`}
                 >
-                  Choir Gallery ({groupPhotosList.length})
+                  Choir Gallery ({groupPhotosList.filter(photo => !leadersList.some(l => l.photoUrl && l.photoUrl === photo.customUrl)).length})
                 </button>
                 <button
                   onClick={() => setPhotosSubView('supabase')}
@@ -1871,7 +1871,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {groupPhotosList.map((photo) => (
+                    {groupPhotosList
+                      .filter(photo => !leadersList.some(l => l.photoUrl && l.photoUrl === photo.customUrl))
+                      .map((photo) => (
                       <div key={photo.id} className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between">
                         <div className="aspect-16/10 bg-[#EAF4FB] relative overflow-hidden flex items-center justify-center">
                           <img
