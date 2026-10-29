@@ -1190,7 +1190,17 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // 8. REAL AUDIBLE HTML5 AUDIO PLAYBACK ENGINE
   const [currentSong, setCurrentSong] = useState<Song>(() => songs[0] || INITIAL_SONGS_CATALOG[0]);
+  const userHasChosenTrackRef = useRef<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
+  // Keep the latest added song (songs[0]) as the initial track on the main hero page and mini player
+  useEffect(() => {
+    if (songs.length > 0 && !isPlaying && !userHasChosenTrackRef.current) {
+      if (currentSong?.id !== songs[0].id) {
+        setCurrentSong(songs[0]);
+      }
+    }
+  }, [songs, isPlaying, currentSong?.id]);
   const [currentTimeSeconds, setCurrentTimeSeconds] = useState<number>(0);
   const [durationFromAudio, setDurationFromAudio] = useState<number>(0);
   const [isPlayerMinimized, setIsPlayerMinimized] = useState<boolean>(true);
@@ -1510,6 +1520,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Real Play Song: Starts 40-second audio preview with authentic choir voices from YouTube
   const playSong = (song: Song) => {
+    userHasChosenTrackRef.current = true;
     setAudioError(false);
     setIsIntroCutoffOpenState(false);
     setCurrentSong(song);
@@ -1856,6 +1867,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       youtubeId: ytId,
       thumbnailUrl: newSong.thumbnailUrl || `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`
     };
+    userHasChosenTrackRef.current = false;
     setSongs(prev => {
       const updated = [song, ...prev];
       try {
@@ -1864,6 +1876,20 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       saveSongToSupabase(song, updated);
       return updated;
     });
+
+    // Make the latest added song the active song that starts the main hero page and mini player
+    setCurrentSong(song);
+    currentTimeRef.current = 0;
+    setCurrentTimeSeconds(0);
+    setSeekCommand({ targetSeconds: 0, nonce: Date.now() });
+    if (ytPlayerRef.current && typeof ytPlayerRef.current.cueVideoById === 'function') {
+      try {
+        ytPlayerRef.current.cueVideoById({
+          videoId: ytId,
+          startSeconds: 0
+        });
+      } catch (_) {}
+    }
   };
 
   const updateSong = (id: string, updated: Partial<Song>) => {
@@ -2079,6 +2105,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     setMembers(INITIAL_MEMBERS);
     setSongs(INITIAL_SONGS_CATALOG);
+    userHasChosenTrackRef.current = false;
     setCurrentSong(INITIAL_SONGS_CATALOG[0]);
     setSheetMusicList(INITIAL_SHEET_MUSIC);
     setLeadersList(INITIAL_LEADERS);
