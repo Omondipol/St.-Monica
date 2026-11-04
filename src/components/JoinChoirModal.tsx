@@ -180,7 +180,7 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                   {lang === 'sw' ? 'Usajili wa Mwanakwaya' : 'Chorister Registration'}
                 </span>
                 <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340] leading-tight">
-                  {lang === 'sw' ? 'Jiunge na Kwaya ya Mtakatifu Monika' : 'Join St. Monica Choir'}
+                  {lang === 'sw' ? 'Jiunge na Kwaya ya Misa ya Tatu ya Mtakatifu Monika' : 'Join St. Monica Third Mass Choir'}
                 </h2>
                 <span className="text-xs text-slate-600 font-source block mt-0.5">
                   Section 58 · Catholic Diocese of Nakuru

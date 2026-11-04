@@ -17,6 +17,7 @@ import scorePreviewNimzima from '../assets/images/score_preview_nimzima_17914463
 import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
 import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { getAssetUrl } from '../utils/assetHelper';
+import { generateSongScorePdf } from '../utils/fileDownload';
 
 export const CartDrawer: React.FC = () => {
   const { 
@@ -488,7 +489,29 @@ export const CartDrawer: React.FC = () => {
             <div className="w-full space-y-2 pt-2">
               <button
                 type="button"
-                onClick={() => setHasDownloaded(true)}
+                onClick={() => {
+                  setHasDownloaded(true);
+                  // Generate valid, printable PDF scores for all digital sheet music items in cart
+                  const digitalItems = cart.filter(item => item.product.downloadable || item.product.type === 'sheet_music');
+                  if (digitalItems.length > 0) {
+                    digitalItems.forEach(item => {
+                      generateSongScorePdf({
+                        title: item.product.name,
+                        composer: 'St. Monica Catholic Choir',
+                        voices: 'SATB',
+                        language: 'Kiswahili',
+                        sharingStatus: 'Licensed Score'
+                      });
+                    });
+                  } else {
+                    generateSongScorePdf({
+                      title: 'Noti za Kwaya ya Mtakatifu Monika',
+                      composer: 'St. Monica Catholic Choir',
+                      voices: 'SATB',
+                      language: 'Kiswahili'
+                    });
+                  }
+                }}
                 className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-[12px] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <Download className="w-4 h-4" />

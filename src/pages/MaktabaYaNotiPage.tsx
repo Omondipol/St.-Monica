@@ -26,7 +26,7 @@ import {
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
 import { CHOIR_STATS } from '../data/choirContent';
-import { triggerFileDownload } from '../utils/fileDownload';
+import { triggerFileDownload, generateSongScorePdf } from '../utils/fileDownload';
 import scorePreviewSheet from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 
 interface MaktabaYaNotiPageProps {
@@ -178,25 +178,25 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
     window.scrollTo({ top: 160, behavior: 'smooth' });
   };
 
-  // Handle PDF Download
+  // Handle PDF Download - Generates a fully formatted, valid PDF score that opens in any viewer
   const handleDownloadPdf = (song: LibrarySong) => {
     incrementDownloadCount(song.id);
-    const content = `%PDF-1.4\n% St. Monica Catholic Choir Nakuru - ${lang === 'sw' ? 'Maktaba ya Noti' : 'Sheet Music Library'}\nTitle: ${song.title}\nComposer: ${song.composer}\nVoices: ${song.voices}\nStatus: ${song.sharingStatus}\n\nLyrics / Notes:\n${song.lyrics || 'Sacred Catholic Score Sheet'}`;
-    const blob = new Blob([content], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${song.title.replace(/\s+/g, '_')}_StMonicaChoir.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    generateSongScorePdf({
+      title: song.title,
+      composer: song.composer,
+      language: song.language,
+      voices: song.voices,
+      season: song.season,
+      sharingStatus: song.sharingStatus,
+      lyrics: song.lyrics,
+      categories: song.categories
+    });
   };
 
   // Dedicated Sheet Notes Download
   const handleDownloadNotes = (song: LibrarySong) => {
     const targetUrl = song.notesUrl || song.pdfUrl;
-    if (targetUrl) {
+    if (targetUrl && !targetUrl.includes('example.com') && targetUrl !== '#' && targetUrl !== '') {
       incrementDownloadCount(song.id);
       triggerFileDownload(targetUrl, song.notesFileName || `${song.title.replace(/\s+/g, '_')}_Notes.pdf`);
     } else {
