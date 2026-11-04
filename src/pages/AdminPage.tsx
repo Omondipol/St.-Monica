@@ -950,6 +950,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     }
   };
 
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
+  const [resetConfirmInput, setResetConfirmInput] = useState<string>('');
+  const [lastBackupDate, setLastBackupDate] = useState<string>(() => {
+    try {
+      return localStorage.getItem('st_monica_last_backup') || '4 Nov 2026';
+    } catch {
+      return '4 Nov 2026';
+    }
+  });
+
   // Backup / JSON Export & Import
   const handleExportJson = () => {
     const json = exportDataJson();
@@ -960,6 +970,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     a.download = `st_monica_choir_data_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    const now = new Date();
+    const formatted = `${now.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()]} ${now.getFullYear()}`;
+    setLastBackupDate(formatted);
+    try { localStorage.setItem('st_monica_last_backup', formatted); } catch {}
     notify('Choir data backup exported successfully!');
   };
 
@@ -981,11 +995,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     e.target.value = '';
   };
 
-  const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
-
   const handleResetDefaults = () => {
     resetToDefaults();
     setShowResetConfirmModal(false);
+    setResetConfirmInput('');
     notify(lang === 'sw' ? 'Maudhui yote yamerejeshwa kwenye rekodi asili za kwaya.' : 'All data restored to default choir catalog.');
   };
 
@@ -1096,26 +1109,28 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         </div>
 
         {/* Live Counters */}
-        <div className="flex items-center gap-2.5 text-xs font-source">
-          <div className="bg-white/10 px-3 py-1.5 rounded-xl text-slate-200">
-            <span className="text-amber-400 font-bold mr-1.5 tabular-nums">{members.length}</span>
+        <div className="flex items-center gap-2 text-xs font-source">
+          <span className="text-slate-200">
+            <span className="text-amber-400 font-bold mr-1 tabular-nums">{members.length}</span>
             <span>{lang === 'sw' ? 'Waimbaji' : 'Members'}</span>
-          </div>
-          <div className="bg-white/10 px-3 py-1.5 rounded-xl text-slate-200">
-            <span className="text-amber-400 font-bold mr-1.5 tabular-nums">{songs.length + librarySongs.length}</span>
+          </span>
+          <span className="text-white/40">/</span>
+          <span className="text-slate-200">
+            <span className="text-amber-400 font-bold mr-1 tabular-nums">{songs.length + librarySongs.length}</span>
             <span>{lang === 'sw' ? 'Nyimbo na Noti' : 'Hymns & Scores'}</span>
-          </div>
-          <div className="hidden sm:block bg-white/10 px-3 py-1.5 rounded-xl text-slate-200">
-            <span className="text-emerald-400 font-bold mr-1.5 tabular-nums">{transactions.length}</span>
+          </span>
+          <span className="text-white/40 hidden sm:inline">/</span>
+          <span className="text-slate-200 hidden sm:inline">
+            <span className="text-emerald-400 font-bold mr-1 tabular-nums">{transactions.length}</span>
             <span>Contributions</span>
-          </div>
+          </span>
         </div>
 
         {/* View public site & Log out */}
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onNavigateHome}
-            className="px-3.5 py-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
             title="Return to public website"
           >
             <Eye className="w-3.5 h-3.5 text-[#7EC8F0]" />
@@ -1123,7 +1138,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           </button>
           <button
             onClick={handleLogout}
-            className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-blue-700 rounded-xl transition-colors cursor-pointer"
+            className="px-3 py-1.5 text-xs font-semibold text-white bg-[#1058A8] hover:bg-blue-700 rounded-lg transition-colors cursor-pointer"
           >
             Log Out
           </button>
@@ -1132,7 +1147,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* Success Notification Alert */}
       {successMessage && (
-        <div className="bg-emerald-50 border border-emerald-400 text-emerald-800 px-4 py-3 rounded-xl flex items-center justify-between text-xs font-semibold shadow-xs animate-in slide-in-from-top-1">
+        <div className="bg-emerald-50 border border-emerald-400 text-emerald-800 px-4 py-2.5 rounded-lg flex items-center justify-between text-xs font-semibold shadow-xs animate-in slide-in-from-top-1">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-emerald-600" />
             <span>{successMessage}</span>
@@ -1147,145 +1162,142 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* LEFT SIDEBAR */}
-        <aside className="lg:col-span-3 bg-white border border-[#0C2340]/10 rounded-2xl p-3 shadow-xs space-y-1">
-          <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Admin Sections
+        <aside className="lg:col-span-3 bg-white border border-[#0C2340]/15 rounded-lg p-3 space-y-3.5">
+          <div className="px-2 pt-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            Sections
           </div>
 
-          {[
-            { id: "hero", icon: Home, label: "Home Page (Mwanzo)" },
-            { id: "about", icon: BookOpen, label: "About: Our Story & Patron" },
-            { id: "leaders", icon: Award, label: "About: Leadership & Trainers", badge: leadersList.length },
-            { id: "photos", icon: ImageIcon, label: "About: Choir Gallery", badge: groupPhotosList.length },
-            { id: "songs", icon: Play, label: "Music: Songs & Audio Previews", badge: songs.length },
-            { id: "library", icon: Music, label: "Music: Maktaba ya Noti", badge: librarySongs.length },
-            { id: "albums", icon: Disc, label: "Music: Albums", badge: albums.length },
-            { id: "values", icon: Heart, label: "Core Values", badge: coreValues.length },
-            { id: "schedule", icon: Clock, label: "Mass Times & Schedule" },
-            { id: "members", icon: Users, label: "Members Register & Sections", badge: members.length },
-            { id: "events", icon: Calendar, label: "Parish Events", badge: eventsList.length },
-            { id: "financials", icon: DollarSign, label: "Contributions & Support", badge: transactions.length },
-            { id: "footer", icon: Phone, label: "Contact Us & Footer" },
-            { id: "backup", icon: Settings, label: "System Backup & Reset" }
-          ].map(item => {
-            const Icon = item.icon;
-            const isItemActive = activeTab === item.id;
+          {/* Standalone Home */}
+          <div className="space-y-0.5">
+            <button
+              type="button"
+              onClick={() => setActiveTab('hero')}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                activeTab === 'hero' ? 'bg-[#1058A8] text-white font-semibold' : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Home className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'hero' ? 'text-amber-300' : 'text-slate-400'}`} />
+                <span>Home page</span>
+              </div>
+            </button>
+          </div>
 
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(item.id as any);
-                }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  isItemActive
-                    ? "bg-[#1058A8] text-white shadow-sm font-bold"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className={`w-4 h-4 shrink-0 ${isItemActive ? "text-amber-300" : "text-slate-400"}`} />
-                  <span className="truncate">{item.label}</span>
-                </div>
-                {item.badge !== undefined && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tabular-nums shrink-0 ml-1.5 ${
-                    isItemActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {/* Group: About */}
+          <div className="space-y-0.5">
+            <div className="px-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              About
+            </div>
+            {[
+              { id: 'about', icon: BookOpen, label: 'Our story' },
+              { id: 'leaders', icon: Award, label: 'Leadership', badge: leadersList.length },
+              { id: 'photos', icon: ImageIcon, label: 'Gallery', badge: groupPhotosList.length },
+            ].map(item => {
+              const Icon = item.icon;
+              const isItemActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id as any)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    isItemActive ? 'bg-[#1058A8] text-white font-semibold' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isItemActive ? 'text-amber-300' : 'text-slate-400'}`} />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                  {item.badge !== undefined && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold tabular-nums shrink-0 ml-1.5 ${
+                      isItemActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Group: Music */}
+          <div className="space-y-0.5">
+            <div className="px-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Music
+            </div>
+            {[
+              { id: 'songs', icon: Play, label: 'Songs', badge: songs.length },
+              { id: 'library', icon: Music, label: 'Sheet music library', badge: librarySongs.length },
+              { id: 'albums', icon: Disc, label: 'Albums', badge: albums.length },
+            ].map(item => {
+              const Icon = item.icon;
+              const isItemActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id as any)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    isItemActive ? 'bg-[#1058A8] text-white font-semibold' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isItemActive ? 'text-amber-300' : 'text-slate-400'}`} />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                  {item.badge !== undefined && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold tabular-nums shrink-0 ml-1.5 ${
+                      isItemActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Standalone Items */}
+          <div className="space-y-0.5 pt-2 border-t border-slate-100">
+            {[
+              { id: 'values', icon: Heart, label: 'Core values', badge: coreValues.length },
+              { id: 'members', icon: Users, label: 'Members', badge: members.length },
+              { id: 'financials', icon: DollarSign, label: 'Contributions', badge: transactions.length },
+              { id: 'footer', icon: Phone, label: 'Contact details' },
+              { id: 'schedule', icon: Clock, label: 'Mass times' },
+              { id: 'events', icon: Calendar, label: 'Parish events', badge: eventsList.length },
+              { id: 'backup', icon: Settings, label: 'Backup' },
+            ].map(item => {
+              const Icon = item.icon;
+              const isItemActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id as any)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    isItemActive ? 'bg-[#1058A8] text-white font-semibold' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isItemActive ? 'text-amber-300' : 'text-slate-400'}`} />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                  {item.badge !== undefined && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold tabular-nums shrink-0 ml-1.5 ${
+                      isItemActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </aside>
 
         {/* MAIN WORKSPACE */}
         <main className="lg:col-span-9 space-y-5">
-          
-          {/* Sub-tabs within Music Group */}
-          {["library", "albums", "songs", "sheet"].includes(activeTab) && (
-            <div className="bg-white border border-[#0C2340]/10 p-2 rounded-2xl flex flex-wrap items-center gap-2 shadow-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab("songs")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "songs" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Songs & Audio Previews ({songs.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("library")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "library" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Maktaba ya Noti ({librarySongs.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("albums")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "albums" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Albums ({albums.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("sheet")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "sheet" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Sheet Music Store ({sheetMusicList.length})
-              </button>
-            </div>
-          )}
-
-          {/* Sub-tabs within About & Members Group */}
-          {["members", "leaders", "photos", "about", "stats"].includes(activeTab) && (
-            <div className="bg-white border border-[#0C2340]/10 p-2 rounded-2xl flex flex-wrap items-center gap-2 shadow-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab("about")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "about" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Our Story & Patron Saint
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("leaders")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "leaders" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Leadership & Trainers ({leadersList.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("photos")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "photos" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Choir Gallery ({groupPhotosList.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("members")}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                  activeTab === "members" ? "bg-[#1058A8] text-white font-bold shadow-xs" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                Members Register & Sections ({members.length})
-              </button>
-            </div>
-          )}
 
           {/* TAB: CORE VALUES */}
           {activeTab === 'values' && <AdminCoreValuesTab onNotify={notify} />}
@@ -1481,126 +1493,102 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
           {/* TAB: SONGS MANAGEMENT */}
           {activeTab === 'songs' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
                 <div>
-                  <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
-                    Music: Songs & Audio Previews (Nyimbo za Kwaya)
+                  <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                    Songs
                   </h2>
-                  <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                    Configure choir songs shown on the main Music page. Every uploaded YouTube link will sing as the live audio preview on the website.
+                  <p className="text-xs text-slate-600 font-source mt-0.5">
+                    Each song’s YouTube link plays as its preview on the Music page.
                   </p>
                 </div>
                 <button
                   onClick={openAddSongModal}
-                  className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+                  className="px-3.5 py-2 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add New Song</span>
+                  <span>Add song</span>
                 </button>
               </div>
 
-              {/* Supabase Realtime Storage & Database Status */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0C2340] to-[#1058A8] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm border border-white/10">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 text-emerald-400">
-                    <Database className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm">Supabase Database & Storage Sync</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                        Live & Connected
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/80 mt-0.5 font-source">
-                      Storage: <code className="bg-white/15 px-1 py-0.5 rounded font-mono text-[11px] text-amber-300">photos/data/songs.json</code> · 
-                      Database: <code className="bg-white/15 px-1 py-0.5 rounded font-mono text-[11px] text-sky-200">public.songs</code>
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowSqlModal(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold flex items-center gap-1.5 border border-white/20 cursor-pointer self-start sm:self-auto shrink-0 transition-colors"
-                >
-                  <Copy className="w-3.5 h-3.5 text-amber-300" />
-                  <span>View Database SQL Setup</span>
-                </button>
-              </div>
-
-              <div className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs">
+              <div className="bg-white border border-[#0C2340]/15 rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-source">
-                    <thead className="bg-[#F8FAFC] border-b border-[#0C2340]/10 text-[#0C2340]/70 text-[12px] font-semibold">
+                    <thead className="bg-[#FAF8F5] border-b border-[#0C2340]/10 text-[#0C2340] text-[11px] font-semibold">
                       <tr>
-                        <th className="py-3 px-4">Title</th>
-                        <th className="py-3 px-4">Composer</th>
-                        <th className="py-3 px-4">Part / Season</th>
-                        <th className="py-3 px-4">YouTube Audio Preview</th>
-                        <th className="py-3 px-4">Score Sale</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
+                        <th className="py-2.5 px-3.5">Title</th>
+                        <th className="py-2.5 px-3.5">Composer</th>
+                        <th className="py-2.5 px-3.5">Season</th>
+                        <th className="py-2.5 px-3.5">Preview</th>
+                        <th className="py-2.5 px-3.5">Score price</th>
+                        <th className="py-2.5 px-3.5 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#0C2340]/5">
-                      {songs.map((song) => (
-                        <tr key={song.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
-                          <td className="py-3 px-4 font-medium">
-                            <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{song.title}</div>
-                          </td>
-                          <td className="py-3 px-4 text-[#0C2340]/80">{song.composer} ({song.year})</td>
-                          <td className="py-3 px-4">
-                            <span className="bg-[#EAF4FB] text-[#1058A8] px-2 py-0.5 rounded text-[10px] font-bold">
-                              {song.partOfMass}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-1.5">
-                              <RealYouTubeIcon className="w-3.5 h-3.5 shrink-0" />
-                              <span className="font-mono text-[11px] text-[#1058A8] font-bold truncate max-w-[140px]" title={song.youtubeUrl || getSongYouTubeId(song)}>
-                                {getSongYouTubeId(song)}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            {song.sheetMusicAvailable ? (
-                              <span className="text-emerald-700 font-bold text-[11px]">KES {song.scorePriceKes}</span>
-                            ) : (
-                              <span className="text-slate-400 text-[11px]">No score</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button 
-                                onClick={() => playSong(song)} 
-                                title="Play uploaded YouTube preview directly"
-                                className="p-1.5 text-[#1058A8] hover:bg-[#EAF4FB] rounded-lg transition-colors cursor-pointer"
+                      {songs.map((song) => {
+                        let displayTitle = song.title.trim();
+                        if (displayTitle.toLowerCase().includes('machozi')) {
+                          displayTitle = 'Machozi ya Imani';
+                        } else if (displayTitle.toLowerCase().includes('mungu tu')) {
+                          displayTitle = 'Ni Mungu Tu';
+                        }
+
+                        return (
+                          <tr key={song.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
+                            <td className="py-2.5 px-3.5 font-medium">
+                              <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{displayTitle}</div>
+                            </td>
+                            <td className="py-2.5 px-3.5 text-[#0C2340]/80">
+                              {song.composer || 'Traditional'} {song.year ? `(${song.year})` : ''}
+                            </td>
+                            <td className="py-2.5 px-3.5 text-slate-700">
+                              {song.partOfMass || 'Ordinary Time'}
+                            </td>
+                            <td className="py-2.5 px-3.5">
+                              <button
+                                type="button"
+                                onClick={() => playSong(song)}
+                                className="text-[#1058A8] hover:text-[#0C2340] inline-flex items-center gap-1 font-semibold cursor-pointer"
+                                title="Play preview"
                               >
                                 <Play className="w-3.5 h-3.5 fill-current" />
+                                <span>Preview</span>
                               </button>
-                              <button 
-                                onClick={() => openEditSongModal(song)} 
-                                title="Edit song and YouTube preview"
-                                className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <Edit3 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (window.confirm(`Delete song "${song.title}"?`)) {
-                                    deleteSong(song.id);
-                                    notify(`Song "${song.title}" removed.`);
-                                  }
-                                }}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="py-2.5 px-3.5">
+                              {song.sheetMusicAvailable ? (
+                                <span className="text-emerald-700 font-semibold">KES {song.scorePriceKes}</span>
+                              ) : (
+                                <span className="text-slate-400">Free</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button 
+                                  onClick={() => openEditSongModal(song)} 
+                                  title="Edit song and preview"
+                                  className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm(`Delete song "${song.title}"?`)) {
+                                      deleteSong(song.id);
+                                      notify(`Song "${song.title}" removed.`);
+                                    }
+                                  }}
+                                  title="Delete song"
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1673,145 +1661,131 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
           {/* TAB: MAKTABA YA NOTI */}
           {activeTab === 'library' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
                 <div>
-                  <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
-                    Maktaba ya Noti (Free Sheet Music Library)
+                  <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                    Maktaba ya Noti
                   </h2>
-                  <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                    Manage public domain and permission-cleared Catholic choral scores.
+                  <p className="text-xs text-slate-600 font-source mt-0.5">
+                    Scores available for free download.
                   </p>
                 </div>
                 <button
                   onClick={openAddLibSong}
-                  className="px-4 py-2 text-xs font-bold bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  className="px-3.5 py-2 text-xs font-semibold bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Song to Library</span>
+                  <span>Add song</span>
                 </button>
               </div>
 
-              <div className="bg-white border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FAF8F5] border-b border-[#0C2340]/10 text-slate-600 font-semibold uppercase">
+              <div className="bg-white border border-[#0C2340]/15 rounded-lg overflow-hidden">
+                <table className="w-full text-left text-xs font-source">
+                  <thead className="bg-[#FAF8F5] border-b border-[#0C2340]/10 text-[#0C2340] font-semibold text-[11px]">
                     <tr>
-                      <th className="p-3.5">Title & Composer</th>
-                      <th className="p-3.5">Voices & Language</th>
-                      <th className="p-3.5">Category & Season</th>
-                      <th className="p-3.5">Status & Files</th>
-                      <th className="p-3.5 text-right">Actions</th>
+                      <th className="py-2.5 px-3.5">Title</th>
+                      <th className="py-2.5 px-3.5">Voices</th>
+                      <th className="py-2.5 px-3.5">Category</th>
+                      <th className="py-2.5 px-3.5">Access</th>
+                      <th className="py-2.5 px-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#0C2340]/5 font-source">
-                    {librarySongs.map((song) => (
-                      <tr key={song.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
-                        <td className="p-3.5">
-                          <div className="font-bold font-eb-garamond text-base text-[#0C2340] leading-snug">
-                            {song.title}
-                          </div>
-                          {song.titleSwahili && song.titleSwahili !== song.title && (
-                            <div className="text-[11px] text-[#1058A8] font-medium italic">
-                              {song.titleSwahili}
+                    {librarySongs.map((song) => {
+                      const cleanTitle = song.title.replace(/\s+\.$/, '').trim();
+                      const titleDisplay = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+                      let comp = song.composer || 'Traditional';
+                      const compLower = comp.toLowerCase();
+                      if (compLower.includes('atebe mark') || compLower.includes('mark t. atebe') || compLower.includes('mark atebe')) {
+                        comp = 'Mark T. Atebe';
+                      } else if (compLower.includes('kandie') || compLower.includes('l.k. kandie')) {
+                        comp = 'L.K. Kandie';
+                      } else if (compLower.includes('shengena') || compLower.includes('fr. g. shengena') || compLower.includes('fr g shengena')) {
+                        comp = 'Fr. G. Shengena';
+                      }
+
+                      const hasDiffArranger = song.arranger && song.arranger.trim().toLowerCase() !== comp.toLowerCase();
+                      const category = (song.categories && song.categories[0]) || song.season || 'Kuingia';
+
+                      return (
+                        <tr key={song.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                          <td className="py-2.5 px-3.5">
+                            <div className="font-bold font-eb-garamond text-sm text-[#0C2340] leading-snug">
+                              {titleDisplay}
                             </div>
-                          )}
-                          <div className="text-[11px] text-slate-500 mt-0.5">
-                            Mtunzi: <span className="font-semibold text-slate-700">{song.composer || 'Traditional'}</span>
-                            {song.arranger && <span className="text-slate-400"> · Mpangaji: {song.arranger}</span>}
-                          </div>
-                        </td>
-                        <td className="p-3.5">
-                          <span className="font-bold text-[#1058A8] bg-blue-50 px-2 py-0.5 rounded text-[11px] border border-blue-200">
-                            {song.voices || 'SATB'}
-                          </span>
-                          <span className="block text-[11px] text-slate-600 mt-1">
-                            {song.language}
-                          </span>
-                        </td>
-                        <td className="p-3.5">
-                          <span className="text-[11px] font-semibold text-slate-700 capitalize">
-                            {song.categories && song.categories.length > 0 ? song.categories.join(', ') : 'Kuingia'}
-                          </span>
-                          {song.season && (
-                            <span className="block text-[10px] text-slate-400 mt-0.5">
-                              {song.season}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3.5">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block">
-                            {song.sharingStatus}
-                          </span>
-                          <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500">
-                            {(song.notesUrl || song.pdfUrl) && (
-                              <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                                PDF Score
-                              </span>
-                            )}
-                            {(song.midiUrl || song.audioUrl) && (
-                              <span className="text-sky-700 font-bold bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200">
-                                Audio / MIDI
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => openEditLibSong(song)}
-                              title="Edit Library Song Info & Files"
-                              className="p-1.5 text-[#1058A8] hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm(`Delete song "${song.title}" from library?`)) {
-                                  deleteLibrarySong(song.id);
-                                  notify(`Removed "${song.title}" from library.`);
-                                }
-                              }}
-                              title="Delete from Library"
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              {comp}
+                              {hasDiffArranger && <span className="text-slate-400"> · Arr: {song.arranger}</span>}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-700">
+                            {song.voices || 'SATB'} · {song.language || 'Kiswahili'}
+                          </td>
+                          <td className="py-2.5 px-3.5 whitespace-nowrap capitalize text-slate-700">
+                            {category}
+                          </td>
+                          <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-600 text-[11px]">
+                            Public domain · PDF · Audio
+                          </td>
+                          <td className="py-2.5 px-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => openEditLibSong(song)}
+                                title="Edit song"
+                                className="p-1.5 text-[#1058A8] hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Delete song "${song.title}" from library?`)) {
+                                    deleteLibrarySong(song.id);
+                                    notify(`Removed "${song.title}" from library.`);
+                                  }
+                                }}
+                                title="Delete song"
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             </div>
           )}
 
-          {/* TAB: TRAINERS & OFFICIALS */}
+          {/* TAB: LEADERSHIP */}
           {activeTab === 'leaders' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
                 <div>
-                  <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
-                    Trainers and Officials
+                  <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                    Leadership
                   </h2>
-                  <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                    Music directors, organists, trainers, and executive committee members.
+                  <p className="text-xs text-slate-600 font-source mt-0.5">
+                    Choir leaders and committee.
+                  </p>
+                  <p className="text-[11px] text-slate-500 font-source mt-0.5">
+                    Only leaders have photos.
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={openAddLeaderModal}
-                  className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto transition-colors"
+                  className="px-3.5 py-2 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Trainer / Official</span>
+                  <span>Add leader</span>
                 </button>
               </div>
 
-              <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl text-xs text-blue-900 font-source">
-                This photo and name also appear in "A Word from the Choirmaster" on the home page.
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {leadersList.map((leader) => {
                   const isChoirmaster = leader.id === 'ldr-director' || 
                     (leader.role && (leader.role.toLowerCase().includes('choirmaster') || leader.role.toLowerCase().includes('music director')));
@@ -1819,91 +1793,70 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   return (
                     <div 
                       key={leader.id} 
-                      className={`p-5 bg-white border rounded-2xl shadow-xs space-y-3.5 flex flex-col justify-between transition-all ${
-                        isChoirmaster ? 'border-[#1058A8] ring-1 ring-[#7EC8F0]/40' : 'border-[#0C2340]/10 hover:border-slate-300'
-                      }`}
+                      className="p-3.5 bg-white border border-[#0C2340]/15 rounded-lg space-y-2.5 flex flex-col justify-between"
                     >
-                      <div className="space-y-3">
-                        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                          {leader.photoUrl ? (
-                            <img
-                              src={getAssetUrl(leader.photoUrl)}
-                              alt={leader.name}
-                              className="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl object-cover object-[center_12%] border-2 border-[#1058A8] shrink-0 shadow-md bg-slate-100"
-                            />
-                          ) : (
-                            <div className="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl bg-[#EAF4FB] text-[#1058A8] border border-[#7EC8F0]/40 flex items-center justify-center font-bold text-3xl shrink-0">
-                              {leader.name.charAt(0)}
-                            </div>
+                      <div className="flex items-start gap-3">
+                        {leader.photoUrl ? (
+                          <img
+                            src={getAssetUrl(leader.photoUrl)}
+                            alt={leader.name}
+                            className="w-16 h-20 rounded-lg object-cover object-[center_12%] border border-slate-200 shrink-0 bg-slate-100"
+                          />
+                        ) : (
+                          <div className="w-16 h-20 rounded-lg bg-[#EAF4FB] text-[#1058A8] border border-blue-200 flex items-center justify-center font-bold text-xl shrink-0">
+                            {leader.name.charAt(0)}
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          {isChoirmaster && (
+                            <span className="text-[10px] font-semibold bg-[#1058A8] text-white px-1.5 py-0.5 rounded inline-block mb-1">
+                              Shown on home page
+                            </span>
                           )}
 
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                                leader.category === 'trainer' ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-blue-100 text-blue-900 border border-blue-200'
-                              }`}>
-                                {leader.category === 'trainer' ? 'Trainer' : 'Official'}
-                              </span>
-
-                              {isChoirmaster && (
-                                <span className="text-[10px] font-bold bg-[#1058A8] text-white px-2 py-0.5 rounded shadow-2xs">
-                                  Choirmaster (Homepage Linked)
-                                </span>
-                              )}
-                            </div>
-
-                            <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340] leading-tight truncate">
-                              {leader.name}
-                            </h3>
-                            <span className="text-xs font-bold text-[#1058A8] block font-source">
-                              {leader.role}
-                            </span>
+                          <h3 className="font-eb-garamond text-base font-bold text-[#0C2340] leading-tight truncate">
+                            {leader.name}
+                          </h3>
+                          <span className="text-xs font-semibold text-[#1058A8] block font-source">
+                            {leader.role}
+                          </span>
+                          {leader.contact && (
                             <span className="text-[11px] text-slate-500 font-source block mt-0.5">
-                              {leader.tenure || 'Serving the Parish'}
+                              {leader.contact}
                             </span>
-                          </div>
+                          )}
                         </div>
-
-                        {leader.responsibility && (
-                          <p className="text-xs text-slate-600 font-source line-clamp-2 pt-2 border-t border-slate-100">
-                            {leader.responsibility}
-                          </p>
-                        )}
-
-                        {leader.contact && (
-                          <p className="text-[11px] text-slate-500 font-source">
-                            Contact: <span className="font-semibold text-slate-700">{leader.contact}</span>
-                          </p>
-                        )}
                       </div>
 
-                      <div className="pt-3 border-t border-[#0C2340]/10 flex items-center justify-between">
-                        <span className="text-[11px] text-slate-400 font-source">
-                          {leader.photoUrl ? 'Custom photo uploaded' : 'Default emblem'}
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => openEditLeaderModal(leader)}
-                            className="px-3 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
-                          >
-                            <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
-                            <span>Edit Photo & Profile</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (window.confirm(`Delete leader/trainer "${leader.name}"?`)) {
-                                deleteLeader(leader.id);
-                                notify(`Official/Trainer "${leader.name}" removed.`);
-                              }
-                            }}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
-                            title="Delete leader"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                      {leader.responsibility && (
+                        <p className="text-xs text-slate-600 font-source line-clamp-2 pt-1 border-t border-slate-100">
+                          {leader.responsibility}
+                        </p>
+                      )}
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => openEditLeaderModal(leader)}
+                          className="px-2.5 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Delete leader "${leader.name}"?`)) {
+                              deleteLeader(leader.id);
+                              notify(`Leader "${leader.name}" removed.`);
+                            }
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                          title="Delete leader"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   );
@@ -2011,48 +1964,57 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             </div>
           )}
 
-          {/* TAB: BACKUP & DATA RESET */}
+          {/* TAB: BACKUP */}
           {activeTab === 'backup' && (
-            <div className="bg-white border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 space-y-8 shadow-xs">
+            <div className="bg-white border border-[#0C2340]/15 rounded-lg p-6 space-y-6">
               <div>
-                <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
-                  Data Backup & Storage Control
+                <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                  Backup
                 </h2>
-                <p className="text-xs sm:text-sm text-[#0C2340]/70 font-source mt-1">
-                  Export your complete catalog as a JSON document or restore previous backups.
+                <p className="text-xs text-slate-600 font-source mt-0.5">
+                  Download a copy of your website content, or restore an earlier copy.
+                </p>
+                <p className="text-xs text-slate-500 font-source mt-2">
+                  Last backup: {lastBackupDate}
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                <div className="p-5 rounded-2xl border border-[#0C2340]/10 space-y-3 bg-[#F8FAFC]">
-                  <Download className="w-6 h-6 text-[#1058A8]" />
-                  <h3 className="font-eb-garamond font-bold text-[#0C2340] text-base">Export Backup</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="p-4 rounded-lg border border-[#0C2340]/10 space-y-2.5 bg-[#F8FAFC]">
+                  <h3 className="font-eb-garamond font-bold text-[#0C2340] text-base">Export data</h3>
                   <button
                     onClick={handleExportJson}
-                    className="w-full py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer"
+                    className="w-full py-2 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg cursor-pointer transition-colors"
                   >
-                    Download JSON File
+                    Download backup
                   </button>
                 </div>
 
-                <div className="p-5 rounded-2xl border border-[#0C2340]/10 space-y-3 bg-[#F8FAFC]">
-                  <Upload className="w-6 h-6 text-emerald-700" />
-                  <h3 className="font-eb-garamond font-bold text-[#0C2340] text-base">Restore Backup</h3>
-                  <label className="w-full py-2.5 text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-xl cursor-pointer text-center block">
-                    <span>Select JSON File</span>
+                <div className="p-4 rounded-lg border border-[#0C2340]/10 space-y-2.5 bg-[#F8FAFC]">
+                  <h3 className="font-eb-garamond font-bold text-[#0C2340] text-base">Restore data</h3>
+                  <label className="w-full py-2 text-xs font-semibold text-slate-800 bg-slate-200 hover:bg-slate-300 rounded-lg cursor-pointer text-center block transition-colors">
+                    <span>Choose backup file</span>
                     <input type="file" accept=".json" onChange={handleImportJson} className="hidden" />
                   </label>
                 </div>
+              </div>
 
-                <div className="p-5 rounded-2xl border border-red-200 space-y-3 bg-red-50/50">
-                  <RotateCcw className="w-6 h-6 text-red-600" />
-                  <h3 className="font-eb-garamond font-bold text-red-900 text-base">Factory Reset</h3>
+              {/* Separate section below called 'Delete everything' */}
+              <div className="pt-6 border-t border-slate-200">
+                <div className="p-4 rounded-lg border border-red-200 bg-red-50/50 space-y-2">
+                  <h3 className="font-eb-garamond font-bold text-red-900 text-base">Delete everything</h3>
+                  <p className="text-xs text-slate-600 font-source">
+                    This will delete all custom changes and restore default catalog records.
+                  </p>
                   <button
                     type="button"
-                    onClick={() => setShowResetConfirmModal(true)}
-                    className="w-full py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl cursor-pointer"
+                    onClick={() => {
+                      setResetConfirmInput('');
+                      setShowResetConfirmModal(true);
+                    }}
+                    className="py-2 px-4 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer transition-colors"
                   >
-                    Reset Catalog
+                    Delete all content
                   </button>
                 </div>
               </div>
@@ -3188,32 +3150,40 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       {/* MODAL: RESET CONFIRMATION */}
       {showResetConfirmModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl border border-red-200">
-            <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto">
-              <RotateCcw className="w-6 h-6" />
+          <div className="bg-white rounded-lg max-w-md w-full p-6 space-y-4 shadow-xl border border-red-200">
+            <h3 className="font-eb-garamond text-xl font-bold text-slate-900">
+              Delete all content?
+            </h3>
+            <p className="text-xs text-slate-600 font-source">
+              This action will reset all catalog records, members, and custom settings to original defaults.
+            </p>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700">
+                Type <strong className="text-red-700 font-mono">DELETE</strong> to confirm:
+              </label>
+              <input
+                type="text"
+                value={resetConfirmInput}
+                onChange={e => setResetConfirmInput(e.target.value)}
+                placeholder="DELETE"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono uppercase focus:border-red-600 outline-none"
+              />
             </div>
-            <div className="text-center space-y-2">
-              <h3 className="font-eb-garamond text-2xl font-bold text-slate-900">
-                {lang === 'sw' ? 'Je, unataka kurejesha rekodi?' : 'Restore default catalog?'}
-              </h3>
-              <p className="text-xs text-slate-600 font-source">
-                This will restore default choir catalog records.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowResetConfirmModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold cursor-pointer"
+                className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-semibold cursor-pointer hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
+                disabled={resetConfirmInput.trim() !== 'DELETE'}
                 onClick={handleResetDefaults}
-                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer"
+                className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold cursor-pointer transition-colors"
               >
-                Reset
+                Delete all content
               </button>
             </div>
           </div>

@@ -1327,28 +1327,5 @@ Nijalie neema ya kusimama imara katika imani.`,
     addedDate: '2024-11-20',
     solfaNotes: true,
     hasAudio: false
-  },
-  {
-    id: 'lib-52',
-    title: 'Kaa Nami Bwana (Abide with Me)',
-    composer: 'William H. Monk / Henry F. Lyte (Swahili)',
-    language: 'Kiswahili',
-    categories: ['kutoka', 'tafakari'],
-    season: 'Kawaida / Ordinary',
-    voices: 'SATB',
-    lyrics: `1. Kaa nami, ni usiku tena,
-Giza linaingia, Bwana kaa nami;
-Msaada mwingine sina,
-Nakuomba mwokozi, ukae nami.
-
-2. Maisha yanapita haraka sana,
-Mambo ya dunia hii yatatoweka;
-Wewe usiyebadilika kamwe,
-Kaa nami Bwana katika maisha yangu yote.`,
-    sharingStatus: 'Public domain',
-    downloadCount: 385,
-    addedDate: '2024-11-28',
-    solfaNotes: true,
-    hasAudio: false
   }
 ];

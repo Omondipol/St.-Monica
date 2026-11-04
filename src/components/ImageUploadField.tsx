@@ -31,6 +31,7 @@ interface ImageUploadFieldProps {
   presetOptions?: PresetImageOption[];
   aspectRatio?: string; // e.g. "aspect-[4/5]", "aspect-video", "aspect-square"
   pipelineTarget?: PipelineTarget; // 'profile' | 'gallery' | 'banner' | 'logo'
+  customRuleText?: string;
   className?: string;
 }
 
@@ -45,6 +46,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   presetOptions,
   aspectRatio = 'aspect-[4/5]',
   pipelineTarget = 'profile',
+  customRuleText,
   className = ''
 }) => {
   const activePresets = presets || presetOptions;
@@ -61,6 +63,14 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
 
   const effectiveValue = value || defaultValue || '';
 
+  const ruleMessage = customRuleText || (
+    pipelineTarget === 'banner'
+      ? 'Use the original photo, not a WhatsApp copy. At least 1600 × 500 px.'
+      : pipelineTarget === 'gallery'
+      ? 'Use the original photo, not a WhatsApp copy. At least 1200 × 900 px.'
+      : 'Use the original photo, not a WhatsApp copy. At least 800 × 1000 px.'
+  );
+
   React.useEffect(() => {
     setUrlInput(value || defaultValue || '');
     setPreviewError(false);
@@ -74,7 +84,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     e.target.value = '';
 
     setUploadedFileName(file.name);
-    // Open interactive 4:5 Crop Modal with head clearance guide & pipeline execution
+    // Open interactive Crop Modal with head clearance guide & pipeline execution
     setSelectedFileForCrop(file);
     setIsCropOpen(true);
   };
@@ -107,7 +117,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const isCustom = defaultValue && value && value !== defaultValue;
 
   return (
-    <div className={`space-y-2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl ${className}`}>
+    <div className={`space-y-2 p-3.5 bg-slate-50 border border-slate-200 rounded-lg ${className}`}>
       <div className="flex items-center justify-between gap-2">
         <div>
           <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider">
@@ -138,20 +148,19 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
         </p>
       )}
 
-      {/* Rules Banner (Min 800×1000px, 10MB, original photo advice) */}
-      <div className="bg-sky-50 border border-sky-200/80 rounded-lg p-2 text-[10px] text-sky-950 font-source leading-tight flex items-start gap-1.5">
+      {/* Rules Banner */}
+      <div className="bg-sky-50 border border-sky-200/80 rounded-md p-2 text-[10px] text-sky-950 font-source leading-tight flex items-start gap-1.5">
         <Info className="w-3.5 h-3.5 text-[#1058A8] shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold text-[#0C2340]">Automatic Pipeline Rules:</span>{' '}
-          Min 800 × 1000 px for crisp portrait cards. Use original camera/gallery photo (avoid WhatsApp/screenshots which are compressed). Automatic 4:5 crop with head space.
+          {ruleMessage}
         </div>
       </div>
 
       {/* Image Preview & Upload Controls */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-1">
         
-        {/* Preview Box - Natural proportions filling frame with focus slightly above center so heads are never cut off */}
-        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-slate-900 border border-slate-300 relative group flex items-center justify-center shadow-inner max-h-[190px]`}>
+        {/* Preview Box */}
+        <div className={`sm:col-span-5 ${aspectRatio} rounded-md overflow-hidden bg-slate-900 border border-slate-300 relative group flex items-center justify-center shadow-inner max-h-[190px]`}>
           {effectiveValue && !previewError ? (
             <img
               src={getAssetUrl(effectiveValue)}
@@ -179,7 +188,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           )}
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: side by side */}
         <div className="sm:col-span-7 space-y-2 text-xs">
           <input
             ref={fileInputRef}
@@ -189,23 +198,23 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             onChange={handleFileChange}
           />
 
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-row items-center gap-2">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors whitespace-nowrap"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Upload Photo (Crop & Pipe)</span>
+              <span>Upload photo</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsUrlMode(!isUrlMode)}
-              className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold rounded-md flex items-center gap-1.5 cursor-pointer transition-colors whitespace-nowrap"
             >
               <LinkIcon className="w-3.5 h-3.5 text-slate-500" />
-              <span>{isUrlMode ? 'Hide URL' : 'Web URL'}</span>
+              <span>{isUrlMode ? 'Hide link' : 'Use image link'}</span>
             </button>
           </div>
 

@@ -481,6 +481,42 @@ export const INITIAL_SONGS_CATALOG: Song[] = [
     recordedAt: "Recorded at Khakstudio, Nakuru",
     whyWeSingIt: "Composed by Bernard Mukasa, this entrance song was adopted by our parish in 2021 to open celebrations honoring Small Christian Communities.",
     whyWeSingItSw: "Ulitungwa na Bernard Mukasa na kupokelewa parokiani mwaka 2021 kama wimbo wa kuingia unaoenzi Jumuiya Ndogondogo."
+  },
+  {
+    id: "song-nimungutu",
+    title: "Ni Mungu Tu",
+    titleSwahili: "Ni Mungu Tu",
+    album: "Nyimbo za Kiliturujia",
+    composer: "Atebe Mark T.",
+    year: 2024,
+    season: "Ordinary Time",
+    seasonSwahili: "Wakati wa Kawaida / Shukrani",
+    partOfMass: "Praise",
+    partOfMassSwahili: "Wimbo wa Shukrani na Sifa",
+    language: "Kiswahili",
+    voicing: "SATB Choral Polyphony",
+    musicalKey: "F Major",
+    duration: "4:15",
+    youtubeUrl: "https://youtu.be/syOCKFbVS-8",
+    youtubeId: "syOCKFbVS-8",
+    thumbnailUrl: "https://i.ytimg.com/vi/syOCKFbVS-8/hqdefault.jpg",
+    audioPreviewUrl: getAudioUrl("machozi-ya-imani-preview.mp3"),
+    sheetMusicAvailable: true,
+    scorePriceKes: 300,
+    lyricsSwahili: [
+      "1. Ni Mungu tu anayetujalia uzima na nguvu za kusimama mbele ya altare Yake takatifu.",
+      "Kiitikio: Ni Mungu tu, ametenda makuu maishani mwetu; tumsifu na kumtukuza daima.",
+      "2. Kwa uaminifu Wake ametuongoza katika utume wa muziki na umoja wa kidugu."
+    ],
+    lyricsEnglish: [
+      "1. It is God alone who grants us life and strength to stand before His holy altar.",
+      "Refrain: It is God alone who has worked wonders in our lives; let us praise and exalt Him forever.",
+      "2. In His faithfulness He has guided our ministry of music and fraternal harmony."
+    ],
+    waveformPeaks: [85,90,88,86,89,92,60,88,95,94,88,92,65,82,86,88,89,88,85,62,82,81,85,84,86,58,92,90,90,85,90,75,70,82,85,86,84,85,58,90,88,86,87,88,87,87,87,60,86,85,88,85,85,63,85,90,92,88,87,85,62,84,82,82,83,83,55,84,82,82,76,68,50,44,46,36,30,20,12,12],
+    recordedAt: "Recorded at Khakstudio, Nakuru",
+    whyWeSingIt: "A joyful Thanksgiving hymn by Atebe Mark T. praising God's guidance and blessings upon the choir.",
+    whyWeSingItSw: "Wimbo wa shukrani wa Atebe Mark T. unaosifu uaminifu na baraka za Mungu kwa kwaya."
   }
 ];
 
@@ -1379,7 +1415,7 @@ export const ALL_EIGHT_VIRTUES_CATALOG: CoreValueItem[] = [
   },
   {
     id: 'val-excellence',
-    badgeNumber: 3, // Displayed as 3 on default 3-item home layout
+    badgeNumber: 6,
     titleEn: 'Excellence',
     titleSw: 'Ubora wa Utume',
     subtitleEn: 'A Fitting Sacrifice of Praise',

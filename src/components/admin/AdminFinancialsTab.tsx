@@ -309,235 +309,202 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
     }
   };
 
+  const formatDisplayDate = (dStr: string) => {
+    if (!dStr) return '';
+    try {
+      const parsed = new Date(dStr.includes('T') ? dStr : dStr.replace(' ', 'T'));
+      if (isNaN(parsed.getTime())) {
+        return dStr;
+      }
+      const day = parsed.getDate();
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = monthNames[parsed.getMonth()];
+      const year = parsed.getFullYear();
+      let hours = parsed.getHours();
+      const minutes = parsed.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12 || 12;
+      return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+    } catch {
+      return dStr;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-3xl border border-[#0C2340]/10 shadow-sm overflow-hidden">
-        <AfricanGeometricBorder />
-        <div className="p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#0C2340]/10">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EAF4FB] text-[#1058A8] border border-[#7EC8F0]/40">
-                  {lang === 'sw' ? 'Daftari la Michango na Mauzo' : 'Contributions & Financial Ledger'}
-                </span>
-                <span className="text-xs text-slate-500 font-medium">
-                  Till: <strong className="text-slate-800">{footerContact?.mpesaTill || '8421092'}</strong>
-                </span>
-              </div>
-              <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340] mt-1">
-                {lang === 'sw' ? 'Fedha Zote Zilizopokelewa Kupitia Tovuti' : 'Funds Received & Supporter Records'}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 font-source mt-1 max-w-2xl">
-                {lang === 'sw'
-                  ? 'Fuatilia michango yote ya kwaya, ununuzi wa noti za muziki, ada za waimbaji, na utoe ripoti rasmi ya fedha (PDF).'
-                  : 'Track all incoming choir donations, hymn sponsorships, sheet music purchases, and annual membership dues with full M-Pesa verification.'}
-              </p>
-            </div>
+      <div className="bg-white rounded-lg border border-[#0C2340]/15 p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#0C2340]/10">
+          <div>
+            <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+              Contributions
+            </h2>
+            <p className="text-xs text-slate-600 font-source mt-0.5">
+              Donations, sheet music sales and membership fees. Till: {footerContact?.mpesaTill || '8421092'}
+            </p>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <button
-                onClick={exportFinancialPdf}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-colors"
-              >
-                <Download className="w-4 h-4 text-[#7EC8F0]" />
-                <span>{lang === 'sw' ? 'Pakua Taarifa (PDF)' : 'Export Financial PDF'}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={exportFinancialPdf}
+              className="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <Download className="w-4 h-4 text-[#7EC8F0]" />
+              <span>Export PDF</span>
+            </button>
+
+            <button
+              onClick={handleOpenAdd}
+              className="px-3.5 py-2 rounded-lg bg-[#1058A8] hover:bg-[#0C2340] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add contribution</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Metric Tiles - Clean without icons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 bg-[#FAF8F5] border border-[#0C2340]/10 rounded-lg">
+            <span className="text-xs font-semibold text-slate-600 block">Donations</span>
+            <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums block mt-1">
+              KES {stats.donations.toLocaleString()}
+            </span>
+          </div>
+
+          <div className="p-4 bg-[#FAF8F5] border border-[#0C2340]/10 rounded-lg">
+            <span className="text-xs font-semibold text-slate-600 block">Membership</span>
+            <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums block mt-1">
+              KES {stats.membership.toLocaleString()}
+            </span>
+            <span className="text-[11px] text-slate-500 block mt-0.5">
+              KES 500 each
+            </span>
+          </div>
+
+          <div className="p-4 bg-[#FAF8F5] border border-[#0C2340]/10 rounded-lg">
+            <span className="text-xs font-semibold text-slate-600 block">Sheet music</span>
+            <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums block mt-1">
+              KES {stats.sheetMusic.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Search & Category Filter Toolbar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search supporter, phone, or M-Pesa code..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X className="w-3.5 h-3.5" />
               </button>
+            )}
+          </div>
 
+          <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+            <span className="text-slate-400 text-[11px] mr-1">Category:</span>
+            {(['all', 'donation', 'sheet_music', 'membership'] as const).map(c => (
               <button
-                onClick={handleOpenAdd}
-                className="px-4 py-2.5 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-colors"
+                key={c}
+                onClick={() => setCategoryFilter(c)}
+                className={`px-3 py-1.5 rounded-lg capitalize transition-colors cursor-pointer ${
+                  categoryFilter === c
+                    ? 'bg-[#0C2340] text-white font-bold'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
               >
-                <Plus className="w-4 h-4" />
-                <span>{lang === 'sw' ? 'Rekodi Mchango' : 'Record Contribution'}</span>
+                {c === 'all' ? 'All' :
+                 c === 'donation' ? 'Donations' :
+                 c === 'sheet_music' ? 'Sheet Music' :
+                 'Membership'}
               </button>
-            </div>
+            ))}
           </div>
+        </div>
 
-          {/* Metric KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Total Received</span>
-                <DollarSign className="w-4 h-4 text-emerald-600" />
-              </div>
-              <div className="mt-2">
-                <span className="font-eb-garamond text-2xl sm:text-3xl font-bold text-emerald-950 tabular-nums">
-                  KES {stats.total.toLocaleString()}
-                </span>
-                <span className="text-[11px] text-emerald-700 block mt-0.5">
-                  Across {stats.count} transactions
-                </span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#FAF8F5] border border-[#0C2340]/10 rounded-2xl flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">Choir Support / Gifts</span>
-                <Heart className="w-4 h-4 text-rose-500" />
-              </div>
-              <div className="mt-2">
-                <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums">
-                  KES {stats.donations.toLocaleString()}
-                </span>
-                <span className="text-[11px] text-slate-500 block mt-0.5">
-                  Sound, vestments, hymn gifts
-                </span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#FAF8F5] border border-[#0C2340]/10 rounded-2xl flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">Sheet Music Sales</span>
-                <Music className="w-4 h-4 text-[#1058A8]" />
-              </div>
-              <div className="mt-2">
-                <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums">
-                  KES {stats.sheetMusic.toLocaleString()}
-                </span>
-                <span className="text-[11px] text-slate-500 block mt-0.5">
-                  SATB scores & bundles
-                </span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#FAF8F5] border border-[#0C2340]/10 rounded-2xl flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0C2340] uppercase tracking-wider">Chorister Dues</span>
-                <Users className="w-4 h-4 text-amber-600" />
-              </div>
-              <div className="mt-2">
-                <span className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums">
-                  KES {stats.membership.toLocaleString()}
-                </span>
-                <span className="text-[11px] text-slate-500 block mt-0.5">
-                  Annual 500 KES registrations
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Search & Category Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder={lang === 'sw' ? 'Tafuta kwa jina la mchangiaji, simu, au namba ya M-Pesa...' : 'Search supporter, phone, or M-Pesa code...'}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
-              <span className="text-slate-400 text-[11px] mr-1">Category:</span>
-              {(['all', 'donation', 'sheet_music', 'membership'] as const).map(c => (
-                <button
-                  key={c}
-                  onClick={() => setCategoryFilter(c)}
-                  className={`px-3 py-1.5 rounded-lg capitalize transition-colors cursor-pointer ${
-                    categoryFilter === c
-                      ? 'bg-[#0C2340] text-white font-bold'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  {c === 'all' ? (lang === 'sw' ? 'Zote' : 'All') :
-                   c === 'donation' ? (lang === 'sw' ? 'Michango' : 'Donations') :
-                   c === 'sheet_music' ? (lang === 'sw' ? 'Noti za Wimbo' : 'Sheet Music') :
-                   (lang === 'sw' ? 'Uanachama' : 'Membership')}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Transaction Ledger Table */}
-          <div className="border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-source divide-y divide-[#0C2340]/10">
-                <thead className="bg-[#FAF8F5] text-[#0C2340] font-bold uppercase tracking-wider text-[11px]">
+        {/* Transaction Ledger Table */}
+        <div className="border border-[#0C2340]/10 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-source divide-y divide-[#0C2340]/10">
+              <thead className="bg-[#FAF8F5] text-[#0C2340] font-semibold text-[11px]">
+                <tr>
+                  <th className="py-2.5 px-3.5">#</th>
+                  <th className="py-2.5 px-3.5">Supporter</th>
+                  <th className="py-2.5 px-3.5 whitespace-nowrap">Date & Time</th>
+                  <th className="py-2.5 px-3.5 min-w-[130px] whitespace-nowrap">Amount</th>
+                  <th className="py-2.5 px-3.5">Purpose</th>
+                  <th className="py-2.5 px-3.5 whitespace-nowrap">M-Pesa reference</th>
+                  <th className="py-2.5 px-3.5">Status</th>
+                  <th className="py-2.5 px-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#0C2340]/5 bg-white">
+                {filteredTransactions.length === 0 ? (
                   <tr>
-                    <th className="py-3 px-4">#</th>
-                    <th className="py-3 px-4">Supporter / Donor</th>
-                    <th className="py-3 px-4">Date & Time</th>
-                    <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Purpose / Purpose Sw</th>
-                    <th className="py-3 px-4">M-Pesa Reference</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <td colSpan={8} className="py-10 text-center text-slate-500">
+                      <p className="font-medium">No transactions match your search.</p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-[#0C2340]/5 bg-white">
-                  {filteredTransactions.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-500">
-                        <DollarSign className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="font-semibold">{lang === 'sw' ? 'Hakuna rekodi zilizopatikana.' : 'No transactions match your search.'}</p>
+                ) : (
+                  filteredTransactions.map((tx, idx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-2.5 px-3.5 font-bold text-slate-400 tabular-nums">
+                        {idx + 1}
                       </td>
-                    </tr>
-                  ) : (
-                    filteredTransactions.map((tx, idx) => (
-                      <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-400 tabular-nums">
-                          {idx + 1}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-900 text-sm">
-                            {tx.donorName}
+                      <td className="py-2.5 px-3.5">
+                        <div className="font-semibold text-slate-900 text-xs">
+                          {tx.donorName}
+                        </div>
+                        {tx.donorPhone && (
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            {tx.donorPhone}
                           </div>
-                          {tx.donorPhone && (
-                            <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3 text-slate-400" />
-                              <span>{tx.donorPhone}</span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
-                          {tx.date}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="font-bold text-emerald-800 text-sm tabular-nums">
-                            KES {Number(tx.amountKes).toLocaleString()}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 max-w-xs">
-                          <div className="font-medium text-slate-800">
-                            {tx.purpose}
-                          </div>
-                          {tx.purposeSw && (
-                            <div className="text-[10px] text-slate-500 italic">
-                              {tx.purposeSw}
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-[11px] font-bold text-[#1058A8]">
-                          {tx.mpesaReference}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            <span>Verified</span>
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right">
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3.5 text-slate-600 whitespace-nowrap">
+                        {formatDisplayDate(tx.date)}
+                      </td>
+                      <td className="py-2.5 px-3.5 min-w-[130px] whitespace-nowrap">
+                        <span className="font-bold text-emerald-800 text-xs tabular-nums">
+                          KES {Number(tx.amountKes).toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3.5 max-w-xs">
+                        <div className="font-medium text-slate-800">
+                          {tx.purpose}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3.5 font-mono text-[11px] font-bold text-[#1058A8] whitespace-nowrap">
+                        {tx.mpesaReference}
+                      </td>
+                      <td className="py-2.5 px-3.5 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Verified</span>
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3.5 text-right">
+                        {tx.status !== 'verified' && (
                           <button
                             onClick={() => handleDelete(tx)}
-                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
-                            title="Delete Record"
+                            className="p-1 rounded text-rose-600 hover:bg-rose-50 cursor-pointer"
+                            title="Delete record"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
