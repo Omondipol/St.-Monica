@@ -510,13 +510,14 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     handleZoomChange(zoom + delta);
   };
 
-  // Execute Crop from original full-resolution photo with Lanczos resampling & pipeline
+  // Execute Crop from original full-resolution photo with high-quality resampling
   const handleApplyCrop = async () => {
     const fullCanvas = fullResCanvasRef.current;
     if (!fullCanvas || !previewDimensions.width) return;
 
     setIsProcessing(true);
-    setPipelineProgress('Step 1/3: Archiving untouched original...');
+    setSaveError('');
+    setPipelineProgress('Saving photo…');
 
     try {
       const fullW = fullCanvas.width;
@@ -539,18 +540,16 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
       const sw = Math.min(fullW - sx, cropW_prev * ratioToFull);
       const sh = Math.min(fullH - sy, cropH_prev * ratioToFull);
 
-      // Output at least 800 × 1000 px (4:5 ratio) with Lanczos high quality resampling
+      // Output at least 800 × 1000 px (4:5 ratio) with high quality resampling
       let outW = Math.max(800, Math.min(2400, Math.round(sw)));
       let outH = target === 'profile' 
         ? Math.round(outW / (4 / 5)) 
         : Math.round(sh * (outW / sw));
 
-      setPipelineProgress('Step 2/3: Applying Lanczos resampling & generating master WebP (Q90)...');
-
-      // Crop from original full-resolution photo (not preview) with high-quality Lanczos resampling
+      // Crop from original full-resolution photo (not preview)
       const croppedCanvas = resampleLanczosHighQuality(fullCanvas, sx, sy, sw, sh, outW, outH);
 
-      // Run through automated pipeline (compressed only once at Q90 WebP)
+      // Run through automated pipeline
       const pipelineResult = await runImagePipeline(
         croppedCanvas,
         file,
@@ -558,85 +557,83 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         target === 'profile' ? 'leaders' : 'gallery'
       );
 
-      setPipelineProgress('Step 3/3: Finalizing sharp display version...');
       setTimeout(() => {
         onComplete(pipelineResult);
         setIsProcessing(false);
         onClose();
-      }, 300);
+      }, 250);
     } catch (err: any) {
-      console.error('Image pipeline error:', err);
+      console.error('Image crop save error:', err);
       // Fallback
       if (fullResCanvasRef.current) {
-        const fallbackCanvas = document.createElement('canvas');
-        fallbackCanvas.width = 800;
-        fallbackCanvas.height = 1000;
-        const ctx = fallbackCanvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(fullResCanvasRef.current, 0, 0, 800, 1000);
-          const dataUrl = fallbackCanvas.toDataURL('image/webp', 0.90);
-          onComplete({ url: dataUrl, cardUrl: dataUrl });
-        }
+        try {
+          const fallbackCanvas = document.createElement('canvas');
+          fallbackCanvas.width = 800;
+          fallbackCanvas.height = 1000;
+          const ctx = fallbackCanvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(fullResCanvasRef.current, 0, 0, 800, 1000);
+            const dataUrl = fallbackCanvas.toDataURL('image/webp', 0.90);
+            onComplete({ url: dataUrl, cardUrl: dataUrl });
+            setIsProcessing(false);
+            onClose();
+            return;
+          }
+        } catch (_) {}
       }
       setIsProcessing(false);
-      onClose();
+      setSaveError('The photo could not be saved. Try again, or use a smaller file.');
     }
   };
 
+  const [saveError, setSaveError] = useState<string>('');
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#1C1E24] text-white border border-white/15 rounded-3xl w-full max-w-2xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white text-slate-800 border border-slate-200 rounded-lg w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#0C2340]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#1058A8] flex items-center justify-center text-white">
-              <CropIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-fraunces text-base sm:text-lg font-bold text-white leading-tight">
-                {target === 'profile' ? 'Position & Frame Profile Photo' : 'Image Crop & Automated Pipeline'}
-              </h3>
-              <p className="text-xs text-sky-200/80 font-source">
-                {target === 'profile' ? '4:5 Portrait Card Frame · Automated Sharp Pipeline' : 'Crop and optimize for high quality display'}
-              </p>
-            </div>
-          </div>
+        <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+          <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340]">
+            Crop photo
+          </h3>
           <button
             type="button"
             disabled={isProcessing}
             onClick={onClose}
-            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+            className="p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Upload Rules Notice Banner */}
-        <div className="bg-[#0C2340]/60 border-b border-white/10 px-4 py-2.5 text-[11px] sm:text-xs text-slate-300 font-source space-y-1 shrink-0">
-          <div className="flex items-start gap-1.5 text-amber-300 font-medium">
-            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-            <span>
-              <strong>Upload Advice:</strong> Use original camera/gallery photos. Avoid WhatsApp or screenshots because compression makes them soft and blurry.
-            </span>
+        {/* Small photo warning banner */}
+        {(validationError || validationWarning || saveError) && (
+          <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-200 text-xs text-amber-900 font-source space-y-1 shrink-0">
+            {validationError && (
+              <div className="flex items-start gap-1.5 font-medium text-rose-800">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                <span>{validationError}</span>
+              </div>
+            )}
+            {!validationError && validationWarning && (
+              <div className="flex items-start gap-1.5 font-medium text-amber-900">
+                <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-700" />
+                <span>{validationWarning}</span>
+              </div>
+            )}
+            {saveError && (
+              <div className="flex items-start gap-1.5 font-medium text-rose-800">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                <span>{saveError}</span>
+              </div>
+            )}
           </div>
-          {validationError && (
-            <div className="flex items-start gap-1.5 text-rose-300 font-medium bg-rose-950/40 border border-rose-500/30 p-2 rounded-lg">
-              <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-              <span>{validationError}</span>
-            </div>
-          )}
-          {validationWarning && (
-            <div className="flex items-start gap-1.5 text-amber-300 font-medium bg-amber-950/40 border border-amber-500/30 p-2 rounded-lg">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
-              <span>{validationWarning}</span>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Crop Stage Area */}
         <div 
-          className="relative flex-1 min-h-[320px] max-h-[460px] bg-slate-950 flex items-center justify-center p-4 overflow-hidden select-none"
+          className="relative flex-1 min-h-[300px] max-h-[440px] bg-slate-900 flex items-center justify-center p-4 overflow-hidden select-none"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -645,40 +642,40 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
           onTouchEnd={handleTouchEnd}
           onWheel={handleWheel}
         >
-          {/* Active 4:5 Crop Window */}
+          {/* Active 4:5 Crop Window with thin 1-2px border */}
           <div
-            className="relative pointer-events-none z-20 border-2 border-[#E5A93C] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.75)] overflow-hidden flex flex-col justify-between"
+            className="relative pointer-events-none z-20 border border-[#E5A93C] rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col justify-between"
             style={{
               width: `${FRAME_W}px`,
-              height: `${FRAME_H}px`, // exact 4:5 aspect ratio (240 × 300)
+              height: `${FRAME_H}px`,
             }}
           >
-            {/* Top Head-Clearance Guide for portrait photos */}
+            {/* Top Head-Clearance Guide */}
             {target === 'profile' && (
-              <div className="w-full pt-3 px-3">
-                <div className="w-full border-b border-dashed border-sky-400/70 pb-1 text-center">
-                  <span className="text-[10px] font-bold text-sky-200 tracking-wider uppercase bg-[#0C2340]/80 px-2 py-0.5 rounded shadow">
-                    Top of head guide (leave space above)
+              <div className="w-full pt-2 px-3">
+                <div className="w-full border-b border-dashed border-sky-300/80 pb-1 text-center">
+                  <span className="text-[10px] font-medium text-sky-100 bg-slate-900/80 px-2 py-0.5 rounded">
+                    Leave space above the head.
                   </span>
                 </div>
               </div>
             )}
 
             {/* Subtle center crosshair guide */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-              <div className="w-8 h-[1px] bg-white"></div>
-              <div className="h-8 w-[1px] bg-white absolute"></div>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+              <div className="w-6 h-[1px] bg-white"></div>
+              <div className="h-6 w-[1px] bg-white absolute"></div>
             </div>
 
-            {/* Bottom 4:5 indicator */}
+            {/* Bottom guide text */}
             <div className="w-full pb-2 text-center">
-              <span className="text-[9px] font-semibold text-white/80 bg-black/60 px-2 py-0.5 rounded">
-                4:5 Portrait Frame (Drag & Zoom to position face)
+              <span className="text-[10px] text-white/90 bg-black/60 px-2.5 py-0.5 rounded font-source">
+                Drag to move, use the slider to zoom.
               </span>
             </div>
           </div>
 
-          {/* Movable / Zoomable Source Image (Screen-scaled preview with calculated zoom) */}
+          {/* Movable / Zoomable Source Image */}
           {previewSrc && previewDimensions.width > 0 && (
             <img
               ref={imageRef}
@@ -697,57 +694,58 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             />
           )}
 
+          {/* Processing overlay with undimmed photo and small spinner */}
           {isProcessing && (
-            <div className="absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center gap-3 p-6 text-center animate-in fade-in">
-              <Loader2 className="w-8 h-8 text-[#7EC8F0] animate-spin" />
-              <p className="text-sm font-bold text-white font-source">
-                {pipelineProgress || 'Processing image through automated pipeline...'}
-              </p>
-              <p className="text-xs text-sky-200/70 font-source max-w-xs">
-                Creating pristine WebP multi-resolution copies & archiving untouched original.
-              </p>
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 text-white border border-white/20 px-3.5 py-1.5 rounded-md flex items-center gap-2 shadow-lg text-xs font-semibold animate-in fade-in">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7EC8F0]" />
+              <span>Saving photo…</span>
             </div>
           )}
         </div>
 
-        {/* Controls Bar: Zoom Slider & Position Reset */}
-        <div className="p-3 sm:p-4 bg-[#14161B] border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        {/* Controls Bar: Zoom Slider & Reset */}
+        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
+            <span className="text-[11px] font-medium text-slate-600">Zoom</span>
             <button
               type="button"
+              disabled={isProcessing}
               onClick={() => handleZoomChange(zoom - (maxZoom - minZoom) / 10)}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+              className="p-1 rounded bg-white hover:bg-slate-200 border border-slate-300 text-slate-700 cursor-pointer disabled:opacity-50"
               title="Zoom out"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <input
               type="range"
+              disabled={isProcessing}
               min={minZoom}
               max={maxZoom}
               step={(maxZoom - minZoom) / 100 || 0.01}
               value={zoom}
               onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
-              className="w-full sm:w-36 accent-[#1058A8] cursor-pointer"
+              className="w-full sm:w-32 accent-[#1058A8] cursor-pointer"
             />
             <button
               type="button"
+              disabled={isProcessing}
               onClick={() => handleZoomChange(zoom + (maxZoom - minZoom) / 10)}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+              className="p-1 rounded bg-white hover:bg-slate-200 border border-slate-300 text-slate-700 cursor-pointer disabled:opacity-50"
               title="Zoom in"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-3.5 h-3.5" />
             </button>
 
             <button
               type="button"
+              disabled={isProcessing}
               onClick={handleReset}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center gap-1 cursor-pointer ml-1"
+              className="px-2 py-1 rounded bg-white hover:bg-slate-200 border border-slate-300 text-slate-700 flex items-center gap-1 cursor-pointer ml-1 disabled:opacity-50 text-[11px] font-medium"
               title="Reset position"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline text-[11px]">Center</span>
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
             </button>
           </div>
 
@@ -757,27 +755,24 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={onClose}
-              className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium cursor-pointer transition-colors"
+              className="px-3 py-1.5 rounded-md bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-medium cursor-pointer transition-colors disabled:opacity-50"
             >
-              Cancel
+              {isProcessing ? 'Stop' : 'Cancel'}
             </button>
 
             <button
               type="button"
               disabled={isProcessing}
               onClick={handleApplyCrop}
-              className="px-5 py-2 rounded-xl bg-[#1058A8] hover:bg-[#0C4685] text-white font-bold flex items-center gap-2 shadow-md cursor-pointer transition-colors disabled:opacity-50"
+              className="px-4 py-1.5 rounded-md bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors disabled:opacity-75"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Saving…</span>
                 </>
               ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Apply & Run Pipeline</span>
-                </>
+                <span>Save photo</span>
               )}
             </button>
           </div>

@@ -106,38 +106,33 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   };
 
   const handleReset = () => {
-    if (defaultValue) {
-      onChange(defaultValue);
-      setUrlInput(defaultValue);
+    if (window.confirm('Remove this photo?')) {
+      onChange(defaultValue || '');
+      setUrlInput(defaultValue || '');
       setUploadedFileName('');
       setPreviewError(false);
     }
   };
 
-  const isCustom = defaultValue && value && value !== defaultValue;
+  const isCustom = (defaultValue && value && value !== defaultValue) || (!defaultValue && value);
 
   return (
-    <div className={`space-y-2 p-3.5 bg-slate-50 border border-slate-200 rounded-lg ${className}`}>
+    <div className={`space-y-2.5 p-3 bg-white border border-slate-200 rounded-md ${className}`}>
       <div className="flex items-center justify-between gap-2">
         <div>
-          <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-slate-800">
             {label}
           </label>
-          {labelSw && (
-            <span className="text-[11px] text-[#1058A8] font-medium block">
-              {labelSw}
-            </span>
-          )}
         </div>
-        {isCustom && defaultValue && (
+        {isCustom && (
           <button
             type="button"
             onClick={handleReset}
-            className="text-[11px] font-semibold text-amber-700 hover:text-amber-900 flex items-center gap-1 cursor-pointer"
-            title="Reset to default image"
+            className="text-[11px] font-medium text-rose-600 hover:text-rose-800 flex items-center gap-1 cursor-pointer"
+            title="Remove photo"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Reset default</span>
+            <span>Remove photo</span>
           </button>
         )}
       </div>
@@ -149,7 +144,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       )}
 
       {/* Rules Banner */}
-      <div className="bg-sky-50 border border-sky-200/80 rounded-md p-2 text-[10px] text-sky-950 font-source leading-tight flex items-start gap-1.5">
+      <div className="bg-sky-50 border border-sky-200/70 rounded-md p-2 text-[11px] text-sky-900 font-source leading-tight flex items-start gap-1.5">
         <Info className="w-3.5 h-3.5 text-[#1058A8] shrink-0 mt-0.5" />
         <div>
           {ruleMessage}
@@ -159,8 +154,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       {/* Image Preview & Upload Controls */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-1">
         
-        {/* Preview Box */}
-        <div className={`sm:col-span-5 ${aspectRatio} rounded-md overflow-hidden bg-slate-900 border border-slate-300 relative group flex items-center justify-center shadow-inner max-h-[190px]`}>
+        {/* Preview Box - Plain border without dark background */}
+        <div className={`sm:col-span-5 ${aspectRatio} rounded-md overflow-hidden bg-slate-100 border border-slate-300 relative group flex items-center justify-center max-h-[190px]`}>
           {effectiveValue && !previewError ? (
             <img
               src={getAssetUrl(effectiveValue)}
@@ -173,18 +168,12 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
               onError={() => setPreviewError(true)}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center bg-slate-100 w-full h-full">
+            <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center bg-slate-50 w-full h-full">
               <ImageIcon className="w-6 h-6 mb-1 text-slate-300" />
               <span className="text-[10px] text-slate-500 font-medium">
-                {previewError ? 'Unable to load image' : 'No image selected'}
+                {previewError ? 'Unable to load image' : 'No photo'}
               </span>
             </div>
-          )}
-          
-          {value && isCustom && (
-            <span className="absolute bottom-1 right-1 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
-              Custom Image
-            </span>
           )}
         </div>
 

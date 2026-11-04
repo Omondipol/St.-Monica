@@ -742,8 +742,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     category: 'trainer' as 'trainer' | 'official',
     responsibility: '',
     responsibilitySw: '',
-    tenure: 'Serving since 2020',
-    tenureSw: 'Anahudumu tangu 2020',
+    tenure: 'Since 2019',
+    tenureSw: 'Tangu 2019',
     contact: '',
     photoUrl: ''
   });
@@ -757,8 +757,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       category: 'trainer',
       responsibility: '',
       responsibilitySw: '',
-      tenure: 'Serving since 2024',
-      tenureSw: 'Anahudumu tangu 2024',
+      tenure: '',
+      tenureSw: '',
       contact: '',
       photoUrl: ''
     });
@@ -774,8 +774,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       category: leader.category,
       responsibility: leader.responsibility,
       responsibilitySw: leader.responsibilitySw,
-      tenure: leader.tenure,
-      tenureSw: leader.tenureSw,
+      tenure: leader.tenure === 'Serving the Parish' ? '' : leader.tenure,
+      tenureSw: leader.tenureSw || '',
       contact: leader.contact || '',
       photoUrl: leader.photoUrl || ''
     });
@@ -801,10 +801,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
     if (editingLeaderId) {
       updateLeader(editingLeaderId, payload);
-      notify(`Official/Trainer "${payload.name}" updated!`);
+      notify(`Leader "${payload.name}" updated!`);
     } else {
       addLeader(payload);
-      notify(`New Official/Trainer "${payload.name}" recognized!`);
+      notify(`New leader "${payload.name}" added!`);
     }
     setIsLeaderModalOpen(false);
   };
@@ -1228,6 +1228,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             {[
               { id: 'songs', icon: Play, label: 'Songs', badge: songs.length },
               { id: 'library', icon: Music, label: 'Sheet music library', badge: librarySongs.length },
+              { id: 'sheet', icon: FileText, label: 'Sheet music scores', badge: sheetMusicList.length },
               { id: 'albums', icon: Disc, label: 'Albums', badge: albums.length },
             ].map(item => {
               const Icon = item.icon;
@@ -1598,57 +1599,62 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
           {/* TAB: SHEET MUSIC */}
           {activeTab === 'sheet' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
                 <div>
-                  <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
-                    Sheet Music & Noti za Nyimbo on Sale
+                  <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                    Sheet music scores
                   </h2>
-                  <p className="text-xs text-[#0C2340]/70 font-source mt-0.5">
-                    Vocal scores available for choirmasters to purchase via M-Pesa.
+                  <p className="text-xs text-slate-600 font-source mt-0.5">
+                    Vocal scores available for choirmasters to purchase or download.
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={openAddSheetModal}
-                  className="px-4 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+                  className="px-3.5 py-2 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Sheet Music Score</span>
+                  <span>Add sheet music score</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {sheetMusicList.map((item) => (
-                  <div key={item.id} className="p-5 bg-white border border-[#0C2340]/10 rounded-2xl shadow-xs space-y-3 flex flex-col justify-between">
+                  <div key={item.id} className="p-4 bg-white border border-[#0C2340]/15 rounded-lg space-y-2.5 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-[#EAF4FB] text-[#1058A8] font-bold text-[11px] px-2 py-0.5 rounded">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="bg-[#EAF4FB] text-[#1058A8] font-semibold text-[11px] px-2 py-0.5 rounded">
                           {item.notationType}
                         </span>
-                        <span className="text-base font-bold font-eb-garamond text-[#1058A8]">
+                        <span className="text-sm font-bold font-eb-garamond text-[#1058A8]">
                           KES {item.priceKes}
                         </span>
                       </div>
                       <h3 className="font-eb-garamond text-base font-bold text-[#0C2340] leading-snug">{item.title}</h3>
-                      <p className="text-xs text-[#0C2340]/75 line-clamp-2 mt-1">{item.description}</p>
+                      <p className="text-[11px] text-slate-500 font-source mt-0.5">Composer: {item.composer}</p>
+                      <p className="text-xs text-slate-600 font-source line-clamp-2 mt-1.5">{item.description}</p>
                     </div>
 
-                    <div className="pt-3 border-t border-[#0C2340]/10 flex items-center justify-end gap-2">
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5">
                       <button
+                        type="button"
                         onClick={() => openEditSheetModal(item)}
-                        className="px-3 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1"
+                        className="px-2.5 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                       >
-                        <Edit3 className="w-3 h-3 text-[#1058A8]" />
+                        <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
                         <span>Edit</span>
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
-                          if (window.confirm(`Delete sheet music "${item.title}"?`)) {
+                          if (window.confirm(`Delete sheet music score "${item.title}"?`)) {
                             deleteSheetMusic(item.id);
                             notify(`Score "${item.title}" removed.`);
                           }
                         }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                        title="Delete score"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1657,6 +1663,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 ))}
               </div>
             </div>
+          )}
+
+          {/* TAB: ALBUMS */}
+          {activeTab === 'albums' && (
+            <AdminAlbumsTab onNotify={notify} />
           )}
 
           {/* TAB: MAKTABA YA NOTI */}
@@ -2167,140 +2178,132 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
           </div>
         </div>
       )}
-      {/* MODAL: ADD / EDIT TRAINER OR OFFICIAL (WITH SUPABASE PHOTO UPLOADER) */}
+      {/* MODAL: ADD / EDIT LEADER */}
       {isLeaderModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
-              <div>
-                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                  {editingLeaderId ? 'Edit Trainer / Official Profile' : 'Add New Trainer / Official'}
-                </h3>
-                <p className="text-[11px] text-slate-500 font-source mt-0.5">
-                  Only trainers and officials can have individual portrait photos.
-                </p>
-              </div>
-              <button onClick={() => setIsLeaderModalOpen(false)} className="cursor-pointer">
-                <X className="w-5 h-5 text-[#0C2340]/60" />
+          <div className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
+              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                {editingLeaderId ? 'Edit leader' : 'Add leader'}
+              </h3>
+              <button 
+                type="button"
+                onClick={() => setIsLeaderModalOpen(false)} 
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveLeader} className="space-y-4 text-xs font-source">
+            <form onSubmit={handleSaveLeader} className="space-y-3.5 text-xs font-source flex-1">
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Full Name *</label>
+                <label className="block font-semibold text-slate-800 mb-1">Full name</label>
                 <input
                   type="text"
                   required
                   value={leaderForm.name}
                   onChange={e => setLeaderForm({ ...leaderForm, name: e.target.value })}
                   placeholder="e.g. Mwalimu Atebe Mark T."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Official Role (English) *</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Role</label>
                   <input
                     type="text"
                     required
                     value={leaderForm.role}
                     onChange={e => setLeaderForm({ ...leaderForm, role: e.target.value })}
                     placeholder="e.g. Music Director & Choirmaster"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Wadhifa Rasmi (Kiswahili)</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Wadhifa (optional)</label>
                   <input
                     type="text"
                     value={leaderForm.roleSw}
                     onChange={e => setLeaderForm({ ...leaderForm, roleSw: e.target.value })}
-                    placeholder="e.g. Mkurugenzi wa Muziki na Mwalimu Mkuu"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                    placeholder="e.g. Mkurugenzi wa Muziki"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Leadership Category *</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Group</label>
                   <select
                     value={leaderForm.category}
                     onChange={e => setLeaderForm({ ...leaderForm, category: e.target.value as any })}
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none bg-white"
                   >
-                    <option value="trainer">Music Trainer / Instructor</option>
-                    <option value="official">Executive Official / Committee</option>
+                    <option value="trainer">Music trainer / instructor</option>
+                    <option value="official">Executive committee</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Tenure / Years</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Years of service (optional)</label>
                   <input
                     type="text"
                     value={leaderForm.tenure}
                     onChange={e => setLeaderForm({ ...leaderForm, tenure: e.target.value })}
-                    placeholder="Serving the Parish"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                    placeholder="Since 2019"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Responsibility / Role Summary</label>
+                <label className="block font-semibold text-slate-800 mb-1">What they do (optional)</label>
                 <textarea
                   rows={2}
                   value={leaderForm.responsibility}
                   onChange={e => setLeaderForm({ ...leaderForm, responsibility: e.target.value })}
-                  placeholder="Conducts weekly liturgical rehearsals, oversees four-part vocal polyphony..."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  placeholder="Conducts weekly rehearsals, oversees liturgical singing..."
+                  className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Contact (Phone or Email)</label>
+                <label className="block font-semibold text-slate-800 mb-1">Phone or email (optional)</label>
                 <input
                   type="text"
                   value={leaderForm.contact}
                   onChange={e => setLeaderForm({ ...leaderForm, contact: e.target.value })}
-                  placeholder="0712 345 678"
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  placeholder="07XX XXX XXX"
+                  className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                 />
               </div>
 
-              {/* Photo Upload: Connects to Supabase Cloud */}
-              <div className="pt-2">
+              {/* Photo section */}
+              <div className="pt-1">
                 <ImageUploadField
-                  label="Portrait Photograph"
-                  labelSw="Picha ya Mwalimu au Afisa"
+                  label="Photo"
                   value={leaderForm.photoUrl}
                   onChange={val => setLeaderForm(prev => ({ ...prev, photoUrl: val }))}
                   defaultValue="/assets/choir/choirmaster_director.jpg"
-                  helpText="Upload a clear portrait from your phone or computer."
-                  aspectRatio="aspect-square"
+                  aspectRatio="aspect-[4/5]"
                 />
               </div>
 
-              {(leaderForm.role.toLowerCase().includes('choirmaster') || leaderForm.role.toLowerCase().includes('director')) && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-xs font-source">
-                  This photo and name also appear in "A Word from the Choirmaster" on the home page.
-                </div>
-              )}
-
-              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+              {/* Pinned Sticky Bottom Buttons */}
+              <div className="sticky bottom-0 bg-white pt-3 pb-1 border-t border-slate-200 flex items-center justify-end gap-2.5 shrink-0 z-10">
                 <button
                   type="button"
                   onClick={() => setIsLeaderModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-md border border-slate-300 cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C4685] rounded-md cursor-pointer shadow-2xs flex items-center gap-1.5 transition-colors"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>{editingLeaderId ? 'Update Leader Profile' : 'Save Trainer / Official'}</span>
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save changes</span>
                 </button>
               </div>
             </form>
@@ -2686,46 +2689,50 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       {/* MODAL: ADD / EDIT SHEET MUSIC SCORE */}
       {isSheetModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
+          <div className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                {editingSheetId ? 'Edit Sheet Music Score' : 'Add Sheet Music for Sale'}
+                {editingSheetId ? 'Edit sheet music score' : 'Add sheet music score'}
               </h3>
-              <button onClick={() => setIsSheetModalOpen(false)} className="cursor-pointer">
-                <X className="w-5 h-5 text-[#0C2340]/60" />
+              <button 
+                type="button"
+                onClick={() => setIsSheetModalOpen(false)} 
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveSheet} className="space-y-4 text-xs font-source">
+            <form onSubmit={handleSaveSheet} className="space-y-3.5 text-xs font-source flex-1">
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Score Title *</label>
+                <label className="block font-semibold text-slate-800 mb-1">Score title</label>
                 <input
                   type="text"
                   required
                   value={sheetForm.title}
                   onChange={e => setSheetForm({ ...sheetForm, title: e.target.value })}
                   placeholder="Machozi ya Imani SATB"
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Composer</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Composer (optional)</label>
                   <input
                     type="text"
                     value={sheetForm.composer}
                     onChange={e => setSheetForm({ ...sheetForm, composer: e.target.value })}
                     placeholder="Bernard Mukasa"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Notation Type</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Notation type</label>
                   <select
                     value={sheetForm.notationType}
                     onChange={e => setSheetForm({ ...sheetForm, notationType: e.target.value as any })}
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none bg-white"
                   >
                     <option value="Tonic Sol-fa & Staff">Tonic Sol-fa & Staff</option>
                     <option value="Tonic Sol-fa">Tonic Sol-fa Only</option>
@@ -2736,52 +2743,86 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Price in KES *</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Price in KES</label>
                   <input
                     type="number"
                     value={sheetForm.priceKes}
                     onChange={e => setSheetForm({ ...sheetForm, priceKes: Number(e.target.value) || 300 })}
                     placeholder="300"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none font-bold"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Voicing</label>
+                  <label className="block font-semibold text-slate-800 mb-1">Voicing (optional)</label>
                   <input
                     type="text"
                     value={sheetForm.voicing}
                     onChange={e => setSheetForm({ ...sheetForm, voicing: e.target.value })}
                     placeholder="SATB Choir & Organ"
-                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                    className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                   />
                 </div>
               </div>
 
+              {/* PDF Sheet Music File or Link */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-md space-y-2">
+                <label className="block font-semibold text-slate-800 flex items-center justify-between">
+                  <span>Score PDF (for buyer download)</span>
+                  <span className="text-[11px] text-slate-500 font-normal">PDF document</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          setSheetForm(prev => ({ ...prev, downloadUrl: reader.result as string }));
+                          notify(`Attached PDF score: ${file.name}`);
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="block w-full text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border file:border-slate-300 file:text-xs file:font-medium file:bg-white file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={sheetForm.downloadUrl}
+                  onChange={e => setSheetForm({ ...sheetForm, downloadUrl: e.target.value })}
+                  placeholder="Or enter PDF URL (e.g. https://... or /scores/...)"
+                  className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none bg-white text-xs"
+                />
+              </div>
+
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Description</label>
+                <label className="block font-semibold text-slate-800 mb-1">Description (optional)</label>
                 <textarea
                   rows={2}
                   value={sheetForm.description}
                   onChange={e => setSheetForm({ ...sheetForm, description: e.target.value })}
                   placeholder="Complete 4-part SATB vocal sheet music in PDF format..."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none"
                 />
               </div>
 
-              <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
+              <div className="sticky bottom-0 bg-white pt-3 pb-1 border-t border-slate-200 flex items-center justify-end gap-2.5 shrink-0 z-10">
                 <button
                   type="button"
                   onClick={() => setIsSheetModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#0C2340] hover:bg-slate-100 rounded-xl cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-md border border-slate-300 cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C4685] rounded-md cursor-pointer shadow-2xs flex items-center gap-1.5 transition-colors"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>{editingSheetId ? 'Update Score' : 'Save Score for Sale'}</span>
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{editingSheetId ? 'Save changes' : 'Add score'}</span>
                 </button>
               </div>
             </form>
