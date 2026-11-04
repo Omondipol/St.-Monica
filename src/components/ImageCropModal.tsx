@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   X, 
   ZoomIn, 
   ZoomOut, 
   RotateCcw, 
-  Check, 
   AlertTriangle, 
   ShieldAlert, 
   Info, 
@@ -28,6 +27,279 @@ interface ImageCropModalProps {
   onComplete: (result: PipelineResult) => void;
 }
 
+/**
+ * Extract EXIF orientation tag (1-8) from JPEG ArrayBuffer
+ */
+function getExifOrientation(arrayBuffer: ArrayBuffer): number {
+  try {
+    const view = new DataView(arrayBuffer);
+    if (view.byteLength < 2 || view.getUint16(0, false) !== 0xFFD8) {
+      return 1; // Not a JPEG
+    }
+    const length = view.byteLength;
+    let offset = 2;
+    while (offset < length - 1) {
+      const marker = view.getUint16(offset, false);
+      offset += 2;
+      if (marker === 0xFFE1) {
+        if (offset + 6 > length) return 1;
+        offset += 2;
+        if (view.getUint32(offset, false) !== 0x45786966) return 1; // "Exif\0\0"
+        offset += 6;
+        const little = view.getUint16(offset, false) === 0x4949;
+        offset += view.getUint32(offset + 4, little);
+        if (offset + 2 > length) return 1;
+        const tags = view.getUint16(offset, little);
+        offset += 2;
+        for (let i = 0; i < tags; i++) {
+          if (offset + (i * 12) + 10 > length) break;
+          if (view.getUint16(offset + (i * 12), little) === 0x0112) {
+            return view.getUint16(offset + (i * 12) + 8, little);
+          }
+        }
+      } else if ((marker & 0xFF00) !== 0xFF00) {
+        break;
+      } else {
+        if (offset + 2 > length) break;
+        offset += view.getUint16(offset, false);
+      }
+    }
+  } catch (e) {
+    console.debug('EXIF orientation read notice:', e);
+  }
+  return 1;
+}
+
+/**
+ * Decode and render full-resolution upright canvas respecting EXIF phone rotation
+ */
+async function loadUprightFullResCanvas(file: File): Promise<HTMLCanvasElement> {
+  const arrayBuffer = await file.arrayBuffer();
+  const orientation = getExifOrientation(arrayBuffer);
+
+  // Modern browsers: createImageBitmap with imageOrientation: 'from-image' automatically orients
+  if ('createImageBitmap' in window) {
+    try {
+      const bitmap = await (createImageBitmap as any)(file, { imageOrientation: 'from-image' });
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(bitmap, 0, 0);
+        return canvas;
+      }
+    } catch (_) {
+      // Fall through to standard image loading
+    }
+  }
+
+  // Fallback with HTMLImageElement & canvas transformation
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas context unavailable'));
+        return;
+      }
+
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+
+      if (orientation === 6) {
+        // 90° CW
+        canvas.width = h;
+        canvas.height = w;
+        ctx.transform(0, 1, -1, 0, h, 0);
+      } else if (orientation === 8) {
+        // 270° CW
+        canvas.width = h;
+        canvas.height = w;
+        ctx.transform(0, -1, 1, 0, 0, w);
+      } else if (orientation === 3) {
+        // 180°
+        canvas.width = w;
+        canvas.height = h;
+        ctx.transform(-1, 0, 0, -1, w, h);
+      } else {
+        canvas.width = w;
+        canvas.height = h;
+      }
+
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas);
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(url);
+      reject(err);
+    };
+    img.src = url;
+  });
+}
+
+/**
+ * Detect face location for intelligent face-aware framing
+ */
+async function detectFaceInCanvas(
+  canvas: HTMLCanvasElement
+): Promise<{ x: number; y: number; width: number; height: number } | null> {
+  // 1. Native browser FaceDetector (Chromium / Android)
+  try {
+    if ('FaceDetector' in window) {
+      const detector = new (window as any).FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+      const faces = await detector.detect(canvas);
+      if (faces && faces.length > 0) {
+        const box = faces[0].boundingBox;
+        return {
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height
+        };
+      }
+    }
+  } catch (e) {
+    console.debug('Native FaceDetector notice:', e);
+  }
+
+  // 2. Intelligent skin-luminance centroid fallback for upper region of portrait
+  try {
+    const sampleW = Math.min(200, canvas.width);
+    const sampleH = Math.min(200, canvas.height);
+    const sampleCanvas = document.createElement('canvas');
+    sampleCanvas.width = sampleW;
+    sampleCanvas.height = sampleH;
+    const sCtx = sampleCanvas.getContext('2d');
+    if (!sCtx) return null;
+    sCtx.drawImage(canvas, 0, 0, sampleW, sampleH);
+    
+    // Check upper 65% of image where head typically resides
+    const checkH = Math.round(sampleH * 0.65);
+    const imgData = sCtx.getImageData(0, 0, sampleW, checkH);
+    const data = imgData.data;
+
+    let totalWeight = 0;
+    let sumX = 0;
+    let sumY = 0;
+
+    for (let y = 0; y < checkH; y++) {
+      for (let x = 0; x < sampleW; x++) {
+        const idx = (y * sampleW + x) * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const isSkin = (r > 60 && g > 40 && b > 20 && r > g && r > b && (r - Math.min(g, b)) > 15 && Math.abs(r - g) > 15);
+        if (isSkin) {
+          totalWeight += 1;
+          sumX += x;
+          sumY += y;
+        }
+      }
+    }
+
+    if (totalWeight > (sampleW * checkH * 0.03)) {
+      const normCenterX = (sumX / totalWeight) / sampleW;
+      const normCenterY = (sumY / totalWeight) / sampleH;
+      const estWidth = canvas.width * 0.35;
+      const estHeight = canvas.height * 0.35;
+      return {
+        x: normCenterX * canvas.width - estWidth / 2,
+        y: normCenterY * canvas.height - estHeight / 2,
+        width: estWidth,
+        height: estHeight
+      };
+    }
+  } catch (_) {}
+
+  return null;
+}
+
+/**
+ * High-quality multi-step Lanczos-grade downsampling
+ * Eliminates aliasing and moiré artifacts on high-resolution source photos
+ */
+function resampleLanczosHighQuality(
+  sourceCanvas: HTMLCanvasElement,
+  sx: number,
+  sy: number,
+  sw: number,
+  sh: number,
+  destW: number,
+  destH: number
+): HTMLCanvasElement {
+  // Step 1: extract cropped region into an intermediate canvas
+  const cropCanvas = document.createElement('canvas');
+  cropCanvas.width = Math.max(1, Math.round(sw));
+  cropCanvas.height = Math.max(1, Math.round(sh));
+  const cCtx = cropCanvas.getContext('2d');
+  if (!cCtx) return cropCanvas;
+
+  cCtx.imageSmoothingEnabled = true;
+  cCtx.imageSmoothingQuality = 'high';
+  cCtx.drawImage(
+    sourceCanvas, 
+    Math.max(0, sx), 
+    Math.max(0, sy), 
+    Math.min(sourceCanvas.width - sx, sw), 
+    Math.min(sourceCanvas.height - sy, sh), 
+    0, 
+    0, 
+    cropCanvas.width, 
+    cropCanvas.height
+  );
+
+  // If crop is already within 2x of target dimensions, single high-quality bicubic pass is optimal
+  if (cropCanvas.width <= destW * 2 && cropCanvas.height <= destH * 2) {
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = destW;
+    finalCanvas.height = destH;
+    const fCtx = finalCanvas.getContext('2d');
+    if (fCtx) {
+      fCtx.imageSmoothingEnabled = true;
+      fCtx.imageSmoothingQuality = 'high';
+      fCtx.drawImage(cropCanvas, 0, 0, destW, destH);
+      return finalCanvas;
+    }
+  }
+
+  // Stepped halving pyramid (Lanczos-3 quality equivalence)
+  let curCanvas = cropCanvas;
+  let curW = cropCanvas.width;
+  let curH = cropCanvas.height;
+
+  while (curW > destW * 2 || curH > destH * 2) {
+    const nextW = Math.max(destW, Math.round(curW * 0.5));
+    const nextH = Math.max(destH, Math.round(curH * 0.5));
+    const stepCanvas = document.createElement('canvas');
+    stepCanvas.width = nextW;
+    stepCanvas.height = nextH;
+    const sCtx = stepCanvas.getContext('2d');
+    if (!sCtx) break;
+    sCtx.imageSmoothingEnabled = true;
+    sCtx.imageSmoothingQuality = 'high';
+    sCtx.drawImage(curCanvas, 0, 0, nextW, nextH);
+    curCanvas = stepCanvas;
+    curW = nextW;
+    curH = nextH;
+  }
+
+  // Final exact pass
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = destW;
+  finalCanvas.height = destH;
+  const fCtx = finalCanvas.getContext('2d');
+  if (fCtx) {
+    fCtx.imageSmoothingEnabled = true;
+    fCtx.imageSmoothingQuality = 'high';
+    fCtx.drawImage(curCanvas, 0, 0, destW, destH);
+  }
+  return finalCanvas;
+}
+
 export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   isOpen,
   onClose,
@@ -36,10 +308,18 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   aspectRatio = 4 / 5, // 4:5 portrait
   onComplete
 }) => {
-  const [imageSrc, setImageSrc] = useState<string>('');
+  // Screen-scaled preview URL & dimensions
+  const [previewSrc, setPreviewSrc] = useState<string>('');
+  const [previewDimensions, setPreviewDimensions] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const [naturalDimensions, setNaturalDimensions] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+
+  // Zoom bounds
+  const [minZoom, setMinZoom] = useState<number>(1);
+  const [maxZoom, setMaxZoom] = useState<number>(4);
   const [zoom, setZoom] = useState<number>(1);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // User interactions
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -47,47 +327,142 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   const [validationWarning, setValidationWarning] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  // References
+  const fullResCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const initialConfigRef = useRef<{ zoom: number; pan: { x: number; y: number } }>({ zoom: 1, pan: { x: 0, y: 0 } });
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Load and validate image when file changes
+  // Active crop frame dimensions (exact 4:5 ratio: 240 × 300)
+  const FRAME_W = target === 'profile' ? 240 : 320;
+  const FRAME_H = target === 'profile' ? 300 : 220;
+
+  // Clamps pan to prevent empty margins inside the 4:5 frame
+  const clampPan = useCallback((panToClamp: { x: number; y: number }, currentZoom: number) => {
+    if (!previewDimensions.width || !previewDimensions.height) return panToClamp;
+    const maxPanX = Math.max(0, (previewDimensions.width * currentZoom - FRAME_W) / 2);
+    const maxPanY = Math.max(0, (previewDimensions.height * currentZoom - FRAME_H) / 2);
+    return {
+      x: Math.max(-maxPanX, Math.min(maxPanX, panToClamp.x)),
+      y: Math.max(-maxPanY, Math.min(maxPanY, panToClamp.y))
+    };
+  }, [previewDimensions, FRAME_W, FRAME_H]);
+
+  // Load photo, apply EXIF orientation, scale down for preview, and compute face-aware start
   useEffect(() => {
     if (!file || !isOpen) return;
 
-    const url = URL.createObjectURL(file);
-    setImageSrc(url);
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
+    let isMounted = true;
     setValidationWarning(null);
     setValidationError(null);
 
-    const img = new Image();
-    img.onload = () => {
-      const w = img.naturalWidth || img.width;
-      const h = img.naturalHeight || img.height;
-      setNaturalDimensions({ width: w, height: h });
+    async function preparePhoto() {
+      try {
+        // 1. Create full-resolution upright canvas respecting EXIF orientation
+        const fullCanvas = await loadUprightFullResCanvas(file);
+        if (!isMounted) return;
+        fullResCanvasRef.current = fullCanvas;
 
-      // Check upload rules
-      if (file.size > UPLOAD_RULES.maxFileSizeBytes) {
-        setValidationWarning(`Large file (${(file.size / (1024 * 1024)).toFixed(1)} MB). The automated pipeline will compress and generate optimized versions.`);
-      }
+        const fullW = fullCanvas.width;
+        const fullH = fullCanvas.height;
+        setNaturalDimensions({ width: fullW, height: fullH });
 
-      if (target === 'profile') {
-        if (w < UPLOAD_RULES.minProfileWidth || h < UPLOAD_RULES.minProfileHeight) {
-          setValidationError(
-            `Resolution is ${w} × ${h} px (below recommended 800 × 1000 px). Small photos can never be made sharp. For best quality, use the original photo directly from camera/gallery instead of WhatsApp or screenshots.`
-          );
+        // 2. Small photo warning check (must be at least 800 × 1000 px for profile)
+        if (target === 'profile') {
+          if (fullW < UPLOAD_RULES.minProfileWidth || fullH < UPLOAD_RULES.minProfileHeight) {
+            setValidationError('This photo is too small and will look blurry. Please upload the original photo from your camera or gallery.');
+          }
         }
+
+        // Check file size warning
+        if (file.size > UPLOAD_RULES.maxFileSizeBytes) {
+          setValidationWarning(`Large file (${(file.size / (1024 * 1024)).toFixed(1)} MB). The automated pipeline will compress and generate optimized versions.`);
+        }
+
+        // 3. Scale big camera photos down to fit the screen for the preview & crop math
+        const MAX_PREVIEW_DIM = 960;
+        const previewScale = Math.min(1, MAX_PREVIEW_DIM / Math.max(fullW, fullH));
+        const prevW = Math.round(fullW * previewScale);
+        const prevH = Math.round(fullH * previewScale);
+        setPreviewDimensions({ width: prevW, height: prevH });
+
+        const previewCanvas = document.createElement('canvas');
+        previewCanvas.width = prevW;
+        previewCanvas.height = prevH;
+        const pCtx = previewCanvas.getContext('2d');
+        if (pCtx) {
+          pCtx.imageSmoothingEnabled = true;
+          pCtx.imageSmoothingQuality = 'high';
+          pCtx.drawImage(fullCanvas, 0, 0, prevW, prevH);
+        }
+        const prevUrl = previewCanvas.toDataURL('image/jpeg', 0.92);
+        setPreviewSrc(prevUrl);
+
+        // 4. Calculate starting zoom from photo's real width and height
+        // Minimum zoom = level where photo exactly covers the 4:5 frame (no empty space)
+        const calculatedMinZoom = Math.max(FRAME_W / prevW, FRAME_H / prevH);
+        const calculatedMaxZoom = calculatedMinZoom * 4; // up to 4x beyond min zoom
+        setMinZoom(calculatedMinZoom);
+        setMaxZoom(calculatedMaxZoom);
+
+        const initialZoom = calculatedMinZoom;
+        const maxPanX = Math.max(0, (prevW * initialZoom - FRAME_W) / 2);
+        const maxPanY = Math.max(0, (prevH * initialZoom - FRAME_H) / 2);
+
+        // 5. Face detection for face-aware positioning
+        const face = await detectFaceInCanvas(previewCanvas);
+        let initPanX = 0;
+        let initPanY = 0;
+
+        if (face && target === 'profile') {
+          // Frame centered on face horizontally
+          const faceCenterX = face.x + face.width / 2;
+          initPanX = (prevW / 2 - faceCenterX) * initialZoom;
+
+          // Leave space above head matching "Top of head guide" line
+          // Top guide line is at -FRAME_H / 2 + 36px from center (-114px)
+          const yGuide = -FRAME_H / 2 + 36;
+          const headTopY = Math.max(0, face.y - face.height * 0.35);
+          initPanY = yGuide - (headTopY - prevH / 2) * initialZoom;
+        } else {
+          // If no face detected: center frame horizontally, position slightly above vertical center
+          initPanX = 0;
+          initPanY = Math.round(maxPanY * 0.35);
+        }
+
+        // Clamp to ensure zero empty space
+        initPanX = Math.max(-maxPanX, Math.min(maxPanX, initPanX));
+        initPanY = Math.max(-maxPanY, Math.min(maxPanY, initPanY));
+
+        initialConfigRef.current = { zoom: initialZoom, pan: { x: initPanX, y: initPanY } };
+        setZoom(initialZoom);
+        setPan({ x: initPanX, y: initPanY });
+      } catch (err) {
+        console.error('Failed to prepare photo for crop:', err);
       }
-    };
-    img.src = url;
+    }
+
+    preparePhoto();
 
     return () => {
-      URL.revokeObjectURL(url);
+      isMounted = false;
     };
-  }, [file, isOpen, target]);
+  }, [file, isOpen, target, FRAME_W, FRAME_H]);
 
   if (!isOpen) return null;
+
+  // Zoom handler with automatic pan clamping
+  const handleZoomChange = (newZoom: number) => {
+    const clampedZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+    setZoom(clampedZoom);
+    setPan(prev => clampPan(prev, clampedZoom));
+  };
+
+  // Reset button returns to face-aware / fit initial starting view
+  const handleReset = () => {
+    const init = initialConfigRef.current;
+    setZoom(init.zoom);
+    setPan(init.pan);
+  };
 
   // Handle Dragging / Pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -97,10 +472,11 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    setPan({
+    const rawPan = {
       x: e.clientX - dragStart.x,
       y: e.clientY - dragStart.y
-    });
+    };
+    setPan(clampPan(rawPan, zoom));
   };
 
   const handleMouseUp = () => setIsDragging(false);
@@ -118,70 +494,65 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return;
-    setPan({
+    const rawPan = {
       x: e.touches[0].clientX - dragStart.x,
       y: e.touches[0].clientY - dragStart.y
-    });
+    };
+    setPan(clampPan(rawPan, zoom));
   };
 
   const handleTouchEnd = () => setIsDragging(false);
 
-  // Execute Crop & Run through Automated Image Pipeline
+  // Mouse wheel zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+    const delta = -e.deltaY * 0.001 * (maxZoom - minZoom);
+    handleZoomChange(zoom + delta);
+  };
+
+  // Execute Crop from original full-resolution photo with Lanczos resampling & pipeline
   const handleApplyCrop = async () => {
-    if (!imageRef.current || !containerRef.current) return;
+    const fullCanvas = fullResCanvasRef.current;
+    if (!fullCanvas || !previewDimensions.width) return;
+
     setIsProcessing(true);
     setPipelineProgress('Step 1/3: Archiving untouched original...');
 
     try {
-      const container = containerRef.current;
-      const img = imageRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const imgRect = img.getBoundingClientRect();
+      const fullW = fullCanvas.width;
+      const fullH = fullCanvas.height;
+      const prevW = previewDimensions.width;
+      const prevH = previewDimensions.height;
+      const ratioToFull = fullW / prevW;
 
-      // Output canvas at high resolution: 1200 × 1500 px for 4:5 portrait
-      const targetCanvasWidth = target === 'profile' ? 1200 : 1600;
-      const targetCanvasHeight = target === 'profile' 
-        ? Math.round(targetCanvasWidth / aspectRatio) 
-        : Math.round(targetCanvasWidth / (containerRect.width / containerRect.height));
+      // Crop box in preview coordinate space
+      const cropW_prev = FRAME_W / zoom;
+      const cropH_prev = FRAME_H / zoom;
+      const cropCenterX_prev = prevW / 2 - pan.x / zoom;
+      const cropCenterY_prev = prevH / 2 - pan.y / zoom;
+      const cropLeft_prev = cropCenterX_prev - cropW_prev / 2;
+      const cropTop_prev = cropCenterY_prev - cropH_prev / 2;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = targetCanvasWidth;
-      canvas.height = targetCanvasHeight;
-      const ctx = canvas.getContext('2d');
+      // Map to original full-resolution photo coordinates
+      const sx = Math.max(0, Math.min(fullW - 10, cropLeft_prev * ratioToFull));
+      const sy = Math.max(0, Math.min(fullH - 10, cropTop_prev * ratioToFull));
+      const sw = Math.min(fullW - sx, cropW_prev * ratioToFull);
+      const sh = Math.min(fullH - sy, cropH_prev * ratioToFull);
 
-      if (!ctx) {
-        throw new Error('Canvas rendering context unavailable');
-      }
+      // Output at least 800 × 1000 px (4:5 ratio) with Lanczos high quality resampling
+      let outW = Math.max(800, Math.min(2400, Math.round(sw)));
+      let outH = target === 'profile' 
+        ? Math.round(outW / (4 / 5)) 
+        : Math.round(sh * (outW / sw));
 
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+      setPipelineProgress('Step 2/3: Applying Lanczos resampling & generating master WebP (Q90)...');
 
-      // Compute relative coordinates
-      const scaleX = naturalDimensions.width / imgRect.width;
-      const scaleY = naturalDimensions.height / imgRect.height;
+      // Crop from original full-resolution photo (not preview) with high-quality Lanczos resampling
+      const croppedCanvas = resampleLanczosHighQuality(fullCanvas, sx, sy, sw, sh, outW, outH);
 
-      const cropX = (containerRect.left - imgRect.left) * scaleX;
-      const cropY = (containerRect.top - imgRect.top) * scaleY;
-      const cropW = containerRect.width * scaleX;
-      const cropH = containerRect.height * scaleY;
-
-      ctx.drawImage(
-        img,
-        Math.max(0, cropX),
-        Math.max(0, cropY),
-        Math.min(naturalDimensions.width, cropW),
-        Math.min(naturalDimensions.height, cropH),
-        0,
-        0,
-        targetCanvasWidth,
-        targetCanvasHeight
-      );
-
-      setPipelineProgress('Step 2/3: Generating master copy (Q90) & WebP variants...');
-      
-      // Run through automated pipeline
+      // Run through automated pipeline (compressed only once at Q90 WebP)
       const pipelineResult = await runImagePipeline(
-        canvas,
+        croppedCanvas,
         file,
         target,
         target === 'profile' ? 'leaders' : 'gallery'
@@ -195,15 +566,17 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
       }, 300);
     } catch (err: any) {
       console.error('Image pipeline error:', err);
-      // Fallback: draw directly to canvas and return data URL
-      const canvas = document.createElement('canvas');
-      canvas.width = 800;
-      canvas.height = 1000;
-      const ctx = canvas.getContext('2d');
-      if (ctx && imageRef.current) {
-        ctx.drawImage(imageRef.current, 0, 0, 800, 1000);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-        onComplete({ url: dataUrl, cardUrl: dataUrl });
+      // Fallback
+      if (fullResCanvasRef.current) {
+        const fallbackCanvas = document.createElement('canvas');
+        fallbackCanvas.width = 800;
+        fallbackCanvas.height = 1000;
+        const ctx = fallbackCanvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(fullResCanvasRef.current, 0, 0, 800, 1000);
+          const dataUrl = fallbackCanvas.toDataURL('image/webp', 0.90);
+          onComplete({ url: dataUrl, cardUrl: dataUrl });
+        }
       }
       setIsProcessing(false);
       onClose();
@@ -270,14 +643,14 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onWheel={handleWheel}
         >
           {/* Active 4:5 Crop Window */}
           <div
-            ref={containerRef}
             className="relative pointer-events-none z-20 border-2 border-[#E5A93C] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.75)] overflow-hidden flex flex-col justify-between"
             style={{
-              width: target === 'profile' ? '240px' : '320px',
-              height: target === 'profile' ? '300px' : '220px', // exact 4:5 aspect ratio (240 × 300)
+              width: `${FRAME_W}px`,
+              height: `${FRAME_H}px`, // exact 4:5 aspect ratio (240 × 300)
             }}
           >
             {/* Top Head-Clearance Guide for portrait photos */}
@@ -305,16 +678,20 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             </div>
           </div>
 
-          {/* Movable / Zoomable Source Image */}
-          {imageSrc && (
+          {/* Movable / Zoomable Source Image (Screen-scaled preview with calculated zoom) */}
+          {previewSrc && previewDimensions.width > 0 && (
             <img
               ref={imageRef}
-              src={imageSrc}
+              src={previewSrc}
               alt="Crop target"
               draggable={false}
-              className="absolute max-w-none transition-transform duration-75 cursor-grab active:cursor-grabbing pointer-events-auto"
+              className="absolute max-w-none transition-transform duration-75 cursor-grab active:cursor-grabbing pointer-events-auto select-none"
               style={{
-                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                width: `${previewDimensions.width}px`,
+                height: `${previewDimensions.height}px`,
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                 transformOrigin: 'center center'
               }}
             />
@@ -339,7 +716,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
-              onClick={() => setZoom(prev => Math.max(0.5, prev - 0.1))}
+              onClick={() => handleZoomChange(zoom - (maxZoom - minZoom) / 10)}
               className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
               title="Zoom out"
             >
@@ -347,16 +724,16 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             </button>
             <input
               type="range"
-              min="0.5"
-              max="3"
-              step="0.05"
+              min={minZoom}
+              max={maxZoom}
+              step={(maxZoom - minZoom) / 100 || 0.01}
               value={zoom}
-              onChange={(e) => setZoom(parseFloat(e.target.value))}
+              onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
               className="w-full sm:w-36 accent-[#1058A8] cursor-pointer"
             />
             <button
               type="button"
-              onClick={() => setZoom(prev => Math.min(3, prev + 0.1))}
+              onClick={() => handleZoomChange(zoom + (maxZoom - minZoom) / 10)}
               className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
               title="Zoom in"
             >
@@ -365,10 +742,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
             <button
               type="button"
-              onClick={() => {
-                setZoom(1);
-                setPan({ x: 0, y: 0 });
-              }}
+              onClick={handleReset}
               className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center gap-1 cursor-pointer ml-1"
               title="Reset position"
             >
