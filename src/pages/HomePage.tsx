@@ -1185,7 +1185,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     src={getAssetUrl(choirmasterDisplayPhoto)}
                     alt={choirmasterDisplayName}
                     loading="lazy"
-                    className="w-36 h-44 sm:w-44 sm:h-52 rounded-2xl object-cover object-[center_12%] border-2 border-[#1058A8] shadow-md group-hover:scale-[1.02] transition-transform duration-200 bg-slate-100"
+                    className="w-[144px] h-[180px] sm:w-[176px] sm:h-[220px] aspect-[4/5] rounded-2xl object-cover object-[center_20%] border-2 border-[#1058A8] shadow-md group-hover:scale-[1.02] transition-transform duration-200 bg-slate-100"
                   />
                   <div className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">

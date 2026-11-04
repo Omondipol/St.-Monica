@@ -108,13 +108,14 @@ declare global {
 export default supabase;
 
 /**
- * Automatically resize & optimize high-resolution images on the client
- * to a sensible maximum dimension (~2000px) with 85% JPEG quality before upload.
+ * Automatically resize & optimize images on the client according to pipeline rules:
+ * - Master copy at maximum 2400 px on longest side, quality 90.
+ * - WebP output with seamless JPEG fallback.
  */
 export async function optimizeImageForUpload(
   file: File | Blob, 
-  maxWidth = 2000, 
-  quality = 0.85
+  maxWidth = 2400, 
+  quality = 0.90
 ): Promise<{ blob: Blob; contentType: string }> {
   if (file.type && (file.type.includes('svg') || file.type.includes('gif'))) {
     return { blob: file, contentType: file.type || 'image/svg+xml' };
@@ -131,11 +132,8 @@ export async function optimizeImageForUpload(
       img.onload = () => {
         URL.revokeObjectURL(url);
         let { width, height } = img;
-        if (width <= maxWidth && height <= maxWidth && file.size < 1.5 * 1024 * 1024) {
-          resolve({ blob: file, contentType: file.type || 'image/jpeg' });
-          return;
-        }
 
+        // Longest side max calculation
         if (width > height) {
           if (width > maxWidth) {
             height = Math.round((height * maxWidth) / width);
@@ -149,8 +147,8 @@ export async function optimizeImageForUpload(
         }
 
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = Math.round(width);
+        canvas.height = Math.round(height);
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           resolve({ blob: file, contentType: file.type || 'image/jpeg' });
@@ -161,11 +159,22 @@ export async function optimizeImageForUpload(
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
+        // Convert to WebP Q90, falling back to JPEG Q90
         canvas.toBlob(
           (blob) => {
-            resolve({ blob: blob || file, contentType: 'image/jpeg' });
+            if (blob && blob.type === 'image/webp') {
+              resolve({ blob, contentType: 'image/webp' });
+            } else {
+              canvas.toBlob(
+                (jpgBlob) => {
+                  resolve({ blob: jpgBlob || file, contentType: 'image/jpeg' });
+                },
+                'image/jpeg',
+                quality
+              );
+            }
           },
-          'image/jpeg',
+          'image/webp',
           quality
         );
       };
@@ -181,30 +190,52 @@ export async function optimizeImageForUpload(
 }
 
 /**
- * Upload an image or file to Supabase Cloud Storage
- * Automatically optimizes large phone photos to max 2000px before uploading.
- * Tries 'photos' bucket first, then 'app-images' bucket
+ * Upload an image to Supabase Cloud Storage through the Automated Pipeline:
+ * 1. Archives untouched original in 'originals/' bucket folder for safe future reprocessing
+ * 2. Uploads optimized master copy (max 2400px, Q90) to 'uploads/' or target folder
  */
 export async function uploadImageToSupabase(
   file: File | Blob,
   folder = 'uploads',
   customFileName?: string
-): Promise<{ url: string; error?: string }> {
+): Promise<{ url: string; originalUrl?: string; error?: string }> {
   try {
-    const optimized = await optimizeImageForUpload(file);
+    const timestamp = Date.now();
+    const hash = Math.random().toString(36).substring(2, 8);
+    
+    // 1. Archive untouched original if it is a File object
+    let originalUrl: string | undefined;
+    if (file instanceof File) {
+      try {
+        const origExt = file.name.includes('.') ? file.name.split('.').pop() : 'jpg';
+        const origPath = `originals/${timestamp}_${hash}_raw.${origExt}`;
+        const { error: origErr } = await supabase.storage
+          .from('photos')
+          .upload(origPath, file, {
+            contentType: file.type || 'image/jpeg',
+            cacheControl: '31536000',
+            upsert: true
+          });
+        if (!origErr) {
+          const { data } = supabase.storage.from('photos').getPublicUrl(origPath);
+          originalUrl = data?.publicUrl;
+        }
+      } catch (origArchiveErr) {
+        console.warn('Original archival note:', origArchiveErr);
+      }
+    }
+
+    // 2. Process through pipeline: Max 2400px longest side, Q90 WebP
+    const optimized = await optimizeImageForUpload(file, 2400, 0.90);
     const fileToUpload = optimized.blob;
     const contentType = optimized.contentType;
 
-    const ext = file instanceof File && file.name.includes('.')
-      ? file.name.split('.').pop()
-      : (contentType ? contentType.split('/')[1] : 'jpg') || 'jpg';
-
+    const ext = contentType === 'image/webp' ? 'webp' : 'jpg';
     const safeName = customFileName
       ? customFileName.replace(/[^a-zA-Z0-9._-]/g, '')
-      : `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+      : `${timestamp}_${hash}_master.${ext}`;
 
     const filePath = `${folder}/${safeName}`;
-
     const bucketsToTry = ['photos', 'app-images'];
     let lastError: any = null;
 
@@ -214,14 +245,14 @@ export async function uploadImageToSupabase(
           .from(bucket)
           .upload(filePath, fileToUpload, {
             contentType,
-            cacheControl: '3600',
+            cacheControl: '31536000',
             upsert: true
           });
 
         if (!uploadErr) {
           const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
           if (data?.publicUrl) {
-            return { url: data.publicUrl };
+            return { url: data.publicUrl, originalUrl };
           }
         } else {
           lastError = uploadErr;

@@ -1,7 +1,18 @@
 import React, { useRef, useState } from 'react';
-import { Upload, Link as LinkIcon, RotateCcw, Image as ImageIcon, Check, Loader2, CloudCheck } from 'lucide-react';
+import { 
+  Upload, 
+  Link as LinkIcon, 
+  RotateCcw, 
+  Image as ImageIcon, 
+  Check, 
+  Loader2, 
+  Crop,
+  Info,
+  Sparkles
+} from 'lucide-react';
 import { getAssetUrl } from '../utils/assetHelper';
-import { supabase, uploadImageToSupabase } from '../lib/supabase';
+import { ImageCropModal } from './ImageCropModal';
+import { PipelineTarget, PipelineResult } from '../utils/imagePipeline';
 
 export interface PresetImageOption {
   label: string;
@@ -18,7 +29,8 @@ interface ImageUploadFieldProps {
   helpText?: string;
   presets?: PresetImageOption[];
   presetOptions?: PresetImageOption[];
-  aspectRatio?: string; // e.g. "aspect-video", "aspect-square", "aspect-[4/3]"
+  aspectRatio?: string; // e.g. "aspect-[4/5]", "aspect-video", "aspect-square"
+  pipelineTarget?: PipelineTarget; // 'profile' | 'gallery' | 'banner' | 'logo'
   className?: string;
 }
 
@@ -31,7 +43,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   helpText,
   presets,
   presetOptions,
-  aspectRatio = 'aspect-video',
+  aspectRatio = 'aspect-[4/5]',
+  pipelineTarget = 'profile',
   className = ''
 }) => {
   const activePresets = presets || presetOptions;
@@ -40,8 +53,11 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const [urlInput, setUrlInput] = useState<string>(value);
   const [previewError, setPreviewError] = useState<boolean>(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
+
+  // Crop Modal state
+  const [selectedFileForCrop, setSelectedFileForCrop] = useState<File | null>(null);
+  const [isCropOpen, setIsCropOpen] = useState<boolean>(false);
 
   const effectiveValue = value || defaultValue || '';
 
@@ -50,52 +66,25 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     setPreviewError(false);
   }, [value, defaultValue]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file (JPG, PNG, WebP, or SVG).');
-      return;
-    }
+    // Reset input so re-selecting same file triggers change
+    e.target.value = '';
 
     setUploadedFileName(file.name);
-    setIsUploading(true);
-    setUploadStatus('Uploading to Supabase Cloud...');
+    // Open interactive 4:5 Crop Modal with head clearance guide & pipeline execution
+    setSelectedFileForCrop(file);
+    setIsCropOpen(true);
+  };
 
-    try {
-      const { url, error } = await uploadImageToSupabase(file, 'photos');
-      if (url) {
-        onChange(url);
-        setUrlInput(url);
-        setPreviewError(false);
-        setUploadStatus('Uploaded to Supabase');
-      } else {
-        // Fallback to DataURL so user never loses image
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            onChange(reader.result);
-            setUrlInput(reader.result);
-            setPreviewError(false);
-            setUploadStatus('Loaded');
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    } catch (_) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          onChange(reader.result);
-          setUrlInput(reader.result);
-          setPreviewError(false);
-          setUploadStatus('Loaded');
-        }
-      };
-      reader.readAsDataURL(file);
-    } finally {
-      setIsUploading(false);
+  const handleCropComplete = (result: PipelineResult) => {
+    if (result.url) {
+      onChange(result.url);
+      setUrlInput(result.url);
+      setPreviewError(false);
+      setUploadStatus('Optimized via Pipeline');
     }
   };
 
@@ -149,16 +138,29 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
         </p>
       )}
 
+      {/* Rules Banner (Min 800×1000px, 10MB, original photo advice) */}
+      <div className="bg-sky-50 border border-sky-200/80 rounded-lg p-2 text-[10px] text-sky-950 font-source leading-tight flex items-start gap-1.5">
+        <Info className="w-3.5 h-3.5 text-[#1058A8] shrink-0 mt-0.5" />
+        <div>
+          <span className="font-bold text-[#0C2340]">Automatic Pipeline Rules:</span>{' '}
+          Min 800 × 1000 px for crisp portrait cards. Use original camera/gallery photo (avoid WhatsApp/screenshots which are compressed). Automatic 4:5 crop with head space.
+        </div>
+      </div>
+
       {/* Image Preview & Upload Controls */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-1">
         
-        {/* Preview Box */}
-        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-slate-900 border border-slate-300 relative group flex items-center justify-center shadow-inner`}>
+        {/* Preview Box - Natural proportions filling frame with focus slightly above center so heads are never cut off */}
+        <div className={`sm:col-span-5 ${aspectRatio} rounded-lg overflow-hidden bg-slate-900 border border-slate-300 relative group flex items-center justify-center shadow-inner max-h-[190px]`}>
           {effectiveValue && !previewError ? (
             <img
               src={getAssetUrl(effectiveValue)}
               alt={label}
-              className={`w-full h-full ${aspectRatio === 'aspect-square' ? 'object-contain p-2' : 'object-cover object-[center_15%]'}`}
+              className={`w-full h-full ${
+                aspectRatio === 'aspect-square' 
+                  ? 'object-contain p-2' 
+                  : 'object-cover object-[center_20%]'
+              }`}
               onError={() => setPreviewError(true)}
             />
           ) : (
@@ -182,7 +184,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
             className="hidden"
             onChange={handleFileChange}
           />
@@ -190,21 +192,11 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
-              disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60"
+              className="px-3 py-1.5 bg-[#1058A8] hover:bg-[#0C4685] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Uploading to Supabase...</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Upload Photo</span>
-                </>
-              )}
+              <Upload className="w-3.5 h-3.5" />
+              <span>Upload Photo (Crop & Pipe)</span>
             </button>
 
             <button
@@ -213,7 +205,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
               className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               <LinkIcon className="w-3.5 h-3.5 text-slate-500" />
-              <span>{isUrlMode ? 'Hide URL' : 'Use Web URL'}</span>
+              <span>{isUrlMode ? 'Hide URL' : 'Web URL'}</span>
             </button>
           </div>
 
@@ -222,7 +214,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
               <Check className="w-3.5 h-3.5" />
               <span className="truncate max-w-[200px]">{uploadedFileName}</span>
               {uploadStatus && (
-                <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.2 rounded font-semibold ml-1">
+                <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.2 rounded font-semibold ml-1 flex items-center gap-0.5">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-500 inline" />
                   {uploadStatus}
                 </span>
               )}
@@ -283,6 +276,20 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
         </div>
 
       </div>
+
+      {/* Interactive 4:5 Crop Modal */}
+      {selectedFileForCrop && isCropOpen && (
+        <ImageCropModal
+          isOpen={isCropOpen}
+          onClose={() => {
+            setIsCropOpen(false);
+            setSelectedFileForCrop(null);
+          }}
+          file={selectedFileForCrop}
+          target={pipelineTarget}
+          onComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 };

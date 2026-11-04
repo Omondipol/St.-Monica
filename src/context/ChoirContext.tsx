@@ -1049,6 +1049,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         rehearsalSchedule: updated.rehearsalsEn || prev.rehearsalSchedule,
         rehearsalScheduleSw: updated.rehearsalsSw || prev.rehearsalScheduleSw,
       }));
+      setSiteNotice(prev => ({
+        ...prev,
+        textEn: updated.rehearsalsEn ? `Welcome to St. Monica Third Mass Choir official website. Choir rehearsals: ${updated.rehearsalsEn}.` : prev.textEn,
+        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
+      }));
     }
   };
 
@@ -2366,6 +2371,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ...prev,
         rehearsalSchedule: updated.rehearsals || prev.rehearsalSchedule,
         rehearsalScheduleSw: updated.rehearsalsSw || prev.rehearsalScheduleSw,
+      }));
+      setSiteNotice(prev => ({
+        ...prev,
+        textEn: updated.rehearsals ? `Welcome to St. Monica Third Mass Choir official website. Choir rehearsals: ${updated.rehearsals}.` : prev.textEn,
+        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
       }));
     }
   };

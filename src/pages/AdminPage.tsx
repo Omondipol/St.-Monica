@@ -62,7 +62,7 @@ import { AdminFinancialsTab } from '../components/admin/AdminFinancialsTab';
 import { AdminCoreValuesTab } from '../components/admin/AdminCoreValuesTab';
 import { MediaManager } from '../components/MediaManager';
 import { triggerFileDownload } from '../utils/fileDownload';
-import { supabase, optimizeImageForUpload } from '../lib/supabase';
+import { supabase, optimizeImageForUpload, uploadImageToSupabase } from '../lib/supabase';
 
 interface AdminPageProps {
   onNavigateHome: () => void;
@@ -807,30 +807,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       // Case 1: Physical File Selected from Device
       if (selectedPhotoFile) {
-        notify('Inapakia picha...');
-        const optimized = await optimizeImageForUpload(selectedPhotoFile, 2000, 0.85);
-        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.jpg`;
+        notify('Inapakia picha kupitia automated pipeline...');
+        const { url: uploadedUrl, error: uploadErr } = await uploadImageToSupabase(selectedPhotoFile, 'gallery');
 
-        const { error: uploadError } = await supabase.storage
-          .from('photos')
-          .upload(cleanFileName, optimized.blob, {
-            contentType: optimized.contentType,
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.warn(`Storage upload notice: ${uploadError.message}. Using resilient data URL.`);
+        if (uploadErr || !uploadedUrl) {
+          console.warn(`Storage upload notice: ${uploadErr}. Using resilient data URL.`);
           const reader = new FileReader();
           finalPublicUrl = await new Promise((resolve) => {
             reader.onloadend = () => resolve(reader.result as string);
             reader.readAsDataURL(selectedPhotoFile);
           });
         } else {
-          const { data: urlData } = supabase.storage
-            .from('photos')
-            .getPublicUrl(cleanFileName);
-          finalPublicUrl = urlData.publicUrl;
+          finalPublicUrl = uploadedUrl;
         }
       }
       // Case 2: Base64 or Blob Data URL from ImageUploadField
@@ -838,24 +826,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         notify('Inachakata picha...');
         const res = await fetch(finalPublicUrl);
         const blob = await res.blob();
-        const optimized = await optimizeImageForUpload(blob, 2000, 0.85);
-        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.jpg`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('photos')
-          .upload(cleanFileName, optimized.blob, {
-            contentType: optimized.contentType,
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.warn(`Storage upload notice: ${uploadError.message}. Retaining data URL.`);
-        } else {
-          const { data: urlData } = supabase.storage
-            .from('photos')
-            .getPublicUrl(cleanFileName);
-          finalPublicUrl = urlData.publicUrl;
+        const { url: uploadedUrl } = await uploadImageToSupabase(blob, 'gallery');
+        if (uploadedUrl) {
+          finalPublicUrl = uploadedUrl;
         }
       }
 

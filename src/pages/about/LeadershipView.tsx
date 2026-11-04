@@ -83,10 +83,10 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
                 className="p-6 sm:p-7 bg-white/95 border border-[#0C2340]/10 rounded-3xl space-y-4 hover:border-[#1058A8]/40 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all flex flex-col justify-between"
               >
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                  {/* Large High-Clarity Portrait Display */}
+                  {/* Large High-Clarity Portrait Display - 4:5 Portrait Frame, whole pixel values */}
                   <div 
                     onClick={() => photoSrc && setSelectedLeader(trainer)}
-                    className="w-36 h-48 sm:w-44 sm:h-56 rounded-2xl overflow-hidden border-2 border-[#1058A8] shadow-md relative group cursor-pointer bg-slate-900 shrink-0 select-none"
+                    className="w-[144px] h-[180px] sm:w-[176px] sm:h-[220px] aspect-[4/5] rounded-2xl overflow-hidden border-2 border-[#1058A8] shadow-md relative group cursor-pointer bg-slate-900 shrink-0 select-none"
                     title={photoSrc ? 'Click to view full photo in HD' : trainer.name}
                   >
                     {photoSrc ? (
@@ -94,7 +94,7 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
                         <img
                           src={photoSrc}
                           alt={trainer.name}
-                          className="w-full h-full object-cover object-[center_12%] group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                           <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
@@ -187,10 +187,10 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
                 className="p-6 sm:p-7 bg-white/95 border border-[#0C2340]/10 rounded-3xl space-y-4 hover:border-[#1058A8]/40 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all flex flex-col justify-between"
               >
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                  {/* Large High-Clarity Portrait Display */}
+                  {/* Large High-Clarity Portrait Display - 4:5 Portrait Frame, whole pixel values */}
                   <div 
                     onClick={() => photoSrc && setSelectedLeader(official)}
-                    className="w-36 h-48 sm:w-44 sm:h-56 rounded-2xl overflow-hidden border-2 border-[#1058A8] shadow-md relative group cursor-pointer bg-slate-900 shrink-0 select-none"
+                    className="w-[144px] h-[180px] sm:w-[176px] sm:h-[220px] aspect-[4/5] rounded-2xl overflow-hidden border-2 border-[#1058A8] shadow-md relative group cursor-pointer bg-slate-900 shrink-0 select-none"
                     title={photoSrc ? 'Click to view full photo in HD' : official.name}
                   >
                     {photoSrc ? (
@@ -198,7 +198,7 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
                         <img
                           src={photoSrc}
                           alt={official.name}
-                          className="w-full h-full object-cover object-[center_12%] group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                           <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">

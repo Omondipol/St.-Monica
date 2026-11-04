@@ -173,7 +173,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
                     src={getImageSrc(photo.imageKey, photo.customUrl)}
                     alt={photo.title}
                     loading="lazy"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-[center_20%]"
                     referrerPolicy="no-referrer"
                   />
                   {photo.year && photo.year.trim() !== '' && photo.year.trim() !== '2024' && (
