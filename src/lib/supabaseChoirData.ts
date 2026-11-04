@@ -303,7 +303,124 @@ export async function saveGroupPhotosToSupabase(allPhotos: ChoirGroupPhoto[]): P
 }
 
 /**
- * Save Albums, Sheet Music, or Members catalog to Supabase
+ * Map database row to frontend ChoirMember
+ */
+function mapRowToMember(row: any): ChoirMember {
+  return {
+    id: String(row.id),
+    name: row.name || 'Anonymous Chorister',
+    voice: (row.voice || 'soprano').toLowerCase() as 'soprano' | 'alto' | 'tenor' | 'bass',
+    phone: row.phone || undefined,
+    email: row.email || undefined,
+    role: row.role || 'Chorister',
+    registeredAt: row.registered_at || new Date().toISOString(),
+    expiresAt: row.expires_at || new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+    renewalFeePaid: Number(row.renewal_fee_paid) || 500,
+    paymentReference: row.payment_reference || undefined,
+    status: (row.status === 'expired' ? 'expired' : 'active') as 'active' | 'expired'
+  };
+}
+
+/**
+ * Map frontend ChoirMember to database row
+ */
+function mapMemberToRow(member: ChoirMember): any {
+  return {
+    id: member.id,
+    name: member.name,
+    voice: member.voice,
+    phone: member.phone || null,
+    email: member.email || null,
+    role: member.role || 'Chorister',
+    registered_at: member.registeredAt,
+    expires_at: member.expiresAt,
+    renewal_fee_paid: member.renewalFeePaid || 500,
+    payment_reference: member.paymentReference || null,
+    status: member.status || 'active'
+  };
+}
+
+/**
+ * Load members from Supabase:
+ * 1. Checks relational table 'members'
+ * 2. Falls back to storage 'data/members.json'
+ */
+export async function loadMembersFromSupabase(): Promise<ChoirMember[] | null> {
+  // 1. Try relational table 'members'
+  try {
+    const { data, error } = await supabase
+      .from('members')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data.map(mapRowToMember);
+    }
+  } catch (e) {
+    // Table might not exist yet, proceed to storage
+  }
+
+  // 2. Try Supabase Storage 'data/members.json'
+  const storageMembers = await fetchJsonFromSupabaseStorage<ChoirMember[]>('members.json');
+  if (Array.isArray(storageMembers) && storageMembers.length > 0) {
+    return storageMembers;
+  }
+
+  return null;
+}
+
+/**
+ * Save or update a member in Supabase (both table 'members' and storage 'data/members.json')
+ */
+export async function saveMemberToSupabase(member: ChoirMember, allMembers: ChoirMember[]): Promise<boolean> {
+  let dbSuccess = false;
+
+  // 1. Upsert into relational 'members' table
+  try {
+    const row = mapMemberToRow(member);
+    const { error } = await supabase.from('members').upsert(row, { onConflict: 'id' });
+    if (!error) {
+      dbSuccess = true;
+    } else {
+      console.warn('[Supabase DB] members table upsert notice:', error.message);
+    }
+  } catch (e) {
+    console.warn('[Supabase DB] Error accessing members table:', e);
+  }
+
+  // 2. Always persist full members list into Supabase Storage
+  try {
+    await saveCatalogToSupabase('members', allMembers);
+  } catch (e) {
+    console.warn('[Supabase Storage] members.json sync notice:', e);
+  }
+
+  return dbSuccess;
+}
+
+/**
+ * Delete a member from Supabase (both table 'members' and storage 'data/members.json')
+ */
+export async function deleteMemberFromSupabase(memberId: string, remainingMembers: ChoirMember[]): Promise<boolean> {
+  // 1. Delete from database table
+  try {
+    await supabase.from('members').delete().eq('id', memberId);
+  } catch (e) {
+    console.warn('[Supabase DB] delete member notice:', e);
+  }
+
+  // 2. Update Supabase Storage
+  try {
+    await saveCatalogToSupabase('members', remainingMembers);
+  } catch (e) {
+    console.warn('[Supabase Storage] update remaining members notice:', e);
+  }
+
+  return true;
+}
+
+/**
+ * Save Albums, Sheet Music, Members, or Events catalog to Supabase Storage
  */
 export async function saveCatalogToSupabase(name: string, data: any): Promise<boolean> {
   try {
@@ -315,7 +432,7 @@ export async function saveCatalogToSupabase(name: string, data: any): Promise<bo
 }
 
 /**
- * Load Albums, Sheet Music, or Members catalog from Supabase
+ * Load Albums, Sheet Music, Members, or Events catalog from Supabase Storage
  */
 export async function loadCatalogFromSupabase<T>(name: string): Promise<T | null> {
   return fetchJsonFromSupabaseStorage<T>(`${name}.json`);
@@ -381,7 +498,23 @@ CREATE TABLE IF NOT EXISTS public.albums (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. Enable Row Level Security (RLS) & Public Access Policies
+-- 4. Create table for Members / Choristers (Voice Sections: Soprano, Alto, Tenor, Bass)
+CREATE TABLE IF NOT EXISTS public.members (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  voice TEXT NOT NULL,
+  phone TEXT,
+  email TEXT,
+  role TEXT DEFAULT 'Chorister',
+  registered_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  renewal_fee_paid NUMERIC DEFAULT 500,
+  payment_reference TEXT,
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. Enable Row Level Security (RLS) & Public Access Policies
 ALTER TABLE public.songs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public read songs" ON public.songs;
 CREATE POLICY "Public read songs" ON public.songs FOR SELECT USING (true);
@@ -412,8 +545,19 @@ CREATE POLICY "Public update albums" ON public.albums FOR UPDATE USING (true);
 DROP POLICY IF EXISTS "Public delete albums" ON public.albums;
 CREATE POLICY "Public delete albums" ON public.albums FOR DELETE USING (true);
 
--- 5. Enable Realtime Replication
+ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read members" ON public.members;
+CREATE POLICY "Public read members" ON public.members FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert members" ON public.members;
+CREATE POLICY "Public insert members" ON public.members FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update members" ON public.members;
+CREATE POLICY "Public update members" ON public.members FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public delete members" ON public.members;
+CREATE POLICY "Public delete members" ON public.members FOR DELETE USING (true);
+
+-- 6. Enable Realtime Replication
 ALTER PUBLICATION supabase_realtime ADD TABLE public.songs;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.gallery;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.albums;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
 `;

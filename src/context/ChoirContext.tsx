@@ -46,7 +46,10 @@ import {
   deleteGalleryPhotoFromSupabase,
   saveGroupPhotosToSupabase,
   saveCatalogToSupabase,
-  loadCatalogFromSupabase
+  loadCatalogFromSupabase,
+  loadMembersFromSupabase,
+  saveMemberToSupabase,
+  deleteMemberFromSupabase
 } from '../lib/supabaseChoirData';
 import { getSongYouTubeId, extractYouTubeVideoId } from '../utils/assetHelper';
 
@@ -527,6 +530,30 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadCatalogFromSupabase<MassItem[]>('masses').then(remoteMasses => {
       if (isMounted && remoteMasses && Array.isArray(remoteMasses) && remoteMasses.length > 0) {
         setMassesList(remoteMasses);
+      }
+    });
+    loadCatalogFromSupabase<Album[]>('albums').then(remoteAlbums => {
+      if (isMounted && remoteAlbums && Array.isArray(remoteAlbums) && remoteAlbums.length > 0) {
+        setAlbums(remoteAlbums);
+      }
+    });
+    loadCatalogFromSupabase<LibrarySong[]>('library_songs').then(remoteLib => {
+      if (isMounted && remoteLib && Array.isArray(remoteLib) && remoteLib.length > 0) {
+        setLibrarySongs(remoteLib);
+      }
+    });
+
+    // Hydrate members from Supabase (relational table or storage)
+    loadMembersFromSupabase().then(remoteMembers => {
+      if (isMounted && remoteMembers && Array.isArray(remoteMembers) && remoteMembers.length > 0) {
+        setMembers(prev => {
+          // Merge remote members with local members, prioritizing remote updates
+          const remoteIds = new Set(remoteMembers.map(m => m.id));
+          const localOnly = prev.filter(m => !remoteIds.has(m.id));
+          const merged = [...remoteMembers, ...localOnly];
+          try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
       }
     });
 
@@ -1124,7 +1151,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setMembers(prev => {
       const updated = [newMem, ...prev];
       try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updated)); } catch (_) {}
-      saveCatalogToSupabase('members', updated);
+      saveMemberToSupabase(newMem, updated);
       return updated;
     });
     return newMem;
@@ -1132,12 +1159,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const renewMember = (id: string, paymentRef?: string) => {
     setMembers(prev => {
+      let renewedMem: ChoirMember | undefined;
       const updatedList = prev.map(m => {
         if (m.id === id) {
           const newReg = new Date();
           const newExpiry = new Date(newReg);
           newExpiry.setFullYear(newExpiry.getFullYear() + 1);
-          return {
+          renewedMem = {
             ...m,
             registeredAt: newReg.toISOString(),
             expiresAt: newExpiry.toISOString(),
@@ -1145,11 +1173,16 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             paymentReference: paymentRef || `MPESA-RENEW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
             status: 'active' as const
           };
+          return renewedMem;
         }
         return m;
       });
       try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updatedList)); } catch (_) {}
-      saveCatalogToSupabase('members', updatedList);
+      if (renewedMem) {
+        saveMemberToSupabase(renewedMem, updatedList);
+      } else {
+        saveCatalogToSupabase('members', updatedList);
+      }
       return updatedList;
     });
   };
@@ -1158,7 +1191,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setMembers(prev => {
       const filtered = prev.filter(m => m.id !== id);
       try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(filtered)); } catch (_) {}
-      saveCatalogToSupabase('members', filtered);
+      deleteMemberFromSupabase(id, filtered);
       return filtered;
     });
   };
@@ -1171,16 +1204,27 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setMembers(prev => {
       const updated = [newMem, ...prev];
       try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updated)); } catch (_) {}
-      saveCatalogToSupabase('members', updated);
+      saveMemberToSupabase(newMem, updated);
       return updated;
     });
   };
 
   const updateMember = (id: string, updated: Partial<ChoirMember>) => {
     setMembers(prev => {
-      const updatedList = prev.map(m => m.id === id ? { ...m, ...updated } : m);
+      let updatedMem: ChoirMember | undefined;
+      const updatedList = prev.map(m => {
+        if (m.id === id) {
+          updatedMem = { ...m, ...updated };
+          return updatedMem;
+        }
+        return m;
+      });
       try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(updatedList)); } catch (_) {}
-      saveCatalogToSupabase('members', updatedList);
+      if (updatedMem) {
+        saveMemberToSupabase(updatedMem, updatedList);
+      } else {
+        saveCatalogToSupabase('members', updatedList);
+      }
       return updatedList;
     });
   };
