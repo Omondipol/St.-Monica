@@ -1,6 +1,7 @@
 import { supabase, resolveSupabaseUrl, resolveSupabaseAnonKey } from './supabase';
 import { Song, Album, SheetMusicItem, ChoirGroupPhoto } from '../data/choirContent';
 import { ChoirMember } from '../data/membersData';
+import { LibrarySong } from '../data/libraryData';
 
 const STORAGE_BUCKET = 'photos';
 
@@ -176,16 +177,6 @@ export async function saveSongToSupabase(song: Song, allUpdatedSongs: Song[]): P
     await uploadJsonToSupabaseStorage('songs.json', allUpdatedSongs);
   } catch (e) {
     console.warn('[Supabase Storage] songs.json sync notice:', e);
-  }
-
-  // 3. If thumbnail is present, also record entry in Supabase 'gallery' table
-  if (song.thumbnailUrl && song.thumbnailUrl.startsWith('http')) {
-    try {
-      await supabase.from('gallery').insert([{
-        title: `Wimbo: ${song.title} (${song.composer})`,
-        image_url: song.thumbnailUrl
-      }]);
-    } catch (_) {}
   }
 
   return dbSuccess;
@@ -420,6 +411,239 @@ export async function deleteMemberFromSupabase(memberId: string, remainingMember
 }
 
 /**
+ * Map database row to frontend Album
+ */
+function mapRowToAlbum(row: any): Album {
+  return {
+    id: String(row.id),
+    title: row.title || 'Untitled Album',
+    releaseYear: Number(row.release_year) || 2024,
+    trackCount: Number(row.track_count) || (Array.isArray(row.songs) ? row.songs.length : 1),
+    coverImage: row.cover_image || 'choir_singing_moment',
+    priceKes: Number(row.price_kes) || 500,
+    description: row.description || '',
+    descriptionSw: row.description_sw || row.description || '',
+    youtubePlaylistUrl: row.youtube_playlist_url || undefined,
+    songs: Array.isArray(row.songs) ? row.songs : []
+  };
+}
+
+/**
+ * Map frontend Album to database row
+ */
+function mapAlbumToRow(album: Album): any {
+  return {
+    id: album.id,
+    title: album.title,
+    release_year: album.releaseYear,
+    track_count: album.trackCount || (album.songs ? album.songs.length : 1),
+    cover_image: album.coverImage,
+    price_kes: album.priceKes || 500,
+    description: album.description || '',
+    description_sw: album.descriptionSw || '',
+    youtube_playlist_url: album.youtubePlaylistUrl || null,
+    songs: album.songs || []
+  };
+}
+
+/**
+ * Load albums from Supabase (relational table 'albums' or storage 'data/albums.json')
+ */
+export async function loadAlbumsFromSupabase(): Promise<Album[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('albums')
+      .select('*')
+      .order('release_year', { ascending: false });
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data.map(mapRowToAlbum);
+    }
+  } catch (e) {
+    // Database table may not exist yet, continue to storage
+  }
+
+  return fetchJsonFromSupabaseStorage<Album[]>('albums.json');
+}
+
+/**
+ * Save or update an album in Supabase (both table 'albums' and storage 'data/albums.json')
+ */
+export async function saveAlbumToSupabase(album: Album, allAlbums: Album[]): Promise<boolean> {
+  let dbSuccess = false;
+
+  try {
+    const row = mapAlbumToRow(album);
+    const { error } = await supabase.from('albums').upsert(row, { onConflict: 'id' });
+    if (!error) {
+      dbSuccess = true;
+    } else {
+      console.warn('[Supabase DB] albums table upsert notice:', error.message);
+    }
+  } catch (e) {
+    console.warn('[Supabase DB] Error accessing albums table:', e);
+  }
+
+  try {
+    await saveCatalogToSupabase('albums', allAlbums);
+  } catch (e) {
+    console.warn('[Supabase Storage] albums.json sync notice:', e);
+  }
+
+  return dbSuccess;
+}
+
+/**
+ * Delete an album from Supabase (both table 'albums' and storage 'data/albums.json')
+ */
+export async function deleteAlbumFromSupabase(albumId: string, remainingAlbums: Album[]): Promise<boolean> {
+  try {
+    await supabase.from('albums').delete().eq('id', albumId);
+  } catch (e) {
+    console.warn('[Supabase DB] delete album notice:', e);
+  }
+
+  try {
+    await saveCatalogToSupabase('albums', remainingAlbums);
+  } catch (e) {
+    console.warn('[Supabase Storage] update remaining albums notice:', e);
+  }
+
+  return true;
+}
+
+/**
+ * Map database row to frontend LibrarySong
+ */
+function mapRowToLibrarySong(row: any): LibrarySong {
+  return {
+    id: String(row.id),
+    title: row.title || 'Untitled Library Score',
+    titleSwahili: row.title_swahili || undefined,
+    composer: row.composer || 'Traditional',
+    arranger: row.arranger || undefined,
+    language: row.language || 'Kiswahili',
+    categories: Array.isArray(row.categories) ? row.categories : ['kuingia'],
+    season: row.season || undefined,
+    voices: row.voices || 'SATB',
+    lyrics: row.lyrics || undefined,
+    previewImage: row.preview_image || undefined,
+    pdfUrl: row.pdf_url || undefined,
+    audioUrl: row.audio_url || undefined,
+    hasAudio: Boolean(row.has_audio || row.audio_url || row.midi_url),
+    sharingStatus: row.sharing_status || 'Public domain',
+    permissionGivenBy: row.permission_given_by || undefined,
+    permissionDate: row.permission_date || undefined,
+    externalSourceUrl: row.external_source_url || undefined,
+    downloadCount: Number(row.download_count) || 0,
+    addedDate: row.added_date || new Date().toISOString().split('T')[0],
+    solfaNotes: Boolean(row.solfa_notes),
+    tempo: row.tempo || undefined,
+    notesUrl: row.notes_url || undefined,
+    notesFileName: row.notes_file_name || undefined,
+    midiUrl: row.midi_url || undefined,
+    midiFileName: row.midi_file_name || undefined
+  };
+}
+
+/**
+ * Map frontend LibrarySong to database row
+ */
+function mapLibrarySongToRow(song: LibrarySong): any {
+  return {
+    id: song.id,
+    title: song.title,
+    title_swahili: song.titleSwahili || null,
+    composer: song.composer,
+    arranger: song.arranger || null,
+    language: song.language,
+    categories: song.categories || ['kuingia'],
+    season: song.season || null,
+    voices: song.voices || 'SATB',
+    lyrics: song.lyrics || null,
+    pdf_url: song.pdfUrl || null,
+    audio_url: song.audioUrl || null,
+    notes_url: song.notesUrl || null,
+    notes_file_name: song.notesFileName || null,
+    midi_url: song.midiUrl || null,
+    midi_file_name: song.midiFileName || null,
+    sharing_status: song.sharingStatus || 'Public domain',
+    permission_given_by: song.permissionGivenBy || null,
+    permission_date: song.permissionDate || null,
+    external_source_url: song.externalSourceUrl || null,
+    download_count: song.downloadCount || 0,
+    added_date: song.addedDate || new Date().toISOString().split('T')[0],
+    tempo: song.tempo || null
+  };
+}
+
+/**
+ * Load music library songs from Supabase (first checks table 'library_songs', falls back to storage 'data/library_songs.json')
+ */
+export async function loadLibrarySongsFromSupabase(): Promise<LibrarySong[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('library_songs')
+      .select('*')
+      .order('title', { ascending: true });
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data.map(mapRowToLibrarySong);
+    }
+  } catch (e) {
+    // Database table may not exist yet, continue to storage
+  }
+
+  return fetchJsonFromSupabaseStorage<LibrarySong[]>('library_songs.json');
+}
+
+/**
+ * Save or update a music library score in Supabase (both table 'library_songs' and storage 'data/library_songs.json')
+ */
+export async function saveLibrarySongToSupabase(song: LibrarySong, allSongs: LibrarySong[]): Promise<boolean> {
+  let dbSuccess = false;
+
+  try {
+    const row = mapLibrarySongToRow(song);
+    const { error } = await supabase.from('library_songs').upsert(row, { onConflict: 'id' });
+    if (!error) {
+      dbSuccess = true;
+    } else {
+      console.warn('[Supabase DB] library_songs table upsert notice:', error.message);
+    }
+  } catch (e) {
+    console.warn('[Supabase DB] Error accessing library_songs table:', e);
+  }
+
+  try {
+    await saveCatalogToSupabase('library_songs', allSongs);
+  } catch (e) {
+    console.warn('[Supabase Storage] library_songs.json sync notice:', e);
+  }
+
+  return dbSuccess;
+}
+
+/**
+ * Delete a music library score from Supabase (both table 'library_songs' and storage 'data/library_songs.json')
+ */
+export async function deleteLibrarySongFromSupabase(songId: string, remainingSongs: LibrarySong[]): Promise<boolean> {
+  try {
+    await supabase.from('library_songs').delete().eq('id', songId);
+  } catch (e) {
+    console.warn('[Supabase DB] delete library_song notice:', e);
+  }
+
+  try {
+    await saveCatalogToSupabase('library_songs', remainingSongs);
+  } catch (e) {
+    console.warn('[Supabase Storage] update remaining library_songs notice:', e);
+  }
+
+  return true;
+}
+
+/**
  * Save Albums, Sheet Music, Members, or Events catalog to Supabase Storage
  */
 export async function saveCatalogToSupabase(name: string, data: any): Promise<boolean> {
@@ -555,9 +779,48 @@ CREATE POLICY "Public update members" ON public.members FOR UPDATE USING (true);
 DROP POLICY IF EXISTS "Public delete members" ON public.members;
 CREATE POLICY "Public delete members" ON public.members FOR DELETE USING (true);
 
+-- 5. Create table for Library Songs (Maktaba ya Noti)
+CREATE TABLE IF NOT EXISTS public.library_songs (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  title_swahili TEXT,
+  composer TEXT NOT NULL DEFAULT 'Traditional',
+  arranger TEXT,
+  language TEXT DEFAULT 'Kiswahili',
+  categories JSONB DEFAULT '["kuingia"]'::jsonb,
+  season TEXT,
+  voices TEXT DEFAULT 'SATB',
+  lyrics TEXT,
+  pdf_url TEXT,
+  audio_url TEXT,
+  notes_url TEXT,
+  notes_file_name TEXT,
+  midi_url TEXT,
+  midi_file_name TEXT,
+  sharing_status TEXT DEFAULT 'Public domain',
+  permission_given_by TEXT,
+  permission_date TEXT,
+  external_source_url TEXT,
+  download_count INTEGER DEFAULT 0,
+  added_date TEXT,
+  tempo TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.library_songs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read library_songs" ON public.library_songs;
+CREATE POLICY "Public read library_songs" ON public.library_songs FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert library_songs" ON public.library_songs;
+CREATE POLICY "Public insert library_songs" ON public.library_songs FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update library_songs" ON public.library_songs;
+CREATE POLICY "Public update library_songs" ON public.library_songs FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public delete library_songs" ON public.library_songs;
+CREATE POLICY "Public delete library_songs" ON public.library_songs FOR DELETE USING (true);
+
 -- 6. Enable Realtime Replication
 ALTER PUBLICATION supabase_realtime ADD TABLE public.songs;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.gallery;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.albums;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.library_songs;
 `;

@@ -49,7 +49,13 @@ import {
   loadCatalogFromSupabase,
   loadMembersFromSupabase,
   saveMemberToSupabase,
-  deleteMemberFromSupabase
+  deleteMemberFromSupabase,
+  loadAlbumsFromSupabase,
+  saveAlbumToSupabase,
+  deleteAlbumFromSupabase,
+  loadLibrarySongsFromSupabase,
+  saveLibrarySongToSupabase,
+  deleteLibrarySongFromSupabase
 } from '../lib/supabaseChoirData';
 import { getSongYouTubeId, extractYouTubeVideoId } from '../utils/assetHelper';
 
@@ -532,14 +538,16 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setMassesList(remoteMasses);
       }
     });
-    loadCatalogFromSupabase<Album[]>('albums').then(remoteAlbums => {
+    loadAlbumsFromSupabase().then(remoteAlbums => {
       if (isMounted && remoteAlbums && Array.isArray(remoteAlbums) && remoteAlbums.length > 0) {
         setAlbums(remoteAlbums);
+        try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(remoteAlbums)); } catch (_) {}
       }
     });
-    loadCatalogFromSupabase<LibrarySong[]>('library_songs').then(remoteLib => {
+    loadLibrarySongsFromSupabase().then(remoteLib => {
       if (isMounted && remoteLib && Array.isArray(remoteLib) && remoteLib.length > 0) {
         setLibrarySongs(remoteLib);
+        try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(remoteLib)); } catch (_) {}
       }
     });
 
@@ -1257,7 +1265,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setAlbums(prev => {
       const updated = [alb, ...prev];
       try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(updated)); } catch (_) {}
-      saveCatalogToSupabase('albums', updated);
+      saveAlbumToSupabase(alb, updated);
       return updated;
     });
   };
@@ -1265,8 +1273,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateAlbum = (id: string, updated: Partial<Album>) => {
     setAlbums(prev => {
       const updatedList = prev.map(a => a.id === id ? { ...a, ...updated } : a);
+      const target = updatedList.find(a => a.id === id);
       try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(updatedList)); } catch (_) {}
-      saveCatalogToSupabase('albums', updatedList);
+      if (target) {
+        saveAlbumToSupabase(target, updatedList);
+      }
       return updatedList;
     });
   };
@@ -1275,7 +1286,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setAlbums(prev => {
       const filtered = prev.filter(a => a.id !== id);
       try { localStorage.setItem(STORAGE_KEYS.ALBUMS, JSON.stringify(filtered)); } catch (_) {}
-      saveCatalogToSupabase('albums', filtered);
+      deleteAlbumFromSupabase(id, filtered);
       return filtered;
     });
   };
@@ -2282,7 +2293,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLibrarySongs(prev => {
       const updated = [song, ...prev];
       try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(updated)); } catch (_) {}
-      saveCatalogToSupabase('library_songs', updated);
+      saveLibrarySongToSupabase(song, updated);
       return updated;
     });
   };
@@ -2290,8 +2301,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateLibrarySong = (id: string, updated: Partial<LibrarySong>) => {
     setLibrarySongs(prev => {
       const updatedList = prev.map(s => s.id === id ? { ...s, ...updated } : s);
+      const target = updatedList.find(s => s.id === id);
       try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(updatedList)); } catch (_) {}
-      saveCatalogToSupabase('library_songs', updatedList);
+      if (target) {
+        saveLibrarySongToSupabase(target, updatedList);
+      }
       return updatedList;
     });
   };
@@ -2300,7 +2314,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLibrarySongs(prev => {
       const filtered = prev.filter(s => s.id !== id);
       try { localStorage.setItem(STORAGE_KEYS.LIBRARY, JSON.stringify(filtered)); } catch (_) {}
-      saveCatalogToSupabase('library_songs', filtered);
+      deleteLibrarySongFromSupabase(id, filtered);
       return filtered;
     });
   };

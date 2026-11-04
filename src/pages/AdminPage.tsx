@@ -164,10 +164,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [showLibModal, setShowLibModal] = useState<boolean>(false);
   const [editingLibSongId, setEditingLibSongId] = useState<string | null>(null);
   const [libTitle, setLibTitle] = useState('');
+  const [libTitleSwahili, setLibTitleSwahili] = useState('');
   const [libComposer, setLibComposer] = useState('');
+  const [libArranger, setLibArranger] = useState('');
   const [libLanguage, setLibLanguage] = useState<'Kiswahili' | 'English' | 'Latin' | 'Kikuyu' | 'Dholuo' | 'Kalenjin' | 'Other'>('Kiswahili');
   const [libCategories, setLibCategories] = useState<string[]>(['kuingia']);
+  const [libSeason, setLibSeason] = useState('');
   const [libVoices, setLibVoices] = useState<'SATB' | 'Unison' | 'Solo' | 'SSAA' | 'TTBB'>('SATB');
+  const [libTempo, setLibTempo] = useState('');
   const [libLyrics, setLibLyrics] = useState('');
   const [libPdfUrl, setLibPdfUrl] = useState('');
   const [libAudioUrl, setLibAudioUrl] = useState('');
@@ -181,6 +185,56 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [libExternalSourceUrl, setLibExternalSourceUrl] = useState('');
   const [showBulkSpreadsheetModal, setShowBulkSpreadsheetModal] = useState<boolean>(false);
   const [csvSpreadsheetText, setCsvSpreadsheetText] = useState('');
+
+  const openAddLibSong = () => {
+    setEditingLibSongId(null);
+    setLibTitle('');
+    setLibTitleSwahili('');
+    setLibComposer('Traditional');
+    setLibArranger('');
+    setLibLanguage('Kiswahili');
+    setLibCategories(['kuingia']);
+    setLibSeason('Ordinary Time');
+    setLibVoices('SATB');
+    setLibTempo('Andante');
+    setLibLyrics('');
+    setLibPdfUrl('');
+    setLibAudioUrl('');
+    setLibNotesUrl('');
+    setLibNotesFileName('');
+    setLibMidiUrl('');
+    setLibMidiFileName('');
+    setLibSharingStatus('Public domain');
+    setLibPermissionGivenBy('');
+    setLibPermissionDate('');
+    setLibExternalSourceUrl('');
+    setShowLibModal(true);
+  };
+
+  const openEditLibSong = (song: LibrarySong) => {
+    setEditingLibSongId(song.id);
+    setLibTitle(song.title);
+    setLibTitleSwahili(song.titleSwahili || '');
+    setLibComposer(song.composer || 'Traditional');
+    setLibArranger(song.arranger || '');
+    setLibLanguage(song.language || 'Kiswahili');
+    setLibCategories(song.categories && song.categories.length > 0 ? song.categories : ['kuingia']);
+    setLibSeason(song.season || '');
+    setLibVoices(song.voices || 'SATB');
+    setLibTempo(song.tempo || '');
+    setLibLyrics(song.lyrics || '');
+    setLibPdfUrl(song.pdfUrl || '');
+    setLibAudioUrl(song.audioUrl || '');
+    setLibNotesUrl(song.notesUrl || '');
+    setLibNotesFileName(song.notesFileName || '');
+    setLibMidiUrl(song.midiUrl || '');
+    setLibMidiFileName(song.midiFileName || '');
+    setLibSharingStatus(song.sharingStatus || 'Public domain');
+    setLibPermissionGivenBy(song.permissionGivenBy || '');
+    setLibPermissionDate(song.permissionDate || '');
+    setLibExternalSourceUrl(song.externalSourceUrl || '');
+    setShowLibModal(true);
+  };
 
   const handleUploadFile = (e: React.ChangeEvent<HTMLInputElement>, type: 'notes' | 'midi') => {
     const file = e.target.files?.[0];
@@ -208,11 +262,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
     const payload = {
       title: libTitle.trim(),
+      titleSwahili: libTitleSwahili.trim() || undefined,
       composer: libComposer.trim() || 'Traditional',
+      arranger: libArranger.trim() || undefined,
       language: libLanguage,
       categories: libCategories.length > 0 ? libCategories : ['kuingia'],
+      season: libSeason.trim() || undefined,
       voices: libVoices,
-      lyrics: libLyrics.trim(),
+      tempo: libTempo.trim() || undefined,
+      lyrics: libLyrics.trim() || undefined,
       pdfUrl: libPdfUrl.trim() || undefined,
       audioUrl: libAudioUrl.trim() || undefined,
       notesUrl: libNotesUrl.trim() || undefined,
@@ -474,6 +532,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     thumbnailUrl: '',
     sheetMusicAvailable: true,
     scorePriceKes: 300,
+    whyWeSingIt: '',
+    whyWeSingItSw: '',
     lyricsSwahiliText: '',
     lyricsEnglishText: ''
   });
@@ -499,6 +559,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       thumbnailUrl: '',
       sheetMusicAvailable: true,
       scorePriceKes: 300,
+      whyWeSingIt: 'Sung in reverence during the Sacred Liturgy to lift prayerful devotion before the altar.',
+      whyWeSingItSw: 'Huimbwa kwa heshima na uchaji katika Liturujia Takatifu kuelekeza sala altaroni.',
       lyricsSwahiliText: '1. Maneno ya Kiswahili...\nKiitikio: Sala yetu hekaluni...',
       lyricsEnglishText: '1. English translation...\nRefrain: Our holy prayer...'
     });
@@ -510,22 +572,24 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     setSongForm({
       title: song.title,
       titleSwahili: song.titleSwahili,
-      album: song.album,
+      album: song.album || 'Nyimbo za Kiliturujia za SEC 58',
       composer: song.composer,
       year: song.year,
-      season: song.season,
-      seasonSwahili: song.seasonSwahili,
-      partOfMass: song.partOfMass,
-      partOfMassSwahili: song.partOfMassSwahili,
-      language: song.language,
-      voicing: song.voicing,
-      musicalKey: song.musicalKey,
-      duration: song.duration,
-      youtubeUrl: song.youtubeUrl,
-      audioPreviewUrl: song.audioPreviewUrl,
+      season: song.season || 'Ordinary Time',
+      seasonSwahili: song.seasonSwahili || 'Wakati wa Kawaida',
+      partOfMass: song.partOfMass || 'Entrance',
+      partOfMassSwahili: song.partOfMassSwahili || 'Wimbo wa Kuingia',
+      language: song.language || 'Kiswahili',
+      voicing: song.voicing || 'SATB',
+      musicalKey: song.musicalKey || 'G Major',
+      duration: song.duration || '4:15',
+      youtubeUrl: song.youtubeUrl || YOUTUBE_CHANNEL_URL,
+      audioPreviewUrl: song.audioPreviewUrl || 'preview.mp3',
       thumbnailUrl: song.thumbnailUrl || '',
-      sheetMusicAvailable: song.sheetMusicAvailable,
-      scorePriceKes: song.scorePriceKes,
+      sheetMusicAvailable: song.sheetMusicAvailable ?? true,
+      scorePriceKes: song.scorePriceKes || 300,
+      whyWeSingIt: song.whyWeSingIt || '',
+      whyWeSingItSw: song.whyWeSingItSw || '',
       lyricsSwahiliText: song.lyricsSwahili?.join('\n') || '',
       lyricsEnglishText: song.lyricsEnglish?.join('\n') || ''
     });
@@ -564,6 +628,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
       lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monika SEC 58.'],
       lyricsEnglish: lyricsEnglish.length ? lyricsEnglish : ['Song of St. Monica Choir SEC 58.'],
+      whyWeSingIt: songForm.whyWeSingIt.trim() || undefined,
+      whyWeSingItSw: songForm.whyWeSingItSw.trim() || undefined,
       waveformPeaks: [40, 60, 50, 80, 95, 70, 85, 90, 75, 60, 85, 70, 80, 90, 60, 40, 70, 85, 90, 50, 65, 80, 45, 30]
     };
 
@@ -1618,12 +1684,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   </p>
                 </div>
                 <button
-                  onClick={() => {
-                    setEditingLibSongId(null);
-                    setLibTitle('');
-                    setLibComposer('');
-                    setShowLibModal(true);
-                  }}
+                  onClick={openAddLibSong}
                   className="px-4 py-2 text-xs font-bold bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                 >
                   <Plus className="w-4 h-4" />
@@ -1636,29 +1697,86 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   <thead className="bg-[#FAF8F5] border-b border-[#0C2340]/10 text-slate-600 font-semibold uppercase">
                     <tr>
                       <th className="p-3.5">Title & Composer</th>
-                      <th className="p-3.5">Language</th>
-                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5">Voices & Language</th>
+                      <th className="p-3.5">Category & Season</th>
+                      <th className="p-3.5">Status & Files</th>
                       <th className="p-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#0C2340]/5">
+                  <tbody className="divide-y divide-[#0C2340]/5 font-source">
                     {librarySongs.map((song) => (
-                      <tr key={song.id} className="hover:bg-[#FAF8F5]/80">
-                        <td className="p-3.5 font-bold font-eb-garamond text-sm text-[#0C2340]">{song.title}</td>
-                        <td className="p-3.5">{song.language}</td>
-                        <td className="p-3.5">{song.sharingStatus}</td>
+                      <tr key={song.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                        <td className="p-3.5">
+                          <div className="font-bold font-eb-garamond text-base text-[#0C2340] leading-snug">
+                            {song.title}
+                          </div>
+                          {song.titleSwahili && song.titleSwahili !== song.title && (
+                            <div className="text-[11px] text-[#1058A8] font-medium italic">
+                              {song.titleSwahili}
+                            </div>
+                          )}
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Mtunzi: <span className="font-semibold text-slate-700">{song.composer || 'Traditional'}</span>
+                            {song.arranger && <span className="text-slate-400"> · Mpangaji: {song.arranger}</span>}
+                          </div>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="font-bold text-[#1058A8] bg-blue-50 px-2 py-0.5 rounded text-[11px] border border-blue-200">
+                            {song.voices || 'SATB'}
+                          </span>
+                          <span className="block text-[11px] text-slate-600 mt-1">
+                            {song.language}
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="text-[11px] font-semibold text-slate-700 capitalize">
+                            {song.categories && song.categories.length > 0 ? song.categories.join(', ') : 'Kuingia'}
+                          </span>
+                          {song.season && (
+                            <span className="block text-[10px] text-slate-400 mt-0.5">
+                              {song.season}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3.5">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block">
+                            {song.sharingStatus}
+                          </span>
+                          <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500">
+                            {(song.notesUrl || song.pdfUrl) && (
+                              <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                PDF Score
+                              </span>
+                            )}
+                            {(song.midiUrl || song.audioUrl) && (
+                              <span className="text-sky-700 font-bold bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200">
+                                Audio / MIDI
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td className="p-3.5 text-right">
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Delete song "${song.title}" from library?`)) {
-                                deleteLibrarySong(song.id);
-                                notify(`Removed "${song.title}" from library.`);
-                              }
-                            }}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => openEditLibSong(song)}
+                              title="Edit Library Song Info & Files"
+                              className="p-1.5 text-[#1058A8] hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Delete song "${song.title}" from library?`)) {
+                                  deleteLibrarySong(song.id);
+                                  notify(`Removed "${song.title}" from library.`);
+                                }
+                              }}
+                              title="Delete from Library"
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -2326,6 +2444,66 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Album (Albamu ya Wimbo)</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={albums.some(a => a.title === songForm.album) ? songForm.album : 'custom'}
+                      onChange={e => {
+                        if (e.target.value !== 'custom') {
+                          setSongForm({ ...songForm, album: e.target.value });
+                        }
+                      }}
+                      className="w-1/2 p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white text-xs truncate"
+                    >
+                      {albums.map(a => (
+                        <option key={a.id} value={a.title}>{a.title}</option>
+                      ))}
+                      <option value="custom">Other / Custom</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={songForm.album}
+                      onChange={e => setSongForm({ ...songForm, album: e.target.value })}
+                      placeholder="Album Title"
+                      className="w-1/2 p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Liturgical Season (Kipindi cha Kiliturujia)</label>
+                  <select
+                    value={songForm.season}
+                    onChange={e => {
+                      const seasonVal = e.target.value as Song['season'];
+                      const swMap: Record<string, string> = {
+                        'Ordinary Time': 'Wakati wa Kawaida',
+                        'Advent': 'Majilio',
+                        'Lent': 'Kwaresima',
+                        'Easter': 'Pasaka',
+                        'Marian': 'Bikira Maria',
+                        'Patronal': 'Sikukuu ya Somo'
+                      };
+                      setSongForm({
+                        ...songForm,
+                        season: seasonVal,
+                        seasonSwahili: swMap[seasonVal] || seasonVal
+                      });
+                    }}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white text-xs"
+                  >
+                    <option value="Ordinary Time">Ordinary Time (Wakati wa Kawaida)</option>
+                    <option value="Advent">Advent (Majilio)</option>
+                    <option value="Lent">Lent (Kwaresima)</option>
+                    <option value="Easter">Easter (Pasaka)</option>
+                    <option value="Marian">Marian (Bikira Maria)</option>
+                    <option value="Patronal">Patronal (Somo: Mt. Monika)</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-[#0C2340] mb-1">Voicing</label>
@@ -2355,6 +2533,33 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     onChange={e => setSongForm({ ...songForm, duration: e.target.value })}
                     placeholder="4:15"
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Sheet Music Score Options */}
+              <div className="p-3 bg-amber-50/60 border border-amber-200/80 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={songForm.sheetMusicAvailable}
+                    onChange={e => setSongForm({ ...songForm, sheetMusicAvailable: e.target.checked })}
+                    className="w-4 h-4 rounded text-[#1058A8] focus:ring-[#1058A8]"
+                  />
+                  <div>
+                    <span className="font-bold text-[#0C2340] block">Sheet Music for Sale</span>
+                    <span className="text-[11px] text-slate-500 font-source block">Enable downloadable SATB score</span>
+                  </div>
+                </label>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Score Price (KES)</label>
+                  <input
+                    type="number"
+                    value={songForm.scorePriceKes}
+                    onChange={e => setSongForm({ ...songForm, scorePriceKes: Number(e.target.value) || 300 })}
+                    placeholder="300"
+                    disabled={!songForm.sheetMusicAvailable}
+                    className="w-full p-2 border border-slate-300 rounded-lg text-xs font-bold disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -2402,15 +2607,52 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Swahili Lyrics (Line by Line)</label>
-                <textarea
-                  rows={3}
-                  value={songForm.lyricsSwahiliText}
-                  onChange={e => setSongForm({ ...songForm, lyricsSwahiliText: e.target.value })}
-                  placeholder="1. Tazama ninakuja Ee Bwana..."
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
-                />
+              {/* Devotional Reason (Why We Sing It) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Why We Sing It (English Reflection)</label>
+                  <textarea
+                    rows={2}
+                    value={songForm.whyWeSingIt}
+                    onChange={e => setSongForm({ ...songForm, whyWeSingIt: e.target.value })}
+                    placeholder="Devotional meaning and reflection during liturgical celebration..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Kwa Nini Tunaimba (Tafakari ya Kiswahili)</label>
+                  <textarea
+                    rows={2}
+                    value={songForm.whyWeSingItSw}
+                    onChange={e => setSongForm({ ...songForm, whyWeSingItSw: e.target.value })}
+                    placeholder="Maana ya kiroho na tafakari ya wimbo huu altaroni..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Lyrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Swahili Lyrics (Line by Line)</label>
+                  <textarea
+                    rows={3}
+                    value={songForm.lyricsSwahiliText}
+                    onChange={e => setSongForm({ ...songForm, lyricsSwahiliText: e.target.value })}
+                    placeholder="1. Tazama ninakuja Ee Bwana..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">English Lyrics (Line by Line)</label>
+                  <textarea
+                    rows={3}
+                    value={songForm.lyricsEnglishText}
+                    onChange={e => setSongForm({ ...songForm, lyricsEnglishText: e.target.value })}
+                    placeholder="1. Behold I come O Lord..."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
               </div>
 
               <div className="pt-4 border-t border-[#0C2340]/10 flex items-center justify-end gap-3">
@@ -2703,9 +2945,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             </div>
 
             <form onSubmit={handleSaveLibSong} className="space-y-4 text-xs font-source">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Song Title *</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">Song Title (Kichwa cha Wimbo) *</label>
                   <input
                     type="text"
                     required
@@ -2716,18 +2958,41 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Composer</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">Swahili / Alternate Title</label>
                   <input
                     type="text"
-                    value={libComposer}
-                    onChange={e => setLibComposer(e.target.value)}
-                    placeholder="Bernard Mukasa"
+                    value={libTitleSwahili}
+                    onChange={e => setLibTitleSwahili(e.target.value)}
+                    placeholder="e.g. Bwana Unibadili"
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Composer (Mtunzi)</label>
+                  <input
+                    type="text"
+                    value={libComposer}
+                    onChange={e => setLibComposer(e.target.value)}
+                    placeholder="e.g. Bernard Mukasa"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Arranger / Harmonizer (Mpangaji)</label>
+                  <input
+                    type="text"
+                    value={libArranger}
+                    onChange={e => setLibArranger(e.target.value)}
+                    placeholder="e.g. Atebe Mark T."
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-[#0C2340] mb-1">Language</label>
                   <select
@@ -2745,70 +3010,113 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Voices</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">Voices (Mpangilio wa Sauti)</label>
                   <select
                     value={libVoices}
                     onChange={e => setLibVoices(e.target.value as any)}
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
                   >
-                    <option value="SATB">SATB (Four Part)</option>
-                    <option value="Unison">Unison</option>
-                    <option value="Solo">Solo</option>
-                    <option value="SSAA">SSAA</option>
-                    <option value="TTBB">TTBB</option>
+                    <option value="SATB">SATB (Soprano, Alto, Tenor, Bass)</option>
+                    <option value="Unison">Unison (Sauti Moja)</option>
+                    <option value="Solo">Solo (Mwimbaji Pekee)</option>
+                    <option value="SSAA">SSAA (Sauti za Kike)</option>
+                    <option value="TTBB">TTBB (Sauti za Kiume)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Category (Sehemu ya Misa)</label>
+                  <select
+                    value={libCategories[0] || 'kuingia'}
+                    onChange={e => setLibCategories([e.target.value])}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    {LIBRARY_CATEGORIES.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.nameSw} ({cat.nameEn})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Sharing / Copyright Status</label>
-                <select
-                  value={libSharingStatus}
-                  onChange={e => setLibSharingStatus(e.target.value as any)}
-                  className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
-                >
-                  <option value="Public domain">Public domain (Domini ya Umma)</option>
-                  <option value="Shared with permission">Shared with permission (Kwa Idhini)</option>
-                  <option value="Link only">Link only (Kiungo pekee)</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Liturgical Season (Kipindi cha Kiliturujia)</label>
+                  <input
+                    type="text"
+                    value={libSeason}
+                    onChange={e => setLibSeason(e.target.value)}
+                    placeholder="Ordinary Time / Wakati wa Kawaida"
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#0C2340] mb-1">Sharing / Copyright Status</label>
+                  <select
+                    value={libSharingStatus}
+                    onChange={e => setLibSharingStatus(e.target.value as any)}
+                    className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
+                  >
+                    <option value="Public domain">Public domain (Domini ya Umma)</option>
+                    <option value="Shared with permission">Shared with permission (Kwa Idhini)</option>
+                    <option value="Link only">Link only (Kiungo pekee)</option>
+                  </select>
+                </div>
               </div>
 
               {/* Upload Sheet Music Notes / MIDI */}
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Score File (PDF / Image)</label>
-                  <input
-                    type="file"
-                    accept=".pdf,image/*"
-                    onChange={e => handleUploadFile(e, 'notes')}
-                    className="text-[11px] text-slate-600 block w-full"
-                  />
-                  {libNotesFileName && (
-                    <span className="text-[10px] text-emerald-700 font-semibold block mt-1 truncate">
-                      File: {libNotesFileName}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">MIDI Audio File</label>
-                  <input
-                    type="file"
-                    accept=".mid,.midi,audio/*"
-                    onChange={e => handleUploadFile(e, 'midi')}
-                    className="text-[11px] text-slate-600 block w-full"
-                  />
-                  {libMidiFileName && (
-                    <span className="text-[10px] text-emerald-700 font-semibold block mt-1 truncate">
-                      File: {libMidiFileName}
-                    </span>
-                  )}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                <span className="font-bold text-[#0C2340] block">Score & Audio Files</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Upload Score (PDF / Image)</label>
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      onChange={e => handleUploadFile(e, 'notes')}
+                      className="text-[11px] text-slate-600 block w-full"
+                    />
+                    {libNotesFileName && (
+                      <span className="text-[10px] text-emerald-700 font-semibold block mt-1 truncate">
+                        Attached: {libNotesFileName}
+                      </span>
+                    )}
+                    <input
+                      type="text"
+                      value={libPdfUrl}
+                      onChange={e => setLibPdfUrl(e.target.value)}
+                      placeholder="Or paste direct PDF URL"
+                      className="w-full p-2 mt-1.5 border border-slate-300 rounded-lg text-[11px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Upload MIDI / Audio Preview</label>
+                    <input
+                      type="file"
+                      accept=".mid,.midi,audio/*"
+                      onChange={e => handleUploadFile(e, 'midi')}
+                      className="text-[11px] text-slate-600 block w-full"
+                    />
+                    {libMidiFileName && (
+                      <span className="text-[10px] text-emerald-700 font-semibold block mt-1 truncate">
+                        Attached: {libMidiFileName}
+                      </span>
+                    )}
+                    <input
+                      type="text"
+                      value={libAudioUrl}
+                      onChange={e => setLibAudioUrl(e.target.value)}
+                      placeholder="Or paste direct Audio URL"
+                      className="w-full p-2 mt-1.5 border border-slate-300 rounded-lg text-[11px]"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-[#0C2340] mb-1">Lyrics / Maneno</label>
+                <label className="block font-bold text-[#0C2340] mb-1">Lyrics / Maneno ya Wimbo</label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={libLyrics}
                   onChange={e => setLibLyrics(e.target.value)}
                   placeholder="1. Ee Bwana unibadili..."

@@ -265,24 +265,37 @@ export const AdminAlbumsTab: React.FC<AdminAlbumsTabProps> = ({ onNotify }) => {
                   />
                 </div>
 
-                <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Release Year</label>
-                  <input
-                    type="number"
-                    value={formYear}
-                    onChange={e => setFormYear(Number(e.target.value))}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:border-[#1058A8] outline-none"
-                  />
-                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 col-span-2">
+                  <div>
+                    <label className="block font-bold text-[#0C2340] mb-1">Release Year</label>
+                    <input
+                      type="number"
+                      value={formYear}
+                      onChange={e => setFormYear(Number(e.target.value))}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:border-[#1058A8] outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Track Count</label>
-                  <input
-                    type="number"
-                    value={formTrackCount}
-                    onChange={e => setFormTrackCount(Number(e.target.value))}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:border-[#1058A8] outline-none"
-                  />
+                  <div>
+                    <label className="block font-bold text-[#0C2340] mb-1">Track Count</label>
+                    <input
+                      type="number"
+                      value={formTrackCount}
+                      onChange={e => setFormTrackCount(Number(e.target.value))}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:border-[#1058A8] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-[#0C2340] mb-1">Album Price (KES)</label>
+                    <input
+                      type="number"
+                      value={formPriceKes}
+                      onChange={e => setFormPriceKes(Number(e.target.value) || 500)}
+                      placeholder="500"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:border-[#1058A8] outline-none font-bold text-[#1058A8]"
+                    />
+                  </div>
                 </div>
               </div>
 
