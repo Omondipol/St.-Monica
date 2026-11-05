@@ -30,6 +30,7 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
     hymnalTab,
     registerYouTubePlayer,
     setIsIntroCutoffOpen,
+    handleCutoffStop,
     isIntroCutoffOpen,
     isSupportModalOpen,
     isCartOpen,
@@ -102,13 +103,8 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
               if (isPlayingState) {
                 // Video is actively playing authentic choir song
               } else if (isEndedState) {
-                // If YouTube video ends before 40s or reaches end
-                setCurrentTimeSeconds(40);
-                setIsPlaying(false);
-                if (!hasShownCutoffInVisit(currentSong.id)) {
-                  markCutoffShownInVisit(currentSong.id);
-                  setIsIntroCutoffOpen(true);
-                }
+                // If YouTube video ends before 40s or reaches end, halt and show cutoff popup
+                handleCutoffStop();
               }
             },
             onError: () => {
@@ -184,6 +180,24 @@ export const YouTubeAudioHost: React.FC<YouTubeAudioHostProps> = ({ currentRoute
       }
     } catch (_) {}
   }, [isPlaying, isPlayerReady, isMuted, volume]);
+
+  // Dedicated active check on YouTube player current time: strictly stop and trigger popup at 40 seconds
+  useEffect(() => {
+    if (!isPlaying || !isPlayerReady) return;
+    const interval = setInterval(() => {
+      const player = playerRef.current;
+      if (!player) return;
+      try {
+        if (typeof player.getCurrentTime === 'function') {
+          const t = player.getCurrentTime();
+          if (typeof t === 'number' && !isNaN(t) && t >= 40) {
+            handleCutoffStop();
+          }
+        }
+      } catch (_) {}
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isPlaying, isPlayerReady, handleCutoffStop]);
 
   // Update position of the player container:
   // 1. In expanded hymnal 'listen' tab: anchor directly over #yt-expanded-player-slot in the left column.

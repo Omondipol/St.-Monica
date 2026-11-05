@@ -11,7 +11,8 @@ export const YouTubePlayerModal: React.FC = () => {
     isYoutubeModalOpen, 
     setIsYoutubeModalOpen, 
     lang,
-    openSupportModal
+    openSupportModal,
+    handleCutoffStop
   } = useChoir();
 
   React.useEffect(() => {
@@ -25,6 +26,15 @@ export const YouTubePlayerModal: React.FC = () => {
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isYoutubeModalOpen, setIsYoutubeModalOpen]);
+
+  // Strictly enforce 40-second cutoff for video preview modal as well
+  React.useEffect(() => {
+    if (!isYoutubeModalOpen) return;
+    const timer = setTimeout(() => {
+      handleCutoffStop();
+    }, 40000);
+    return () => clearTimeout(timer);
+  }, [isYoutubeModalOpen, handleCutoffStop]);
 
   if (!isYoutubeModalOpen || !currentSong) return null;
 
@@ -79,7 +89,7 @@ export const YouTubePlayerModal: React.FC = () => {
         <div className="relative w-full aspect-video bg-black flex items-center justify-center">
           {videoId ? (
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
+              src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&end=40`}
               title={currentSong.title}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

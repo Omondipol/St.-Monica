@@ -166,6 +166,7 @@ interface ChoirContextType {
   setIsPlaying: (playing: boolean) => void;
   setCurrentTimeSeconds: (time: number) => void;
   setIsIntroCutoffOpen: (open: boolean) => void;
+  handleCutoffStop: () => void;
   setAudioError: (err: boolean) => void;
   hasShownCutoffInVisit: (songId: string) => boolean;
   markCutoffShownInVisit: (songId: string) => void;
@@ -1581,9 +1582,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     currentTimeRef.current = 40;
     setCurrentTimeSeconds(40);
     setIsPlaying(false);
-    setIsIntroCutoffOpenState(true);
+    setIsIntroCutoffOpen(true);
     markCutoffShownInVisit(currentSong.id);
-  }, [currentSong.id, markCutoffShownInVisit]);
+  }, [currentSong.id, markCutoffShownInVisit, setIsIntroCutoffOpen]);
 
   // Initialize persistent Audio instance once with timeupdate listener
   useEffect(() => {
@@ -2597,6 +2598,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsPlaying,
         setCurrentTimeSeconds,
         setIsIntroCutoffOpen,
+        handleCutoffStop,
         setAudioError,
         hasShownCutoffInVisit,
         markCutoffShownInVisit,
@@ -2803,6 +2805,7 @@ export const useChoir = (): ChoirContextType => {
       setIsPlaying: () => {},
       setCurrentTimeSeconds: () => {},
       setIsIntroCutoffOpen: () => {},
+      handleCutoffStop: () => {},
       setAudioError: () => {},
       hasShownCutoffInVisit: () => false,
       markCutoffShownInVisit: () => {},
