@@ -332,11 +332,29 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   const initialConfigRef = useRef<{ zoom: number; pan: { x: number; y: number } }>({ zoom: 1, pan: { x: 0, y: 0 } });
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Active crop frame dimensions (exact 4:5 ratio: 240 × 300)
-  const FRAME_W = target === 'profile' ? 240 : 320;
-  const FRAME_H = target === 'profile' ? 300 : 220;
+  // Active aspect ratio & frame dimensions
+  const activeRatio = (aspectRatio && aspectRatio > 0)
+    ? aspectRatio
+    : (target === 'profile' ? 4 / 5 : (target === 'logo' ? 1 : 16 / 9));
 
-  // Clamps pan to prevent empty margins inside the 4:5 frame
+  // Determine crop box size based on target ratio:
+  // For widescreen hero / landscape banners (16:9, 16:10, 21:9): 440px wide by (440 / activeRatio) px tall
+  // For square: 280 × 280 px
+  // For portrait (4:5, 3:4): 300px tall by (300 * activeRatio) px wide
+  let FRAME_W = 240;
+  let FRAME_H = 300;
+  if (activeRatio >= 1.4) {
+    FRAME_W = 440;
+    FRAME_H = Math.round(FRAME_W / activeRatio); // 16:9 -> 440 × 248
+  } else if (activeRatio >= 0.95 && activeRatio <= 1.05) {
+    FRAME_W = 280;
+    FRAME_H = 280; // 1:1 square
+  } else {
+    FRAME_H = 300;
+    FRAME_W = Math.round(FRAME_H * activeRatio); // 4:5 -> 240 × 300
+  }
+
+  // Clamps pan to prevent empty margins inside the frame
   const clampPan = useCallback((panToClamp: { x: number; y: number }, currentZoom: number) => {
     if (!previewDimensions.width || !previewDimensions.height) return panToClamp;
     const maxPanX = Math.max(0, (previewDimensions.width * currentZoom - FRAME_W) / 2);
@@ -347,7 +365,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     };
   }, [previewDimensions, FRAME_W, FRAME_H]);
 
-  // Load photo, apply EXIF orientation, scale down for preview, and compute face-aware start
+  // Load photo, apply EXIF orientation, scale down for preview, and compute framing
   useEffect(() => {
     if (!file || !isOpen) return;
 
@@ -366,10 +384,14 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         const fullH = fullCanvas.height;
         setNaturalDimensions({ width: fullW, height: fullH });
 
-        // 2. Small photo warning check (must be at least 800 × 1000 px for profile)
+        // 2. Small photo warning check
         if (target === 'profile') {
           if (fullW < UPLOAD_RULES.minProfileWidth || fullH < UPLOAD_RULES.minProfileHeight) {
             setValidationError('This photo is too small and will look blurry. Please upload the original photo from your camera or gallery.');
+          }
+        } else if (target === 'banner') {
+          if (fullW < 1200 || fullH < 600) {
+            setValidationWarning('For the main hero section, a high-resolution photo of at least 1920 × 1080 px is recommended.');
           }
         }
 
@@ -398,7 +420,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         setPreviewSrc(prevUrl);
 
         // 4. Calculate starting zoom from photo's real width and height
-        // Minimum zoom = level where photo exactly covers the 4:5 frame (no empty space)
+        // Minimum zoom = level where photo exactly covers the frame (no empty space)
         const calculatedMinZoom = Math.max(FRAME_W / prevW, FRAME_H / prevH);
         const calculatedMaxZoom = calculatedMinZoom * 4; // up to 4x beyond min zoom
         setMinZoom(calculatedMinZoom);
@@ -408,28 +430,33 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         const maxPanX = Math.max(0, (prevW * initialZoom - FRAME_W) / 2);
         const maxPanY = Math.max(0, (prevH * initialZoom - FRAME_H) / 2);
 
-        // 5. Face detection for face-aware positioning
-        const face = await detectFaceInCanvas(previewCanvas);
+        // 5. Positioning logic
         let initPanX = 0;
         let initPanY = 0;
 
-        if (face && target === 'profile') {
-          // Frame centered on face horizontally
-          const faceCenterX = face.x + face.width / 2;
-          initPanX = (prevW / 2 - faceCenterX) * initialZoom;
-
-          // Leave space above head matching "Top of head guide" line
-          // Top guide line is at -FRAME_H / 2 + 36px from center (-114px)
-          const yGuide = -FRAME_H / 2 + 36;
-          const headTopY = Math.max(0, face.y - face.height * 0.35);
-          initPanY = yGuide - (headTopY - prevH / 2) * initialZoom;
-        } else {
-          // If no face detected: center frame horizontally, position slightly above vertical center
+        if (target === 'profile') {
+          // Face detection for face-aware portrait positioning
+          const face = await detectFaceInCanvas(previewCanvas);
+          if (face) {
+            const faceCenterX = face.x + face.width / 2;
+            initPanX = (prevW / 2 - faceCenterX) * initialZoom;
+            const yGuide = -FRAME_H / 2 + 36;
+            const headTopY = Math.max(0, face.y - face.height * 0.35);
+            initPanY = yGuide - (headTopY - prevH / 2) * initialZoom;
+          } else {
+            initPanX = 0;
+            initPanY = Math.round(maxPanY * 0.35);
+          }
+        } else if (target === 'banner') {
+          // For widescreen hero: start centered horizontally and vertically
           initPanX = 0;
-          initPanY = Math.round(maxPanY * 0.35);
+          initPanY = 0;
+        } else {
+          initPanX = 0;
+          initPanY = 0;
         }
 
-        // Clamp to ensure zero empty space
+        // Clamp to ensure zero empty space inside crop frame
         initPanX = Math.max(-maxPanX, Math.min(maxPanX, initPanX));
         initPanY = Math.max(-maxPanY, Math.min(maxPanY, initPanY));
 
@@ -548,10 +575,13 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
       if (target === 'profile') {
         outW = Math.max(800, Math.min(1600, Math.round(sw)));
         outH = Math.round(outW / (4 / 5)); // strict 4:5 portrait
+      } else if (activeRatio >= 1.4) {
+        // Direct to expected widescreen hero screen size (1920x1080 or up to 2400)
+        outW = Math.min(2400, Math.max(1920, Math.round(sw)));
+        outH = Math.round(outW / activeRatio);
       } else {
-        // Direct to expected large screen size, maintaining full surface clarity
-        outW = Math.min(2400, Math.max(1600, Math.round(sw)));
-        outH = Math.round(sh * (outW / sw));
+        outW = Math.min(2400, Math.max(1200, Math.round(sw)));
+        outH = Math.round(outW / activeRatio);
       }
 
       // Crop from original full-resolution photo (not preview)
@@ -562,7 +592,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         croppedCanvas,
         file,
         target,
-        target === 'profile' ? 'leaders' : 'gallery'
+        target === 'profile' ? 'leaders' : (target === 'banner' ? 'hero' : 'gallery')
       );
 
       setTimeout(() => {
@@ -576,11 +606,11 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
       if (fullResCanvasRef.current) {
         try {
           const fallbackCanvas = document.createElement('canvas');
-          fallbackCanvas.width = 800;
-          fallbackCanvas.height = 1000;
+          fallbackCanvas.width = target === 'profile' ? 800 : 1920;
+          fallbackCanvas.height = target === 'profile' ? 1000 : 1080;
           const ctx = fallbackCanvas.getContext('2d');
           if (ctx) {
-            ctx.drawImage(fullResCanvasRef.current, 0, 0, 800, 1000);
+            ctx.drawImage(fullResCanvasRef.current, 0, 0, fallbackCanvas.width, fallbackCanvas.height);
             const dataUrl = fallbackCanvas.toDataURL('image/webp', 0.90);
             onComplete({ url: dataUrl, cardUrl: dataUrl });
             setIsProcessing(false);
@@ -598,12 +628,12 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white text-slate-800 border border-slate-200 rounded-lg w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-white text-slate-800 border border-slate-200 rounded-lg w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         
         {/* Modal Header */}
         <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
           <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340]">
-            Crop photo
+            {target === 'banner' ? 'Position & crop hero photo (16:9)' : target === 'profile' ? 'Crop profile photo (4:5)' : 'Crop photo'}
           </h3>
           <button
             type="button"
@@ -641,7 +671,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
         {/* Crop Stage Area */}
         <div 
-          className="relative flex-1 min-h-[300px] max-h-[440px] bg-slate-900 flex items-center justify-center p-4 overflow-hidden select-none"
+          className="relative flex-1 min-h-[320px] max-h-[460px] bg-slate-900 flex items-center justify-center p-4 overflow-hidden select-none"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -650,20 +680,28 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
           onTouchEnd={handleTouchEnd}
           onWheel={handleWheel}
         >
-          {/* Active 4:5 Crop Window with thin 1-2px border */}
+          {/* Active Crop Window with thin 1-2px border */}
           <div
-            className="relative pointer-events-none z-20 border border-[#E5A93C] rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col justify-between"
+            className="relative pointer-events-none z-20 border-2 border-[#E5A93C] rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col justify-between"
             style={{
               width: `${FRAME_W}px`,
               height: `${FRAME_H}px`,
             }}
           >
-            {/* Top Head-Clearance Guide */}
-            {target === 'profile' && (
+            {/* Top Guide: Profile vs Widescreen Hero */}
+            {target === 'profile' ? (
               <div className="w-full pt-2 px-3">
                 <div className="w-full border-b border-dashed border-sky-300/80 pb-1 text-center">
                   <span className="text-[10px] font-medium text-sky-100 bg-slate-900/80 px-2 py-0.5 rounded">
                     Leave space above the head.
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full pt-2 px-3">
+                <div className="w-full border-b border-dashed border-sky-300/80 pb-1 text-center">
+                  <span className="text-[10px] font-medium text-sky-100 bg-slate-900/80 px-2.5 py-0.5 rounded">
+                    16:9 Widescreen Hero · Position choir & altar
                   </span>
                 </div>
               </div>

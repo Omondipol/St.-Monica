@@ -248,13 +248,13 @@ img {
   animation: slowZoom 20s ease-in-out infinite alternate;
 }
 
-/* Continuous Ken Burns zoom animation for home carousel */
+/* Gentle Ken Burns subtle drift for home carousel - preserves composition without cropping choir heads */
 @keyframes kenburnsZoom {
   0% {
     transform: scale(1.0);
   }
   100% {
-    transform: scale(1.18);
+    transform: scale(1.04);
   }
 }
 

@@ -475,9 +475,10 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   helpText="High-resolution landscape photo (1920x1080 or 16:9 ratio recommended)."
                   presets={photoPresets}
                   aspectRatio="aspect-video"
+                  pipelineTarget="banner"
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                   <div>
                     <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1">
                       Slide Label / Internal Name
@@ -502,6 +503,22 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                       placeholder="e.g. Full choir singing at Sunday Sung Mass altar"
                       className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1">
+                      Focal Framing / Alignment
+                    </label>
+                    <select
+                      value={currentSlide.focus || '50% 35%'}
+                      onChange={(e) => handleUpdateCurrentSlideField('focus', e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white cursor-pointer"
+                    >
+                      <option value="50% 35%">Whole Choir & Altar (50% 35%)</option>
+                      <option value="50% 50%">Center (50% 50%)</option>
+                      <option value="50% 25%">Upper / Altar Faces (50% 25%)</option>
+                      <option value="60% 25%">Choirmaster Conducting (60% 25%)</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -679,6 +696,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   helpText="High-quality photo of St. Monica Catholic Church exterior or sanctuary, Section 58 Nakuru."
                   presets={photoPresets}
                   aspectRatio="aspect-[4/3]"
+                  pipelineTarget="banner"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
@@ -859,6 +877,7 @@ export const AdminHomepageTab: React.FC<AdminHomepageTabProps> = ({ onNotify }) 
                   helpText="Atmospheric, reverent image of choristers singing or church sanctuary."
                   presets={photoPresets}
                   aspectRatio="aspect-video"
+                  pipelineTarget="banner"
                 />
               </div>
 

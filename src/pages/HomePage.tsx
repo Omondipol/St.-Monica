@@ -56,29 +56,29 @@ const DESKTOP_HERO_SLIDES: HeroSlideData[] = [
     src: "/assets/choir/choir_01.jpg",
     alt: "Full choir at Sunday Sung Mass altar in St. Monica Catholic Church, Section 58",
     description: "Full Choir at Sunday Sung Mass",
-    focus: "50% 25%",
-    focusMobile: "50% 20%"
+    focus: "50% 35%",
+    focusMobile: "50% 30%"
   },
   {
     src: "/assets/choir/choir_03.jpg",
     alt: "St. Monica's Catholic Church sanctuary and altar, Section 58 Nakuru",
     description: "Parish Sanctuary & Church",
-    focus: "50% 30%",
-    focusMobile: "50% 25%"
+    focus: "50% 40%",
+    focusMobile: "50% 35%"
   },
   {
     src: "/assets/choir/choir_09.jpg",
     alt: "Choristers singing praise before the parish altar",
     description: "Singers in Sacred Song",
-    focus: "50% 20%",
-    focusMobile: "50% 15%"
+    focus: "50% 30%",
+    focusMobile: "50% 25%"
   },
   {
     src: "/assets/choir/choir_07.jpg",
     alt: "The choirmaster directing four-part vocal polyphony",
     description: "Choirmaster Directing",
-    focus: "60% 15%",
-    focusMobile: "60% 15%",
+    focus: "55% 25%",
+    focusMobile: "55% 25%",
     isChoirDirector: true
   }
 ];
@@ -88,29 +88,29 @@ const MOBILE_HERO_SLIDES: HeroSlideData[] = [
     src: "/assets/choir/choir_01.jpg",
     alt: "Full choir at Mass altar",
     description: "Full Choir at Mass",
-    focus: "50% 20%",
-    focusMobile: "50% 20%"
+    focus: "50% 30%",
+    focusMobile: "50% 30%"
   },
   {
     src: "/assets/choir/choir_03.jpg",
     alt: "St. Monica's Catholic Church sanctuary",
     description: "Parish Church",
-    focus: "50% 25%",
-    focusMobile: "50% 25%"
+    focus: "50% 35%",
+    focusMobile: "50% 35%"
   },
   {
     src: "/assets/choir/choir_09.jpg",
     alt: "Choristers singing sacred hymns",
     description: "Choristers Singing",
-    focus: "50% 15%",
-    focusMobile: "50% 15%"
+    focus: "50% 25%",
+    focusMobile: "50% 25%"
   },
   {
     src: "/assets/choir/choir_07.jpg",
     alt: "The choirmaster directing the choir",
     description: "Choirmaster Directing",
-    focus: "60% 15%",
-    focusMobile: "60% 15%",
+    focus: "55% 25%",
+    focusMobile: "55% 25%",
     isChoirDirector: true
   }
 ];
@@ -350,7 +350,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       ...def,
       src: customSrc || def.src,
       alt: custom?.alt || def.alt,
-      description: custom?.description || def.description
+      description: custom?.description || def.description,
+      focus: custom?.focus || def.focus,
+      focusMobile: (isMobile && custom?.focusMobile) ? custom.focusMobile : (custom?.focus || def.focusMobile)
     };
   });
 

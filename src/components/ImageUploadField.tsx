@@ -59,12 +59,40 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const [selectedFileForCrop, setSelectedFileForCrop] = useState<File | null>(null);
   const [isCropOpen, setIsCropOpen] = useState<boolean>(false);
 
+  // Dynamically resolve pipeline target:
+  // If explicitly provided and not default profile, use it.
+  // Otherwise detect from aspectRatio string or label.
+  const isVideoOrHero = aspectRatio.includes('video') || aspectRatio.includes('16/9') || aspectRatio.includes('16:9') || label.toLowerCase().includes('hero') || label.toLowerCase().includes('slide') || label.toLowerCase().includes('banner');
+  const isSquare = aspectRatio.includes('square') || aspectRatio.includes('1/1') || label.toLowerCase().includes('logo') || label.toLowerCase().includes('artwork');
+  const isGallery = aspectRatio.includes('16/10') || aspectRatio.includes('4/3') || label.toLowerCase().includes('gallery');
+
+  const resolvedTarget: PipelineTarget = pipelineTarget !== 'profile'
+    ? pipelineTarget
+    : isVideoOrHero
+    ? 'banner'
+    : isSquare
+    ? 'logo'
+    : isGallery
+    ? 'gallery'
+    : 'profile';
+
+  // Numeric aspect ratio passed to crop tool
+  const numericAspectRatio = ((): number => {
+    if (isVideoOrHero) return 16 / 9;
+    if (isSquare) return 1;
+    if (aspectRatio.includes('16/10')) return 16 / 10;
+    if (aspectRatio.includes('4/3')) return 4 / 3;
+    if (aspectRatio.includes('21/9')) return 21 / 9;
+    if (aspectRatio.includes('4/5')) return 4 / 5;
+    return resolvedTarget === 'banner' ? 16 / 9 : (resolvedTarget === 'logo' ? 1 : 4 / 5);
+  })();
+
   const effectiveValue = value || defaultValue || '';
 
   const ruleMessage = customRuleText || (
-    pipelineTarget === 'banner'
-      ? 'Use the original photo, not a WhatsApp copy. At least 1600 × 500 px.'
-      : pipelineTarget === 'gallery'
+    resolvedTarget === 'banner'
+      ? 'Use the original landscape photo, not a WhatsApp copy. At least 1920 × 1080 px.'
+      : resolvedTarget === 'gallery'
       ? 'Use the original photo, not a WhatsApp copy. At least 1200 × 900 px.'
       : 'Use the original photo, not a WhatsApp copy. At least 800 × 1000 px.'
   );
@@ -276,7 +304,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             setSelectedFileForCrop(null);
           }}
           file={selectedFileForCrop}
-          target={pipelineTarget}
+          target={resolvedTarget}
+          aspectRatio={numericAspectRatio}
           onComplete={handleCropComplete}
         />
       )}
