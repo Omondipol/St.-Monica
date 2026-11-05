@@ -24,6 +24,7 @@ import {
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { CoreValuesSection } from '../components/CoreValuesSection';
 import { getAssetUrl } from '../utils/assetHelper';
+import { LIBRARY_CATEGORIES } from '../data/libraryData';
 
 import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
 import heroSlide2Faces from '../assets/images/hero_slide_2_faces.jpg';
@@ -1055,13 +1056,60 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </p>
             </div>
 
-            <button
-              onClick={() => onNavigate('shop')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] border border-[#0C2340]/20 rounded-xl cursor-pointer self-start sm:self-auto transition-colors"
+            <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+              <button
+                onClick={() => onNavigate('library')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer transition-colors shadow-xs"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>{lang === 'sw' ? 'Maktaba ya Noti (Bure)' : 'Sheet Music Library (Free)'}</span>
+              </button>
+              <button
+                onClick={() => onNavigate('shop')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#0C2340] bg-white hover:bg-[#EAF4FB] border border-[#0C2340]/20 rounded-xl cursor-pointer transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4 text-[#1058A8]" />
+                <span>{lang === 'sw' ? 'Duka Lote la Noti' : 'All Sheet Music'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick-Jump Liturgical Categories Ribbon (Bilingual Kiswahili & English) */}
+          <div className="space-y-2 pt-1 pb-1">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-source">
+              <span className="font-semibold text-[#0C2340] text-[11px] uppercase tracking-wider">
+                {lang === 'sw' ? 'Makundi ya Kiliturujia (Maktaba ya Noti):' : 'Liturgical Categories (Sheet Music Library):'}
+              </span>
+              <button 
+                onClick={() => onNavigate('library')} 
+                className="text-[#1058A8] font-bold hover:underline text-[11px] flex items-center gap-1 cursor-pointer"
+              >
+                <span>{lang === 'sw' ? 'Tazama Makundi Yote 31' : 'View All 31 Categories'}</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div 
+              className="flex items-center gap-2 overflow-x-auto pb-2 pt-0.5 scrollbar-none scroll-smooth text-xs"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              <ShoppingBag className="w-4 h-4 text-[#1058A8]" />
-              <span>{lang === 'sw' ? 'Duka Lote la Noti' : 'All Sheet Music'}</span>
-            </button>
+              {LIBRARY_CATEGORIES.slice(0, 12).map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => onNavigate('library')}
+                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#EAF4FB] text-[#0C2340] border border-[#0C2340]/15 whitespace-nowrap font-medium text-[11px] transition-all cursor-pointer shadow-2xs hover:border-[#1058A8] flex items-center gap-1.5 shrink-0"
+                >
+                  <span className="font-bold text-[#1058A8]">{cat.nameSw}</span>
+                  <span className="text-slate-500 text-[10px]">({cat.nameEn})</span>
+                </button>
+              ))}
+              <button
+                onClick={() => onNavigate('library')}
+                className="px-3 py-1.5 rounded-lg bg-[#EAF4FB] hover:bg-[#1058A8] text-[#1058A8] hover:text-white font-bold text-[11px] transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                {lang === 'sw' ? '+ Makundi Mengine' : '+ More Categories'}
+              </button>
+            </div>
           </div>
 
           {/* 4 Cards: Fixed 4/3 aspect ratio, identical CSS watermark, KES 300 price */}

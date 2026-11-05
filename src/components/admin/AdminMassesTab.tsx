@@ -298,8 +298,14 @@ export const AdminMassesTab: React.FC<AdminMassesTabProps> = ({ onNotify }) => {
 
       {/* Add / Edit Mass Modal */}
       {showMassModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-[#0C2340]/15 space-y-5 text-left">
+        <div 
+          onClick={() => setShowMassModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C2340]/80 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-[#0C2340]/15 space-y-5 text-left cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                 {editingMassId ? 'Edit Sunday Mass' : 'Add New Sunday Mass'}

@@ -49,7 +49,7 @@ import { SUPABASE_DATABASE_SQL } from '../lib/supabaseChoirData';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
-import { LIBRARY_CATEGORIES, LibrarySong } from '../data/libraryData';
+import { LIBRARY_CATEGORIES, LibrarySong, isSongInCategory } from '../data/libraryData';
 import { ImageUploadField } from '../components/ImageUploadField';
 import { getAssetUrl, extractYouTubeVideoId, getSongYouTubeId } from '../utils/assetHelper';
 import { AdminHomepageTab } from '../components/admin/AdminHomepageTab';
@@ -168,7 +168,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [libComposer, setLibComposer] = useState('');
   const [libArranger, setLibArranger] = useState('');
   const [libLanguage, setLibLanguage] = useState<'Kiswahili' | 'English' | 'Latin' | 'Kikuyu' | 'Dholuo' | 'Kalenjin' | 'Other'>('Kiswahili');
-  const [libCategories, setLibCategories] = useState<string[]>(['kuingia']);
+  const [libCategories, setLibCategories] = useState<string[]>(['mwanzo']);
+  const [adminLibCatFilter, setAdminLibCatFilter] = useState<string>('all');
   const [libSeason, setLibSeason] = useState('');
   const [libVoices, setLibVoices] = useState<'SATB' | 'Unison' | 'Solo' | 'SSAA' | 'TTBB'>('SATB');
   const [libTempo, setLibTempo] = useState('');
@@ -1679,16 +1680,34 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     Maktaba ya Noti
                   </h2>
                   <p className="text-xs text-slate-600 font-source mt-0.5">
-                    Scores available for free download.
+                    Scores available for free download · Bilingual categories.
                   </p>
                 </div>
-                <button
-                  onClick={openAddLibSong}
-                  className="px-3.5 py-2 text-xs font-semibold bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add song</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={adminLibCatFilter}
+                    onChange={(e) => setAdminLibCatFilter(e.target.value)}
+                    className="px-2.5 py-1.5 text-xs font-semibold text-[#0C2340] bg-white border border-[#0C2340]/20 rounded-lg shadow-2xs max-w-[220px] truncate"
+                    aria-label="Filter by category"
+                  >
+                    <option value="all">All Categories ({librarySongs.length})</option>
+                    {LIBRARY_CATEGORIES.map(cat => {
+                      const count = librarySongs.filter(s => isSongInCategory(s.categories, cat.id)).length;
+                      return (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nameSw} ({cat.nameEn}) - {count}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <button
+                    onClick={openAddLibSong}
+                    className="px-3.5 py-2 text-xs font-semibold bg-[#1058A8] hover:bg-[#0C2340] text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add song</span>
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white border border-[#0C2340]/15 rounded-lg overflow-hidden">
@@ -1697,13 +1716,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     <tr>
                       <th className="py-2.5 px-3.5">Title</th>
                       <th className="py-2.5 px-3.5">Voices</th>
-                      <th className="py-2.5 px-3.5">Category</th>
+                      <th className="py-2.5 px-3.5">Category (Kiswahili & English)</th>
                       <th className="py-2.5 px-3.5">Access</th>
                       <th className="py-2.5 px-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#0C2340]/5 font-source">
-                    {librarySongs.map((song) => {
+                    {librarySongs
+                      .filter(song => adminLibCatFilter === 'all' || isSongInCategory(song.categories, adminLibCatFilter))
+                      .map((song) => {
                       const cleanTitle = song.title.replace(/\s+\.$/, '').trim();
                       const titleDisplay = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
                       let comp = song.composer || 'Traditional';
@@ -1717,7 +1738,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       }
 
                       const hasDiffArranger = song.arranger && song.arranger.trim().toLowerCase() !== comp.toLowerCase();
-                      const category = (song.categories && song.categories[0]) || song.season || 'Kuingia';
+                      const firstCat = (song.categories && song.categories[0]);
+                      const matchedCat = LIBRARY_CATEGORIES.find(c => c.id === firstCat || c.legacyIds?.includes(firstCat));
+                      const categoryDisplay = matchedCat 
+                        ? `${matchedCat.nameSw} (${matchedCat.nameEn})` 
+                        : (firstCat || song.season || 'Mwanzo (Entrance)');
 
                       return (
                         <tr key={song.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
@@ -1733,8 +1758,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                           <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-700">
                             {song.voices || 'SATB'} · {song.language || 'Kiswahili'}
                           </td>
-                          <td className="py-2.5 px-3.5 whitespace-nowrap capitalize text-slate-700">
-                            {category}
+                          <td className="py-2.5 px-3.5 text-slate-700 font-medium">
+                            <span className="inline-block bg-[#1058A8]/10 text-[#1058A8] px-2 py-0.5 rounded text-[11px]">
+                              {categoryDisplay}
+                            </span>
                           </td>
                           <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-600 text-[11px]">
                             Public domain · PDF · Audio
@@ -2069,8 +2096,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: ADD / EDIT GROUP PHOTO (SUPABASE DIRECT STORAGE & DATABASE INTEGRATION) */}
       {isPhotoModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
+        <div 
+          onClick={() => setIsPhotoModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 cursor-default"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingPhotoId ? 'Edit Choir Group Photo' : 'Add Photo'}
@@ -2214,8 +2247,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       )}
       {/* MODAL: ADD / EDIT LEADER */}
       {isLeaderModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+        <div 
+          onClick={() => setIsLeaderModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
               <div>
                 <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
@@ -2353,8 +2392,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: ADD / EDIT REPERTOIRE SONG */}
       {isSongModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={() => setIsSongModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto cursor-default"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingSongId ? 'Edit Repertoire Hymn' : 'Add New Recorded Hymn'}
@@ -2684,8 +2729,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: SUPABASE DATABASE SQL SETUP */}
       {showSqlModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={() => setShowSqlModal(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
               <div className="flex items-center gap-2">
                 <Database className="w-5 h-5 text-[#1058A8]" />
@@ -2729,8 +2780,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: ADD / EDIT SHEET MUSIC SCORE */}
       {isSheetModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+        <div 
+          onClick={() => setIsSheetModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingSheetId ? 'Edit sheet music score' : 'Add sheet music score'}
@@ -2873,8 +2930,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: ADD / EDIT LITURGICAL EVENT */}
       {isEventModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={() => setIsEventModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto cursor-default"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingEventId ? 'Edit Parish Event' : 'Add New Liturgical Event'}
@@ -2977,8 +3040,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: ADD / EDIT MAKTABA YA NOTI LIBRARY SCORE */}
       {showLibModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={() => setShowLibModal(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 max-h-[90vh] overflow-y-auto cursor-default"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 {editingLibSongId ? 'Edit Library Score' : 'Add Song to Maktaba ya Noti'}
@@ -3191,8 +3260,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: BULK SPREADSHEET IMPORT */}
       {showBulkSpreadsheetModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 shadow-2xl border border-[#0C2340]/20">
+        <div 
+          onClick={() => setShowBulkSpreadsheetModal(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 shadow-2xl border border-[#0C2340]/20 cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">Bulk Import Songs (CSV)</h3>
               <button onClick={() => setShowBulkSpreadsheetModal(false)} className="cursor-pointer">
@@ -3231,8 +3306,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
       {/* MODAL: RESET CONFIRMATION */}
       {showResetConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 space-y-4 shadow-xl border border-red-200">
+        <div 
+          onClick={() => setShowResetConfirmModal(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg max-w-md w-full p-6 space-y-4 shadow-xl border border-red-200 cursor-default"
+          >
             <h3 className="font-eb-garamond text-xl font-bold text-slate-900">
               Delete all content?
             </h3>

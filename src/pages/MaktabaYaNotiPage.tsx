@@ -3,7 +3,8 @@ import { useChoir } from '../context/ChoirContext';
 import { supabase } from '../lib/supabase';
 import { 
   LIBRARY_CATEGORIES, 
-  LibrarySong 
+  LibrarySong,
+  isSongInCategory
 } from '../data/libraryData';
 import { 
   Search, 
@@ -74,10 +75,20 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
     }
   };
 
-  // Group definitions for creative, quick category navigation
-  const MASS_PARTS = useMemo(() => ['kuingia', 'matoleo', 'komunyo', 'tafakari', 'shukrani', 'kutoka'], []);
-  const SEASONS_PARTS = useMemo(() => ['majilio', 'noeli', 'kwaresima', 'pasaka', 'roho-mtakatifu'], []);
-  const FEASTS_PARTS = useMemo(() => ['bikira-maria', 'zaburi', 'ndoa', 'watakatifu', 'mazishi', 'ubatizo'], []);
+  // Group definitions for creative, quick category navigation across all 31 categories
+  const MASS_PARTS = useMemo(() => [
+    'mwanzo', 'kuingia', 'sadaka-matoleo', 'matoleo', 'ekaristi-komunio', 'komunyo', 
+    'mafundisho-tafakari', 'tafakari', 'misa', 'misa-tec', 'kutoka', 'shukrani', 'zaburi'
+  ], []);
+  const SEASONS_PARTS = useMemo(() => [
+    'majilio', 'noeli', 'epifania', 'kwaresma', 'kwaresima', 'matawi', 'juma-kuu', 
+    'pasaka', 'kupaa-kwa-bwana', 'pentekoste', 'roho-mtakatifu'
+  ], []);
+  const FEASTS_PARTS = useMemo(() => [
+    'kristu-mfalme', 'utatu-mtakatifu', 'moyo-mtakatifu-wa-yesu', 'mama-maria', 'bikira-maria', 
+    'watakatifu', 'mwaka-mpya', 'mwaka-wa-familia', 'mwaka-wa-huruma-ya-mungu', 'anthem', 
+    'tenzi-za-kiswahili', 'ndoa', 'ubatizo', 'miito', 'mazishi'
+  ], []);
 
   const visibleCategories = useMemo(() => {
     if (categoryGroup === 'mass') return LIBRARY_CATEGORIES.filter(c => MASS_PARTS.includes(c.id));
@@ -117,7 +128,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   const filteredSongs = useMemo(() => {
     return librarySongs.filter(song => {
       // Category filter (if inside a category and no global search term overrides it)
-      if (selectedCategoryId && !song.categories.includes(selectedCategoryId)) {
+      if (selectedCategoryId && !isSongInCategory(song.categories, selectedCategoryId)) {
         return false;
       }
 
@@ -162,11 +173,11 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
     return filteredSongs.slice(startIndex, startIndex + PAGE_SIZE);
   }, [filteredSongs, currentPage]);
 
-  // Song count per category (exact dynamic count)
+  // Song count per category (exact dynamic count supporting legacy and new categories)
   const categoryCounts = useMemo(() => {
     const counts: { [catId: string]: number } = {};
     LIBRARY_CATEGORIES.forEach(c => {
-      counts[c.id] = librarySongs.filter(s => s.categories.includes(c.id)).length;
+      counts[c.id] = librarySongs.filter(s => isSongInCategory(s.categories, c.id)).length;
     });
     return counts;
   }, [librarySongs]);

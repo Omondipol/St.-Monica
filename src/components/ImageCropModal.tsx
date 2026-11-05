@@ -627,8 +627,18 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   const [saveError, setSaveError] = useState<string>('');
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white text-slate-800 border border-slate-200 rounded-lg w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isProcessing) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white text-slate-800 border border-slate-200 rounded-lg w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden cursor-default"
+      >
         
         {/* Modal Header */}
         <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">

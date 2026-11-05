@@ -511,8 +511,14 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
 
       {/* Manual Contribution Entry Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20">
+        <div 
+          onClick={() => setIsModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-[#0C2340]/20 cursor-default"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-[#0C2340]/10">
               <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
                 Record Contribution / Payment

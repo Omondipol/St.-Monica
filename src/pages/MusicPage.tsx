@@ -903,8 +903,14 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
       {/* ================= MODAL: PDF SCORE PREVIEW & SAMPLE DOWNLOAD ================= */}
       {previewScoreItem && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto flex flex-col justify-between">
+        <div 
+          onClick={() => setPreviewScoreItem(null)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto flex flex-col justify-between cursor-default"
+          >
             
             {/* Modal Header */}
             <div className="flex items-start justify-between pb-4 border-b border-slate-200 shrink-0">

@@ -332,8 +332,14 @@ export const AdminCoreValuesTab: React.FC<AdminCoreValuesTabProps> = ({ onNotify
 
       {/* Edit / Add Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-lg w-full p-5 space-y-4 shadow-xl border border-[#0C2340]/20">
+        <div 
+          onClick={() => setShowModal(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg max-w-lg w-full p-5 space-y-4 shadow-xl border border-[#0C2340]/20 cursor-default"
+          >
             <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
               {editingId ? 'Edit Value' : 'Add Value'}
             </h3>

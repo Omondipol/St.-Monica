@@ -8,6 +8,7 @@ export interface LibraryCategory {
   descriptionEn: string;
   themeColor: string;
   motif: 'cross' | 'bread' | 'cup' | 'dove' | 'candle' | 'water' | 'ring' | 'crown' | 'harp' | 'book' | 'incense';
+  legacyIds?: string[];
 }
 
 export interface LibrarySong {
@@ -42,49 +43,79 @@ export interface LibrarySong {
 
 export const LIBRARY_CATEGORIES: LibraryCategory[] = [
   {
-    id: 'kuingia',
-    nameSw: 'Wimbo wa Kuingia',
-    nameEn: 'Entrance',
-    descriptionSw: 'Nyimbo za maandamano ya kuanza Misa Takatifu.',
-    descriptionEn: 'Hymns and chants for the opening liturgical procession.',
+    id: 'anthem',
+    nameSw: 'Anthem',
+    nameEn: 'Anthem',
+    descriptionSw: 'Nyimbo maalum za sifa, matukio rasmi na sherehe za kikanisa.',
+    descriptionEn: 'Sacred anthems and ceremonial liturgical hymns.',
     themeColor: '#1058A8',
-    motif: 'cross'
+    motif: 'harp'
   },
   {
-    id: 'matoleo',
-    nameSw: 'Matoleo',
-    nameEn: 'Offertory',
-    descriptionSw: 'Nyimbo za utoaji wa sadaka, mkate na divai altaroni.',
-    descriptionEn: 'Hymns sung during the presentation of gifts and altar preparation.',
-    themeColor: '#1058A8',
-    motif: 'bread'
-  },
-  {
-    id: 'komunyo',
-    nameSw: 'Komunyo',
-    nameEn: 'Communion',
-    descriptionSw: 'Nyimbo za kuungana na Kristo katika Ekaristi Takatifu.',
+    id: 'ekaristi-komunio',
+    legacyIds: ['komunyo', 'ekaristi'],
+    nameSw: 'Ekaristi / Komunio',
+    nameEn: 'Eucharist / Holy Communion',
+    descriptionSw: 'Nyimbo za kuungana na Kristo katika Sakramenti Kuu ya Altare.',
     descriptionEn: 'Sacred hymns sung while receiving the Holy Eucharist.',
     themeColor: '#1058A8',
     motif: 'cup'
   },
   {
-    id: 'tafakari',
-    nameSw: 'Tafakari',
-    nameEn: 'Meditation',
-    descriptionSw: 'Nyimbo za shukurani na tafakari baada ya Komunyo.',
-    descriptionEn: 'Reflective and prayerful hymns of post-communion thanksgiving.',
+    id: 'epifania',
+    nameSw: 'Epifania',
+    nameEn: 'Epiphany',
+    descriptionSw: 'Kudhihirishwa kwa Bwana wetu kwa mataifa yote na Mamajusi.',
+    descriptionEn: 'The Manifestation of the Lord to the nations and the Magi.',
     themeColor: '#1058A8',
-    motif: 'harp'
+    motif: 'candle'
   },
   {
-    id: 'kutoka',
-    nameSw: 'Wimbo wa Kutoka',
-    nameEn: 'Recessional',
-    descriptionSw: 'Nyimbo za kuhitimisha Misa na kutumwa duniani kwa amani.',
-    descriptionEn: 'Closing liturgical dismissal hymns as the congregation goes forth.',
+    id: 'juma-kuu',
+    nameSw: 'Juma Kuu',
+    nameEn: 'Holy Week',
+    descriptionSw: 'Kumbukumbu ya mateso, kifo na ushindi wa Msalaba wa Bwana wetu.',
+    descriptionEn: 'Solemn observance of the Passion, Cross, and Death of Christ.',
     themeColor: '#1058A8',
-    motif: 'incense'
+    motif: 'cross'
+  },
+  {
+    id: 'kristu-mfalme',
+    nameSw: 'Kristu Mfalme',
+    nameEn: 'Christ the King',
+    descriptionSw: 'Nyimbo za kushangilia enzi na utawala wa milele wa Kristo Mfalme.',
+    descriptionEn: 'Solemnity of Our Lord Jesus Christ, King of the Universe.',
+    themeColor: '#1058A8',
+    motif: 'crown'
+  },
+  {
+    id: 'kupaa-kwa-bwana',
+    nameSw: 'Kupaa kwa Bwana',
+    nameEn: 'Ascension of the Lord',
+    descriptionSw: 'Kupaa kwa Yesu mbinguni kwa shangwe na sauti ya panda.',
+    descriptionEn: 'The glorious Ascension of Our Lord Jesus into heaven.',
+    themeColor: '#1058A8',
+    motif: 'dove'
+  },
+  {
+    id: 'kwaresma',
+    legacyIds: ['kwaresima'],
+    nameSw: 'Kwaresma',
+    nameEn: 'Lent',
+    descriptionSw: 'Nyimbo za toba, mfungo, njia ya msalaba na huruma ya Mungu.',
+    descriptionEn: 'Penitential hymns of fasting, prayer, the cross, and divine mercy.',
+    themeColor: '#1058A8',
+    motif: 'cross'
+  },
+  {
+    id: 'mafundisho-tafakari',
+    legacyIds: ['tafakari'],
+    nameSw: 'Mafundisho / Tafakari',
+    nameEn: 'Teachings / Reflection',
+    descriptionSw: 'Nyimbo za mawaidha, mafundisho ya imani na tafakari ya kiroho.',
+    descriptionEn: 'Spiritual teachings, biblical reflections, and choral meditation.',
+    themeColor: '#1058A8',
+    motif: 'book'
   },
   {
     id: 'majilio',
@@ -96,96 +127,219 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
     motif: 'candle'
   },
   {
-    id: 'noeli',
-    nameSw: 'Noeli',
-    nameEn: 'Christmas',
-    descriptionSw: 'Nyimbo za shangwe ya kuzaliwa kwa Bwana wetu Yesu Kristo.',
-    descriptionEn: 'Joyous hymns celebrating the Nativity and Incarnation.',
-    themeColor: '#1058A8',
-    motif: 'cross'
-  },
-  {
-    id: 'kwaresima',
-    nameSw: 'Kwaresima',
-    nameEn: 'Lent',
-    descriptionSw: 'Nyimbo za toba, mfungo, njia ya msalaba na huruma ya Mungu.',
-    descriptionEn: 'Penitential hymns of fasting, the cross, and divine mercy.',
-    themeColor: '#1058A8',
-    motif: 'cross'
-  },
-  {
-    id: 'pasaka',
-    nameSw: 'Pasaka',
-    nameEn: 'Easter',
-    descriptionSw: 'Kushangilia ushindi wa ufufuko wa Kristo, Aleluya.',
-    descriptionEn: 'Triumphant hymns celebrating the Resurrection of the Lord.',
+    id: 'mama-maria',
+    legacyIds: ['bikira-maria'],
+    nameSw: 'Mama Maria',
+    nameEn: 'Mother Mary',
+    descriptionSw: 'Nyimbo za heshima kwa Bikira Maria, Mama wa Mungu na Mwombezi wetu.',
+    descriptionEn: 'Marian hymns honoring the Blessed Virgin Mary and our intercessor.',
     themeColor: '#1058A8',
     motif: 'crown'
   },
   {
-    id: 'bikira-maria',
-    nameSw: 'Bikira Maria',
-    nameEn: 'Mary',
-    descriptionSw: 'Nyimbo za heshima kwa Mama wa Mungu na Mwombezi wetu.',
-    descriptionEn: 'Marian hymns honoring the Blessed Mother and our intercessor.',
+    id: 'matawi',
+    nameSw: 'Matawi',
+    nameEn: 'Palm Sunday',
+    descriptionSw: 'Kuingia kwa ushindi kwa Bwana wetu Yerusalemu: Hosana Mwana wa Daudi.',
+    descriptionEn: 'The Triumphal Entry of the Lord into Jerusalem: Hosanna in the highest.',
     themeColor: '#1058A8',
-    motif: 'crown'
-  },
-  {
-    id: 'zaburi',
-    nameSw: 'Zaburi',
-    nameEn: 'Psalms',
-    descriptionSw: 'Zaburi za mwitikio na nyimbo za sifa za kimaandiko.',
-    descriptionEn: 'Responsorial psalms and scriptural canticles.',
-    themeColor: '#1058A8',
-    motif: 'book'
-  },
-  {
-    id: 'shukrani',
-    nameSw: 'Shukrani',
-    nameEn: 'Thanksgiving',
-    descriptionSw: 'Kumsifu Bwana kwa matendo yake makuu na fadhili zake.',
-    descriptionEn: 'Hymns of gratitude and joy for God’s steadfast love.',
-    themeColor: '#1058A8',
-    motif: 'harp'
-  },
-  {
-    id: 'ndoa',
-    nameSw: 'Ndoa',
-    nameEn: 'Weddings',
-    descriptionSw: 'Nyimbo za baraka ya Sakramenti ya Ndoa Takatifu.',
-    descriptionEn: 'Nuptial hymns celebrating the Sacrament of Holy Matrimony.',
-    themeColor: '#1058A8',
-    motif: 'ring'
-  },
-  {
-    id: 'ubatizo',
-    nameSw: 'Ubatizo',
-    nameEn: 'Baptism',
-    descriptionSw: 'Nyimbo za kuzaliwa upya kwa maji na Roho Mtakatifu.',
-    descriptionEn: 'Gentle hymns for the celebration of Holy Baptism and new life.',
-    themeColor: '#1058A8',
-    motif: 'water'
+    motif: 'bread'
   },
   {
     id: 'mazishi',
     nameSw: 'Mazishi',
-    nameEn: 'Funeral',
-    descriptionSw: 'Sala ya raha ya milele na matumaini ya ufufuko.',
+    nameEn: 'Funeral / Requiem',
+    descriptionSw: 'Sala ya raha ya milele, matumaini ya ufufuko na faraja ya Kikristo.',
     descriptionEn: 'Solemn requiem hymns of Christian hope and eternal rest.',
     themeColor: '#1058A8',
     motif: 'candle'
   },
   {
-    id: 'roho-mtakatifu',
-    nameSw: 'Roho Mtakatifu',
-    nameEn: 'Holy Spirit',
-    descriptionSw: 'Nyimbo za kumwomba Roho Mtakatifu na karama zake (Pentekoste).',
-    descriptionEn: 'Invocations to the Holy Spirit for guidance and Pentecost grace.',
+    id: 'miito',
+    nameSw: 'Miito',
+    nameEn: 'Vocations',
+    descriptionSw: 'Kuitikia wito mtakatifu wa Upadre, Utawa na utume kaniasani.',
+    descriptionEn: 'Hymns praying for holy vocations to priesthood and religious life.',
     themeColor: '#1058A8',
     motif: 'dove'
+  },
+  {
+    id: 'misa',
+    legacyIds: ['kutoka'],
+    nameSw: 'Misa',
+    nameEn: 'Holy Mass / Ordinary',
+    descriptionSw: 'Sehemu za Misa Takatifu: Kyrie, Gloria, Sanctus, Agnus Dei na Wimbo wa Kutoka.',
+    descriptionEn: 'Parts of the Holy Mass: Kyrie, Gloria, Sanctus, Agnus Dei, and Recessional.',
+    themeColor: '#1058A8',
+    motif: 'cross'
+  },
+  {
+    id: 'misa-tec',
+    nameSw: 'Misa TEC',
+    nameEn: 'TEC Mass',
+    descriptionSw: 'Nyimbo na melodi zilizoidhinishwa za Misa ya Baraza la Maaskofu (TEC).',
+    descriptionEn: 'Approved liturgical settings of the Episcopal Conference Mass.',
+    themeColor: '#1058A8',
+    motif: 'book'
+  },
+  {
+    id: 'moyo-mtakatifu-wa-yesu',
+    nameSw: 'Moyo Mtakatifu wa Yesu',
+    nameEn: 'Sacred Heart of Jesus',
+    descriptionSw: 'Ibada na sifa kwa Moyo Mtakatifu wa Yesu uliojaa upendo na huruma.',
+    descriptionEn: 'Devotion and praise to the Most Sacred Heart of Jesus.',
+    themeColor: '#1058A8',
+    motif: 'cup'
+  },
+  {
+    id: 'mwaka-mpya',
+    nameSw: 'Mwaka Mpya',
+    nameEn: 'New Year',
+    descriptionSw: 'Kumkabidhi Mungu mwanzo wa mwaka mpya na kuomba amani na baraka zake.',
+    descriptionEn: 'Hymns offering praise and prayers for God’s blessing in the New Year.',
+    themeColor: '#1058A8',
+    motif: 'harp'
+  },
+  {
+    id: 'mwaka-wa-familia',
+    nameSw: 'Mwaka wa Familia (2014)',
+    nameEn: 'Year of the Family (2014)',
+    descriptionSw: 'Umoja, utakatifu na neema ya familia ya Kikristo kama kanisa la nyumbani.',
+    descriptionEn: 'Hymns celebrating Christian family life and the domestic church.',
+    themeColor: '#1058A8',
+    motif: 'ring'
+  },
+  {
+    id: 'mwaka-wa-huruma-ya-mungu',
+    nameSw: 'Mwaka wa Huruma ya Mungu',
+    nameEn: 'Year of Divine Mercy',
+    descriptionSw: 'Sifa na maombi kwa Huruma ya Mungu isiyo na mwisho: Yesu nakutumaini Wewe.',
+    descriptionEn: 'Devotion to the infinite Divine Mercy: Jesus, I trust in You.',
+    themeColor: '#1058A8',
+    motif: 'cross'
+  },
+  {
+    id: 'mwanzo',
+    legacyIds: ['kuingia'],
+    nameSw: 'Mwanzo',
+    nameEn: 'Entrance / Introit',
+    descriptionSw: 'Nyimbo za maandamano ya kuanza Misa Takatifu mbele ya Altare.',
+    descriptionEn: 'Hymns and chants for the opening liturgical procession.',
+    themeColor: '#1058A8',
+    motif: 'cross'
+  },
+  {
+    id: 'ndoa',
+    nameSw: 'Ndoa',
+    nameEn: 'Holy Matrimony / Wedding',
+    descriptionSw: 'Nyimbo za baraka ya Sakramenti ya Ndoa Takatifu na agano la upendo.',
+    descriptionEn: 'Nuptial hymns celebrating the Sacrament of Holy Matrimony.',
+    themeColor: '#1058A8',
+    motif: 'ring'
+  },
+  {
+    id: 'noeli',
+    nameSw: 'Noeli',
+    nameEn: 'Christmas',
+    descriptionSw: 'Nyimbo za shangwe ya kuzaliwa kwa Mwokozi Bwana wetu Yesu Kristo.',
+    descriptionEn: 'Joyous hymns celebrating the Nativity and Incarnation.',
+    themeColor: '#1058A8',
+    motif: 'candle'
+  },
+  {
+    id: 'pasaka',
+    nameSw: 'Pasaka',
+    nameEn: 'Easter',
+    descriptionSw: 'Kushangilia ushindi wa ufufuko wa Kristo: Kristo amefufuka, Aleluya!',
+    descriptionEn: 'Triumphant hymns celebrating the Resurrection of the Lord.',
+    themeColor: '#1058A8',
+    motif: 'crown'
+  },
+  {
+    id: 'pentekoste',
+    legacyIds: ['roho-mtakatifu'],
+    nameSw: 'Pentekoste',
+    nameEn: 'Pentecost / Holy Spirit',
+    descriptionSw: 'Kushuka kwa Roho Mtakatifu juu ya Mitume na karama zake takatifu.',
+    descriptionEn: 'Solemnity of Pentecost and invocation of the gifts of the Holy Spirit.',
+    themeColor: '#1058A8',
+    motif: 'dove'
+  },
+  {
+    id: 'sadaka-matoleo',
+    legacyIds: ['matoleo'],
+    nameSw: 'Sadaka / Matoleo',
+    nameEn: 'Offertory / Presentation of Gifts',
+    descriptionSw: 'Kutoa matoleo, mkate, divai na sadaka zetu mbele ya meza ya Bwana.',
+    descriptionEn: 'Hymns sung during the presentation of gifts and altar preparation.',
+    themeColor: '#1058A8',
+    motif: 'bread'
+  },
+  {
+    id: 'shukrani',
+    nameSw: 'Shukrani',
+    nameEn: 'Thanksgiving',
+    descriptionSw: 'Kumsifu na kumtukuza Mungu kwa fadhili zake na baraka zake kuu.',
+    descriptionEn: 'Hymns of gratitude and joy for God’s steadfast love.',
+    themeColor: '#1058A8',
+    motif: 'harp'
+  },
+  {
+    id: 'tenzi-za-kiswahili',
+    nameSw: 'Tenzi za Kiswahili',
+    nameEn: 'Swahili Hymns / Tenzi',
+    descriptionSw: 'Tenzi za asili za kiliturujia na sifa za Kiswahili zilizopendwa vizazi na vizazi.',
+    descriptionEn: 'Traditional Swahili liturgical hymns and beloved classical chants.',
+    themeColor: '#1058A8',
+    motif: 'book'
+  },
+  {
+    id: 'ubatizo',
+    nameSw: 'Ubatizo',
+    nameEn: 'Baptism',
+    descriptionSw: 'Nyimbo za kuzaliwa upya kwa maji na Roho Mtakatifu katika imani.',
+    descriptionEn: 'Hymns for the celebration of Holy Baptism and initiation into the Church.',
+    themeColor: '#1058A8',
+    motif: 'water'
+  },
+  {
+    id: 'utatu-mtakatifu',
+    nameSw: 'Utatu Mtakatifu',
+    nameEn: 'Holy Trinity',
+    descriptionSw: 'Kumtukuza Mungu Mmoja katika Nafsi Tatu: Baba, Mwana na Roho Mtakatifu.',
+    descriptionEn: 'Solemnity of the Most Holy Trinity: Father, Son, and Holy Spirit.',
+    themeColor: '#1058A8',
+    motif: 'crown'
+  },
+  {
+    id: 'watakatifu',
+    nameSw: 'Watakatifu',
+    nameEn: 'Saints / All Saints',
+    descriptionSw: 'Nyimbo za heshima kwa watakatifu na wafiadini: Mt. Monika, Mt. Sesilia na wote.',
+    descriptionEn: 'Hymns honoring the Saints and Martyrs: St. Monica, St. Cecilia and all saints.',
+    themeColor: '#1058A8',
+    motif: 'incense'
+  },
+  {
+    id: 'zaburi',
+    nameSw: 'Zaburi',
+    nameEn: 'Responsorial Psalm',
+    descriptionSw: 'Zaburi za mwitikio na nyimbo za sifa za kimaandiko katika Misa.',
+    descriptionEn: 'Responsorial psalms and scriptural canticles sung at the ambo.',
+    themeColor: '#1058A8',
+    motif: 'book'
   }
 ];
+
+export function isSongInCategory(songCategories: string[] | undefined, categoryId: string): boolean {
+  if (!songCategories || songCategories.length === 0) return false;
+  if (songCategories.includes(categoryId)) return true;
+  const cat = LIBRARY_CATEGORIES.find(c => c.id === categoryId);
+  if (cat?.legacyIds && cat.legacyIds.some(lid => songCategories.includes(lid))) return true;
+  const parentCat = LIBRARY_CATEGORIES.find(c => c.legacyIds?.includes(categoryId));
+  if (parentCat && songCategories.includes(parentCat.id)) return true;
+  return false;
+}
 
 export const INITIAL_LIBRARY_SONGS: LibrarySong[] = [
   // 1. KUINGIA (Entrance)
@@ -1315,8 +1469,8 @@ In mortis examine.`,
     title: 'Msalaba wa Bwana Wangu',
     composer: 'Traditional Swahili Catholic Lenten Hymn',
     language: 'Kiswahili',
-    categories: ['tafakari'],
-    season: 'Kwaresima / Lent',
+    categories: ['kwaresma', 'mafundisho-tafakari'],
+    season: 'Kwaresma / Lent',
     voices: 'SATB',
     lyrics: `1. Msalaba wa Bwana wangu, ndio wokovu wangu,
 Pale Yesu aliponifia kwa upendo mkuu;
@@ -1327,5 +1481,129 @@ Nijalie neema ya kusimama imara katika imani.`,
     addedDate: '2024-11-20',
     solfaNotes: true,
     hasAudio: false
+  },
+  {
+    id: 'lib-52',
+    title: 'Wimbo wa Mtakatifu Monika (Anthem)',
+    titleSwahili: 'Wimbo Rasmi wa Mtakatifu Monika',
+    composer: 'Mark T. Atebe',
+    language: 'Kiswahili',
+    categories: ['anthem', 'watakatifu'],
+    season: 'Sikukuu ya Mtakatifu Monika',
+    voices: 'SATB',
+    lyrics: `1. Mtakatifu Monika msimamizi wetu,
+Mama uliyeomba kwa machozi na upendo;
+Ukimwombea mwanao Augustino aongoke,
+Hata akawa mwalimu wa kanisa takatifu.
+
+Kiitikio:
+Tuombee Mtakatifu Monika,
+Tufundishe kusali bila kukata tamaa;
+Tuimbe kwa furaha na upendo mkuu,
+Altaroni pa Mungu hekaluni mwake.`,
+    sharingStatus: 'Shared with permission',
+    permissionGivenBy: 'St. Monica Catholic Choir Archive',
+    downloadCount: 485,
+    addedDate: '2024-11-25',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-53',
+    title: 'Kristu Mfalme Tawala',
+    titleSwahili: 'Kristu Mfalme Tawala',
+    composer: 'Fr. G. Shengena',
+    language: 'Kiswahili',
+    categories: ['kristu-mfalme', 'mwanzo'],
+    season: 'Kristu Mfalme',
+    voices: 'SATB',
+    lyrics: `1. Kristu Mfalme tawala mataifa yote,
+Wewe ndiwe mkuu wa wafalme wa dunia;
+Milki yako yadumu milele na milele,
+Wote wanakusujudia na kukuabudu.
+
+Kiitikio:
+Tawala Kristu, tawala Bwana wetu,
+Tawala mioyoni mwetu daima.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 390,
+    addedDate: '2024-11-26',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-54',
+    title: 'Ee Moyo Mtakatifu wa Yesu',
+    titleSwahili: 'Ee Moyo Mtakatifu wa Yesu',
+    composer: 'Bernard Mukasa',
+    language: 'Kiswahili',
+    categories: ['moyo-mtakatifu-wa-yesu', 'ekaristi-komunio'],
+    season: 'Moyo Mtakatifu',
+    voices: 'SATB',
+    lyrics: `1. Ee Moyo Mtakatifu wa Yesu chemchemi ya uzima,
+Moyo uliotobolewa kwa mkuki msalabani;
+Kutoka kwako kilitoka damu na maji ya wokovu,
+Tuoshe na ututakase katika huruma yako.`,
+    sharingStatus: 'Shared with permission',
+    downloadCount: 520,
+    addedDate: '2024-11-27',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-55',
+    title: 'Misa ya Baraza TEC (Mwanzo & Bwana Utuhurumie)',
+    titleSwahili: 'Misa TEC',
+    composer: 'Baraza la Maaskofu (TEC)',
+    language: 'Kiswahili',
+    categories: ['misa-tec', 'misa'],
+    season: 'Kawaida / Ordinary',
+    voices: 'SATB',
+    lyrics: `Bwana utuhurumie, Bwana utuhurumie.
+Kristu utuhurumie, Kristu utuhurumie.
+Bwana utuhurumie, Bwana utuhurumie.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 640,
+    addedDate: '2024-11-28',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-56',
+    title: 'Yesu Kwetu Ni Rafiki (Tenzi za Kiswahili)',
+    titleSwahili: 'Yesu Kwetu Ni Rafiki',
+    composer: 'Tenzi za Kiswahili / J.M. Scriven',
+    language: 'Kiswahili',
+    categories: ['tenzi-za-kiswahili', 'mafundisho-tafakari'],
+    season: 'Kawaida / Ordinary',
+    voices: 'SATB',
+    lyrics: `1. Yesu kwetu ni rafiki, kweli anatuonea;
+Haja zetu za maombi zote amezichukua;
+Mara ngapi tunakosa amani kwa bure tu,
+Kwa sababu hatuleti maombi kwa Mungu wetu.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 475,
+    addedDate: '2024-11-29',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-57',
+    title: 'Yesu Ninakutumaini (Huruma ya Mungu)',
+    titleSwahili: 'Huruma ya Mungu',
+    composer: 'St. Faustina Devotion Choral Setting',
+    language: 'Kiswahili',
+    categories: ['mwaka-wa-huruma-ya-mungu', 'mafundisho-tafakari'],
+    season: 'Huruma ya Mungu',
+    voices: 'SATB',
+    lyrics: `Yesu ninakutumaini,
+Chemchemi ya huruma isiyo na mwisho;
+Moyo wako ni kimbilio langu daima,
+Ee Yesu ninakutumaini.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 380,
+    addedDate: '2024-12-01',
+    solfaNotes: true,
+    hasAudio: true
   }
 ];
