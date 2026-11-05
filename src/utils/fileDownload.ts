@@ -130,7 +130,7 @@ export function generateSongScorePdf(song: {
   sharingStatus?: string;
   lyrics?: string;
   categories?: string[];
-}): void {
+}, customFilename?: string): void {
   try {
     const doc = new jsPDF({
       orientation: 'portrait',
@@ -257,7 +257,7 @@ export function generateSongScorePdf(song: {
     // 6. Draw Official Stamp / Footer
     drawFooter(doc, pageWidth, pageHeight);
 
-    const safeFilename = `${(song.title || 'Wimbo').replace(/[^a-zA-Z0-9_-]/g, '_')}_StMonica_Score.pdf`;
+    const safeFilename = customFilename || `${(song.title || 'Wimbo').replace(/[^a-zA-Z0-9_-]/g, '_')}_StMonica_Score.pdf`;
     doc.save(safeFilename);
   } catch (err) {
     console.error('Failed to generate score PDF:', err);

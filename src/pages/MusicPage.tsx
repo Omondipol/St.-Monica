@@ -13,12 +13,16 @@ import {
   ExternalLink,
   Download,
   Music2,
-  Film
+  Film,
+  Eye,
+  X,
+  Check
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
 import { getAssetUrl } from '../utils/assetHelper';
+import { triggerFileDownload, generateSongScorePdf } from '../utils/fileDownload';
 
 import choirBannerImg from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
 import choirSingingMomentImg from '../assets/images/choir_singing_moment_1791356740170.jpg';
@@ -111,6 +115,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSelection, setFilterSelection] = useState('all');
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
+  const [previewScoreItem, setPreviewScoreItem] = useState<SheetMusicItem | null>(null);
+  const [isDownloadingScore, setIsDownloadingScore] = useState(false);
 
   // Double-tap tracker for mobile and desktop click
   const lastTapRef = useRef<{ id: string; time: number }>({ id: '', time: 0 });
@@ -436,10 +442,10 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 sm:space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      {/* ================= STEP 1 & 2: SLIM BANNER (160px) WITH QUIET YOUTUBE LINK ================= */}
-      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+      {/* ================= STEP 1 & 2: SLIM BANNER WITH QUIET YOUTUBE LINK ================= */}
+      <section className="relative h-[180px] sm:h-[200px] rounded-3xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
         {/* Real choir cover photo background */}
         <img 
           src={getAssetUrl('/assets/choir/choir_01.jpg')} 
@@ -451,11 +457,11 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
 
         {/* Text content inside slim banner */}
-        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
+        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1.5 sm:space-y-2">
           <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
-            {lang === 'sw' ? 'Muziki Mtakatifu' : 'Sacred Choral Music'}
+            {lang === 'sw' ? 'Muziki Mtakatifu na Noti' : 'Sacred Music & Sheet Music Scores'}
           </span>
-          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+          <h1 className="font-eb-garamond text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
             {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
           </h1>
 
@@ -595,11 +601,11 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
         </section>
       )}
 
-      {/* ================= STEP 7: UNIFIED SUB-TABS (Songs vs Sheet Music) ================= */}
-      <div className="bg-white/90 backdrop-blur-sm border border-[#0C2340]/10 rounded-2xl p-1.5 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] flex items-center gap-2">
+      {/* ================= STEP 7: UNIFIED SUB-TABS (Songs vs Sheet Music Scores) ================= */}
+      <div className="bg-white/90 backdrop-blur-sm border border-[#0C2340]/10 rounded-2xl p-2 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] flex items-center gap-2">
         <button
           onClick={() => setActiveTab('songs')}
-          className={`px-4 py-2 text-xs sm:text-sm font-source font-semibold rounded-xl cursor-pointer transition-all ${
+          className={`px-5 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base font-source font-bold rounded-xl cursor-pointer transition-all ${
             activeTab === 'songs'
               ? 'bg-[#1058A8] text-white shadow-xs'
               : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
@@ -610,13 +616,13 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
         <button
           onClick={() => setActiveTab('sheet_music')}
-          className={`px-4 py-2 text-xs sm:text-sm font-source font-semibold rounded-xl cursor-pointer transition-all ${
+          className={`px-5 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base font-source font-bold rounded-xl cursor-pointer transition-all ${
             activeTab === 'sheet_music'
               ? 'bg-[#1058A8] text-white shadow-xs'
               : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5]'
           }`}
         >
-          {lang === 'sw' ? `Noti za Kuuza (${sheetMusicList.length})` : `Sheet Music for Sale (${sheetMusicList.length})`}
+          {lang === 'sw' ? `Noti za Nyimbo (${sheetMusicList.length})` : `Sheet Music Scores (${sheetMusicList.length})`}
         </button>
       </div>
 
@@ -764,86 +770,266 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
         </div>
       )}
 
-      {/* ================= TAB 2: SHEET MUSIC FOR SALE (NOTI) ================= */}
+      {/* ================= TAB 2: SHEET MUSIC SCORES (NOTI) ================= */}
       {activeTab === 'sheet_music' && (
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredSheetMusic.map((item) => (
-            <div
-              key={item.id}
-              className="p-5 bg-white/95 border border-[#0C2340]/10 rounded-2xl hover:border-[#1058A8] shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] transition-all flex flex-col justify-between space-y-3"
-            >
-              <div className="space-y-3">
-                {/* Score Preview Image */}
-                <div className="w-full h-40 rounded-xl overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group">
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#0C2340]/10">
+            <div>
+              <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+                {lang === 'sw' ? 'Noti za Nyimbo Zilizopangiliwa' : 'Sheet Music Scores'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 font-source mt-0.5">
+                {lang === 'sw'
+                  ? 'Noti halisi za sauti nne (SATB) zenye Solfa na Stafu kwa ajili ya walimu wa kwaya.'
+                  : 'Official four-part vocal scores (SATB) in tonic sol-fa and staff notation for choirmasters.'}
+              </p>
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-[#1058A8] bg-[#EAF4FB] px-3.5 py-1.5 rounded-xl font-source shrink-0 self-start sm:self-auto">
+              {filteredSheetMusic.length} {lang === 'sw' ? 'noti zilizopo' : 'scores available'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {filteredSheetMusic.map((item) => (
+              <div
+                key={item.id}
+                className="p-6 sm:p-7 bg-white/95 border border-[#0C2340]/10 rounded-3xl hover:border-[#1058A8] shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] hover:shadow-xl transition-all flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-3.5">
+                  {/* Score Preview Image with click-to-preview */}
+                  <div 
+                    onClick={() => setPreviewScoreItem(item)}
+                    className="w-full h-52 sm:h-60 rounded-2xl overflow-hidden bg-slate-100 border border-[#0C2340]/10 relative group cursor-pointer shadow-xs select-none"
+                    title={lang === 'sw' ? 'Bofya kutazama noti na sampuli' : 'Click to preview score and download sample'}
+                  >
+                    <img
+                      src={getScoreImage(item.id)}
+                      alt={`${item.title} Score Preview`}
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3">
+                      <span className="px-3.5 py-2 bg-white/95 text-[#0C2340] rounded-xl text-xs font-bold font-source flex items-center gap-1.5 shadow-md">
+                        <Eye className="w-4 h-4 text-[#1058A8]" />
+                        <span>{lang === 'sw' ? 'Tazama Noti' : 'Preview Score'}</span>
+                      </span>
+                    </div>
+                    <div className="absolute top-2.5 right-2.5">
+                      <span className="text-[10px] font-bold text-white tracking-widest bg-[#0C2340]/75 backdrop-blur-xs px-2.5 py-1 rounded-full font-source">
+                        PREVIEW
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Title & Voicing */}
+                  <div className="flex items-start justify-between gap-2 pt-1">
+                    <h3 
+                      onClick={() => setPreviewScoreItem(item)}
+                      className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-snug cursor-pointer hover:text-[#1058A8] transition-colors"
+                    >
+                      {lang === 'sw' ? item.titleSw : item.title}
+                    </h3>
+                    <span className="text-xs font-bold bg-[#1058A8]/10 text-[#1058A8] px-2 py-0.5 rounded-lg shrink-0 font-source">
+                      SATB
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-700 font-source">
+                    {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-slate-900">{item.composer}</strong>
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600 font-source">
+                    <span className="px-2 py-0.5 rounded bg-slate-100 font-medium">Soprano · Alto · Tenor · Bass</span>
+                    <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200/60 font-semibold">{item.notationType}</span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-600 font-source leading-relaxed line-clamp-2">
+                    {lang === 'sw' ? item.descriptionSw : item.description}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-[#0C2340]/10 space-y-3">
+                  {/* Price with small M-Pesa logo */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-eb-garamond font-bold text-xl sm:text-2xl text-[#1058A8]">
+                        KES {item.priceKes}
+                      </span>
+                      <span className="text-[10px] font-bold bg-emerald-600 text-white px-2 py-0.5 rounded tracking-wider shadow-2xs font-source">
+                        M-PESA
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-source">
+                      PDF Download
+                    </span>
+                  </div>
+
+                  {/* Buttons: Preview Score & Buy Score */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewScoreItem(item)}
+                      className="py-2.5 px-3 text-xs sm:text-sm font-bold text-[#0C2340] bg-[#FAF8F5] hover:bg-[#EAF4FB] border border-[#0C2340]/15 rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors shadow-2xs font-source"
+                    >
+                      <Eye className="w-4 h-4 text-[#1058A8]" />
+                      <span>{lang === 'sw' ? 'Tazama' : 'Preview'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => addToCart({
+                        id: `prod-${item.id}`,
+                        name: item.title,
+                        nameSw: item.titleSw,
+                        type: 'sheet_music',
+                        priceKes: item.priceKes,
+                        priceUsd: 2.50,
+                        description: item.description,
+                        descriptionSw: item.descriptionSw,
+                        image: 'sheet_music_hymnal',
+                        downloadable: true
+                      })}
+                      className="py-2.5 px-3 text-xs sm:text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors shadow-2xs font-source"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      <span>{lang === 'sw' ? 'Nunua' : 'Buy Score'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ================= MODAL: PDF SCORE PREVIEW & SAMPLE DOWNLOAD ================= */}
+      {previewScoreItem && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto flex flex-col justify-between">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-200 shrink-0">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold bg-[#1058A8]/10 text-[#1058A8] px-2 py-0.5 rounded font-source uppercase tracking-wider">
+                    Official Score Preview
+                  </span>
+                  <span className="text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded font-source">
+                    {previewScoreItem.notationType}
+                  </span>
+                </div>
+                <h3 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+                  {lang === 'sw' ? previewScoreItem.titleSw : previewScoreItem.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 font-source">
+                  {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-slate-800">{previewScoreItem.composer}</strong> · SATB (Soprano, Alto, Tenor, Bass)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewScoreItem(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Score Sheet Document Frame (Crisp preview with notes and stave) */}
+            <div className="space-y-3 flex-1">
+              <div className="w-full bg-[#FAF8F5] border border-slate-300 rounded-2xl overflow-hidden shadow-inner p-3 sm:p-4 relative">
+                <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-md bg-white">
                   <img
-                    src={getScoreImage(item.id)}
-                    alt={`${item.title} Score Preview`}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    src={getScoreImage(previewScoreItem.id)}
+                    alt={`${previewScoreItem.title} Full Score Preview`}
+                    className="w-full max-h-[380px] object-cover object-top select-none"
                   />
-                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
-                    <span className="text-[10px] font-bold text-white tracking-widest bg-[#0C2340]/60 px-2 py-0.5 rounded font-source">
-                      PREVIEW
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-4 text-white flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold font-eb-garamond block text-amber-300">
+                        St. Monica Third Mass Choir Music Ministry
+                      </span>
+                      <span className="text-[11px] text-slate-200 font-source">
+                        4-Part Polyphonic Cadence · Tonic Sol-fa & Staff Notation
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold bg-emerald-600 text-white px-2.5 py-1 rounded-full shadow-2xs font-source">
+                      KES {previewScoreItem.priceKes}
                     </span>
                   </div>
                 </div>
-
-                {/* Song name ONLY as title */}
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-eb-garamond text-base font-bold text-[#0C2340] leading-snug">
-                    {lang === 'sw' ? item.titleSw : item.title}
-                  </h3>
-                  <span className="text-[10px] font-bold bg-[#1058A8]/10 text-[#1058A8] px-1.5 py-0.5 rounded shrink-0 font-source">
-                    SATB
-                  </span>
-                </div>
-
-                <p className="text-xs text-slate-700 font-source">
-                  {lang === 'sw' ? 'Mtunzi:' : 'Composer:'} <strong className="text-slate-900">{item.composer}</strong>
-                </p>
-
-                <p className="text-[11px] text-slate-500 font-source">
-                  Soprano · Alto · Tenor · Bass
-                </p>
-
-                <p className="text-xs text-slate-600 font-source leading-relaxed line-clamp-2">
-                  {lang === 'sw' ? item.descriptionSw : item.description}
-                </p>
               </div>
 
-              <div className="pt-3 border-t border-[#0C2340]/10 space-y-2.5">
-                {/* Price with small M-Pesa logo */}
-                <div className="flex items-center gap-1.5">
-                  <span className="font-eb-garamond font-bold text-base text-[#1058A8]">
-                    KES {item.priceKes}
-                  </span>
-                  <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded tracking-wider shadow-2xs font-source">
-                    M-PESA
-                  </span>
-                </div>
+              <p className="text-xs text-slate-600 font-source leading-relaxed">
+                {lang === 'sw' ? previewScoreItem.descriptionSw : previewScoreItem.description}
+              </p>
+            </div>
 
-                {/* Buy Score button */}
+            {/* Action Buttons: Download PDF Sample & Buy Complete Score */}
+            <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
-                  onClick={() => addToCart({
-                    id: `prod-${item.id}`,
-                    name: item.title,
-                    nameSw: item.titleSw,
-                    type: 'sheet_music',
-                    priceKes: item.priceKes,
-                    priceUsd: 2.50,
-                    description: item.description,
-                    descriptionSw: item.descriptionSw,
-                    image: 'sheet_music_hymnal',
-                    downloadable: true
-                  })}
-                  className="w-full py-2 px-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors shadow-2xs font-source"
+                  type="button"
+                  disabled={isDownloadingScore}
+                  onClick={() => {
+                    setIsDownloadingScore(true);
+                    try {
+                      // Generate and download genuine PDF score
+                      generateSongScorePdf({
+                        title: previewScoreItem.title,
+                        composer: previewScoreItem.composer,
+                        voices: 'SATB',
+                        language: 'Kiswahili',
+                        lyrics: previewScoreItem.descriptionSw || previewScoreItem.description,
+                        sharingStatus: 'Licensed Score'
+                      }, `${previewScoreItem.title.replace(/\s+/g, '_')}_SATB_Score.pdf`);
+                    } catch (e) {
+                      console.error('Score download notice:', e);
+                    } finally {
+                      setTimeout(() => setIsDownloadingScore(false), 1200);
+                    }
+                  }}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 text-xs sm:text-sm font-bold text-[#1058A8] bg-[#EAF4FB] hover:bg-[#1058A8] hover:text-white border border-[#1058A8]/30 rounded-xl cursor-pointer flex items-center justify-center gap-2 transition-all shadow-2xs font-source"
                 >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>{lang === 'sw' ? 'Nunua Noti' : 'Buy Score'}</span>
+                  <Download className="w-4 h-4" />
+                  <span>{isDownloadingScore ? 'Generating PDF…' : 'Download Sample PDF'}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  onClick={() => setPreviewScoreItem(null)}
+                  className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl border border-slate-300 cursor-pointer transition-colors font-source"
+                >
+                  {lang === 'sw' ? 'Funga' : 'Close'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    addToCart({
+                      id: `prod-${previewScoreItem.id}`,
+                      name: previewScoreItem.title,
+                      nameSw: previewScoreItem.titleSw,
+                      type: 'sheet_music',
+                      priceKes: previewScoreItem.priceKes,
+                      priceUsd: 2.50,
+                      description: previewScoreItem.description,
+                      descriptionSw: previewScoreItem.descriptionSw,
+                      image: 'sheet_music_hymnal',
+                      downloadable: true
+                    });
+                    setPreviewScoreItem(null);
+                  }}
+                  className="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-xl cursor-pointer flex items-center justify-center gap-2 transition-colors shadow-xs font-source"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{lang === 'sw' ? `Nunua Noti (KES ${previewScoreItem.priceKes})` : `Buy Score (KES ${previewScoreItem.priceKes})`}</span>
                 </button>
               </div>
             </div>
-          ))}
-        </section>
+
+          </div>
+        </div>
       )}
 
     </div>

@@ -137,7 +137,7 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
                   {choirStats?.repertoireCount ?? CHOIR_STATS.repertoireCount}
                 </span>
                 <p className="text-xs font-bold text-slate-800 font-source mt-1">
-                  {lang === 'sw' ? 'Noti za Kwaya' : 'Choral Scores'}
+                  {lang === 'sw' ? 'Noti za Nyimbo' : 'Sheet Music Scores'}
                 </p>
                 <span className="text-[11px] text-slate-600 font-source mt-0.5">
                   {lang === 'sw' ? 'Noti za solfa na staff' : 'Liturgical Repertoire'}

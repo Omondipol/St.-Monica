@@ -1190,7 +1190,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             </div>
             {[
               { id: 'about', icon: BookOpen, label: 'Our story' },
-              { id: 'leaders', icon: Award, label: 'Leadership', badge: leadersList.length },
+              { id: 'leaders', icon: Award, label: 'Trainers & officials', badge: leadersList.length },
               { id: 'photos', icon: ImageIcon, label: 'Gallery', badge: groupPhotosList.length },
             ].map(item => {
               const Icon = item.icon;
@@ -1365,7 +1365,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
 
                       <div>
                         <label className="block text-xs font-bold text-[#0C2340] uppercase tracking-wider mb-1.5">
-                          Choral Scores in Catalog
+                          Sheet Music Scores in Catalog
                         </label>
                         <input
                           type="number"
@@ -1771,110 +1771,143 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
             </div>
           )}
 
-          {/* TAB: LEADERSHIP */}
-          {activeTab === 'leaders' && (
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
-                <div>
-                  <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
-                    Leadership
-                  </h2>
-                  <p className="text-xs text-slate-600 font-source mt-0.5">
-                    Choir leaders and committee.
-                  </p>
-                  <p className="text-[11px] text-slate-500 font-source mt-0.5">
-                    Only leaders have photos.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={openAddLeaderModal}
-                  className="px-3.5 py-2 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
+          {/* TAB: TRAINERS & OFFICIALS */}
+          {activeTab === 'leaders' && (() => {
+            const trainers = leadersList.filter(l => l.category === 'trainer' || (l.role && (l.role.toLowerCase().includes('choirmaster') || l.role.toLowerCase().includes('director') || l.role.toLowerCase().includes('trainer') || l.role.toLowerCase().includes('organist'))));
+            const officials = leadersList.filter(l => !trainers.some(t => t.id === l.id));
+
+            const renderLeaderCard = (leader: typeof leadersList[0]) => {
+              const isChoirmaster = leader.id === 'ldr-director' || 
+                (leader.role && (leader.role.toLowerCase().includes('choirmaster') || leader.role.toLowerCase().includes('music director')));
+
+              return (
+                <div 
+                  key={leader.id} 
+                  className="p-3.5 bg-white border border-[#0C2340]/15 rounded-lg space-y-2.5 flex flex-col justify-between shadow-2xs"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add leader</span>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {leadersList.map((leader) => {
-                  const isChoirmaster = leader.id === 'ldr-director' || 
-                    (leader.role && (leader.role.toLowerCase().includes('choirmaster') || leader.role.toLowerCase().includes('music director')));
-
-                  return (
-                    <div 
-                      key={leader.id} 
-                      className="p-3.5 bg-white border border-[#0C2340]/15 rounded-lg space-y-2.5 flex flex-col justify-between"
-                    >
-                      <div className="flex items-start gap-3">
-                        {leader.photoUrl ? (
-                          <img
-                            src={getAssetUrl(leader.photoUrl)}
-                            alt={leader.name}
-                            className="w-16 h-20 rounded-lg object-cover object-[center_12%] border border-slate-200 shrink-0 bg-slate-100"
-                          />
-                        ) : (
-                          <div className="w-16 h-20 rounded-lg bg-[#EAF4FB] text-[#1058A8] border border-blue-200 flex items-center justify-center font-bold text-xl shrink-0">
-                            {leader.name.charAt(0)}
-                          </div>
-                        )}
-
-                        <div className="min-w-0 flex-1">
-                          {isChoirmaster && (
-                            <span className="text-[10px] font-semibold bg-[#1058A8] text-white px-1.5 py-0.5 rounded inline-block mb-1">
-                              Shown on home page
-                            </span>
-                          )}
-
-                          <h3 className="font-eb-garamond text-base font-bold text-[#0C2340] leading-tight truncate">
-                            {leader.name}
-                          </h3>
-                          <span className="text-xs font-semibold text-[#1058A8] block font-source">
-                            {leader.role}
-                          </span>
-                          {leader.contact && (
-                            <span className="text-[11px] text-slate-500 font-source block mt-0.5">
-                              {leader.contact}
-                            </span>
-                          )}
-                        </div>
+                  <div className="flex items-start gap-3">
+                    {leader.photoUrl ? (
+                      <img
+                        src={getAssetUrl(leader.photoUrl)}
+                        alt={leader.name}
+                        className="w-16 h-20 rounded-lg object-cover object-[center_12%] border border-slate-200 shrink-0 bg-slate-100"
+                      />
+                    ) : (
+                      <div className="w-16 h-20 rounded-lg bg-[#EAF4FB] text-[#1058A8] border border-blue-200 flex items-center justify-center font-bold text-xl shrink-0">
+                        {leader.name.charAt(0)}
                       </div>
+                    )}
 
-                      {leader.responsibility && (
-                        <p className="text-xs text-slate-600 font-source line-clamp-2 pt-1 border-t border-slate-100">
-                          {leader.responsibility}
-                        </p>
+                    <div className="min-w-0 flex-1">
+                      {isChoirmaster && (
+                        <span className="text-[10px] font-semibold bg-[#1058A8] text-white px-1.5 py-0.5 rounded inline-block mb-1">
+                          Shown on home page
+                        </span>
                       )}
 
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => openEditLeaderModal(leader)}
-                          className="px-2.5 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
-                        >
-                          <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm(`Delete leader "${leader.name}"?`)) {
-                              deleteLeader(leader.id);
-                              notify(`Leader "${leader.name}" removed.`);
-                            }
-                          }}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
-                          title="Delete leader"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <h3 className="font-eb-garamond text-base font-bold text-[#0C2340] leading-tight truncate">
+                        {leader.name}
+                      </h3>
+                      <span className="text-xs font-semibold text-[#1058A8] block font-source">
+                        {leader.role}
+                      </span>
+                      {leader.contact && (
+                        <span className="text-[11px] text-slate-500 font-source block mt-0.5">
+                          {leader.contact}
+                        </span>
+                      )}
                     </div>
-                  );
-                })}
+                  </div>
+
+                  {leader.responsibility && (
+                    <p className="text-xs text-slate-600 font-source line-clamp-2 pt-1 border-t border-slate-100">
+                      {leader.responsibility}
+                    </p>
+                  )}
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => openEditLeaderModal(leader)}
+                      className="px-2.5 py-1 text-xs font-semibold text-[#0C2340] bg-[#EAF4FB] hover:bg-[#7EC8F0]/30 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-[#1058A8]" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Delete leader "${leader.name}"?`)) {
+                          deleteLeader(leader.id);
+                          notify(`Leader "${leader.name}" removed.`);
+                        }
+                      }}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                      title="Delete leader"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            };
+
+            return (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+                  <div>
+                    <h2 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
+                      Trainers & Officials
+                    </h2>
+                    <p className="text-xs text-slate-600 font-source mt-0.5">
+                      Choir music trainers and executive committee officials.
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-source mt-0.5">
+                      Only leaders have photos.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openAddLeaderModal}
+                    className="px-3.5 py-2 text-xs font-semibold text-white bg-[#1058A8] hover:bg-[#0C2340] rounded-lg flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add leader</span>
+                  </button>
+                </div>
+
+                {/* Sub-section 1: Trainers */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-md bg-amber-100 text-amber-800">
+                      <Music className="w-4 h-4" />
+                    </span>
+                    <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340]">
+                      Trainers & Music Directors ({trainers.length})
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {trainers.map(renderLeaderCard)}
+                  </div>
+                </div>
+
+                {/* Sub-section 2: Executive Officials */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-md bg-blue-100 text-blue-800">
+                      <Award className="w-4 h-4" />
+                    </span>
+                    <h3 className="font-eb-garamond text-lg font-bold text-[#0C2340]">
+                      Executive Committee Officials ({officials.length})
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {officials.map(renderLeaderCard)}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* TAB: GROUP PHOTOS & SUPABASE STORAGE */}
           {activeTab === 'photos' && (
@@ -2183,9 +2216,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-lg max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
-              <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                {editingLeaderId ? 'Edit leader' : 'Add leader'}
-              </h3>
+              <div>
+                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                  {editingLeaderId ? 'Edit leader' : 'Add leader'}
+                </h3>
+                <p className="text-[11px] text-slate-500 font-source mt-0.5">
+                  Only leaders have photos.
+                </p>
+              </div>
               <button 
                 type="button"
                 onClick={() => setIsLeaderModalOpen(false)} 
@@ -2240,7 +2278,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                     onChange={e => setLeaderForm({ ...leaderForm, category: e.target.value as any })}
                     className="w-full p-2 border border-slate-300 rounded-md focus:border-[#1058A8] outline-none bg-white"
                   >
-                    <option value="trainer">Music trainer / instructor</option>
+                    <option value="trainer">Trainer</option>
                     <option value="official">Executive committee</option>
                   </select>
                 </div>
@@ -2286,6 +2324,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   onChange={val => setLeaderForm(prev => ({ ...prev, photoUrl: val }))}
                   defaultValue="/assets/choir/choirmaster_director.jpg"
                   aspectRatio="aspect-[4/5]"
+                  className="p-0 border-0 shadow-none bg-transparent"
                 />
               </div>
 

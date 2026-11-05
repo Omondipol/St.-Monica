@@ -1046,7 +1046,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340]">
-                {lang === 'sw' ? 'Noti za Nyimbo Zilizopangiliwa' : 'Choral Sheet Music Scores'}
+                {lang === 'sw' ? 'Noti za Nyimbo Zilizopangiliwa' : 'Sheet Music Scores'}
               </h2>
               {/* Short line under sheet music heading */}
               <p className="text-xs sm:text-sm text-[#1058A8] font-source font-semibold mt-1">

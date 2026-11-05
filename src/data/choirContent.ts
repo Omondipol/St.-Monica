@@ -528,7 +528,7 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     titleSw: "Machozi ya Imani",
     composer: "Atebe Mark T.",
     notationType: "Tonic Sol-fa & Staff",
-    voicing: "SATB Choral",
+    voicing: "SATB (4-Part)",
     voiceParts: "S, A, T, B",
     partOfMass: "Meditation / Contemplative Prayer",
     season: "Ordinary Time",
@@ -551,7 +551,7 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     season: "Ordinary Time",
     priceKes: 300,
     priceUsd: 2.50,
-    previewBars: "l,:d:m | m:r:d | t,:l,:s, | l,:-:- || [E Minor Choral Setting]",
+    previewBars: "l,:d:m | m:r:d | t,:l,:s, | l,:-:- || [E Minor Sacred Setting]",
     description: "Meditation vocal arrangement for Soprano, Alto, Tenor, and Bass (SATB). Composed by Fr. Jude Waweru with dynamics and liturgical breath marks. Instant PDF download with M-Pesa.",
     descriptionSw: "Noti za wimbo wa tafakari uliotungwa na Fr. Jude Waweru kwa sauti nne (SATB). Lipa kupitia M-Pesa.",
     downloadUrl: "#download-maisha"
@@ -569,7 +569,7 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     priceKes: 300,
     priceUsd: 2.50,
     previewBars: "s:d':m' | r':d':t | d':-:- | s:m:d || [Festive D Major]",
-    description: "Easter anthem score composed by Isaack Mwita with traditional East African liturgical rhythm notations and full SATB choral polyphony. Instant PDF download with M-Pesa.",
+    description: "Easter anthem score composed by Isaack Mwita with traditional East African liturgical rhythm notations and full SATB score polyphony. Instant PDF download with M-Pesa.",
     descriptionSw: "Noti kamili za wimbo wa Pasaka zenye mdundo wa kitamaduni na sauti nne (SATB). Mtunzi: Isaack Mwita. Lipa kupitia M-Pesa.",
     downloadUrl: "#download-nimzima"
   },
@@ -579,14 +579,14 @@ export const INITIAL_SHEET_MUSIC: SheetMusicItem[] = [
     titleSw: "Jumuiya Ndogondogo",
     composer: "Bernard Mukasa",
     notationType: "Tonic Sol-fa & Staff",
-    voicing: "SATB Choral",
+    voicing: "SATB (4-Part)",
     voiceParts: "S, A, T, B",
     partOfMass: "Entrance / Small Christian Communities",
     season: "Ordinary Time",
     priceKes: 300,
     priceUsd: 2.50,
     previewBars: "d:m:s | s:s:s | f:m:r | d:-:- || [Tonic Sol-fa & Staff Notation]",
-    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Bernard Mukasa for SATB choir. Instant PDF download with M-Pesa.",
+    description: "Complete 4-part vocal score (Soprano, Alto, Tenor, Bass) in Tonic Sol-fa and Staff Notation. Composed by Bernard Mukasa for SATB voices. Instant PDF download with M-Pesa.",
     descriptionSw: "Noti kamili za sauti nne (S, A, T, B) katika mfumo wa Sol-fa na Staff. Mtunzi: Bernard Mukasa. Lipa kupitia M-Pesa.",
     downloadUrl: "#download-jumuiya"
   }
