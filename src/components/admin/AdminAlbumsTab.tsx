@@ -308,6 +308,7 @@ export const AdminAlbumsTab: React.FC<AdminAlbumsTabProps> = ({ onNotify }) => {
                   helpText="Upload album artwork (square 1:1 ratio) or select from official choir presets."
                   presets={albumPresets}
                   aspectRatio="aspect-square"
+                  pipelineTarget="general"
                 />
               </div>
 

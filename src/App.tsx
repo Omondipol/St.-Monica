@@ -235,7 +235,7 @@ function ChoirApp() {
   const isAboutStory = ['about-story', 'about', 'story'].includes(currentRoute);
   const isAboutPatron = ['about-patron', 'patron'].includes(currentRoute);
   const isAboutGallery = ['about-gallery', 'about-portraits', 'gallery'].includes(currentRoute);
-  const isAboutLeadership = ['about-leadership', 'leadership'].includes(currentRoute);
+  const isAboutLeadership = ['about-leadership', 'leadership', 'trainers', 'officials', 'trainers-officials', 'walimu', 'walimu-maafisa'].includes(currentRoute);
   const isAboutSections = ['about-sections', 'sections'].includes(currentRoute);
 
   const isMusicAlbums = ['music-albums', 'albums', 'album'].includes(currentRoute);

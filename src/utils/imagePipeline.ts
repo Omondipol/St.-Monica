@@ -272,8 +272,9 @@ export async function runImagePipeline(
   const masterPath = `${folder}/${baseName}_master.webp`;
   const masterUrl = await uploadVariantToStorage(masterOpt.blob, masterPath, masterOpt.mimeType);
 
-  // 3. Small images (people, avatars, logos) vs Big photos (banners, galleries)
+  // 3. Profiles (Trainers & Officials portraits) vs Big photos (hero banners, choir gallery, church photos)
   if (target === 'profile' || target === 'logo') {
+    // Only portraits for trainers and officials are resized to small card & avatar versions
     // Tiny avatar: 192 × 192, Q90
     const avatarCanvas = renderToCanvas(croppedCanvas, 192, 192);
     const avatarOpt = await canvasToWebpBlob(avatarCanvas, 0.90);
@@ -315,43 +316,38 @@ export async function runImagePipeline(
     };
   }
 
-  // Target: gallery, banner, general
-  // Gallery thumbnails: 400 & 800 px, Q84 (< 100 KB)
-  const thumbW = 400;
-  const thumbH = Math.round((croppedCanvas.height * thumbW) / croppedCanvas.width);
-  const thumbCanvas = renderToCanvas(croppedCanvas, thumbW, thumbH);
-  const thumbOpt = await canvasToWebpBlob(thumbCanvas, 0.84);
-  const thumbPath = `${folder}/${baseName}_thumb_400.webp`;
-  const thumbUrl = await uploadVariantToStorage(thumbOpt.blob, thumbPath, thumbOpt.mimeType);
-
-  // Medium / 800 px
-  const medW = Math.min(800, croppedCanvas.width);
-  const medH = Math.round((croppedCanvas.height * medW) / croppedCanvas.width);
-  const medCanvas = renderToCanvas(croppedCanvas, medW, medH);
-  const medOpt = await canvasToWebpBlob(medCanvas, 0.84);
-  const medPath = `${folder}/${baseName}_view_800.webp`;
-  const medUrl = await uploadVariantToStorage(medOpt.blob, medPath, medOpt.mimeType);
-
-  // Gallery full view / banner: 1600 px, Q82 (200-400 KB)
-  const fullW = Math.min(1600, croppedCanvas.width);
+  // Target: banner, hero, gallery, church, general
+  // These occupy large surface area on screen — preserve direct large screen occupancy!
+  const isLargeSurface = target === 'banner' || target === 'gallery' || target === 'general';
+  
+  // High-resolution display matching full container / screen width (1920px max or native)
+  const fullW = Math.min(isLargeSurface ? 1920 : 1600, croppedCanvas.width);
   const fullH = Math.round((croppedCanvas.height * fullW) / croppedCanvas.width);
   const fullCanvas = renderToCanvas(croppedCanvas, fullW, fullH);
-  const fullOpt = await canvasToWebpBlob(fullCanvas, 0.82);
-  const fullPath = `${folder}/${baseName}_full_1600.webp`;
+  const fullOpt = await canvasToWebpBlob(fullCanvas, 0.88);
+  const fullPath = `${folder}/${baseName}_screen_${fullW}.webp`;
   const fullUrl = await uploadVariantToStorage(fullOpt.blob, fullPath, fullOpt.mimeType);
 
-  const primaryUrl = fullUrl || medUrl || masterUrl || canvasToDataUrl(fullCanvas, 0.84);
+  // Gallery responsive medium (800-1200 px)
+  const medW = Math.min(1000, croppedCanvas.width);
+  const medH = Math.round((croppedCanvas.height * medW) / croppedCanvas.width);
+  const medCanvas = renderToCanvas(croppedCanvas, medW, medH);
+  const medOpt = await canvasToWebpBlob(medCanvas, 0.85);
+  const medPath = `${folder}/${baseName}_view_1000.webp`;
+  const medUrl = await uploadVariantToStorage(medOpt.blob, medPath, medOpt.mimeType);
+
+  // Primary URL is directly the high-resolution screen-occupancy copy or master
+  const primaryUrl = masterUrl || fullUrl || medUrl || canvasToDataUrl(fullCanvas, 0.88);
 
   const srcset = [
-    thumbUrl ? `${thumbUrl} 400w` : '',
-    medUrl ? `${medUrl} 800w` : '',
-    fullUrl ? `${fullUrl} 1600w` : '',
+    medUrl ? `${medUrl} 1000w` : '',
+    fullUrl ? `${fullUrl} 1920w` : '',
     masterUrl ? `${masterUrl} 2400w` : ''
   ].filter(Boolean).join(', ');
 
   return {
     url: primaryUrl,
-    thumbnailUrl: thumbUrl || primaryUrl,
+    thumbnailUrl: medUrl || primaryUrl,
     masterUrl: masterUrl || primaryUrl,
     originalUrl,
     srcset: srcset || undefined,

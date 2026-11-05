@@ -540,11 +540,19 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
       const sw = Math.min(fullW - sx, cropW_prev * ratioToFull);
       const sh = Math.min(fullH - sy, cropH_prev * ratioToFull);
 
-      // Output at least 800 × 1000 px (4:5 ratio) with high quality resampling
-      let outW = Math.max(800, Math.min(2400, Math.round(sw)));
-      let outH = target === 'profile' 
-        ? Math.round(outW / (4 / 5)) 
-        : Math.round(sh * (outW / sw));
+      // Output resolution:
+      // ONLY portraits for trainers and officials are sized as 4:5 portrait cards (at least 800 × 1000 px)
+      // All other images (hero banners, choir gallery moments, church sanctuary) are directly sized to their full expected screen occupancy (1600 - 2400 px)
+      let outW: number;
+      let outH: number;
+      if (target === 'profile') {
+        outW = Math.max(800, Math.min(1600, Math.round(sw)));
+        outH = Math.round(outW / (4 / 5)); // strict 4:5 portrait
+      } else {
+        // Direct to expected large screen size, maintaining full surface clarity
+        outW = Math.min(2400, Math.max(1600, Math.round(sw)));
+        outH = Math.round(sh * (outW / sw));
+      }
 
       // Crop from original full-resolution photo (not preview)
       const croppedCanvas = resampleLanczosHighQuality(fullCanvas, sx, sy, sw, sh, outW, outH);

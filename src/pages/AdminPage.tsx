@@ -1790,17 +1790,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                       <img
                         src={getAssetUrl(leader.photoUrl)}
                         alt={leader.name}
-                        className="w-16 h-20 rounded-lg object-cover object-[center_12%] border border-slate-200 shrink-0 bg-slate-100"
+                        className="w-20 h-25 aspect-[4/5] rounded-xl object-cover object-[center_18%] border border-[#1058A8]/30 shadow-xs shrink-0 bg-slate-100"
                       />
                     ) : (
-                      <div className="w-16 h-20 rounded-lg bg-[#EAF4FB] text-[#1058A8] border border-blue-200 flex items-center justify-center font-bold text-xl shrink-0">
+                      <div className="w-20 h-25 aspect-[4/5] rounded-xl bg-[#EAF4FB] text-[#1058A8] border border-blue-200 flex items-center justify-center font-bold text-2xl shrink-0">
                         {leader.name.charAt(0)}
                       </div>
                     )}
 
                     <div className="min-w-0 flex-1">
                       {isChoirmaster && (
-                        <span className="text-[10px] font-semibold bg-[#1058A8] text-white px-1.5 py-0.5 rounded inline-block mb-1">
+                        <span className="text-[10px] font-semibold bg-[#1058A8] text-white px-2 py-0.5 rounded-md inline-block mb-1">
                           Shown on home page
                         </span>
                       )}
@@ -2164,6 +2164,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   }}
                   helpText="Optional: If you did not choose a file above, select a preset photo here."
                   aspectRatio="aspect-video"
+                  pipelineTarget="gallery"
                   presetOptions={[
                     { label: 'Full Ensemble Vestments', value: '/assets/choir/choir_01.jpg' },
                     { label: 'Singing in Sanctuary', value: '/assets/choir/choir_02.jpg' },
@@ -2577,6 +2578,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   onChange={(url) => setSongForm({ ...songForm, thumbnailUrl: url })}
                   helpText="Upload an image to Supabase Storage bucket 'photos' or paste a direct image URL."
                   aspectRatio="aspect-video"
+                  pipelineTarget="general"
                 />
               </div>
 

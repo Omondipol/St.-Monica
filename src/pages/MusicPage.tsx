@@ -445,7 +445,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
     <div className="space-y-8 sm:space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
       {/* ================= STEP 1 & 2: SLIM BANNER WITH QUIET YOUTUBE LINK ================= */}
-      <section className="relative h-[180px] sm:h-[200px] rounded-3xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+      <section className="relative min-h-[220px] sm:min-h-[260px] lg:min-h-[280px] rounded-3xl overflow-hidden border border-[#0C2340]/15 shadow-lg select-none flex flex-col justify-between py-10 px-6 sm:px-12">
         {/* Real choir cover photo background */}
         <img 
           src={getAssetUrl('/assets/choir/choir_01.jpg')} 
@@ -456,12 +456,12 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
         {/* Soft dark gradient on the left so white text is crisp and legible */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
 
-        {/* Text content inside slim banner */}
-        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1.5 sm:space-y-2">
-          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+        {/* Text content inside banner */}
+        <div className="relative z-10 my-auto text-white space-y-2 sm:space-y-3">
+          <span className="text-xs sm:text-sm font-bold text-amber-300 font-source block uppercase tracking-widest">
             {lang === 'sw' ? 'Muziki Mtakatifu na Noti' : 'Sacred Music & Sheet Music Scores'}
           </span>
-          <h1 className="font-eb-garamond text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
+          <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
             {lang === 'sw' ? 'Nyimbo Zetu' : 'Our Songs'}
           </h1>
 
@@ -517,7 +517,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
             <div 
               onClick={() => handleSongNameClick(songOfTheWeek)}
               onDoubleClick={(e) => handleSongNameDoubleClick(songOfTheWeek, e)}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] shadow-sm cursor-pointer hover:scale-102 transition-transform"
+              className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340] shadow-md cursor-pointer hover:scale-102 transition-transform"
               title={lang === 'sw' ? 'Bofya mara mbili kufungua kichezaji' : 'Double-tap to open player'}
             >
               <img

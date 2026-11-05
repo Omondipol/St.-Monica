@@ -73,9 +73,9 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
   const currentMeta = voiceMeta[selectedVoice];
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-10 sm:space-y-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Page Title Banner - Clean Marian Navy & Blue with Choir Altar Imagery */}
-      <section className="relative h-[160px] sm:h-[185px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+      <section className="relative min-h-[220px] sm:min-h-[260px] lg:min-h-[280px] rounded-3xl overflow-hidden border border-[#0C2340]/15 shadow-lg select-none flex flex-col justify-between py-10 px-6 sm:px-12">
         <img
           src={getAssetUrl('/assets/choir/choir_04.jpg')}
           alt="St. Monica Choir SATB Ministry"
@@ -84,15 +84,15 @@ export const SectionsView: React.FC<SectionsViewProps> = ({ onNavigate = () => {
         <div className="absolute inset-0 bg-[#0C2340]/85" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340] via-[#0C2340]/90 to-[#1058A8]/60" />
         
-        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
-          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+        <div className="relative z-10 my-auto text-white space-y-2 sm:space-y-3">
+          <span className="text-xs sm:text-sm font-bold text-amber-300 font-source block uppercase tracking-widest">
             {lang === 'sw' ? 'Muundo wa Sauti Nne & Waimbaji' : 'SATB Voicing & Choir Directory'}
           </span>
 
-          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+          <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
             {lang === 'sw' ? 'Sauti za Kwaya na Waimbaji' : 'Voice Sections & Choristers'}
           </h1>
-          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-2xl leading-snug">
+          <p className="font-source text-sm sm:text-base text-slate-200 max-w-2xl leading-relaxed">
             {lang === 'sw'
               ? 'Bofya sauti yoyote (Soprano, Alto, Tenor, Bass) kuona waimbaji wanaohudumia Altare ya Parokia ya Mtakatifu Monika.'
               : 'Select any voice section (Soprano, Alto, Tenor, Bass) to inspect active choristers ministering at Sunday Mass.'}

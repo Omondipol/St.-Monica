@@ -337,10 +337,10 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                         }`}
                       >
                         <span className="font-eb-garamond text-[17px] font-semibold text-white group-hover:text-[#7EC8F0] transition-colors block leading-tight">
-                          {lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers & Officials'}
+                          {lang === 'sw' ? 'Walimu na Maafisa' : 'Trainers and Officials'}
                         </span>
                         <span className="text-[13px] text-white/70 font-source block mt-0.5 leading-snug">
-                          {lang === 'sw' ? 'Uongozi na walimu wa kwaya' : 'Choir directors and leaders'}
+                          {lang === 'sw' ? 'Walimu wa muziki na maafisa wa kamati' : 'Music trainers and executive officials'}
                         </span>
                       </button>
 
@@ -725,8 +725,8 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                       <span className="text-xs text-[#7EC8F0]/80">{lang === 'sw' ? 'Picha kutoka Misa na matamasha.' : 'Photos from Mass and festivals.'}</span>
                     </button>
                     <button onClick={() => navigateTo('about-leadership')} className="w-full min-h-[48px] text-left p-2 rounded-lg hover:bg-white/10 block">
-                      <strong className="font-fraunces text-sm block text-white">{lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers & Officials'}</strong>
-                      <span className="text-xs text-[#7EC8F0]/80">{lang === 'sw' ? 'Watu wanaoongoza kwaya.' : 'The people who lead the choir.'}</span>
+                      <strong className="font-fraunces text-sm block text-white">{lang === 'sw' ? 'Walimu na Maafisa' : 'Trainers & Officials'}</strong>
+                      <span className="text-xs text-[#7EC8F0]/80">{lang === 'sw' ? 'Walimu wa muziki na kamati ya kwaya.' : 'Music trainers and choir officials.'}</span>
                     </button>
                     <button onClick={() => navigateTo('about-sections')} className="w-full min-h-[48px] text-left p-2 rounded-lg hover:bg-white/10 block">
                       <strong className="font-fraunces text-sm block text-white">{lang === 'sw' ? 'Sauti za Kwaya' : 'Voice Sections'}</strong>

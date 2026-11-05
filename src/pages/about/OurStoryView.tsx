@@ -48,23 +48,24 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
   ];
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Page Title Banner (Matching Music Section Slim Banner) */}
-      <section className="relative h-[160px] sm:h-[170px] rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md shadow-slate-900/5 select-none flex flex-col justify-between">
+    <div className="space-y-10 sm:space-y-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Page Title Banner - Matching Home Page Generous Scale */}
+      <section className="relative min-h-[220px] sm:min-h-[260px] lg:min-h-[280px] rounded-3xl overflow-hidden border border-[#0C2340]/15 shadow-lg select-none flex flex-col justify-between py-10 px-6 sm:px-12">
         <img 
           src={getAssetUrl(aboutPageConfig?.storyBannerImg || '/assets/choir/choir_02.jpg')} 
           alt="St. Monica Catholic Church, Nakuru" 
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/80 to-[#0C2340]/25" />
-        <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 text-white space-y-1 sm:space-y-1.5">
-          <span className="text-[12px] sm:text-[13px] font-semibold text-[#7EC8F0] font-source block uppercase tracking-wider">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2340]/95 via-[#0C2340]/85 to-[#0C2340]/30" />
+        
+        <div className="relative z-10 my-auto text-white space-y-2 sm:space-y-3">
+          <span className="text-xs sm:text-sm font-bold text-amber-300 font-source block uppercase tracking-widest">
             {lang === 'sw' ? 'Historia na Utume Wetu' : 'Our Story & Heritage'}
           </span>
-          <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
+          <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
             {lang === 'sw' ? 'Historia ya Kwaya' : 'Heritage & History'}
           </h1>
-          <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
+          <p className="font-source text-sm sm:text-base text-slate-200 max-w-2xl leading-relaxed">
             {lang === 'sw'
               ? (aboutPageConfig?.storySubtitleSw || 'Kutoka waimbaji kumi na wanne mwaka 2012 hadi jumuiya inayotumikia altare ya Mungu kila juma.')
               : (aboutPageConfig?.storySubtitleEn || 'Serving Sunday High Mass at Section 58 with sacred four-part choral liturgy since 2012.')}
@@ -73,23 +74,23 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
         <AfricanGeometricBorder className="relative z-10" />
       </section>
 
-      {/* Unified Section Navigation Tabs */}
+      {/* Navigation Tabs */}
       <AboutNavTabs currentTab="about-story" onNavigate={onNavigate} />
 
-      {/* Two-Column Story and Photo */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/90 border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
-        <div className="lg:col-span-7 space-y-4 text-[16px] text-[#0C2340]/85 font-source leading-relaxed">
-          <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+      {/* Two-Column Story and Photo: Photo occupies large screen surface */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center bg-white border border-[#0C2340]/12 rounded-3xl p-6 sm:p-10 shadow-sm">
+        <div className="lg:col-span-7 space-y-5 text-base sm:text-lg text-[#0C2340]/85 font-source leading-relaxed">
+          <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340] leading-tight">
             {lang === 'sw' 
               ? (aboutPageConfig?.storyTitleSw || 'Mizizi Yetu Katika Parokia ya Mtakatifu Monika') 
               : (aboutPageConfig?.storyTitleEn || 'Our Roots in St. Monica Parish, Nakuru')}
           </h2>
-          <p>
+          <p className="text-base text-slate-700 leading-relaxed">
             {lang === 'sw'
               ? (aboutPageConfig?.storyParagraph1Sw || 'Kwaya ya Misa ya Tatu ya Mtakatifu Monika ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Tatu ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.')
               : (aboutPageConfig?.storyParagraph1En || 'St. Monica Third Mass Choir was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass (the parish 3rd Mass). Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.')}
           </p>
-          <p>
+          <p className="text-base text-slate-700 leading-relaxed">
             {lang === 'sw'
               ? (aboutPageConfig?.storyParagraph2Sw || 'Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.')
               : (aboutPageConfig?.storyParagraph2En || 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.')}
@@ -97,49 +98,49 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
 
           <div className="pt-5 border-t border-[#0C2340]/10">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#1058A8] font-source">
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1058A8] font-source">
                 {lang === 'sw' ? 'Muhtasari wa Utume Wetu' : 'Choir Ministry at a Glance'}
               </h3>
-              <span className="text-[11px] text-slate-600 font-source font-medium">
+              <span className="text-xs text-slate-600 font-source font-medium">
                 {lang === 'sw' ? 'Misa ya Tatu · Section 58 Nakuru' : 'Third Mass · Section 58 Nakuru'}
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-center">
-              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
-                <Users className="w-5 h-5 text-[#1058A8] mb-1.5" />
-                <span className="font-eb-garamond text-3xl font-bold text-[#1058A8] block tabular-nums">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+              <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
+                <Users className="w-6 h-6 text-[#1058A8] mb-2" />
+                <span className="font-eb-garamond text-3xl sm:text-4xl font-bold text-[#1058A8] block tabular-nums">
                   {choirStats?.membersCount ?? CHOIR_STATS.membersCount}
                 </span>
-                <p className="text-xs font-bold text-slate-800 font-source mt-1">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 font-source mt-1">
                   {lang === 'sw' ? 'Waimbaji wa Kwaya' : 'Active Choristers'}
                 </p>
-                <span className="text-[11px] text-slate-600 font-source mt-0.5">
+                <span className="text-xs text-slate-500 font-source mt-0.5">
                   {lang === 'sw' ? 'Soprano, Alto, Tenor, Bass' : 'Four-Part SATB Harmony'}
                 </span>
               </div>
 
-              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
-                <Calendar className="w-5 h-5 text-[#0C2340] mb-1.5" />
-                <span className="font-eb-garamond text-3xl font-bold text-[#0C2340] block tabular-nums">
+              <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
+                <Calendar className="w-6 h-6 text-[#0C2340] mb-2" />
+                <span className="font-eb-garamond text-3xl sm:text-4xl font-bold text-[#0C2340] block tabular-nums">
                   {choirStats?.yearsServing ?? CHOIR_STATS.yearsServing}
                 </span>
-                <p className="text-xs font-bold text-slate-800 font-source mt-1">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 font-source mt-1">
                   {lang === 'sw' ? 'Miaka ya Utume' : 'Years of Ministry'}
                 </p>
-                <span className="text-[11px] text-slate-600 font-source mt-0.5">
+                <span className="text-xs text-slate-500 font-source mt-0.5">
                   {lang === 'sw' ? 'Kuanzia 2012 hadi sasa' : 'Founded in 2012'}
                 </span>
               </div>
 
-              <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
-                <Music className="w-5 h-5 text-[#1058A8] mb-1.5" />
-                <span className="font-eb-garamond text-3xl font-bold text-[#1058A8] block tabular-nums">
+              <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
+                <Music className="w-6 h-6 text-[#1058A8] mb-2" />
+                <span className="font-eb-garamond text-3xl sm:text-4xl font-bold text-[#1058A8] block tabular-nums">
                   {choirStats?.repertoireCount ?? CHOIR_STATS.repertoireCount}
                 </span>
-                <p className="text-xs font-bold text-slate-800 font-source mt-1">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 font-source mt-1">
                   {lang === 'sw' ? 'Noti za Nyimbo' : 'Sheet Music Scores'}
                 </p>
-                <span className="text-[11px] text-slate-600 font-source mt-0.5">
+                <span className="text-xs text-slate-500 font-source mt-0.5">
                   {lang === 'sw' ? 'Noti za solfa na staff' : 'Liturgical Repertoire'}
                 </span>
               </div>
@@ -147,7 +148,8 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-5 aspect-4/3 rounded-2xl overflow-hidden border border-[#0C2340]/10 shadow-sm bg-slate-900">
+        {/* Large screen occupancy photo */}
+        <div className="lg:col-span-5 h-[340px] sm:h-[420px] lg:h-[480px] rounded-3xl overflow-hidden border border-[#0C2340]/12 shadow-md bg-slate-900">
           <img
             src={getAssetUrl(aboutPageConfig?.storyPhotoImg || '/assets/choir/choir_04.jpg')}
             alt="St. Monica Parish Choir"
@@ -158,24 +160,24 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
       </div>
 
       {/* Historical Milestones Timeline */}
-      <section className="bg-white border border-[#0C2340]/10 rounded-2xl p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]">
-        <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340]">
+      <section className="bg-white border border-[#0C2340]/12 rounded-3xl p-6 sm:p-10 space-y-8 shadow-sm">
+        <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0C2340]">
           {lang === 'sw' ? 'Hatua Muhimu za Safari Yetu (2012 — Leo)' : 'Our Journey & Milestones (2012 — Present)'}
         </h2>
 
-        <div className="space-y-6 border-l-2 border-[#1058A8]/20 pl-4 sm:pl-6 ml-2 sm:ml-4">
+        <div className="space-y-8 border-l-2 border-[#1058A8]/20 pl-5 sm:pl-8 ml-2 sm:ml-4">
           {timeline.map((item, idx) => (
-            <div key={idx} className="relative space-y-1">
-              <div className="absolute -left-[25px] sm:-left-[33px] top-1 w-4 h-4 rounded-full bg-[#1058A8] border-4 border-[#FAF8F5]" />
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-[#1058A8] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full font-source tabular-nums">
+            <div key={idx} className="relative space-y-1.5">
+              <div className="absolute -left-[29px] sm:-left-[41px] top-1.5 w-4 h-4 rounded-full bg-[#1058A8] border-4 border-[#FAF8F5]" />
+              <div className="flex items-center gap-3">
+                <span className="text-xs sm:text-sm font-bold text-[#1058A8] bg-[#EAF4FB] px-3 py-1 rounded-full font-source tabular-nums">
                   {item.year}
                 </span>
-                <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
+                <h3 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340]">
                   {item.title}
                 </h3>
               </div>
-              <p className="text-sm text-[#0C2340]/80 font-source leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-700 font-source leading-relaxed">
                 {item.desc}
               </p>
             </div>
@@ -184,7 +186,7 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
       </section>
 
       {/* Core Values Section */}
-      <CoreValuesSection lang={lang} />
+      <CoreValuesSection lang={lang} onNavigate={onNavigate} />
     </div>
   );
 };

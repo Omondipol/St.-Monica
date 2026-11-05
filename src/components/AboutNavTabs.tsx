@@ -8,7 +8,10 @@ interface AboutNavTabsProps {
 }
 
 export const AboutNavTabs: React.FC<AboutNavTabsProps> = ({ currentTab, onNavigate }) => {
-  const { lang } = useChoir();
+  const { lang, leadersList, activeMembers, groupPhotosList } = useChoir();
+
+  const leaderCount = leadersList ? leadersList.length : 6;
+  const photoCount = groupPhotosList ? groupPhotosList.length : 12;
 
   const tabs = [
     {
@@ -30,14 +33,14 @@ export const AboutNavTabs: React.FC<AboutNavTabsProps> = ({ currentTab, onNaviga
       labelSw: 'Picha za Kwaya',
       labelEn: 'Choir Gallery',
       icon: Image,
-      badge: '12'
+      badge: String(photoCount)
     },
     {
       id: 'about-leadership',
-      labelSw: 'Walimu na Viongozi',
+      labelSw: 'Walimu na Maafisa',
       labelEn: 'Trainers & Officials',
       icon: Users,
-      badge: '6'
+      badge: String(leaderCount)
     },
     {
       id: 'about-sections',
@@ -51,7 +54,7 @@ export const AboutNavTabs: React.FC<AboutNavTabsProps> = ({ currentTab, onNaviga
   return (
     <div className="w-full">
       <nav 
-        className="bg-white/95 backdrop-blur-sm border border-[#0C2340]/12 rounded-2xl p-1.5 shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)] flex items-center gap-1.5 overflow-x-auto scrollbar-none"
+        className="bg-white/95 backdrop-blur-sm border border-[#0C2340]/12 rounded-2xl p-2 shadow-sm flex items-center gap-2 overflow-x-auto scrollbar-none"
         aria-label="About section tabs"
       >
         {tabs.map((tab) => {
@@ -65,17 +68,17 @@ export const AboutNavTabs: React.FC<AboutNavTabsProps> = ({ currentTab, onNaviga
                 e.preventDefault();
                 onNavigate(tab.id);
               }}
-              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-source font-semibold flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-150 ${
+              className={`px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-source font-semibold flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-150 ${
                 isActive
-                  ? 'bg-[#1058A8] text-white shadow-sm shadow-[#1058A8]/25'
+                  ? 'bg-[#1058A8] text-white shadow-md shadow-[#1058A8]/25 ring-1 ring-[#1058A8]'
                   : 'text-[#0C2340]/75 hover:text-[#0C2340] hover:bg-[#FAF8F5] active:bg-slate-100'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-white' : 'text-[#1058A8]'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#1058A8]'}`} />
               <span>{lang === 'sw' ? tab.labelSw : tab.labelEn}</span>
               {tab.badge && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-[#0C2340]/5 text-[#0C2340]/60'
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-[#0C2340]/5 text-[#0C2340]/70'
                 }`}>
                   {tab.badge}
                 </span>

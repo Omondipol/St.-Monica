@@ -822,21 +822,21 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   onClick={() => onNavigate('about-leadership')}
                   className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl border border-[#0C2340]/15 hover:bg-white text-sm font-semibold text-slate-800 transition-colors cursor-pointer"
                 >
-                  <span>{lang === 'sw' ? 'Walimu na Viongozi' : 'Trainers & Officials'}</span>
+                  <span>{lang === 'sw' ? 'Walimu na Maafisa' : 'Trainers and Officials'}</span>
                   <ArrowRight className="w-4 h-4 text-slate-400" />
                 </button>
               </div>
             </div>
 
             <div className="lg:col-span-5">
-              <div className="rounded-2xl overflow-hidden border border-[#0C2340]/15 shadow-md bg-white">
+              <div className="rounded-3xl overflow-hidden border border-[#0C2340]/15 shadow-md bg-white">
                 <img
                   src={getAssetUrl(parishMessage?.churchImg || '/assets/choir/choir_08.jpg')}
                   alt={parishMessage?.churchName || "St. Monica Catholic Church, Section 58 Nakuru"}
-                  width={600}
-                  height={400}
+                  width={1200}
+                  height={800}
                   loading="lazy"
-                  className="w-full h-72 sm:h-80 object-cover"
+                  className="w-full h-80 sm:h-96 lg:h-[440px] object-cover"
                   referrerPolicy="no-referrer"
                 />
                 <div className="p-4 bg-white border-t border-[#0C2340]/10 flex items-center justify-between">
@@ -944,12 +944,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     {/* 16:9 Video Thumbnail with Play Badge */}
-                    <div className="relative w-20 sm:w-24 aspect-video rounded-lg overflow-hidden shrink-0 border border-white/15 shadow-xs">
+                    <div className="relative w-28 sm:w-36 aspect-video rounded-xl overflow-hidden shrink-0 border border-white/15 shadow-sm">
                       <img
                         src={songThumb}
                         alt={song.title}
-                        width={160}
-                        height={90}
+                        width={320}
+                        height={180}
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         referrerPolicy="no-referrer"
