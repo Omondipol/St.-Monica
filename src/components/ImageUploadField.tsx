@@ -7,8 +7,7 @@ import {
   Check, 
   Loader2, 
   Crop,
-  Info,
-  Sparkles
+  Info
 } from 'lucide-react';
 import { getAssetUrl } from '../utils/assetHelper';
 import { ImageCropModal } from './ImageCropModal';
@@ -54,8 +53,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const [isUrlMode, setIsUrlMode] = useState<boolean>(false);
   const [urlInput, setUrlInput] = useState<string>(value);
   const [previewError, setPreviewError] = useState<boolean>(false);
-  const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [hasUploaded, setHasUploaded] = useState<boolean>(false);
 
   // Crop Modal state
   const [selectedFileForCrop, setSelectedFileForCrop] = useState<File | null>(null);
@@ -83,7 +81,6 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     // Reset input so re-selecting same file triggers change
     e.target.value = '';
 
-    setUploadedFileName(file.name);
     // Open interactive Crop Modal with head clearance guide & pipeline execution
     setSelectedFileForCrop(file);
     setIsCropOpen(true);
@@ -94,7 +91,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       onChange(result.url);
       setUrlInput(result.url);
       setPreviewError(false);
-      setUploadStatus('Optimized via Pipeline');
+      setHasUploaded(true);
     }
   };
 
@@ -102,6 +99,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     if (urlInput.trim()) {
       onChange(urlInput.trim());
       setPreviewError(false);
+      setHasUploaded(true);
     }
   };
 
@@ -109,7 +107,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     if (window.confirm('Remove this photo?')) {
       onChange(defaultValue || '');
       setUrlInput(defaultValue || '');
-      setUploadedFileName('');
+      setHasUploaded(false);
       setPreviewError(false);
     }
   };
@@ -207,16 +205,10 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             </button>
           </div>
 
-          {uploadedFileName && (
-            <p className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium">
-              <Check className="w-3.5 h-3.5" />
-              <span className="truncate max-w-[200px]">{uploadedFileName}</span>
-              {uploadStatus && (
-                <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.2 rounded font-semibold ml-1 flex items-center gap-0.5">
-                  <Sparkles className="w-2.5 h-2.5 text-amber-500 inline" />
-                  {uploadStatus}
-                </span>
-              )}
+          {hasUploaded && (
+            <p className="text-xs text-emerald-700 flex items-center gap-1.5 font-medium pt-0.5">
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Uploaded</span>
             </p>
           )}
 
@@ -256,7 +248,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                         onChange(presetUrl);
                         setUrlInput(presetUrl);
                         setPreviewError(false);
-                        setUploadedFileName('');
+                        setHasUploaded(false);
                       }}
                       className={`text-[10px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${
                         value === presetUrl
