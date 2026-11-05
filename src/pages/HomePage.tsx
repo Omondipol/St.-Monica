@@ -875,15 +875,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-[#7EC8F0] border border-white/15 uppercase tracking-wider">
-                  {lang === 'sw' ? 'Mkusanyiko wa Nyimbo' : 'Song Repertoire'}
-                </span>
-                <span className="text-xs text-amber-400 font-semibold">
-                  {songs.length} {lang === 'sw' ? 'Nyimbo' : 'Songs'}
-                </span>
-              </div>
-              <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-white mt-1">
+              <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
                 {lang === 'sw' ? 'Nyimbo Zetu Zilizorekodiwa' : 'Our Recorded Songs'}
               </h2>
               <p className="text-sm sm:text-base text-white/80 font-source mt-1">
