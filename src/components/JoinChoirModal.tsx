@@ -597,12 +597,12 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2.5 rounded-xl bg-white border border-[#0C2340]/10 flex items-center justify-between">
                       <div>
-                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Paybill / Till:</span>
-                        <strong className="font-source text-xs text-[#0C2340] tabular-nums font-bold">{"{{MPESA_TILL}}"}</strong>
+                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Paybill:</span>
+                        <strong className="font-source text-xs text-[#0C2340] tabular-nums font-bold">678408</strong>
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleCopy('{{MPESA_TILL}}', 'till')}
+                        onClick={() => handleCopy('678408', 'till')}
                         className="px-2 py-0.5 text-[10px] rounded bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
                       >
                         {copiedField === 'till' ? 'Copied' : 'Copy'}

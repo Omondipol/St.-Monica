@@ -88,64 +88,89 @@ export function normalizeMpesaPhone(input: string): { valid: boolean; normalized
 }
 
 /**
+ * Robust JSON fetcher that gracefully handles non-JSON/HTML error pages without throwing SyntaxError.
+ */
+async function safeJsonFetch<T = any>(url: string, options?: RequestInit): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(url, options);
+  } catch (netErr: any) {
+    throw new Error('Could not reach payment server. Please check your connection.');
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try {
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || data?.errorMessage || data?.message || `Payment request failed (${res.status})`);
+      }
+      return data as T;
+    } catch (parseErr: any) {
+      if (parseErr.message && !parseErr.message.includes('Unexpected token') && !parseErr.message.includes('valid JSON')) {
+        throw parseErr;
+      }
+    }
+  }
+
+  // Handle HTML or text responses
+  const text = await res.text();
+  if (text.includes('<html') || text.includes('<!DOCTYPE') || text.includes('<head')) {
+    throw new Error('Payment service is connecting. Please wait a moment and try again.');
+  }
+
+  try {
+    const data = JSON.parse(text);
+    if (!res.ok) {
+      throw new Error(data?.error || data?.message || `Payment request failed (${res.status})`);
+    }
+    return data as T;
+  } catch {
+    if (!res.ok) {
+      throw new Error(text || `Request failed with status ${res.status}`);
+    }
+    return text as any;
+  }
+}
+
+/**
  * Initiates an STK push payment request.
  */
 export async function initiateStkPush(params: InitiateStkParams): Promise<StkInitiateResponse> {
-  const res = await fetch('/api/mpesa/stkpush', {
+  return safeJsonFetch<StkInitiateResponse>('/api/mpesa/stkpush', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(params)
   });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'Failed to initiate M-Pesa STK Push');
-  }
-
-  return data;
 }
 
 /**
  * Polls the current status of a payment.
  */
 export async function pollPaymentStatus(checkoutRequestId: string): Promise<PaymentStatusResponse> {
-  const res = await fetch(`/api/mpesa/status/${encodeURIComponent(checkoutRequestId)}`);
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'Could not fetch payment status');
-  }
-  return data;
+  return safeJsonFetch<PaymentStatusResponse>(`/api/mpesa/status/${encodeURIComponent(checkoutRequestId)}`);
 }
 
 /**
  * Fetches all transactions and category totals for the Admin Contributions page.
  */
 export async function fetchMpesaTransactions(): Promise<TransactionsLedgerResponse> {
-  const res = await fetch('/api/mpesa/transactions');
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'Failed to fetch contributions');
-  }
-  return data;
+  return safeJsonFetch<TransactionsLedgerResponse>('/api/mpesa/transactions');
 }
 
 /**
  * Manually records a transaction.
  */
 export async function recordManualTransaction(record: Partial<MpesaTransactionRecord>): Promise<MpesaTransactionRecord> {
-  const res = await fetch('/api/mpesa/transactions', {
+  const data = await safeJsonFetch<{ transaction: MpesaTransactionRecord }>('/api/mpesa/transactions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(record)
   });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'Failed to record transaction');
-  }
   return data.transaction;
 }
 
@@ -153,13 +178,9 @@ export async function recordManualTransaction(record: Partial<MpesaTransactionRe
  * Deletes a transaction by ID.
  */
 export async function deleteMpesaTransaction(id: string): Promise<void> {
-  const res = await fetch(`/api/mpesa/transactions/${encodeURIComponent(id)}`, {
+  await safeJsonFetch(`/api/mpesa/transactions/${encodeURIComponent(id)}`, {
     method: 'DELETE'
   });
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.error || 'Failed to delete transaction');
-  }
 }
 
 /**
@@ -169,14 +190,13 @@ export async function simulatePaymentCallback(
   checkoutRequestId: string,
   outcome: 'success' | 'cancelled' | 'failed'
 ): Promise<any> {
-  const res = await fetch('/api/mpesa/simulate-callback', {
+  return safeJsonFetch('/api/mpesa/simulate-callback', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ checkoutRequestId, outcome })
   });
-  return res.json();
 }
 
 /**
@@ -190,6 +210,6 @@ export async function getMpesaConfig(): Promise<{
   callbackUrl: string;
   hasCredentials: boolean;
 }> {
-  const res = await fetch('/api/mpesa/config');
-  return res.json();
+  return safeJsonFetch('/api/mpesa/config');
 }
+

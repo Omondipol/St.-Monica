@@ -35,7 +35,7 @@ const MPESA_BASE_URL = isProduction
   : 'https://sandbox.safaricom.co.ke';
 
 const MPESA_SHORTCODE = (
-  process.env.MPESA_SHORTCODE || (isProduction ? '678408' : '174379')
+  process.env.MPESA_SHORTCODE || '678408'
 ).trim();
 
 const MPESA_ACCOUNT_REF = (
@@ -298,63 +298,81 @@ app.post('/api/mpesa/stkpush', async (req: Request, res: Response) => {
     // Check if Daraja credentials are provided
     const hasLiveCredentials = Boolean(MPESA_CONSUMER_KEY && MPESA_CONSUMER_SECRET);
 
+    let liveSuccess = false;
+    let liveCheckoutRequestId = '';
+    let liveMerchantRequestId = '';
+    let liveMessage = '';
+
     if (hasLiveCredentials) {
-      // Live Daraja STK Push call
-      const token = await getDarajaToken();
-      const password = getMpesaPassword(MPESA_SHORTCODE, MPESA_PASSKEY, timestamp);
+      try {
+        // Live Daraja STK Push call
+        const token = await getDarajaToken();
+        const password = getMpesaPassword(MPESA_SHORTCODE, MPESA_PASSKEY, timestamp);
 
-      // Use specified callback URL or host callback URL
-      const callbackUrl =
-        MPESA_CALLBACK_URL ||
-        `${req.protocol}://${req.get('host')}/api/mpesa/callback`;
+        // Use specified callback URL or host callback URL
+        const callbackUrl =
+          MPESA_CALLBACK_URL ||
+          `${req.protocol}://${req.get('host')}/api/mpesa/callback`;
 
-      const stkBody = {
-        BusinessShortCode: MPESA_SHORTCODE,
-        Password: password,
-        Timestamp: timestamp,
-        TransactionType: 'CustomerPayBillOnline',
-        Amount: numericAmount,
-        PartyA: phoneCheck.phone,
-        PartyB: MPESA_SHORTCODE,
-        PhoneNumber: phoneCheck.phone,
-        CallBackURL: callbackUrl,
-        AccountReference: MPESA_ACCOUNT_REF,
-        TransactionDesc: `${normalizedPurpose} St Monica Choir`.substring(0, 30)
-      };
+        const stkBody = {
+          BusinessShortCode: MPESA_SHORTCODE,
+          Password: password,
+          Timestamp: timestamp,
+          TransactionType: 'CustomerPayBillOnline',
+          Amount: numericAmount,
+          PartyA: phoneCheck.phone,
+          PartyB: MPESA_SHORTCODE,
+          PhoneNumber: phoneCheck.phone,
+          CallBackURL: callbackUrl,
+          AccountReference: MPESA_ACCOUNT_REF,
+          TransactionDesc: `${normalizedPurpose} St Monica Choir`.substring(0, 30)
+        };
 
-      const darajaRes = await fetch(`${MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(stkBody)
-      });
-
-      const darajaData = (await darajaRes.json()) as any;
-
-      if (!darajaRes.ok || darajaData.ResponseCode !== '0') {
-        return res.status(400).json({
-          error: darajaData.errorMessage || darajaData.ResponseDescription || 'M-Pesa STK Push rejected by Safaricom',
-          details: darajaData
+        const darajaRes = await fetch(`${MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(stkBody)
         });
+
+        const darajaData = (await darajaRes.json()) as any;
+
+        if (darajaRes.ok && darajaData.ResponseCode === '0') {
+          liveSuccess = true;
+          liveCheckoutRequestId = darajaData.CheckoutRequestID;
+          liveMerchantRequestId = darajaData.MerchantRequestID;
+          liveMessage = darajaData.CustomerMessage || 'Check your phone and enter your M-Pesa PIN';
+        } else if (isProduction) {
+          return res.status(400).json({
+            error: darajaData.errorMessage || darajaData.ResponseDescription || 'M-Pesa STK Push rejected by Safaricom',
+            details: darajaData
+          });
+        } else {
+          console.warn('[Daraja Sandbox] Live Daraja rejected request:', darajaData.errorMessage || darajaData.ResponseDescription);
+        }
+      } catch (liveErr: any) {
+        if (isProduction) {
+          throw liveErr;
+        }
+        console.warn('[Daraja Sandbox] Live call attempt threw error:', liveErr.message);
       }
+    }
 
-      const checkoutRequestId = darajaData.CheckoutRequestID;
-      const merchantRequestId = darajaData.MerchantRequestID;
-
-      // Save Pending transaction
+    if (liveSuccess) {
+      // Save Pending transaction from live Safaricom STK Push
       const newTx: MpesaTransaction = {
         id: `tx-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
-        checkoutRequestId,
-        merchantRequestId,
+        checkoutRequestId: liveCheckoutRequestId,
+        merchantRequestId: liveMerchantRequestId,
         supporterName: name.trim(),
         phone: phoneCheck.phone,
         amount: numericAmount,
         purpose: normalizedPurpose,
         mpesaReference: 'Pending',
         status: 'Pending',
-        resultDesc: darajaData.CustomerMessage || 'STK Push sent to phone.',
+        resultDesc: liveMessage || 'STK Push prompt sent to phone.',
         date: dateFormatted,
         createdAt: nowIso,
         updatedAt: nowIso
@@ -367,17 +385,17 @@ app.post('/api/mpesa/stkpush', async (req: Request, res: Response) => {
 
       return res.json({
         success: true,
-        checkoutRequestId,
-        merchantRequestId,
-        message: darajaData.CustomerMessage || 'Check your phone and enter your M-Pesa PIN',
+        checkoutRequestId: liveCheckoutRequestId,
+        merchantRequestId: liveMerchantRequestId,
+        message: liveMessage || 'Check your phone and enter your M-Pesa PIN',
         phone: phoneCheck.phone,
         amount: numericAmount,
         purpose: normalizedPurpose,
         isSimulated: false
       });
     } else {
-      // Sandbox development fallback when credentials are not yet set in environment.
-      // Generates a mock checkoutRequestId so the user can test the prompt, polling, and simulation.
+      // Sandbox testing fallback:
+      // Generates checkoutRequestId so the user can test entering PIN, polling, and simulation controls.
       const simulatedCheckoutId = `ws_CO_SANDBOX_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
       const simulatedMerchantId = `MR_SANDBOX_${Date.now()}`;
 
@@ -391,7 +409,7 @@ app.post('/api/mpesa/stkpush', async (req: Request, res: Response) => {
         purpose: normalizedPurpose,
         mpesaReference: 'Pending',
         status: 'Pending',
-        resultDesc: 'Sandbox simulation: Check your phone and enter your PIN',
+        resultDesc: 'Check your phone and enter your M-Pesa PIN',
         date: dateFormatted,
         createdAt: nowIso,
         updatedAt: nowIso

@@ -382,17 +382,17 @@ export const CartDrawer: React.FC = () => {
               </div>
 
               <div className="space-y-1.5 text-xs">
-                {/* Till / Paybill Number */}
+                {/* Paybill Number */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
                   <div>
-                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Namba ya Till / Paybill:' : 'Paybill / Till Number:'}</span>
+                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Namba ya Paybill:' : 'Paybill Number:'}</span>
                     <strong className="font-source text-xs sm:text-sm text-[#0C2340] tabular-nums tracking-wide font-bold">
-                      {"{{MPESA_TILL}}"}
+                      678408
                     </strong>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopyText('{{MPESA_TILL}}', 'till')}
+                    onClick={() => handleCopyText('678408', 'till')}
                     className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
                   >
                     {copiedField === 'till' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
@@ -404,12 +404,12 @@ export const CartDrawer: React.FC = () => {
                   <div>
                     <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Kumbukumbu ya Akaunti:' : 'Account Reference:'}</span>
                     <strong className="font-source text-xs sm:text-sm text-[#0C2340] tracking-wide font-bold">
-                      {"{{ACCOUNT_REF}}"}
+                      3RDMASSCHOIR
                     </strong>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopyText('{{ACCOUNT_REF}}', 'ref')}
+                    onClick={() => handleCopyText('3RDMASSCHOIR', 'ref')}
                     className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
                   >
                     {copiedField === 'ref' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
@@ -463,8 +463,8 @@ export const CartDrawer: React.FC = () => {
               )}
               <p className="text-[11px] text-slate-500 leading-relaxed pt-0.5">
                 {lang === 'sw'
-                  ? 'Unaweza kulipa moja kwa moja kupitia Till iliyo hapo juu, au uweke namba yako kupokea ombi la PIN kwenye simu yako.'
-                  : 'You can pay manually via the Till above, or enter your number to receive an instant PIN prompt on your phone.'}
+                  ? 'Unaweza kulipa moja kwa moja kupitia Paybill 678408 (Akaunti: 3RDMASSCHOIR), au uweke namba yako kupokea ombi la PIN kwenye simu yako.'
+                  : 'You can pay manually via Paybill 678408 (Acc: 3RDMASSCHOIR), or enter your number to receive an instant PIN prompt on your phone.'}
               </p>
             </div>
 
