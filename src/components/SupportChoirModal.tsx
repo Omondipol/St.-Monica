@@ -21,6 +21,12 @@ import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 import { getAssetUrl } from '../utils/assetHelper';
+import { 
+  normalizeMpesaPhone, 
+  initiateStkPush, 
+  pollPaymentStatus, 
+  simulatePaymentCallback 
+} from '../utils/mpesaClient';
 
 interface AmountOption {
   kes: number;
@@ -66,6 +72,18 @@ export const SupportChoirModal: React.FC = () => {
   const [showManualMenu, setShowManualMenu] = useState<boolean>(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [transactionTime, setTransactionTime] = useState<string>('');
+  const [checkoutRequestId, setCheckoutRequestId] = useState<string>('');
+  const [mpesaReceiptCode, setMpesaReceiptCode] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [statusErrorMessage, setStatusErrorMessage] = useState<string>('');
+  const pollTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, []);
 
   // Swipe-down to dismiss state on mobile phones
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
@@ -128,12 +146,10 @@ export const SupportChoirModal: React.FC = () => {
     setFormStep(2);
   };
 
-  const handleStep2Pay = (e: React.FormEvent) => {
+  const handleStep2Pay = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const cleaned = phoneNumber.replace(/[\s\-\(\)]/g, '');
-    const isValid = /^(?:\+254|0)[17]\d{8}$/.test(cleaned) || cleaned.length >= 9;
-
+    const phoneValidation = normalizeMpesaPhone(phoneNumber);
     if (!phoneNumber.trim()) {
       setPhoneError(
         lang === 'sw' 
@@ -142,17 +158,17 @@ export const SupportChoirModal: React.FC = () => {
       );
       return;
     }
-    if (!isValid) {
+    if (!phoneValidation.valid) {
       setPhoneError(
         lang === 'sw' 
-          ? 'Weka nambari sahihi ya Safaricom (mfano: 07XX XXX XXX).' 
-          : 'Please enter a valid Safaricom number (e.g. 07XX XXX XXX).'
+          ? 'Weka nambari sahihi ya Safaricom (mfano: 07XX XXX XXX au 01XX XXX XXX).' 
+          : 'Please enter a valid Safaricom number (e.g. 07XX XXX XXX or 01XX XXX XXX).'
       );
       return;
     }
 
     setPhoneError('');
-    setModalState('waiting');
+    setIsSubmitting(true);
 
     // Record time of transaction
     const now = new Date();
@@ -164,10 +180,71 @@ export const SupportChoirModal: React.FC = () => {
       }) + ', ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     );
 
-    // Simulate STK push interaction
-    setTimeout(() => {
-      setModalState('success');
-    }, 2800);
+    try {
+      const res = await initiateStkPush({
+        name: donorName.trim() || 'Supporter',
+        phone: phoneValidation.normalized,
+        amount: currentAmount,
+        purpose: 'Donations'
+      });
+
+      setCheckoutRequestId(res.checkoutRequestId);
+      setModalState('waiting');
+      setIsSubmitting(false);
+
+      // Start polling status
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      let count = 0;
+      pollTimerRef.current = setInterval(async () => {
+        count += 1;
+        try {
+          const status = await pollPaymentStatus(res.checkoutRequestId);
+          if (status.status === 'Success') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setMpesaReceiptCode(status.mpesaReference);
+            setModalState('success');
+          } else if (status.status === 'Cancelled') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setStatusErrorMessage(lang === 'sw' ? 'Ombi la M-Pesa limekatishwa kwenye simu.' : 'Payment prompt was cancelled on phone.');
+            setModalState('error');
+          } else if (status.status === 'Failed') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setStatusErrorMessage(status.resultDesc || (lang === 'sw' ? 'Malipo yameshindikana.' : 'Payment failed.'));
+            setModalState('error');
+          }
+        } catch (e) {}
+
+        if (count >= 25) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setStatusErrorMessage(lang === 'sw' ? 'Muda wa ombi umekwisha. Hakuna pesa iliyotolewa.' : 'Payment prompt timed out.');
+          setModalState('error');
+        }
+      }, 2000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setPhoneError(err.message || 'Could not send M-Pesa prompt.');
+    }
+  };
+
+  const handleSimulateOutcome = async (outcome: 'success' | 'cancelled' | 'failed') => {
+    if (!checkoutRequestId) return;
+    try {
+      await simulatePaymentCallback(checkoutRequestId, outcome);
+      const res = await pollPaymentStatus(checkoutRequestId);
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      if (outcome === 'success') {
+        setMpesaReceiptCode(res.mpesaReference);
+        setModalState('success');
+      } else if (outcome === 'cancelled') {
+        setStatusErrorMessage(lang === 'sw' ? 'Ombi la M-Pesa limekatishwa kwenye simu.' : 'Payment prompt cancelled on phone.');
+        setModalState('error');
+      } else {
+        setStatusErrorMessage(res.resultDesc || 'Payment failed.');
+        setModalState('error');
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleResetToForm = () => {
@@ -620,22 +697,55 @@ export const SupportChoirModal: React.FC = () => {
 
           {/* ================= STEP 3: WAITING FOR PIN ================= */}
           {modalState === 'waiting' && (
-            <div className="text-center py-6 space-y-3 pr-10">
+            <div className="text-center py-5 space-y-3 pr-10">
               <div className="w-12 h-12 rounded-full border-3 border-[#1058A8] border-t-transparent animate-spin mx-auto" />
               <div className="space-y-1">
                 <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-                  {lang === 'sw' ? 'Ombi la M-Pesa Limetumwa...' : 'M-Pesa Prompt Sent'}
+                  {lang === 'sw' ? 'Angalia simu yako na uweke PIN' : 'Check your phone and enter your PIN'}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 font-source leading-relaxed max-w-sm mx-auto">
                   {lang === 'sw'
-                    ? `Tafadhali angalia simu yako (${phoneNumber || 'M-Pesa'}) na uweke PIN yako kukamilisha mchango wa KES ${currentAmount.toLocaleString()}.`
-                    : `Please check your phone (${phoneNumber || 'M-Pesa'}) and enter your PIN to complete your gift of KES ${currentAmount.toLocaleString()}.`}
+                    ? `Tafadhali angalia simu yako (${phoneNumber || 'M-Pesa'}) na uweke PIN yako ya M-Pesa kukamilisha mchango wa KES ${currentAmount.toLocaleString()}.`
+                    : `Please check your phone (${phoneNumber || 'M-Pesa'}) and enter your M-Pesa PIN to complete your gift of KES ${currentAmount.toLocaleString()}.`}
                 </p>
               </div>
 
+              {/* Sandbox quick testing triggers */}
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-xs text-left max-w-xs mx-auto space-y-1.5">
+                <span className="text-[10px] text-slate-500 font-semibold block uppercase tracking-wider">
+                  Sandbox Test Triggers:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSimulateOutcome('success')}
+                    className="flex-1 py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                  >
+                    ✓ Enter PIN
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSimulateOutcome('cancelled')}
+                    className="flex-1 py-1 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                  >
+                    ✕ Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSimulateOutcome('failed')}
+                    className="flex-1 py-1 px-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                  >
+                    ! Wrong PIN
+                  </button>
+                </div>
+              </div>
+
               <button
-                onClick={() => setModalState('error')}
-                className="text-xs text-[#1058A8] hover:underline cursor-pointer inline-flex items-center justify-center font-source pt-2"
+                onClick={() => {
+                  if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+                  setModalState('error');
+                }}
+                className="text-xs text-[#1058A8] hover:underline cursor-pointer inline-flex items-center justify-center font-source pt-1"
               >
                 {lang === 'sw' ? 'Je, hukuona ombi la PIN?' : 'Did not receive prompt?'}
               </button>
@@ -678,8 +788,18 @@ export const SupportChoirModal: React.FC = () => {
                 </p>
               </div>
 
-              {/* Receipt Box: Real date/time and amount in body font. No fake receipt code, no Ministry line, no monospace */}
+              {/* Receipt Box */}
               <div className="p-3 bg-white rounded-xl border border-[#0C2340]/10 text-xs font-source text-slate-700 space-y-1.5 text-left max-w-sm mx-auto">
+                {mpesaReceiptCode && (
+                  <div className="flex justify-between items-center pb-1 border-b border-slate-100">
+                    <span className="text-slate-500">
+                      M-Pesa Reference:
+                    </span>
+                    <strong className="font-mono font-bold text-xs text-[#1058A8]">
+                      {mpesaReceiptCode}
+                    </strong>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">
                     {lang === 'sw' ? 'Tarehe na Saa:' : 'Date & Time:'}

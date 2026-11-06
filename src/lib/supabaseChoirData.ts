@@ -644,6 +644,98 @@ export async function deleteLibrarySongFromSupabase(songId: string, remainingSon
 }
 
 /**
+ * Contributions & M-Pesa Transactions in Supabase
+ */
+export interface SupabaseContributionRow {
+  id: string;
+  checkout_request_id?: string;
+  merchant_request_id?: string;
+  supporter_name: string;
+  phone?: string;
+  amount: number;
+  purpose: string;
+  mpesa_reference?: string;
+  status: string;
+  result_desc?: string;
+  date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function loadContributionsFromSupabase(): Promise<any[]> {
+  try {
+    const { data, error } = await supabase
+      .from('contributions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('[Supabase DB] contributions query notice:', error.message);
+      return [];
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map((row: any) => ({
+        id: String(row.id),
+        checkoutRequestId: row.checkout_request_id || '',
+        merchantRequestId: row.merchant_request_id || '',
+        supporterName: row.supporter_name || 'Supporter',
+        phone: row.phone || '',
+        amount: Number(row.amount) || 0,
+        purpose: row.purpose || 'Donations',
+        mpesaReference: row.mpesa_reference || '',
+        status: row.status || 'Pending',
+        resultDesc: row.result_desc || '',
+        date: row.date || '',
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString()
+      }));
+    }
+  } catch (err) {
+    console.warn('Failed to load contributions from Supabase:', err);
+  }
+  return [];
+}
+
+export async function saveContributionToSupabase(tx: any): Promise<void> {
+  try {
+    const row = {
+      id: tx.id,
+      checkout_request_id: tx.checkoutRequestId,
+      merchant_request_id: tx.merchantRequestId,
+      supporter_name: tx.supporterName,
+      phone: tx.phone,
+      amount: tx.amount,
+      purpose: tx.purpose,
+      mpesa_reference: tx.mpesaReference,
+      status: tx.status,
+      result_desc: tx.resultDesc,
+      date: tx.date,
+      created_at: tx.createdAt || new Date().toISOString(),
+      updated_at: tx.updatedAt || new Date().toISOString()
+    };
+
+    const { error } = await supabase.from('contributions').upsert(row, { onConflict: 'id' });
+    if (error) {
+      console.warn('[Supabase DB] contribution save notice:', error.message);
+    }
+  } catch (err) {
+    console.warn('Failed to save contribution to Supabase:', err);
+  }
+}
+
+export async function deleteContributionFromSupabase(id: string): Promise<void> {
+  try {
+    const { error } = await supabase.from('contributions').delete().eq('id', id);
+    if (error) {
+      console.warn('[Supabase DB] contribution delete notice:', error.message);
+    }
+  } catch (err) {
+    console.warn('Failed to delete contribution from Supabase:', err);
+  }
+}
+
+/**
  * Save Albums, Sheet Music, Members, or Events catalog to Supabase Storage
  */
 export async function saveCatalogToSupabase(name: string, data: any): Promise<boolean> {
@@ -817,10 +909,38 @@ CREATE POLICY "Public update library_songs" ON public.library_songs FOR UPDATE U
 DROP POLICY IF EXISTS "Public delete library_songs" ON public.library_songs;
 CREATE POLICY "Public delete library_songs" ON public.library_songs FOR DELETE USING (true);
 
--- 6. Enable Realtime Replication
+-- 6. Create table for Contributions & M-Pesa Transactions
+CREATE TABLE IF NOT EXISTS public.contributions (
+  id TEXT PRIMARY KEY,
+  checkout_request_id TEXT,
+  merchant_request_id TEXT,
+  supporter_name TEXT NOT NULL,
+  phone TEXT,
+  amount NUMERIC NOT NULL,
+  purpose TEXT NOT NULL,
+  mpesa_reference TEXT,
+  status TEXT NOT NULL DEFAULT 'Pending',
+  result_desc TEXT,
+  date TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.contributions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read contributions" ON public.contributions;
+CREATE POLICY "Public read contributions" ON public.contributions FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert contributions" ON public.contributions;
+CREATE POLICY "Public insert contributions" ON public.contributions FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update contributions" ON public.contributions;
+CREATE POLICY "Public update contributions" ON public.contributions FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public delete contributions" ON public.contributions;
+CREATE POLICY "Public delete contributions" ON public.contributions FOR DELETE USING (true);
+
+-- 7. Enable Realtime Replication
 ALTER PUBLICATION supabase_realtime ADD TABLE public.songs;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.gallery;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.albums;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.library_songs;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.contributions;
 `;

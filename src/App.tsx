@@ -11,6 +11,7 @@ import { ChoirFooter } from './components/ChoirFooter';
 import { SongCutoffModal } from './components/SongCutoffModal';
 import { SupportChoirModal } from './components/SupportChoirModal';
 import { JoinChoirModal } from './components/JoinChoirModal';
+import { MpesaPaymentModal } from './components/MpesaPaymentModal';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, CHOIR_STATS } from './data/choirContent';
 
 // Pages & Subviews
@@ -163,6 +164,7 @@ function SupabasePhotoUploadView({ onNavigate }: { onNavigate: (route: string) =
 }
 
 function ChoirApp() {
+  const { isMpesaModalOpen, closeMpesaModal, mpesaModalOptions } = useChoir();
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
@@ -347,6 +349,14 @@ function ChoirApp() {
       <YouTubePlayerModal />
       <CartDrawer />
       <JoinChoirModal onNavigate={handleNavigate} />
+      <MpesaPaymentModal
+        isOpen={isMpesaModalOpen}
+        onClose={closeMpesaModal}
+        defaultPurpose={mpesaModalOptions.purpose || 'Donations'}
+        defaultAmount={mpesaModalOptions.amount || 500}
+        defaultName={mpesaModalOptions.name || ''}
+        defaultPhone={mpesaModalOptions.phone || ''}
+      />
     </div>
   );
 }

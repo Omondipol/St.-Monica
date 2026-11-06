@@ -15,6 +15,12 @@ import {
 } from 'lucide-react';
 import { ChoirMember } from '../data/membersData';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
+import { 
+  normalizeMpesaPhone, 
+  initiateStkPush, 
+  pollPaymentStatus, 
+  simulatePaymentCallback 
+} from '../utils/mpesaClient';
 
 interface JoinChoirModalProps {
   onNavigate?: (route: string) => void;
@@ -42,9 +48,18 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
   const [paymentMethod, setPaymentMethod] = useState<'mpesa_stk' | 'mpesa_paybill'>('mpesa_stk');
   const [paybillCode, setPaybillCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [stkStatus, setStkStatus] = useState<'idle' | 'prompted' | 'pin' | 'verifying' | 'done'>('idle');
+  const [stkStatus, setStkStatus] = useState<'idle' | 'prompted' | 'pin' | 'verifying' | 'done' | 'failed'>('idle');
+  const [stkErrorMessage, setStkErrorMessage] = useState('');
+  const [checkoutRequestId, setCheckoutRequestId] = useState('');
   const [registeredMemberData, setRegisteredMemberData] = useState<ChoirMember | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const pollTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, []);
 
   // Sync preselected voice if provided
   useEffect(() => {
@@ -91,36 +106,104 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
     setStep('checkout');
   };
 
-  const handleSimulateStkPayment = () => {
+  const handleSimulateStkPayment = async () => {
+    const phoneCheck = normalizeMpesaPhone(phone);
+    if (!phoneCheck.valid) {
+      alert(phoneCheck.error || 'Please enter a valid Safaricom phone number');
+      return;
+    }
+
     setIsProcessing(true);
     setStkStatus('prompted');
+    setStkErrorMessage('');
 
-    // Step 1: Prompt phone
-    setTimeout(() => {
-      setStkStatus('pin');
-    }, 1500);
-
-    // Step 2: Processing PIN
-    setTimeout(() => {
-      setStkStatus('verifying');
-    }, 3200);
-
-    // Step 3: Complete payment & register member
-    setTimeout(() => {
-      const randomCode = 'Q' + Math.random().toString(36).substring(2, 8).toUpperCase() + 'K';
-      const newMember = registerMember({
-        name,
-        voice,
-        phone,
-        email,
-        paymentReference: `MPESA-${randomCode}`
+    try {
+      const res = await initiateStkPush({
+        name: name.trim(),
+        phone: phoneCheck.normalized,
+        amount: 500,
+        purpose: 'Membership'
       });
 
-      setRegisteredMemberData(newMember);
+      setCheckoutRequestId(res.checkoutRequestId);
+      setStkStatus('pin');
+
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      let count = 0;
+      pollTimerRef.current = setInterval(async () => {
+        count += 1;
+        try {
+          const status = await pollPaymentStatus(res.checkoutRequestId);
+          if (status.status === 'Success') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            const newMember = registerMember({
+              name,
+              voice,
+              phone: phoneCheck.normalized,
+              email,
+              paymentReference: status.mpesaReference
+            });
+            setRegisteredMemberData(newMember);
+            setIsProcessing(false);
+            setStkStatus('done');
+            setStep('success');
+          } else if (status.status === 'Cancelled') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setIsProcessing(false);
+            setStkStatus('failed');
+            setStkErrorMessage(lang === 'sw' ? 'Ombi la M-Pesa limekatishwa kwenye simu.' : 'Payment prompt was cancelled on your phone.');
+          } else if (status.status === 'Failed') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setIsProcessing(false);
+            setStkStatus('failed');
+            setStkErrorMessage(status.resultDesc || (lang === 'sw' ? 'Malipo ya M-Pesa yameshindikana.' : 'Payment failed.'));
+          }
+        } catch (e) {}
+
+        if (count >= 25) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setIsProcessing(false);
+          setStkStatus('failed');
+          setStkErrorMessage(lang === 'sw' ? 'Muda wa ombi umekwisha. Jaribu tena.' : 'Payment request timed out.');
+        }
+      }, 2000);
+    } catch (err: any) {
       setIsProcessing(false);
-      setStkStatus('done');
-      setStep('success');
-    }, 4500);
+      setStkStatus('failed');
+      setStkErrorMessage(err.message || 'Could not send M-Pesa STK push.');
+    }
+  };
+
+  const handleSimulateMembershipOutcome = async (outcome: 'success' | 'cancelled' | 'failed') => {
+    if (!checkoutRequestId) return;
+    try {
+      await simulatePaymentCallback(checkoutRequestId, outcome);
+      const res = await pollPaymentStatus(checkoutRequestId);
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      if (outcome === 'success') {
+        const newMember = registerMember({
+          name,
+          voice,
+          phone,
+          email,
+          paymentReference: res.mpesaReference
+        });
+        setRegisteredMemberData(newMember);
+        setIsProcessing(false);
+        setStkStatus('done');
+        setStep('success');
+      } else if (outcome === 'cancelled') {
+        setIsProcessing(false);
+        setStkStatus('failed');
+        setStkErrorMessage(lang === 'sw' ? 'Ombi la M-Pesa limekatishwa kwenye simu.' : 'Payment prompt was cancelled on phone.');
+      } else {
+        setIsProcessing(false);
+        setStkStatus('failed');
+        setStkErrorMessage(res.resultDesc || 'Payment failed.');
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleManualPaybillSubmit = (e: React.FormEvent) => {
@@ -449,12 +532,52 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                   )}
 
                   {stkStatus === 'pin' && (
-                    <div className="p-3.5 bg-white rounded-xl border-2 border-[#1058A8] text-center space-y-1 shadow-sm">
+                    <div className="p-3.5 bg-white rounded-xl border-2 border-[#1058A8] text-center space-y-2 shadow-sm">
                       <span className="text-xs font-bold text-[#1058A8] block flex items-center justify-center gap-1.5">
                         <Smartphone className="w-4 h-4 animate-bounce" />
-                        {lang === 'sw' ? 'Tafadhali ingiza PIN ya M-Pesa kwenye simu yako' : 'Please enter your M-Pesa PIN on your phone'}
+                        {lang === 'sw' ? 'Angalia simu yako na uweke PIN ya M-Pesa' : 'Check your phone and enter your PIN'}
                       </span>
-                      <span className="text-[11px] text-slate-600 block">St. Monica Choir · Amount: KES 500</span>
+                      <span className="text-[11px] text-slate-600 block">St. Monica Choir Membership · KES 500</span>
+
+                      {/* Sandbox test controls */}
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleSimulateMembershipOutcome('success')}
+                          className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer"
+                        >
+                          ✓ Enter PIN
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSimulateMembershipOutcome('cancelled')}
+                          className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer"
+                        >
+                          ✕ Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSimulateMembershipOutcome('failed')}
+                          className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded text-[11px] font-semibold cursor-pointer"
+                        >
+                          ! Fail
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {stkStatus === 'failed' && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center space-y-2">
+                      <p className="text-xs text-rose-800 font-semibold">
+                        {stkErrorMessage || 'Payment prompt incomplete or cancelled.'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setStkStatus('idle')}
+                        className="px-3 py-1 bg-[#1058A8] text-white text-xs font-bold rounded-lg hover:bg-[#0C2340] cursor-pointer"
+                      >
+                        Try Again
+                      </button>
                     </div>
                   )}
 

@@ -18,6 +18,12 @@ import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_17914464
 import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { getAssetUrl } from '../utils/assetHelper';
 import { generateSongScorePdf } from '../utils/fileDownload';
+import { 
+  normalizeMpesaPhone, 
+  initiateStkPush, 
+  pollPaymentStatus, 
+  simulatePaymentCallback 
+} from '../utils/mpesaClient';
 
 export const CartDrawer: React.FC = () => {
   const { 
@@ -42,6 +48,16 @@ export const CartDrawer: React.FC = () => {
   const [transactionRef, setTransactionRef] = useState('');
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [copiedField, setCopiedField] = useState<'till' | 'ref' | 'amount' | null>(null);
+  const [checkoutRequestId, setCheckoutRequestId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState('');
+  const pollTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, []);
 
   const handleCopyText = (text: string, field: 'till' | 'ref' | 'amount') => {
     navigator.clipboard?.writeText(text);
@@ -65,36 +81,86 @@ export const CartDrawer: React.FC = () => {
     setCheckoutStep('checkout');
   };
 
-  const handleExecutePayment = (e: React.FormEvent) => {
+  const handleExecutePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleaned = phoneNumber.replace(/[\s\-\(\)]/g, '');
-    const isValid = /^(?:\+254|0)[17]\d{8}$/.test(cleaned) || cleaned.length >= 9;
+    const phoneCheck = normalizeMpesaPhone(phoneNumber);
 
     if (!phoneNumber.trim()) {
       setPhoneError(lang === 'sw' ? 'Tafadhali weka nambari ya simu ya M-Pesa' : 'Please enter your M-Pesa phone number');
       return;
     }
-    if (!isValid) {
-      setPhoneError(lang === 'sw' ? 'Weka nambari sahihi ya Safaricom (mfano: 07XX XXX XXX)' : 'Please enter a valid Safaricom number (e.g. 07XX XXX XXX)');
+    if (!phoneCheck.valid) {
+      setPhoneError(lang === 'sw' ? 'Weka nambari sahihi ya Safaricom (mfano: 07XX XXX XXX au 01XX XXX XXX)' : 'Please enter a valid Safaricom number (e.g. 07XX XXX XXX or 01XX XXX XXX)');
       return;
     }
 
     setPhoneError('');
-    setCheckoutStep('processing_mpesa');
-    setMpesaCountdown(3);
-    
-    // Simulate Safaricom STK Push confirmation
-    const timer = setInterval(() => {
-      setMpesaCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setTransactionRef(`SMCN-${Math.floor(100000 + Math.random() * 900000)}`);
-          setCheckoutStep('confirmed');
-          return 0;
-        }
-        return prev - 1;
+    setIsSubmitting(true);
+    setPaymentErrorMessage('');
+
+    try {
+      const res = await initiateStkPush({
+        name: customerName.trim() || 'Supporter',
+        phone: phoneCheck.normalized,
+        amount: cartTotalKes,
+        purpose: 'Sheet music'
       });
-    }, 1000);
+
+      setCheckoutRequestId(res.checkoutRequestId);
+      setCheckoutStep('processing_mpesa');
+      setIsSubmitting(false);
+
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      let count = 0;
+      pollTimerRef.current = setInterval(async () => {
+        count += 1;
+        try {
+          const status = await pollPaymentStatus(res.checkoutRequestId);
+          if (status.status === 'Success') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setTransactionRef(status.mpesaReference);
+            setCheckoutStep('confirmed');
+          } else if (status.status === 'Cancelled') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setPaymentErrorMessage(lang === 'sw' ? 'Ombi la malipo limekatishwa kwenye simu.' : 'Payment prompt cancelled on your phone.');
+            setPhoneError(lang === 'sw' ? 'Ombi limekatishwa' : 'Prompt cancelled');
+            setCheckoutStep('checkout');
+          } else if (status.status === 'Failed') {
+            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+            setPaymentErrorMessage(status.resultDesc || 'Payment failed.');
+            setPhoneError(status.resultDesc || 'Payment failed');
+            setCheckoutStep('checkout');
+          }
+        } catch (e) {}
+
+        if (count >= 25) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setPaymentErrorMessage(lang === 'sw' ? 'Muda umekwisha. Jaribu tena.' : 'Request timed out. Please try again.');
+          setCheckoutStep('checkout');
+        }
+      }, 2000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setPhoneError(err.message || 'Could not send M-Pesa prompt.');
+    }
+  };
+
+  const handleSimulateCartOutcome = async (outcome: 'success' | 'cancelled' | 'failed') => {
+    if (!checkoutRequestId) return;
+    try {
+      await simulatePaymentCallback(checkoutRequestId, outcome);
+      const res = await pollPaymentStatus(checkoutRequestId);
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      if (outcome === 'success') {
+        setTransactionRef(res.mpesaReference);
+        setCheckoutStep('confirmed');
+      } else {
+        setPaymentErrorMessage(res.resultDesc || 'Payment cancelled.');
+        setCheckoutStep('checkout');
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleFinishAndReset = () => {
@@ -441,7 +507,7 @@ export const CartDrawer: React.FC = () => {
             <div className="w-14 h-14 rounded-full border-3 border-[#1058A8] border-t-transparent animate-spin mx-auto" />
 
             <h4 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
-              {lang === 'sw' ? 'Ombi limetumwa kwa M-Pesa' : 'M-Pesa prompt sent'}
+              {lang === 'sw' ? 'Angalia simu yako na uweke PIN' : 'Check your phone and enter your PIN'}
             </h4>
             <p className="text-xs text-slate-600 max-w-xs leading-relaxed">
               {lang === 'sw'
@@ -449,9 +515,39 @@ export const CartDrawer: React.FC = () => {
                 : `Please check your phone ${phoneNumber} and enter your M-Pesa PIN to complete payment of ${formatPrice(cartTotalKes)} to St. Monica Choir.`}
             </p>
 
-            <div className="tabular-nums text-xs font-semibold text-[#1058A8] bg-[#1058A8]/10 px-3 py-1 rounded-full border border-[#1058A8]/20">
-              {lang === 'sw' ? `Inathibitishwa na Safaricom... ${mpesaCountdown}s` : `Confirming with Safaricom... ${mpesaCountdown}s`}
+            {/* Sandbox test controls */}
+            <div className="w-full max-w-xs p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1.5 text-left">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase block">
+                Sandbox Test Controls:
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleSimulateCartOutcome('success')}
+                  className="flex-1 py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                >
+                  ✓ Enter PIN
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSimulateCartOutcome('cancelled')}
+                  className="flex-1 py-1 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                >
+                  ✕ Cancel
+                </button>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+                setCheckoutStep('checkout');
+              }}
+              className="text-xs text-slate-500 hover:text-[#0C2340] underline cursor-pointer pt-2"
+            >
+              Cancel or change details
+            </button>
           </div>
         )}
 

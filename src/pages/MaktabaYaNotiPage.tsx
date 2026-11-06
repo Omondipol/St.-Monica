@@ -41,7 +41,7 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   onNavigateMusicPaid,
   onNavigate = () => {}
 }) => {
-  const { lang, librarySongs, incrementDownloadCount } = useChoir();
+  const { lang, librarySongs, incrementDownloadCount, openMpesaModal } = useChoir();
 
   // Navigation states
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCategoryId || null);
@@ -411,15 +411,23 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
             <h1 className="font-eb-garamond text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-white">
               {lang === 'sw' ? 'Maktaba ya Muziki' : 'Music Library'}
             </h1>
-            {onNavigateMusicPaid && (
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
               <button
-                onClick={onNavigateMusicPaid}
-                className="text-[#7EC8F0] hover:text-white transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                onClick={() => openMpesaModal({ purpose: 'Sheet music', amount: 500 })}
+                className="px-3 py-1.5 rounded-lg bg-[#1058A8] hover:bg-[#0C2340] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
               >
-                <span>{lang === 'sw' ? 'Noti za Kwaya (Duka)' : 'Music Store (Scores for sale)'}</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <span>{lang === 'sw' ? 'Lipa kwa M-Pesa' : 'Pay with M-Pesa'}</span>
               </button>
-            )}
+              {onNavigateMusicPaid && (
+                <button
+                  onClick={onNavigateMusicPaid}
+                  className="text-[#7EC8F0] hover:text-white transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{lang === 'sw' ? 'Noti za Duka' : 'Music Store'}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
           <p className="font-source text-xs sm:text-sm text-slate-200 max-w-xl leading-snug">
             {lang === 'sw'

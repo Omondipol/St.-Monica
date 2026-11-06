@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { ProductItem } from '../data/choirContent';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Smartphone } from 'lucide-react';
 import { MusicNavTabs } from '../components/MusicNavTabs';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../utils/assetHelper';
@@ -23,7 +23,7 @@ interface ShopPageProps {
 }
 
 export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => {
-  const { lang, productsList, sheetMusicList, addToCart } = useChoir();
+  const { lang, productsList, sheetMusicList, addToCart, openMpesaModal } = useChoir();
   const [filterType, setFilterType] = useState<'all' | 'sheet_music' | 'recordings'>('all');
 
   const formatPrice = (priceKes: number) => {
@@ -208,13 +208,22 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
                   </div>
                 </div>
 
-                <button
-                  onClick={() => addToCart(prod)}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] active:scale-95 text-white text-xs font-bold font-source flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
-                >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>{lang === 'sw' ? 'Weka kwenye Kikapu' : 'Add to Order'}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => addToCart(prod)}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0C2340] text-xs font-bold font-source flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>{lang === 'sw' ? 'Weka Kikapuni' : 'Add to Order'}</span>
+                  </button>
+                  <button
+                    onClick={() => openMpesaModal({ purpose: 'Sheet music', amount: prod.priceKes })}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] active:scale-95 text-white text-xs font-bold font-source flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-all"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>{lang === 'sw' ? 'Lipa M-Pesa' : 'Pay M-Pesa'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           );

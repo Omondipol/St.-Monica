@@ -55,7 +55,10 @@ import {
   deleteAlbumFromSupabase,
   loadLibrarySongsFromSupabase,
   saveLibrarySongToSupabase,
-  deleteLibrarySongFromSupabase
+  deleteLibrarySongFromSupabase,
+  loadContributionsFromSupabase,
+  saveContributionToSupabase,
+  deleteContributionFromSupabase
 } from '../lib/supabaseChoirData';
 import { getSongYouTubeId, extractYouTubeVideoId } from '../utils/assetHelper';
 
@@ -177,6 +180,13 @@ interface ChoirContextType {
   supportSongTitle: string;
   openSupportModal: (songTitle?: string) => void;
   closeSupportModal: () => void;
+
+  // Safaricom Daraja M-Pesa Modal
+  isMpesaModalOpen: boolean;
+  setIsMpesaModalOpen: (open: boolean) => void;
+  mpesaModalOptions: { purpose?: 'Donations' | 'Membership' | 'Sheet music'; amount?: number; name?: string; phone?: string };
+  openMpesaModal: (options?: { purpose?: 'Donations' | 'Membership' | 'Sheet music'; amount?: number; name?: string; phone?: string }) => void;
+  closeMpesaModal: () => void;
 
   // Liturgical Season
   liturgicalSeason: 'ordinary' | 'lent_advent' | 'easter_christmas';
@@ -566,8 +576,39 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
+    // Hydrate contributions & M-Pesa transactions from Supabase
+    loadContributionsFromSupabase().then(remoteTxs => {
+      if (isMounted && remoteTxs && Array.isArray(remoteTxs) && remoteTxs.length > 0) {
+        setTransactions(prev => {
+          const remoteIds = new Set(remoteTxs.map(t => t.id));
+          const localOnly = prev.filter(t => !remoteIds.has(t.id));
+          const merged = [...remoteTxs, ...localOnly];
+          try { localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Realtime listener for contributions
+    let contribChannel: any = null;
+    try {
+      contribChannel = supabase
+        .channel('choir-context:contributions')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'contributions' }, () => {
+          loadContributionsFromSupabase().then(latestTxs => {
+            if (latestTxs && latestTxs.length > 0) {
+              setTransactions(latestTxs);
+            }
+          });
+        })
+        .subscribe();
+    } catch (_) {}
+
     return () => {
       isMounted = false;
+      if (contribChannel) {
+        try { supabase.removeChannel(contribChannel); } catch (_) {}
+      }
     };
   }, []);
 
@@ -1313,10 +1354,21 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `tx-${Date.now()}`
     };
     setTransactions(prev => [newTx, ...prev]);
+    saveContributionToSupabase({
+      id: newTx.id,
+      supporterName: newTx.donorName,
+      phone: newTx.donorPhone,
+      amount: newTx.amountKes,
+      purpose: newTx.purpose,
+      mpesaReference: newTx.mpesaReference,
+      status: newTx.status === 'verified' || newTx.status === 'completed' ? 'Success' : 'Pending',
+      date: newTx.date
+    });
   };
 
   const deleteTransaction = (id: string) => {
     setTransactions(prev => prev.filter(t => t.id !== id));
+    deleteContributionFromSupabase(id);
   };
 
   // 7b. Maktaba ya Noti (Free Sheet Music Library)
@@ -1423,6 +1475,32 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isSupportModalOpen, setIsSupportModalOpenState] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpenState] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpenState] = useState<boolean>(false);
+  const [isMpesaModalOpen, setIsMpesaModalOpenState] = useState<boolean>(false);
+  const [mpesaModalOptions, setMpesaModalOptions] = useState<{
+    purpose?: 'Donations' | 'Membership' | 'Sheet music';
+    amount?: number;
+    name?: string;
+    phone?: string;
+  }>({});
+
+  const openMpesaModal = useCallback((options?: {
+    purpose?: 'Donations' | 'Membership' | 'Sheet music';
+    amount?: number;
+    name?: string;
+    phone?: string;
+  }) => {
+    setMpesaModalOptions(options || {});
+    setIsNowPlayingExpandedState(false);
+    setIsIntroCutoffOpenState(false);
+    setIsSupportModalOpenState(false);
+    setIsCartOpenState(false);
+    setIsJoinModalOpen(false);
+    setIsMpesaModalOpenState(true);
+  }, []);
+
+  const closeMpesaModal = useCallback(() => {
+    setIsMpesaModalOpenState(false);
+  }, []);
 
   // Fix 1: Make sure only one window is open at a time
   const setIsNowPlayingExpanded = useCallback((expanded: boolean) => {
@@ -1433,6 +1511,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsCartOpenState(false);
       setIsMenuOpenState(false);
       setIsYoutubeModalOpenState(false);
+      setIsMpesaModalOpenState(false);
     }
   }, []);
 
@@ -1984,7 +2063,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   // Fix 3: Also hide the page's own scrollbar while any window is open.
-  const isAnyWindowOpen = isNowPlayingExpanded || isIntroCutoffOpen || isSupportModalOpen || isCartOpen || isMenuOpen || isYoutubeModalOpen;
+  const isAnyWindowOpen = isNowPlayingExpanded || isIntroCutoffOpen || isSupportModalOpen || isCartOpen || isMenuOpen || isYoutubeModalOpen || isMpesaModalOpen;
 
   useEffect(() => {
     if (isAnyWindowOpen) {
@@ -2609,6 +2688,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         openSupportModal,
         closeSupportModal,
 
+        isMpesaModalOpen,
+        setIsMpesaModalOpen: setIsMpesaModalOpenState,
+        mpesaModalOptions,
+        openMpesaModal,
+        closeMpesaModal,
+
         liturgicalSeason,
         setLiturgicalSeason,
 
@@ -2814,6 +2899,11 @@ export const useChoir = (): ChoirContextType => {
       supportSongTitle: '',
       openSupportModal: () => {},
       closeSupportModal: () => {},
+      isMpesaModalOpen: false,
+      setIsMpesaModalOpen: () => {},
+      mpesaModalOptions: {},
+      openMpesaModal: () => {},
+      closeMpesaModal: () => {},
       liturgicalSeason: 'ordinary',
       setLiturgicalSeason: () => {},
       cart: [],
