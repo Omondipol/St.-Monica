@@ -515,27 +515,48 @@ export const CartDrawer: React.FC = () => {
                 : `Please check your phone ${phoneNumber} and enter your M-Pesa PIN to complete payment of ${formatPrice(cartTotalKes)} to St. Monica Choir.`}
             </p>
 
-            {/* Sandbox test controls */}
-            <div className="w-full max-w-xs p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1.5 text-left">
-              <span className="text-[10px] text-slate-500 font-semibold uppercase block">
-                Sandbox Test Controls:
-              </span>
-              <div className="flex items-center gap-1.5">
+            {/* Sandbox explanation & simulation controls */}
+            <div className="w-full max-w-xs p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs space-y-2 text-left font-source">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-900 uppercase tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span>{lang === 'sw' ? 'Hali ya Majaribio (Sandbox)' : 'Sandbox Testing Mode'}</span>
+              </div>
+              <p className="text-[11px] text-amber-900/80 leading-relaxed">
+                {lang === 'sw'
+                  ? 'Kwenye Safaricom Sandbox, simu halisi hazipokei ujumbe wa PIN. Bofya kitufe cha majaribio hapa chini kuiga malipo:'
+                  : 'Safaricom Sandbox does not send prompts to real phones. Click a simulation button below to test:'}
+              </p>
+              <div className="grid grid-cols-3 gap-1.5 pt-0.5">
                 <button
                   type="button"
                   onClick={() => handleSimulateCartOutcome('success')}
-                  className="flex-1 py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                  className="py-1.5 px-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold cursor-pointer text-center shadow-xs transition-colors"
+                  title="Simulate user entering correct PIN on phone"
                 >
-                  ✓ Enter PIN
+                  ✓ {lang === 'sw' ? 'Weka PIN' : 'Enter PIN'}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSimulateCartOutcome('cancelled')}
-                  className="flex-1 py-1 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                  className="py-1.5 px-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
+                  title="Simulate user pressing Cancel on phone"
                 >
-                  ✕ Cancel
+                  ✕ {lang === 'sw' ? 'Katisha' : 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSimulateCartOutcome('failed')}
+                  className="py-1.5 px-1 bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
+                  title="Simulate wrong PIN or timeout"
+                >
+                  ! {lang === 'sw' ? 'Imefeli' : 'Fail'}
                 </button>
               </div>
+              <p className="text-[10px] text-slate-500 italic pt-1 border-t border-amber-200/60">
+                {lang === 'sw'
+                  ? 'Ili kupokea ombi halisi kwenye simu yako, weka MPESA_ENV=production na vitambulisho vya moja kwa moja vya Paybill 678408.'
+                  : 'To receive a live prompt on your real phone, set MPESA_ENV=production with live Paybill 678408 credentials.'}
+              </p>
             </div>
 
             <button

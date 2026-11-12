@@ -94,8 +94,8 @@ export interface HeroContent {
 export const INITIAL_HERO_CONTENT: HeroContent = {
   headlineEn: "Uniting hearts through sacred music",
   headlineSw: "Kuunganisha mioyo kupitia muziki mtakatifu",
-  subheadEn: "St. Monica Third Mass Choir (Section 58, Nakuru)",
-  subheadSw: "Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)",
+  subheadEn: "St. Monica Choir · Third Mass · Section 58 · CDN",
+  subheadSw: "Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · CDN",
   verseEn: "Sing to the Lord a new song; sing to the Lord, all the earth.",
   verseSw: "Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.",
   verseRef: "Psalm 96:1 / Zaburi 96:1"
@@ -589,6 +589,130 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
+    // Hydrate Our Story & Patron Saint configuration from Supabase
+    loadCatalogFromSupabase<AboutPageConfig>('about_config').then(remoteAbout => {
+      if (isMounted && remoteAbout) {
+        setAboutPageConfig(prev => {
+          const merged = { ...prev, ...remoteAbout };
+          try { localStorage.setItem(STORAGE_KEYS.ABOUT_CONFIG, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Hero Content from Supabase
+    loadCatalogFromSupabase<HeroContent>('hero_content').then(remoteHero => {
+      if (isMounted && remoteHero) {
+        setHeroContent(prev => {
+          const merged = { ...prev, ...remoteHero };
+          try { localStorage.setItem(STORAGE_KEYS.HERO, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Hero Slides from Supabase
+    loadCatalogFromSupabase<HeroSlideConfig[]>('hero_slides').then(remoteSlides => {
+      if (isMounted && remoteSlides && Array.isArray(remoteSlides) && remoteSlides.length > 0) {
+        setHeroSlides(remoteSlides);
+        try { localStorage.setItem(STORAGE_KEYS.HERO_SLIDES, JSON.stringify(remoteSlides)); } catch (_) {}
+      }
+    });
+
+    // Hydrate Custom Logo from Supabase
+    loadCatalogFromSupabase<{ logoUrl?: string; url?: string }>('logo').then(remoteLogo => {
+      const url = remoteLogo?.logoUrl || remoteLogo?.url;
+      if (isMounted && url) {
+        setCustomLogoUrl(url);
+        try { localStorage.setItem(STORAGE_KEYS.LOGO, url); } catch (_) {}
+      }
+    });
+
+    // Hydrate Parish Message from Supabase
+    loadCatalogFromSupabase<ParishMessageConfig>('parish_message').then(remoteParish => {
+      if (isMounted && remoteParish) {
+        setParishMessage(prev => {
+          const merged = { ...prev, ...remoteParish };
+          try { localStorage.setItem(STORAGE_KEYS.PARISH_MSG, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Scripture Quote from Supabase
+    loadCatalogFromSupabase<ScriptureQuoteConfig>('scripture_quote').then(remoteScripture => {
+      if (isMounted && remoteScripture) {
+        setScriptureQuote(prev => {
+          const merged = { ...prev, ...remoteScripture };
+          try { localStorage.setItem(STORAGE_KEYS.SCRIPTURE, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Choirmaster Message from Supabase
+    loadCatalogFromSupabase<ChoirmasterMessageConfig>('choirmaster_message').then(remoteCm => {
+      if (isMounted && remoteCm) {
+        setChoirmasterMessage(prev => {
+          const merged = { ...prev, ...remoteCm };
+          try { localStorage.setItem(STORAGE_KEYS.CHOIRMASTER, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Footer Contact from Supabase
+    loadCatalogFromSupabase<FooterContactConfig>('footer_contact').then(remoteFooter => {
+      if (isMounted && remoteFooter) {
+        setFooterContact(prev => {
+          const merged = { ...prev, ...remoteFooter };
+          try { localStorage.setItem(STORAGE_KEYS.FOOTER_CONTACT, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Choir Stats from Supabase
+    loadCatalogFromSupabase<typeof CHOIR_STATS>('choir_stats').then(remoteStats => {
+      if (isMounted && remoteStats) {
+        setChoirStats(prev => {
+          const merged = { ...prev, ...remoteStats };
+          try { localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Mass Schedule from Supabase
+    loadCatalogFromSupabase<any>('mass_schedule').then(remoteSchedule => {
+      if (isMounted && remoteSchedule) {
+        setMassSchedule(prev => {
+          const merged = { ...prev, ...remoteSchedule };
+          try { localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
+    // Hydrate Core Values from Supabase
+    loadCatalogFromSupabase<CoreValueItem[]>('core_values').then(remoteValues => {
+      if (isMounted && remoteValues && Array.isArray(remoteValues) && remoteValues.length > 0) {
+        setCoreValues(remoteValues);
+        try { localStorage.setItem(STORAGE_KEYS.CORE_VALUES, JSON.stringify(remoteValues)); } catch (_) {}
+      }
+    });
+
+    // Hydrate Site Notice from Supabase
+    loadCatalogFromSupabase<any>('site_notice').then(remoteNotice => {
+      if (isMounted && remoteNotice) {
+        setSiteNotice(prev => {
+          const merged = { ...prev, ...remoteNotice };
+          try { localStorage.setItem(STORAGE_KEYS.NOTICE, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+
     // Realtime listener for contributions
     let contribChannel: any = null;
     try {
@@ -888,6 +1012,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (e) {
       // ignore
     }
+    saveCatalogToSupabase('logo', { logoUrl: url }).catch(err => {
+      console.warn('Failed to sync logo to Supabase:', err);
+    });
   };
 
   // 7h. Hero Slides Config
@@ -918,6 +1045,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateHeroSlides = (slides: HeroSlideConfig[]) => {
     setHeroSlides(slides);
+    saveCatalogToSupabase('hero_slides', slides).catch(err => {
+      console.warn('Failed to sync hero_slides to Supabase:', err);
+    });
   };
 
   const updateSingleHeroSlide = (index: number, updated: Partial<HeroSlideConfig>) => {
@@ -926,6 +1056,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (copy[index]) {
         copy[index] = { ...copy[index], ...updated };
       }
+      saveCatalogToSupabase('hero_slides', copy).catch(err => {
+        console.warn('Failed to sync hero_slides to Supabase:', err);
+      });
       return copy;
     });
   };
@@ -956,7 +1089,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [parishMessage]);
 
   const updateParishMessage = (updated: Partial<ParishMessageConfig>) => {
-    setParishMessage(prev => ({ ...prev, ...updated }));
+    setParishMessage(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('parish_message', merged).catch(err => {
+        console.warn('Failed to sync parish_message to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   // 7j. Bible Scripture Quote
@@ -985,7 +1124,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [scriptureQuote]);
 
   const updateScriptureQuote = (updated: Partial<ScriptureQuoteConfig>) => {
-    setScriptureQuote(prev => ({ ...prev, ...updated }));
+    setScriptureQuote(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('scripture_quote', merged).catch(err => {
+        console.warn('Failed to sync scripture_quote to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   // 7k. Word from Choirmaster & Picture
@@ -1014,7 +1159,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [choirmasterMessage]);
 
   const updateChoirmasterMessage = (updated: Partial<ChoirmasterMessageConfig>) => {
-    setChoirmasterMessage(prev => ({ ...prev, ...updated }));
+    setChoirmasterMessage(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('choirmaster_message', merged).catch(err => {
+        console.warn('Failed to sync choirmaster_message to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   // 7l. Masses Dynamic List (Add, Edit, Delete)
@@ -1087,7 +1238,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [footerContact]);
 
   const updateFooterContact = (updated: Partial<FooterContactConfig>) => {
-    setFooterContact(prev => ({ ...prev, ...updated }));
+    setFooterContact(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('footer_contact', merged).catch(err => {
+        console.warn('Failed to sync footer_contact to Supabase:', err);
+      });
+      return merged;
+    });
     if (updated.rehearsalsEn || updated.rehearsalsSw) {
       setMassSchedule(prev => ({
         ...prev,
@@ -1101,8 +1258,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }));
       setSiteNotice(prev => ({
         ...prev,
-        textEn: updated.rehearsalsEn ? `Welcome to St. Monica Third Mass Choir official website. Choir rehearsals: ${updated.rehearsalsEn}.` : prev.textEn,
-        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
+        textEn: updated.rehearsalsEn ? `Welcome to St. Monica Choir official website. Choir rehearsals: ${updated.rehearsalsEn}.` : prev.textEn,
+        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Mtakatifu Monika · Misa ya Tatu. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
       }));
     }
   };
@@ -1133,7 +1290,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [aboutPageConfig]);
 
   const updateAboutPageConfig = (updated: Partial<AboutPageConfig>) => {
-    setAboutPageConfig(prev => ({ ...prev, ...updated }));
+    setAboutPageConfig(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('about_config', merged).catch(err => {
+        console.warn('Failed to sync about_config to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   // 7f. Choir Members (Renewable Yearly, Ksh 500)
@@ -1433,19 +1596,40 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addCoreValue = (val: Omit<CoreValueItem, 'id'>) => {
     const id = `val-${Date.now()}`;
     const nextBadge = coreValues.length + 1;
-    setCoreValues(prev => [...prev, { ...val, id, badgeNumber: val.badgeNumber || nextBadge }]);
+    setCoreValues(prev => {
+      const next = [...prev, { ...val, id, badgeNumber: val.badgeNumber || nextBadge }];
+      saveCatalogToSupabase('core_values', next).catch(err => {
+        console.warn('Failed to sync core_values to Supabase:', err);
+      });
+      return next;
+    });
   };
 
   const updateCoreValue = (id: string, updated: Partial<CoreValueItem>) => {
-    setCoreValues(prev => prev.map(v => v.id === id ? { ...v, ...updated } : v));
+    setCoreValues(prev => {
+      const next = prev.map(v => v.id === id ? { ...v, ...updated } : v);
+      saveCatalogToSupabase('core_values', next).catch(err => {
+        console.warn('Failed to sync core_values to Supabase:', err);
+      });
+      return next;
+    });
   };
 
   const deleteCoreValue = (id: string) => {
-    setCoreValues(prev => prev.filter(v => v.id !== id));
+    setCoreValues(prev => {
+      const next = prev.filter(v => v.id !== id);
+      saveCatalogToSupabase('core_values', next).catch(err => {
+        console.warn('Failed to sync core_values to Supabase:', err);
+      });
+      return next;
+    });
   };
 
   const resetCoreValues = () => {
     setCoreValues(DEFAULT_CORE_VALUES);
+    saveCatalogToSupabase('core_values', DEFAULT_CORE_VALUES).catch(err => {
+      console.warn('Failed to sync core_values to Supabase:', err);
+    });
   };
 
   // 8. REAL AUDIBLE HTML5 AUDIO PLAYBACK ENGINE
@@ -2450,11 +2634,23 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Site Configuration & Stats Mutations
   const updateChoirStats = (updated: Partial<typeof CHOIR_STATS>) => {
-    setChoirStats(prev => ({ ...prev, ...updated }));
+    setChoirStats(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('choir_stats', merged).catch(err => {
+        console.warn('Failed to sync choir_stats to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   const updateMassSchedule = (updated: Partial<ChoirContextType['massSchedule']>) => {
-    setMassSchedule(prev => ({ ...prev, ...updated }));
+    setMassSchedule(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('mass_schedule', merged).catch(err => {
+        console.warn('Failed to sync mass_schedule to Supabase:', err);
+      });
+      return merged;
+    });
     if (updated.rehearsals || updated.rehearsalsSw) {
       setFooterContact(prev => ({
         ...prev,
@@ -2468,18 +2664,30 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }));
       setSiteNotice(prev => ({
         ...prev,
-        textEn: updated.rehearsals ? `Welcome to St. Monica Third Mass Choir official website. Choir rehearsals: ${updated.rehearsals}.` : prev.textEn,
-        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Misa ya Tatu · Mt. Monika. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
+        textEn: updated.rehearsals ? `Welcome to St. Monica Choir official website. Choir rehearsals: ${updated.rehearsals}.` : prev.textEn,
+        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Mtakatifu Monika · Misa ya Tatu. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
       }));
     }
   };
 
   const updateSiteNotice = (updated: Partial<ChoirContextType['siteNotice']>) => {
-    setSiteNotice(prev => ({ ...prev, ...updated }));
+    setSiteNotice(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('site_notice', merged).catch(err => {
+        console.warn('Failed to sync site_notice to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   const updateHeroContent = (updated: Partial<HeroContent>) => {
-    setHeroContent(prev => ({ ...prev, ...updated }));
+    setHeroContent(prev => {
+      const merged = { ...prev, ...updated };
+      saveCatalogToSupabase('hero_content', merged).catch(err => {
+        console.warn('Failed to sync hero_content to Supabase:', err);
+      });
+      return merged;
+    });
   };
 
   const resetToDefaults = () => {

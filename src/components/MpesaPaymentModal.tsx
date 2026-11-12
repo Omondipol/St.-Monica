@@ -423,34 +423,40 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
               </div>
 
               {/* Sandbox simulation controls: allows instant testing without waiting */}
-              <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-2 text-left">
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">Sandbox Test Controls:</span>
-                  <span>Simulate customer response:</span>
+              <div className="p-3 bg-amber-50/70 rounded-xl border border-amber-200 space-y-2 text-left">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-900 uppercase tracking-wide">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span>Sandbox Testing Mode</span>
                 </div>
+                <p className="text-[11px] text-amber-900/80 leading-relaxed">
+                  Safaricom Sandbox does not buzz physical phone SIMs. Click below to test payment outcomes:
+                </p>
                 <div className="grid grid-cols-3 gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleSimulate('success')}
-                    className="py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer"
+                    className="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold cursor-pointer text-center shadow-xs transition-colors"
                   >
                     ✓ Enter PIN
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSimulate('cancelled')}
-                    className="py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer"
+                    className="py-1.5 px-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
                   >
                     ✕ Cancel
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSimulate('failed')}
-                    className="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded text-[11px] font-semibold cursor-pointer"
+                    className="py-1.5 px-2 bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
                   >
                     ! Wrong PIN
                   </button>
                 </div>
+                <p className="text-[10px] text-slate-500 italic pt-1 border-t border-amber-200/60">
+                  Switch MPESA_ENV=production to send live STK push prompts to physical phones.
+                </p>
               </div>
 
               <div className="pt-2">

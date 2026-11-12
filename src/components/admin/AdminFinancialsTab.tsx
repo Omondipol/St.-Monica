@@ -299,7 +299,7 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(80, 80, 80);
-      doc.text(`Official M-Pesa Shortcode: 174379 / 678408  |  Statement Date: ${today}`, 14, y + 5);
+      doc.text(`Official M-Pesa Paybill: 678408  |  Account Ref: 3RDMASSCHOIR  |  Statement Date: ${today}`, 14, y + 5);
 
       y += 12;
 

@@ -189,35 +189,29 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                   {lang === 'sw' ? (
                     <>
                       <span className="hidden sm:inline whitespace-nowrap truncate max-w-full">
-                        Kwaya ya Misa ya Tatu · Mt. Monika
+                        Kwaya ya Mtakatifu Monika
                       </span>
                       <span className="sm:hidden flex flex-col leading-tight min-w-0">
                         <span className="font-bold text-[13px] xs:text-[14px] leading-tight text-white truncate max-w-[150px] xs:max-w-[185px] block">
-                          Kwaya ya Misa ya Tatu
-                        </span>
-                        <span className="text-[11px] font-semibold text-[#E5A93C] leading-none mt-0.5 truncate max-w-[150px] xs:max-w-[185px] block">
-                          Mt. Monika · Nakuru
+                          Kwaya ya Mtakatifu Monika
                         </span>
                       </span>
                     </>
                   ) : (
                     <>
                       <span className="hidden sm:inline whitespace-nowrap truncate max-w-full">
-                        St. Monica Third Mass Choir
+                        St. Monica Choir
                       </span>
                       <span className="sm:hidden flex flex-col leading-tight min-w-0">
                         <span className="font-bold text-[13px] xs:text-[14px] leading-tight text-white truncate max-w-[150px] xs:max-w-[185px] block">
-                          St. Monica 3rd Mass Choir
-                        </span>
-                        <span className="text-[11px] font-semibold text-[#E5A93C] leading-none mt-0.5 truncate max-w-[150px] xs:max-w-[185px] block">
-                          Section 58 · Nakuru
+                          St. Monica Choir
                         </span>
                       </span>
                     </>
                   )}
                 </span>
-                <span className="text-[9.5px] xs:text-[10px] sm:text-xs lg:text-[0.78rem] xl:text-[0.88rem] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate max-w-[150px] xs:max-w-[210px] sm:max-w-none block header-tagline">
-                  {lang === 'sw' ? 'Section 58 · Jimbo Katoliki la Nakuru' : 'Section 58 · Catholic Diocese of Nakuru'}
+                <span className="text-[9.5px] xs:text-[10px] sm:text-xs lg:text-[0.78rem] xl:text-[0.88rem] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate max-w-[180px] xs:max-w-[240px] sm:max-w-none block header-tagline">
+                  {lang === 'sw' ? 'Misa ya Tatu · Section 58 · CDN' : 'Third Mass · Section 58 · CDN'}
                 </span>
               </div>
             </button>
@@ -365,7 +359,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                         <div className="relative aspect-[16/10] rounded-lg overflow-hidden border border-white/10 shadow-xs">
                           <img 
                             src={getAssetUrl('/assets/choir/choir_01.jpg')} 
-                            alt="St. Monica Third Mass Choir" 
+                            alt="St. Monica Choir" 
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -374,7 +368,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                             {lang === 'sw' ? 'Wanakwaya' : 'Meet the Choir'}
                           </span>
                           <strong className="font-eb-garamond text-[15px] font-semibold text-white block mt-0.5 leading-tight truncate">
-                            {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
+                            {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir'}
                           </strong>
                           <p className="text-[12px] text-white/70 font-source mt-1 leading-snug line-clamp-1 truncate">
                             {lang === 'sw' ? 'Waimbaji 48 wakihudumu katika Misa.' : '48 choristers singing every Sunday.'}
@@ -673,10 +667,10 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                 <ChoirLogo size={80} variant="simplified" className="w-20 h-20 sm:w-22 sm:h-22 shrink-0 drop-shadow-md" />
                 <div>
                   <h3 className="font-fraunces text-base font-bold text-white">
-                    {lang === 'sw' ? 'Kwaya ya Misa ya Tatu Mtakatifu Monika' : 'St. Monica Third Mass Choir'}
+                    {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir'}
                   </h3>
                   <span className="text-[11px] text-[#7EC8F0]">
-                    {lang === 'sw' ? 'Section 58 · Jimbo Katoliki la Nakuru' : 'Section 58 · Catholic Diocese of Nakuru'}
+                    {lang === 'sw' ? 'Misa ya Tatu · Section 58 · CDN' : 'Third Mass · Section 58 · CDN'}
                   </span>
                 </div>
               </div>

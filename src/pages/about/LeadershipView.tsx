@@ -168,8 +168,8 @@ export const LeadershipView: React.FC<LeadershipViewProps> = ({ onNavigate = () 
           </h1>
           <p className="font-source text-sm sm:text-base text-slate-200 max-w-2xl leading-relaxed">
             {lang === 'sw'
-              ? 'Mkurugenzi wa muziki, walimu wa sauti nne, mpiga kinanda, na maafisa wa kamati ya utendaji ya Kwaya ya Misa ya Tatu, Parokia ya Mtakatifu Monika.'
-              : 'Sacred music choirmasters, vocal instructors, principal organist, and executive committee officials of St. Monica Third Mass Choir.'}
+              ? 'Mkurugenzi wa muziki, walimu wa sauti nne, mpiga kinanda, na maafisa wa kamati ya utendaji ya Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · CDN.'
+              : 'Sacred music choirmasters, vocal instructors, principal organist, and executive committee officials of St. Monica Choir · Third Mass · Section 58 · CDN.'}
           </p>
         </div>
         <AfricanGeometricBorder className="relative z-10" />

@@ -711,33 +711,44 @@ export const SupportChoirModal: React.FC = () => {
               </div>
 
               {/* Sandbox quick testing triggers */}
-              <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-xs text-left max-w-xs mx-auto space-y-1.5">
-                <span className="text-[10px] text-slate-500 font-semibold block uppercase tracking-wider">
-                  Sandbox Test Triggers:
-                </span>
-                <div className="flex items-center gap-1.5">
+              <div className="p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-left max-w-xs mx-auto space-y-2 font-source">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-900 uppercase tracking-wide">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span>{lang === 'sw' ? 'Hali ya Majaribio (Sandbox)' : 'Sandbox Testing Mode'}</span>
+                </div>
+                <p className="text-[11px] text-amber-900/80 leading-relaxed">
+                  {lang === 'sw'
+                    ? 'Safaricom Sandbox haitumi ujumbe kwenye simu halisi. Bofya kitufe kuiga malipo:'
+                    : 'Safaricom Sandbox does not buzz real phones. Click below to simulate your test:'}
+                </p>
+                <div className="grid grid-cols-3 gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleSimulateOutcome('success')}
-                    className="flex-1 py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                    className="py-1.5 px-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold cursor-pointer text-center shadow-xs transition-colors"
                   >
-                    ✓ Enter PIN
+                    ✓ {lang === 'sw' ? 'Weka PIN' : 'Enter PIN'}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSimulateOutcome('cancelled')}
-                    className="flex-1 py-1 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                    className="py-1.5 px-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
                   >
-                    ✕ Cancel
+                    ✕ {lang === 'sw' ? 'Katisha' : 'Cancel'}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSimulateOutcome('failed')}
-                    className="flex-1 py-1 px-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded text-[11px] font-semibold cursor-pointer text-center"
+                    className="py-1.5 px-1 bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
                   >
-                    ! Wrong PIN
+                    ! {lang === 'sw' ? 'Imefeli' : 'Fail'}
                   </button>
                 </div>
+                <p className="text-[10px] text-slate-500 italic pt-1 border-t border-amber-200/60">
+                  {lang === 'sw'
+                    ? 'Ili kupokea ombi halisi kwenye simu, washa MPESA_ENV=production kwa Paybill 678408.'
+                    : 'To receive a prompt on your physical phone, switch MPESA_ENV=production for Paybill 678408.'}
+                </p>
               </div>
 
               <button

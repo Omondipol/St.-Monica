@@ -445,7 +445,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         eyebrow: lang === 'sw' ? (s?.eyebrowSw || null) : (s?.eyebrowEn || null),
         headline: lang === 'sw' ? (s?.headlineSw || heroContent?.headlineSw || 'Kuunganisha mioyo kupitia muziki mtakatifu') : (s?.headlineEn || heroContent?.headlineEn || 'Uniting hearts through sacred music'),
         author: lang === 'sw' ? (s?.attributionSw || null) : (s?.attributionEn || null),
-        subhead: lang === 'sw' ? (s?.descSw || heroContent?.subheadSw || 'Kwaya ya Misa ya Tatu, Mtakatifu Monika (Section 58 Nakuru)') : (s?.descEn || heroContent?.subheadEn || 'St. Monica Third Mass Choir (Section 58, Nakuru)'),
+        subhead: lang === 'sw' ? (s?.descSw || heroContent?.subheadSw || 'Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · CDN') : (s?.descEn || heroContent?.subheadEn || 'St. Monica Choir · Third Mass · Section 58 · CDN'),
         type: 'mass' as const
       };
     }
@@ -474,7 +474,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     return {
       eyebrow: lang === 'sw' ? (s?.eyebrowSw || 'POLIFONIA TAKATIFU NA NYIMBO ZA LITURUJIA') : (s?.eyebrowEn || 'SACRED POLYPHONY & LITURGICAL SONG'),
       headline: lang === 'sw' ? (s?.headlineSw || 'Sauti Nne, Sala Moja Takatifu Mbele ya Altare.') : (s?.headlineEn || 'Four Voices, One Sacred Harmony Before the Altar.'),
-      author: lang === 'sw' ? (s?.attributionSw || 'St. Monica Third Mass Choir · Section 58 Nakuru') : (s?.attributionEn || 'St. Monica Third Mass Choir · Section 58 Nakuru'),
+      author: lang === 'sw' ? (s?.attributionSw || 'Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · CDN') : (s?.attributionEn || 'St. Monica Choir · Third Mass · Section 58 · CDN'),
       subhead: lang === 'sw'
         ? (s?.descSw || 'Waimbaji arobaini na nane wanaoongoza sala ya kuimba ya waumini katika Misa ya Parokia ya Jumapili.')
         : (s?.descEn || "Forty-eight choristers leading the people's sung prayer at the Sunday Parish Mass."),
