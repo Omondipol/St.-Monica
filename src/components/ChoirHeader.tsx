@@ -211,7 +211,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                   )}
                 </span>
                 <span className="text-[9.5px] xs:text-[10px] sm:text-xs lg:text-[0.78rem] xl:text-[0.88rem] text-[#7EC8F0] font-source font-semibold tracking-wide leading-tight mt-0.5 truncate max-w-[180px] xs:max-w-[240px] sm:max-w-none block header-tagline">
-                  {lang === 'sw' ? 'Misa ya Tatu · Section 58 · CDN' : 'Third Mass · Section 58 · CDN'}
+                  {lang === 'sw' ? 'Misa ya Tatu · Section 58 · Nakuru' : 'Third Mass · Section 58 · Nakuru'}
                 </span>
               </div>
             </button>
@@ -670,7 +670,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                     {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir'}
                   </h3>
                   <span className="text-[11px] text-[#7EC8F0]">
-                    {lang === 'sw' ? 'Misa ya Tatu · Section 58 · CDN' : 'Third Mass · Section 58 · CDN'}
+                    {lang === 'sw' ? 'Misa ya Tatu · Section 58 · Nakuru' : 'Third Mass · Section 58 · Nakuru'}
                   </span>
                 </div>
               </div>

@@ -75,9 +75,9 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
     }
   };
 
-  // Group definitions for creative, quick category navigation across all 31 categories
+  // Group definitions for creative, quick category navigation across all categories
   const MASS_PARTS = useMemo(() => [
-    'mwanzo', 'kuingia', 'sadaka-matoleo', 'matoleo', 'ekaristi-komunio', 'komunyo', 
+    'mwanzo', 'kuingia', 'maandamano-ya-biblia', 'sadaka-matoleo', 'matoleo', 'ekaristi-komunio', 'komunyo', 
     'mafundisho-tafakari', 'tafakari', 'misa', 'misa-tec', 'kutoka', 'shukrani', 'zaburi'
   ], []);
   const SEASONS_PARTS = useMemo(() => [

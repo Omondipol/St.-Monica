@@ -94,8 +94,8 @@ export interface HeroContent {
 export const INITIAL_HERO_CONTENT: HeroContent = {
   headlineEn: "Uniting hearts through sacred music",
   headlineSw: "Kuunganisha mioyo kupitia muziki mtakatifu",
-  subheadEn: "St. Monica Choir · Third Mass · Section 58 · CDN",
-  subheadSw: "Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · CDN",
+  subheadEn: "St. Monica Choir · Third Mass · Section 58 · Nakuru",
+  subheadSw: "Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · Nakuru",
   verseEn: "Sing to the Lord a new song; sing to the Lord, all the earth.",
   verseSw: "Mwimbieni Bwana wimbo mpya, mwimbieni Bwana, nchi yote.",
   verseRef: "Psalm 96:1 / Zaburi 96:1"

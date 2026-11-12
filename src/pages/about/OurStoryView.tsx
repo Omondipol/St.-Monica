@@ -87,8 +87,8 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
           </h2>
           <p className="text-base text-slate-700 leading-relaxed">
             {lang === 'sw'
-              ? (aboutPageConfig?.storyParagraph1Sw || 'Kwaya ya Mtakatifu Monika (Misa ya Tatu · Section 58 · CDN) ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.')
-              : (aboutPageConfig?.storyParagraph1En || 'St. Monica Choir (Third Mass · Section 58 · CDN) was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass. Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.')}
+              ? (aboutPageConfig?.storyParagraph1Sw || 'Kwaya ya Mtakatifu Monika (Misa ya Tatu · Section 58 · Nakuru) ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.')
+              : (aboutPageConfig?.storyParagraph1En || 'St. Monica Choir (Third Mass · Section 58 · Nakuru) was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass. Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.')}
           </p>
           <p className="text-base text-slate-700 leading-relaxed">
             {lang === 'sw'
@@ -102,7 +102,7 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
                 {lang === 'sw' ? 'Muhtasari wa Utume Wetu' : 'Choir Ministry at a Glance'}
               </h3>
               <span className="text-xs text-slate-600 font-source font-medium">
-                {lang === 'sw' ? 'Misa ya Tatu · Section 58 · CDN' : 'Third Mass · Section 58 · CDN'}
+                {lang === 'sw' ? 'Misa ya Tatu · Section 58 · Nakuru' : 'Third Mass · Section 58 · Nakuru'}
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">

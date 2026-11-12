@@ -108,7 +108,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
                   {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir'}
                 </h4>
                 <span className="text-xs text-[#7EC8F0] block mt-1 font-source font-medium">
-                  {lang === 'sw' ? 'Misa ya Tatu · Section 58 · CDN' : 'Third Mass · Section 58 · CDN'}
+                  {lang === 'sw' ? 'Misa ya Tatu · Section 58 · Nakuru' : 'Third Mass · Section 58 · Nakuru'}
                 </span>
               </div>
             </div>
@@ -399,8 +399,8 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           <div className="text-center sm:text-left flex flex-col sm:flex-row sm:items-center gap-2">
             <span>
               {lang === 'sw'
-                ? '© 2026 Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · CDN. Haki zote zimehifadhiwa.'
-                : '© 2026 St. Monica Choir · Third Mass · Section 58 · CDN. All rights reserved.'}
+                ? '© 2026 Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · Nakuru. Haki zote zimehifadhiwa.'
+                : '© 2026 St. Monica Choir · Third Mass · Section 58 · Nakuru. All rights reserved.'}
             </span>
             <span className="hidden sm:inline text-slate-500">·</span>
             <button

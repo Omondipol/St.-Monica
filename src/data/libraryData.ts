@@ -108,6 +108,16 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
     motif: 'cross'
   },
   {
+    id: 'maandamano-ya-biblia',
+    legacyIds: ['biblia', 'bible-procession', 'procession-of-the-word'],
+    nameSw: 'Maandamano ya Biblia',
+    nameEn: 'Bible Procession',
+    descriptionSw: 'Nyimbo za maandamano na heshima kwa Neno la Mungu na Kitabu Kitakatifu cha Biblia.',
+    descriptionEn: 'Processional hymns honoring the Holy Scriptures and Book of the Gospels.',
+    themeColor: '#1058A8',
+    motif: 'book'
+  },
+  {
     id: 'mafundisho-tafakari',
     legacyIds: ['tafakari'],
     nameSw: 'Mafundisho / Tafakari',
@@ -165,22 +175,13 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
   },
   {
     id: 'misa',
-    legacyIds: ['kutoka'],
+    legacyIds: ['kutoka', 'misa-tec'],
     nameSw: 'Misa',
-    nameEn: 'Holy Mass / Ordinary',
+    nameEn: 'Mass',
     descriptionSw: 'Sehemu za Misa Takatifu: Kyrie, Gloria, Sanctus, Agnus Dei na Wimbo wa Kutoka.',
     descriptionEn: 'Parts of the Holy Mass: Kyrie, Gloria, Sanctus, Agnus Dei, and Recessional.',
     themeColor: '#1058A8',
     motif: 'cross'
-  },
-  {
-    id: 'misa-tec',
-    nameSw: 'Misa TEC',
-    nameEn: 'TEC Mass',
-    descriptionSw: 'Nyimbo na melodi zilizoidhinishwa za Misa ya Baraza la Maaskofu (TEC).',
-    descriptionEn: 'Approved liturgical settings of the Episcopal Conference Mass.',
-    themeColor: '#1058A8',
-    motif: 'book'
   },
   {
     id: 'moyo-mtakatifu-wa-yesu',
@@ -202,8 +203,8 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
   },
   {
     id: 'mwaka-wa-familia',
-    nameSw: 'Mwaka wa Familia (2014)',
-    nameEn: 'Year of the Family (2014)',
+    nameSw: 'Mwaka wa Familia',
+    nameEn: 'Year of the Family',
     descriptionSw: 'Umoja, utakatifu na neema ya familia ya Kikristo kama kanisa la nyumbani.',
     descriptionEn: 'Hymns celebrating Christian family life and the domestic church.',
     themeColor: '#1058A8',
@@ -1603,6 +1604,54 @@ Ee Yesu ninakutumaini.`,
     sharingStatus: 'Public domain',
     downloadCount: 380,
     addedDate: '2024-12-01',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-58',
+    title: 'Neno Lako Bwana Ni Taa (Maandamano ya Biblia)',
+    titleSwahili: 'Neno Lako Ni Taa',
+    composer: 'Zaburi 119:105 / Liturujia ya Neno',
+    language: 'Kiswahili',
+    categories: ['maandamano-ya-biblia', 'misa', 'zaburi'],
+    season: 'Liturujia ya Neno / Kawaida',
+    voices: 'SATB',
+    lyrics: `Kiitikio:
+Neno lako Bwana ni taa ya miguu yangu,
+Na mwanga wa njia yangu daima.
+
+1. Neno la Bwana ni safi, linaburudisha nafsi;
+Ushuhuda wa Bwana ni amini, humtia mjinga hekima.
+
+2. Maagizo ya Bwana ni ya adili, huufurahisha moyo;
+Amri ya Bwana ni safi, huyatia macho nuru.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 520,
+    addedDate: '2025-01-15',
+    solfaNotes: true,
+    hasAudio: true
+  },
+  {
+    id: 'lib-59',
+    title: 'Lileteni Neno La Bwana (Maandamano ya Injili)',
+    titleSwahili: 'Lileteni Neno La Bwana',
+    composer: 'Liturujia Katoliki ya Kiswahili',
+    language: 'Kiswahili',
+    categories: ['maandamano-ya-biblia', 'misa'],
+    season: 'Kawaida / Sherehe',
+    voices: 'SATB',
+    lyrics: `Kiitikio:
+Lileteni Neno la Bwana kwa shangwe,
+Tulisikie kwa unyenyekevu na imani.
+
+1. Bwana alisema: Mimi ndimi Njia, Ukweli na Uzima;
+Mtu haji kwa Baba ila kwa njia yangu.
+
+2. Maneno yangu niliyowaambia ni roho tena ni uzima;
+Nendeni ulimwenguni kote mkaihubiri Injili.`,
+    sharingStatus: 'Public domain',
+    downloadCount: 460,
+    addedDate: '2025-02-01',
     solfaNotes: true,
     hasAudio: true
   }

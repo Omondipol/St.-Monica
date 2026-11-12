@@ -57,7 +57,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
           <p className="font-source text-sm sm:text-base text-slate-200 max-w-2xl leading-relaxed">
             {lang === 'sw'
               ? 'Waimbaji wa Kwaya ya Mtakatifu Monika katika sare za kwaya, Misa za Jumapili, na matukio ya kikanisa.'
-              : 'Choristers of St. Monica Choir (Third Mass · Section 58 · CDN) in liturgical vestments, Sunday Masses, and parish celebrations.'}
+              : 'Choristers of St. Monica Choir (Third Mass · Section 58 · Nakuru) in liturgical vestments, Sunday Masses, and parish celebrations.'}
           </p>
         </div>
         <AfricanGeometricBorder className="relative z-10" />
@@ -71,7 +71,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
         <div 
           onClick={() => setSelectedPhoto({
             src: getAssetUrl('/assets/choir/choir_01.jpg'),
-            title: lang === 'sw' ? 'Kwaya ya Mtakatifu Monika Katika Sare' : 'St. Monica Choir · Third Mass · Section 58 · CDN',
+            title: lang === 'sw' ? 'Kwaya ya Mtakatifu Monika Katika Sare' : 'St. Monica Choir · Third Mass · Section 58 · Nakuru',
             desc: lang === 'sw' ? 'Waimbaji wote wakiwa mbele ya Altare ya Parokia ya Mtakatifu Monika.' : 'Full choir ensemble standing united before the parish altar.'
           })}
           className="lg:col-span-7 h-[320px] sm:h-[420px] lg:h-[480px] relative overflow-hidden bg-slate-900 group cursor-pointer"
@@ -85,7 +85,7 @@ export const ChoirGalleryView: React.FC<ChoirGalleryViewProps> = ({ onNavigate =
           <div className="absolute inset-0 bg-gradient-to-t from-[#0C2340]/80 via-transparent to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between">
             <span className="bg-[#1058A8] text-white font-source text-xs sm:text-sm px-4 py-2 rounded-xl font-semibold shadow-md">
-              {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir · Third Mass · Section 58 · CDN'}
+              {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir · Third Mass · Section 58 · Nakuru'}
             </span>
             <span className="bg-black/70 hover:bg-black text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <ZoomIn className="w-3.5 h-3.5" />

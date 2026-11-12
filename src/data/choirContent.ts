@@ -276,8 +276,8 @@ export const YOUTUBE_CHANNEL_DISPLAY_NAME = "Kwaya ya Mtakatifu Monika - Nakuru"
 export const CHOIR_STATS = {
   choirName: "St. Monica Choir",
   choirNameSw: "Kwaya ya Mtakatifu Monika",
-  tagline: "Third Mass · Section 58 · CDN",
-  taglineSw: "Misa ya Tatu · Section 58 · CDN",
+  tagline: "Third Mass · Section 58 · Nakuru",
+  taglineSw: "Misa ya Tatu · Section 58 · Nakuru",
   membersCount: 56,
   yearsServing: 14,
   repertoireCount: 12,
