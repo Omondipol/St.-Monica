@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { getSupabaseConfigIssue, resolveSupabaseUrl, supabase } from '../lib/supabase';
 
 export const POLL_INTERVAL_MS = 3000;
 export const MAX_POLL_DURATION_MS = 90000;
 export const IS_SANDBOX = import.meta.env.VITE_MPESA_ENV !== 'production';
 
-async function extractInvokeErrorMessage(error, data) {
+async function extractInvokeErrorMessage(error, data, functionName = 'give-pay') {
   if (data && (data.error || data.detail)) {
     return [data.error, data.detail].filter(Boolean).join(': ');
   }
@@ -26,7 +26,18 @@ async function extractInvokeErrorMessage(error, data) {
     }
   }
 
-  return error?.message || 'Could not initiate M-Pesa payment.';
+  const rawMsg = error?.message || '';
+  if (
+    error?.name === 'FunctionsFetchError' ||
+    rawMsg.includes('Failed to send a request to the Edge Function')
+  ) {
+    const configIssue = getSupabaseConfigIssue();
+    if (configIssue) return configIssue;
+    const base = resolveSupabaseUrl();
+    return `Could not reach Edge Function "${functionName}" at ${base}/functions/v1/${functionName}. Confirm the function is deployed on your Supabase project and allows CORS from this origin.`;
+  }
+
+  return rawMsg || 'Could not initiate M-Pesa payment.';
 }
 
 /**
@@ -85,7 +96,10 @@ export function useSupabaseMpesaPayment(options = {}) {
       if (!supabase) {
         if (active) {
           setPurposesLoading(false);
-          setPurposesError('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.');
+          setPurposesError(
+            getSupabaseConfigIssue() ||
+              'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.'
+          );
         }
         return;
       }
@@ -192,7 +206,10 @@ export function useSupabaseMpesaPayment(options = {}) {
 
       if (!supabase) {
         setStatus('error');
-        setMessage('Supabase client is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+        setMessage(
+          getSupabaseConfigIssue() ||
+            'Supabase client is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+        );
         return false;
       }
 
@@ -230,7 +247,7 @@ export function useSupabaseMpesaPayment(options = {}) {
         });
 
         if (error || !data?.ok || !data?.checkoutId) {
-          const serverMsg = await extractInvokeErrorMessage(error, data);
+          const serverMsg = await extractInvokeErrorMessage(error, data, 'give-pay');
           if (isMountedRef.current) {
             setStatus('error');
             setMessage(serverMsg);

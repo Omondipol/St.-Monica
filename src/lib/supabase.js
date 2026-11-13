@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
+const PLACEHOLDER_URL_PATTERNS = ['your-project', 'placeholder', 'example.com', 'localhost:54321'];
+const PLACEHOLDER_KEY_PATTERNS = ['your-anon', 'your-key', 'placeholder', 'sb_publishable_placeholder'];
+
 export function resolveSupabaseUrl() {
   if (!supabaseUrl) return '';
   try {
@@ -16,9 +19,27 @@ export function resolveSupabaseUrl() {
   return '';
 }
 
-export function isSupabaseConfigured() {
+export function getSupabaseConfigIssue() {
   const url = resolveSupabaseUrl();
-  return Boolean(url && supabaseAnonKey && !supabaseAnonKey.includes('placeholder'));
+  if (!url) {
+    return 'Supabase URL is missing or invalid. Set VITE_SUPABASE_URL to your real Supabase project URL (https://<project-ref>.supabase.co).';
+  }
+  const lowerUrl = url.toLowerCase();
+  if (PLACEHOLDER_URL_PATTERNS.some((p) => lowerUrl.includes(p))) {
+    return `Supabase URL is still set to a placeholder (${url}). Update VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables to your real Supabase project.`;
+  }
+  if (!supabaseAnonKey) {
+    return 'Supabase anon key is missing. Set VITE_SUPABASE_ANON_KEY in your environment variables.';
+  }
+  const lowerKey = supabaseAnonKey.toLowerCase();
+  if (PLACEHOLDER_KEY_PATTERNS.some((p) => lowerKey.includes(p))) {
+    return 'Supabase anon key is still set to a placeholder. Update VITE_SUPABASE_ANON_KEY in your environment variables to your real Supabase anon/publishable key.';
+  }
+  return '';
+}
+
+export function isSupabaseConfigured() {
+  return getSupabaseConfigIssue() === '';
 }
 
 export const supabase =
