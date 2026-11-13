@@ -170,6 +170,13 @@ export function useSupabaseMpesaPayment(options = {}) {
 
           if (data.status === 'success') {
             stopPolling();
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(
+                new CustomEvent('stmonica:payment-confirmed', {
+                  detail: { ...data, checkout_request_id: checkoutId },
+                })
+              );
+            }
             if (isMountedRef.current) {
               setPaymentData(data);
               setStatus('success');

@@ -1461,11 +1461,22 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
-  // 7h. Contributions & Supporters Transactions Ledger
+  // 7h. Contributions & Supporters Transactions Ledger (synced from Supabase give-ledger / confirmed STK callbacks)
   const [transactions, setTransactions] = useState<SupporterTransaction[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (tx: any) =>
+              tx &&
+              typeof tx.mpesaReference === 'string' &&
+              tx.mpesaReference.trim() !== '' &&
+              !tx.mpesaReference.startsWith('MPESA-SMTC-')
+          );
+        }
+      }
     } catch (e) {}
     return [];
   });
@@ -1475,6 +1486,70 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
     } catch (e) {}
   }, [transactions]);
+
+  useEffect(() => {
+    if (supabase && isSupabaseConfigured()) {
+      supabase.functions
+        .invoke('give-ledger', { body: { limit: 200 } })
+        .then(({ data, error }) => {
+          if (!error && Array.isArray(data?.payments)) {
+            const mapped: SupporterTransaction[] = data.payments
+              .filter((r: any) => r.status === 'success')
+              .map((r: any) => ({
+                id: String(r.id || r.checkout_request_id),
+                donorName: r.phone || 'Supporter',
+                donorPhone: r.phone || undefined,
+                amountKes: Number(r.amount) || 0,
+                date: r.paid_at || r.created_at || new Date().toISOString(),
+                purpose: r.account_ref || 'CHOIROFFER',
+                paymentMethod: 'mpesa',
+                mpesaReference: r.mpesa_receipt || r.checkout_request_id || '',
+                status: 'completed',
+                category:
+                  r.account_ref === 'MEMBERSHIP'
+                    ? 'membership'
+                    : r.account_ref === 'SHEETMUSIC'
+                      ? 'sheet_music'
+                      : 'donation',
+              }));
+            setTransactions(mapped);
+          }
+        })
+        .catch(() => {});
+    }
+
+    const handleConfirmed = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (!detail || detail.status !== 'success') return;
+      const receipt = String(detail.mpesa_receipt || detail.checkout_request_id || '');
+      if (!receipt) return;
+      setTransactions((prev) => {
+        if (prev.some((t) => t.mpesaReference === receipt)) return prev;
+        const next: SupporterTransaction = {
+          id: `tx-${detail.checkout_request_id || Date.now()}`,
+          donorName: 'M-Pesa Supporter',
+          amountKes: Number(detail.amount) || 0,
+          date: new Date().toISOString(),
+          purpose: detail.account_ref || 'CHOIROFFER',
+          paymentMethod: 'mpesa',
+          mpesaReference: receipt,
+          status: 'completed',
+          category:
+            detail.account_ref === 'MEMBERSHIP'
+              ? 'membership'
+              : detail.account_ref === 'SHEETMUSIC'
+                ? 'sheet_music'
+                : 'donation',
+        };
+        return [next, ...prev];
+      });
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('stmonica:payment-confirmed', handleConfirmed);
+      return () => window.removeEventListener('stmonica:payment-confirmed', handleConfirmed);
+    }
+  }, []);
 
   const addTransaction = (tx: Omit<SupporterTransaction, 'id'>) => {
     const newTx: SupporterTransaction = {
