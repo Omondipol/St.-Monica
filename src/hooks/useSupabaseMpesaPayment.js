@@ -71,6 +71,7 @@ export function useSupabaseMpesaPayment(options = {}) {
 
   const pollTimerRef = useRef(null);
   const isMountedRef = useRef(true);
+  const lastPayerNameRef = useRef('');
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
 
@@ -173,7 +174,11 @@ export function useSupabaseMpesaPayment(options = {}) {
             if (typeof window !== 'undefined') {
               window.dispatchEvent(
                 new CustomEvent('stmonica:payment-confirmed', {
-                  detail: { ...data, checkout_request_id: checkoutId },
+                  detail: {
+                    ...data,
+                    checkout_request_id: checkoutId,
+                    payer_name: lastPayerNameRef.current || data.payer_name || '',
+                  },
                 })
               );
             }
@@ -207,7 +212,7 @@ export function useSupabaseMpesaPayment(options = {}) {
   );
 
   const submitPayment = useCallback(
-    async ({ phone, amount, account }) => {
+    async ({ phone, amount, account, payerName = '' }) => {
       stopPolling();
       setPaymentData(null);
 
@@ -221,6 +226,7 @@ export function useSupabaseMpesaPayment(options = {}) {
       }
 
       const trimmedPhone = String(phone || '').trim();
+      const trimmedName = String(payerName || '').trim();
       const parsedAmount = Number(amount);
 
       if (!trimmedPhone) {
@@ -243,14 +249,18 @@ export function useSupabaseMpesaPayment(options = {}) {
 
       setStatus('submitting');
       setMessage('Sending M-Pesa prompt...');
+      lastPayerNameRef.current = trimmedName;
 
       try {
+        const bodyPayload = {
+          phone: trimmedPhone,
+          amount: parsedAmount,
+          account,
+          ...(trimmedName ? { payer_name: trimmedName } : {}),
+        };
+
         const { data, error } = await supabase.functions.invoke('give-pay', {
-          body: {
-            phone: trimmedPhone,
-            amount: parsedAmount,
-            account,
-          },
+          body: bodyPayload,
         });
 
         if (error || !data?.ok || !data?.checkoutId) {

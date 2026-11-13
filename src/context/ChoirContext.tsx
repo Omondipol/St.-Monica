@@ -1497,7 +1497,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               .filter((r: any) => r.status === 'success')
               .map((r: any) => ({
                 id: String(r.id || r.checkout_request_id),
-                donorName: r.phone || 'Supporter',
+                donorName: r.payer_name || r.phone || 'Supporter',
                 donorPhone: r.phone || undefined,
                 amountKes: Number(r.amount) || 0,
                 date: r.paid_at || r.created_at || new Date().toISOString(),
@@ -1527,7 +1527,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (prev.some((t) => t.mpesaReference === receipt)) return prev;
         const next: SupporterTransaction = {
           id: `tx-${detail.checkout_request_id || Date.now()}`,
-          donorName: 'M-Pesa Supporter',
+          donorName: detail.payer_name || 'M-Pesa Supporter',
           amountKes: Number(detail.amount) || 0,
           date: new Date().toISOString(),
           purpose: detail.account_ref || 'CHOIROFFER',

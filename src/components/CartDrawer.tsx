@@ -38,6 +38,7 @@ export const CartDrawer: React.FC = () => {
 
   // Checkout flow state: 'cart' | 'checkout' | 'confirmed'
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmed'>('cart');
+  const [payerName, setPayerName] = useState('');
   const [phone, setPhone] = useState('');
   const [transactionRef, setTransactionRef] = useState('');
   const [hasDownloaded, setHasDownloaded] = useState(false);
@@ -90,6 +91,7 @@ export const CartDrawer: React.FC = () => {
   const handleFinishAndReset = () => {
     clearCart();
     setCheckoutStep('cart');
+    setPayerName('');
     setPhone('');
     setTransactionRef('');
     setHasDownloaded(false);
@@ -103,6 +105,7 @@ export const CartDrawer: React.FC = () => {
       phone,
       amount: cartTotalKes,
       account: sheetMusicAccount,
+      payerName,
     });
   };
 
@@ -295,6 +298,24 @@ export const CartDrawer: React.FC = () => {
             )}
 
             <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="cart-mpesa-name"
+                  className="block text-xs font-bold uppercase tracking-wider text-[#0C2340]"
+                >
+                  {lang === 'sw' ? 'Jina Lako (Si lazima)' : 'Your Name (Optional)'}
+                </label>
+                <input
+                  id="cart-mpesa-name"
+                  type="text"
+                  disabled={isBusy}
+                  value={payerName}
+                  onChange={(e) => setPayerName(e.target.value)}
+                  placeholder={lang === 'sw' ? 'Mfano: Mary Wambui' : 'e.g. Mary Wambui'}
+                  className="w-full px-3.5 py-2.5 rounded-[12px] border border-[#0C2340]/20 bg-white text-sm text-[#0C2340] focus:outline-none focus:border-[#1058A8] disabled:opacity-60"
+                />
+              </div>
+
               <div className="space-y-1.5">
                 <label
                   htmlFor="cart-mpesa-phone"

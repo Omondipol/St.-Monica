@@ -40,6 +40,7 @@ export const SupportChoirModal: React.FC = () => {
     stopPolling,
   } = useSupabaseMpesaPayment();
 
+  const [payerName, setPayerName] = useState<string>('');
   const [amount, setAmount] = useState<string>('500');
   const [phone, setPhone] = useState<string>('');
   const [selectedAccount, setSelectedAccount] = useState<string>('');
@@ -107,6 +108,7 @@ export const SupportChoirModal: React.FC = () => {
       phone,
       amount,
       account: selectedAccount,
+      payerName,
     });
   };
 
@@ -300,6 +302,25 @@ export const SupportChoirModal: React.FC = () => {
                   </select>
                 </div>
               )}
+
+              {/* Optional Supporter Name */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="support-name"
+                  className="block text-xs font-bold uppercase tracking-wider text-[#0C2340]"
+                >
+                  {lang === 'sw' ? 'Jina Lako (Si lazima)' : 'Your Name (Optional)'}
+                </label>
+                <input
+                  id="support-name"
+                  type="text"
+                  disabled={isBusy}
+                  value={payerName}
+                  onChange={(e) => setPayerName(e.target.value)}
+                  placeholder={lang === 'sw' ? 'Mfano: Mary Wambui' : 'e.g. Mary Wambui'}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#0C2340]/20 bg-white text-sm text-[#0C2340] focus:outline-none focus:border-[#1058A8] disabled:opacity-60"
+                />
+              </div>
 
               {/* M-Pesa Phone Number */}
               <div className="space-y-1.5">

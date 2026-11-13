@@ -63,18 +63,20 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
     },
   });
 
+  const [payerName, setPayerName] = useState('');
   const [phone, setPhone] = useState(defaultPhone);
   const [amount, setAmount] = useState(String(defaultAmount));
 
   useEffect(() => {
     if (isOpen) {
+      setPayerName(defaultPurpose === 'Sheet music' ? '' : (defaultName || ''));
       setPhone(defaultPhone || '');
       setAmount(String(defaultAmount || 500));
       reset();
     } else {
       stopPolling();
     }
-  }, [isOpen, defaultPhone, defaultAmount, reset, stopPolling]);
+  }, [isOpen, defaultPhone, defaultAmount, defaultName, defaultPurpose, reset, stopPolling]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -133,6 +135,7 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
       phone,
       amount,
       account: resolvedAccount,
+      payerName,
     });
   };
 
@@ -300,6 +303,24 @@ export const MpesaPaymentModal: React.FC<MpesaPaymentModalProps> = ({
                   />
                 </div>
               )}
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="mpesa-modal-name"
+                  className="block text-xs font-bold uppercase tracking-wider text-[#0C2340]"
+                >
+                  {lang === 'sw' ? 'Jina Lako (Si lazima)' : 'Your Name (Optional)'}
+                </label>
+                <input
+                  id="mpesa-modal-name"
+                  type="text"
+                  disabled={isBusy}
+                  value={payerName}
+                  onChange={(e) => setPayerName(e.target.value)}
+                  placeholder={lang === 'sw' ? 'Mfano: Francis Kariuki' : 'e.g. Francis Kariuki'}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#0C2340]/20 bg-white text-sm text-[#0C2340] focus:outline-none focus:border-[#1058A8] disabled:opacity-60"
+                />
+              </div>
 
               <div className="space-y-1.5">
                 <label

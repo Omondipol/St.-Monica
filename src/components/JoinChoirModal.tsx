@@ -361,6 +361,7 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                   phone,
                   amount: 500,
                   account: membershipAccount,
+                  payerName: name,
                 });
               }}
               className="space-y-4"

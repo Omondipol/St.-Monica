@@ -13,6 +13,9 @@ import {
   ChevronUp,
   Copy,
   Check,
+  Trash2,
+  Lock,
+  Loader2,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useChoir } from '../../context/ChoirContext';
@@ -31,6 +34,7 @@ interface GivingPurposeRow {
 interface SupabasePaymentRow {
   id: string;
   checkout_request_id?: string;
+  payer_name?: string | null;
   phone: string;
   amount: number;
   account_ref: string;
@@ -49,48 +53,69 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
     const body = await req.json().catch(() => ({}));
-    const limit = Math.min(Math.max(Number(body?.limit) || 200, 1), 500);
-
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Delete ONLY pending or failed payments — completed (success) payments are strictly protected
+    if (body?.action === "delete") {
+      const id = body?.id ? String(body.id) : "";
+      const checkoutId = body?.checkout_request_id ? String(body.checkout_request_id) : "";
+      if (!id && !checkoutId) return json({ error: "Missing payment identifier" }, 400);
+
+      let lookup = supabase.from("payments").select("id, status");
+      lookup = id ? lookup.eq("id", id) : lookup.eq("checkout_request_id", checkoutId);
+      const { data: existing, error: findErr } = await lookup.maybeSingle();
+
+      if (findErr) return json({ error: findErr.message }, 500);
+      if (!existing) return json({ error: "Payment not found" }, 404);
+      if (existing.status === "success") {
+        return json({ error: "Completed payments cannot be deleted." }, 403);
+      }
+
+      const { error: delErr } = await supabase
+        .from("payments")
+        .delete()
+        .eq("id", existing.id)
+        .neq("status", "success");
+
+      if (delErr) return json({ error: delErr.message }, 500);
+      return json({ ok: true, deletedId: existing.id }, 200);
+    }
+
+    const limit = Math.min(Math.max(Number(body?.limit) || 200, 1), 500);
     const { data, error } = await supabase
       .from("payments")
-      .select("id, checkout_request_id, phone, amount, account_ref, status, result_desc, mpesa_receipt, paid_at, created_at")
+      .select("id, checkout_request_id, payer_name, phone, amount, account_ref, status, result_desc, mpesa_receipt, paid_at, created_at")
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ payments: data || [] }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    if (error) return json({ error: error.message }, 500);
+    return json({ payments: data || [] }, 200);
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err?.message || err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: String(err?.message || err) }, 500);
   }
 });`;
+
+function normalizeKePhone(input?: string | null): string {
+  const digits = String(input || '').replace(/\D/g, '');
+  if (digits.length >= 9) return digits.slice(-9);
+  return digits;
+}
 
 function formatDateTime(iso?: string | null): string {
   if (!iso) return '—';
@@ -106,7 +131,7 @@ function formatDateTime(iso?: string | null): string {
 }
 
 export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify }) => {
-  const { transactions } = useChoir();
+  const { transactions, members } = useChoir();
 
   const [ledgerRows, setLedgerRows] = useState<SupabasePaymentRow[]>([]);
   const [purposes, setPurposes] = useState<GivingPurposeRow[]>([]);
@@ -117,8 +142,21 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [purposeFilter, setPurposeFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'success' | 'pending' | 'failed'>('ALL');
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
   const [showSetupCode, setShowSetupCode] = useState<boolean>(false);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
+
+  const memberNameByPhone = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const m of members || []) {
+      const key = normalizeKePhone(m.phone);
+      if (key && m.name) {
+        map[key] = m.name;
+      }
+    }
+    return map;
+  }, [members]);
 
   const loadFinancials = useCallback(
     async (showToast = false) => {
@@ -186,6 +224,7 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
       if (!byKey.has(key)) {
         byKey.set(key, {
           id: tx.id,
+          payer_name: tx.donorName && tx.donorName !== 'M-Pesa Supporter' && tx.donorName !== 'Supporter' ? tx.donorName : null,
           phone: tx.donorPhone || '—',
           amount: Number(tx.amountKes) || 0,
           account_ref: tx.purpose || 'CHOIROFFER',
@@ -203,6 +242,16 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
     );
   }, [ledgerRows, transactions]);
 
+  const resolveDisplayName = useCallback(
+    (row: SupabasePaymentRow): string => {
+      if (row.payer_name && row.payer_name.trim()) return row.payer_name.trim();
+      const phoneKey = normalizeKePhone(row.phone);
+      if (phoneKey && memberNameByPhone[phoneKey]) return memberNameByPhone[phoneKey];
+      return '—';
+    },
+    [memberNameByPhone]
+  );
+
   const purposeLabelMap = useMemo(() => {
     const map: Record<string, string> = {};
     for (const p of purposes) {
@@ -217,14 +266,16 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
       if (purposeFilter !== 'ALL' && row.account_ref !== purposeFilter) return false;
       if (statusFilter !== 'ALL' && row.status !== statusFilter) return false;
       if (!q) return true;
+      const displayName = resolveDisplayName(row).toLowerCase();
       return (
+        displayName.includes(q) ||
         (row.mpesa_receipt || '').toLowerCase().includes(q) ||
         (row.phone || '').toLowerCase().includes(q) ||
         (row.account_ref || '').toLowerCase().includes(q) ||
         (purposeLabelMap[row.account_ref] || '').toLowerCase().includes(q)
       );
     });
-  }, [allPayments, purposeFilter, statusFilter, searchQuery, purposeLabelMap]);
+  }, [allPayments, purposeFilter, statusFilter, searchQuery, purposeLabelMap, resolveDisplayName]);
 
   const stats = useMemo(() => {
     let totalConfirmedKes = 0;
@@ -246,20 +297,66 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
     return { totalConfirmedKes, confirmedCount, pendingCount, failedCount };
   }, [allPayments]);
 
+  const handleDeletePayment = async (row: SupabasePaymentRow) => {
+    // Completed payments must never be deleted
+    if (row.status === 'success') {
+      onNotify('Completed payments cannot be deleted.');
+      return;
+    }
+    if (!supabase) {
+      onNotify('Supabase is not configured.');
+      return;
+    }
+
+    const rowKey = row.id || row.checkout_request_id || '';
+    setDeletingKey(rowKey);
+    setErrorMsg('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('give-ledger', {
+        body: {
+          action: 'delete',
+          id: row.id,
+          checkout_request_id: row.checkout_request_id,
+        },
+      });
+
+      if (error || data?.error) {
+        const errText = data?.error || error?.message || 'Could not delete payment from Supabase.';
+        setErrorMsg(errText);
+        onNotify(errText);
+        return;
+      }
+
+      setLedgerRows((prev) =>
+        prev.filter((r) => (r.id || r.checkout_request_id) !== rowKey)
+      );
+      setConfirmDeleteKey(null);
+      onNotify(`Deleted ${row.status} payment record.`);
+    } catch (err: any) {
+      const errText = err?.message || 'Failed to delete payment record.';
+      setErrorMsg(errText);
+      onNotify(errText);
+    } finally {
+      setDeletingKey(null);
+    }
+  };
+
   const handleExportCsv = () => {
     if (filteredPayments.length === 0) {
       onNotify('No payment records to export.');
       return;
     }
-    const headers = ['Date', 'Purpose Code', 'Purpose Label', 'Phone', 'M-Pesa Receipt', 'Amount (KES)', 'Status', 'Description'];
+    const headers = ['Date', 'Name', 'Phone', 'Purpose Code', 'Purpose Label', 'M-Pesa Receipt', 'Amount (KES)', 'Status', 'Description'];
     const lines = [
       headers.join(','),
       ...filteredPayments.map((r) =>
         [
           `"${formatDateTime(r.paid_at || r.created_at)}"`,
+          `"${resolveDisplayName(r).replace(/"/g, '""')}"`,
+          `"${r.phone || ''}"`,
           `"${r.account_ref || ''}"`,
           `"${purposeLabelMap[r.account_ref] || r.account_ref || ''}"`,
-          `"${r.phone || ''}"`,
           `"${r.mpesa_receipt || ''}"`,
           String(r.amount || 0),
           `"${r.status}"`,
@@ -303,7 +400,7 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
               </span>
             </div>
             <p className="text-xs text-slate-600 font-source mt-0.5">
-              All M-Pesa STK Push payments from Giving, Sheet Music, and Membership recorded in Supabase.
+              All M-Pesa STK Push payments recorded in Supabase. Completed payments are locked; pending and failed entries can be cleaned up.
             </p>
           </div>
 
@@ -349,7 +446,7 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
             <p className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums">
               {stats.confirmedCount}
             </p>
-            <p className="text-[11px] text-slate-500">Settled STK Push gifts</p>
+            <p className="text-[11px] text-slate-500">Protected · cannot delete</p>
           </div>
 
           <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#0C2340]/10 space-y-1">
@@ -360,7 +457,7 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
             <p className="font-eb-garamond text-2xl font-bold text-[#0C2340] tabular-nums">
               {stats.pendingCount} / {stats.failedCount}
             </p>
-            <p className="text-[11px] text-slate-500">Awaiting PIN or cancelled</p>
+            <p className="text-[11px] text-slate-500">Deletable if incomplete</p>
           </div>
 
           <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#0C2340]/10 space-y-1">
@@ -383,10 +480,10 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
                 <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold">
-                    Deploy Edge Function <code className="font-mono">give-ledger</code> to stream all Supabase <code className="font-mono">payments</code> rows here
+                    Deploy Edge Function <code className="font-mono">give-ledger</code> to stream and manage Supabase <code className="font-mono">payments</code> rows here
                   </p>
                   <p className="text-amber-900 mt-0.5">
-                    Because <code className="font-mono">payments</code> is private (RLS), this tab reads recorded payments securely through a server-side <code className="font-mono">give-ledger</code> Edge Function.
+                    Because <code className="font-mono">payments</code> is private (RLS), this tab reads and cleans up pending/failed entries securely via <code className="font-mono">give-ledger</code>.
                   </p>
                 </div>
               </div>
@@ -438,7 +535,7 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search receipt code, phone, or fund..."
+              placeholder="Search name, receipt code, phone, or fund..."
               className="w-full pl-9 pr-3 py-2 rounded-lg border border-[#0C2340]/20 bg-[#FAF8F5] text-xs text-[#0C2340] focus:outline-none focus:border-[#1058A8]"
             />
           </div>
@@ -482,18 +579,19 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
             <thead>
               <tr className="bg-[#FAF8F5] border-b border-[#0C2340]/10 text-[11px] uppercase tracking-wider text-slate-600">
                 <th className="py-3 px-4 font-bold">Date & Time</th>
-                <th className="py-3 px-4 font-bold">Purpose / Account</th>
+                <th className="py-3 px-4 font-bold">Name</th>
                 <th className="py-3 px-4 font-bold">Phone</th>
+                <th className="py-3 px-4 font-bold">Purpose / Account</th>
                 <th className="py-3 px-4 font-bold">M-Pesa Receipt</th>
                 <th className="py-3 px-4 font-bold text-right">Amount</th>
                 <th className="py-3 px-4 font-bold">Status</th>
-                <th className="py-3 px-4 font-bold">Note</th>
+                <th className="py-3 px-4 font-bold text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0C2340]/10 bg-white">
               {filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                  <td colSpan={8} className="py-10 px-4 text-center text-slate-500">
                     {isLoading
                       ? 'Loading M-Pesa payment records from Supabase...'
                       : 'No M-Pesa payments recorded yet matching the selected filter.'}
@@ -501,13 +599,22 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
                 </tr>
               ) : (
                 filteredPayments.map((row) => {
+                  const rowKey = row.id || row.checkout_request_id || '';
                   const isSuccess = row.status === 'success';
                   const isPending = row.status === 'pending';
+                  const isConfirming = confirmDeleteKey === rowKey;
+                  const isDeleting = deletingKey === rowKey;
 
                   return (
-                    <tr key={row.id || row.checkout_request_id} className="hover:bg-[#FAF8F5]/70 transition-colors">
+                    <tr key={rowKey} className="hover:bg-[#FAF8F5]/70 transition-colors">
                       <td className="py-3 px-4 whitespace-nowrap text-slate-600">
                         {formatDateTime(row.paid_at || row.created_at)}
+                      </td>
+                      <td className="py-3 px-4 font-semibold text-[#0C2340] whitespace-nowrap">
+                        {resolveDisplayName(row)}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-slate-700">
+                        {row.phone || '—'}
                       </td>
                       <td className="py-3 px-4">
                         <span className="font-semibold text-[#0C2340] block">
@@ -517,16 +624,15 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
                           {row.account_ref}
                         </span>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-slate-700">
-                        {row.phone || '—'}
-                      </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         {row.mpesa_receipt ? (
                           <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono font-bold">
                             {row.mpesa_receipt}
                           </span>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-slate-400" title={row.result_desc || ''}>
+                            {row.result_desc ? row.result_desc.slice(0, 26) : '—'}
+                          </span>
                         )}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-right font-bold text-[#0C2340] tabular-nums">
@@ -545,8 +651,46 @@ export const AdminFinancialsTab: React.FC<AdminFinancialsTabProps> = ({ onNotify
                           {isSuccess ? 'Confirmed' : isPending ? 'Pending' : 'Failed'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-500 max-w-[200px] truncate" title={row.result_desc || ''}>
-                        {row.result_desc || '—'}
+                      <td className="py-3 px-4 whitespace-nowrap text-right">
+                        {isSuccess ? (
+                          <span
+                            title="Completed payments cannot be deleted"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-slate-400 bg-slate-100 cursor-not-allowed"
+                          >
+                            <Lock className="w-3 h-3" />
+                            <span>Locked</span>
+                          </span>
+                        ) : isConfirming ? (
+                          <div className="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              disabled={isDeleting}
+                              onClick={() => handleDeletePayment(row)}
+                              className="px-2 py-1 rounded bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold cursor-pointer disabled:opacity-50 inline-flex items-center gap-1"
+                            >
+                              {isDeleting && <Loader2 className="w-3 h-3 animate-spin" />}
+                              <span>Confirm</span>
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isDeleting}
+                              onClick={() => setConfirmDeleteKey(null)}
+                              className="px-2 py-1 rounded border border-slate-300 text-slate-600 hover:bg-slate-100 text-[11px] font-semibold cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteKey(rowKey)}
+                            title={`Delete ${row.status} payment`}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-rose-700 hover:bg-rose-50 border border-rose-200 cursor-pointer transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

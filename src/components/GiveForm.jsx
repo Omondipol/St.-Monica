@@ -51,6 +51,7 @@ export function GiveForm({
     reset,
   } = useSupabaseMpesaPayment({ onSuccess });
 
+  const [payerName, setPayerName] = useState('');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState(
     initialAmount !== '' && initialAmount !== undefined && initialAmount !== null
@@ -83,7 +84,7 @@ export function GiveForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await submitPayment({ phone, amount, account });
+    await submitPayment({ phone, amount, account, payerName });
   };
 
   const displayError =
@@ -149,6 +150,24 @@ export function GiveForm({
                 ))
               )}
             </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="give-name"
+              className="block text-xs font-semibold text-[#0C2340] mb-1.5"
+            >
+              Your Name <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <input
+              id="give-name"
+              type="text"
+              value={payerName}
+              onChange={(e) => setPayerName(e.target.value)}
+              disabled={isBusy}
+              placeholder="e.g. Mary Wambui"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-[#0C2340]/20 bg-white text-sm text-[#0C2340] focus:outline-none focus:border-[#1058A8] disabled:opacity-60"
+            />
           </div>
 
           <div>
