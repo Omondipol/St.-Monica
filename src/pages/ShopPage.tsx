@@ -217,7 +217,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onNavigate = () => {} }) => 
                     <span>{lang === 'sw' ? 'Weka Kikapuni' : 'Add to Order'}</span>
                   </button>
                   <button
-                    onClick={() => openMpesaModal({ purpose: 'Sheet music', amount: prod.priceKes })}
+                    onClick={() => openMpesaModal({ purpose: 'Sheet music', amount: prod.priceKes, name: lang === 'sw' ? prod.nameSw : prod.name })}
                     className="flex-1 py-2.5 px-3 rounded-xl bg-[#1058A8] hover:bg-[#0C2340] active:scale-95 text-white text-xs font-bold font-source flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-all"
                   >
                     <Smartphone className="w-3.5 h-3.5" />

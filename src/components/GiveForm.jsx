@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -8,37 +8,7 @@ import {
   RotateCcw,
   Smartphone,
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-
-const POLL_INTERVAL_MS = 3000;
-const MAX_POLL_DURATION_MS = 90000;
-const IS_SANDBOX = import.meta.env.VITE_MPESA_ENV !== 'production';
-
-async function extractInvokeErrorMessage(error, data) {
-  if (data && (data.error || data.detail)) {
-    return [data.error, data.detail].filter(Boolean).join(': ');
-  }
-
-  // supabase.functions.invoke attaches the Fetch Response on FunctionsHttpError.context
-  if (error?.context && typeof error.context.json === 'function') {
-    try {
-      const payload = await error.context.json();
-      if (payload?.error || payload?.detail) {
-        return [payload.error, payload.detail].filter(Boolean).join(': ');
-      }
-    } catch (_) {
-      // Fallback to text or error.message
-      if (typeof error.context.text === 'function') {
-        try {
-          const txt = await error.context.text();
-          if (txt) return txt;
-        } catch (_) {}
-      }
-    }
-  }
-
-  return error?.message || 'Could not initiate M-Pesa payment.';
-}
+import { useSupabaseMpesaPayment } from '../hooks/useSupabaseMpesaPayment';
 
 /**
  * M-Pesa STK Push Giving Form wired to existing Supabase backend:
@@ -67,35 +37,27 @@ export function GiveForm({
   onSuccess = undefined,
   compact = false,
 }) {
-  const [purposes, setPurposes] = useState([]);
-  const [purposesLoading, setPurposesLoading] = useState(true);
+  const {
+    purposes,
+    purposesLoading,
+    purposesError,
+    status,
+    message,
+    paymentData,
+    isBusy,
+    isSandbox,
+    isConfigured,
+    submitPayment,
+    reset,
+  } = useSupabaseMpesaPayment({ onSuccess });
 
   const [phone, setPhone] = useState('');
-  const [amount, setAmount] = useState(initialAmount !== '' ? String(initialAmount) : '');
+  const [amount, setAmount] = useState(
+    initialAmount !== '' && initialAmount !== undefined && initialAmount !== null
+      ? String(initialAmount)
+      : ''
+  );
   const [account, setAccount] = useState(initialAccount || '');
-
-  // UI states: 'idle' | 'submitting' | 'pending' | 'success' | 'failed' | 'error'
-  const [status, setStatus] = useState('idle');
-  const [message, setMessage] = useState('');
-  const [paymentData, setPaymentData] = useState(null);
-
-  const pollTimerRef = useRef(null);
-  const isMountedRef = useRef(true);
-
-  const stopPolling = () => {
-    if (pollTimerRef.current !== null) {
-      clearInterval(pollTimerRef.current);
-      pollTimerRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-      stopPolling();
-    };
-  }, []);
 
   useEffect(() => {
     if (initialAccount) {
@@ -109,201 +71,31 @@ export function GiveForm({
     }
   }, [initialAmount]);
 
-  // Load active giving purposes from Supabase
   useEffect(() => {
-    let active = true;
-
-    async function loadPurposes() {
-      if (!supabase) {
-        if (active) {
-          setPurposesLoading(false);
-          setStatus('error');
-          setMessage('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.');
-        }
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('giving_purposes')
-          .select('code,label')
-          .eq('active', true)
-          .order('sort');
-
-        if (!active) return;
-
-        if (error) {
-          setStatus('error');
-          setMessage(error.message || 'Could not load giving purposes.');
-          return;
-        }
-
-        const list = Array.isArray(data) ? data : [];
-        setPurposes(list);
-
-        if (list.length > 0) {
-          setAccount((prev) => {
-            if (prev && list.some((item) => item.code === prev)) return prev;
-            if (initialAccount && list.some((item) => item.code === initialAccount)) return initialAccount;
-            return list[0].code;
-          });
-        }
-      } catch (err) {
-        if (active) {
-          setStatus('error');
-          setMessage(err?.message || 'Could not load giving purposes.');
-        }
-      } finally {
-        if (active) {
-          setPurposesLoading(false);
-        }
-      }
+    if (purposes.length > 0) {
+      setAccount((prev) => {
+        if (prev && purposes.some((item) => item.code === prev)) return prev;
+        if (initialAccount && purposes.some((item) => item.code === initialAccount)) return initialAccount;
+        return purposes[0].code;
+      });
     }
-
-    loadPurposes();
-    return () => {
-      active = false;
-    };
-  }, [initialAccount]);
-
-  const startPolling = (checkoutId) => {
-    stopPolling();
-    const startedAt = Date.now();
-
-    pollTimerRef.current = setInterval(async () => {
-      if (!isMountedRef.current) {
-        stopPolling();
-        return;
-      }
-
-      if (Date.now() - startedAt >= MAX_POLL_DURATION_MS) {
-        stopPolling();
-        setStatus('error');
-        setMessage('Confirmation timed out after 90 seconds. If you entered your PIN, check your M-Pesa messages.');
-        return;
-      }
-
-      if (!supabase) {
-        stopPolling();
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase.functions.invoke('give-status', {
-          body: { id: checkoutId },
-        });
-
-        if (error || !data) {
-          return;
-        }
-
-        if (data.status === 'success') {
-          stopPolling();
-          if (isMountedRef.current) {
-            setPaymentData(data);
-            setStatus('success');
-            setMessage('Thank you for your generous gift!');
-            if (typeof onSuccess === 'function') {
-              onSuccess(data);
-            }
-          }
-        } else if (data.status === 'failed') {
-          stopPolling();
-          if (isMountedRef.current) {
-            setPaymentData(data);
-            setStatus('failed');
-            setMessage(data.result_desc || 'Payment failed or was cancelled.');
-          }
-        } else if (data.status === 'pending') {
-          if (isMountedRef.current) {
-            setStatus('pending');
-            setMessage('Check your phone and enter your M-Pesa PIN');
-          }
-        }
-      } catch (_) {
-        // Keep polling on transient network hiccups until 90s timeout
-      }
-    }, POLL_INTERVAL_MS);
-  };
+  }, [purposes, initialAccount]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    stopPolling();
-    setPaymentData(null);
-
-    if (!supabase) {
-      setStatus('error');
-      setMessage('Supabase client is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
-      return;
-    }
-
-    const trimmedPhone = phone.trim();
-    const parsedAmount = Number(amount);
-
-    if (!trimmedPhone) {
-      setStatus('error');
-      setMessage('Please enter your M-Pesa phone number.');
-      return;
-    }
-
-    if (!Number.isInteger(parsedAmount) || parsedAmount < 1) {
-      setStatus('error');
-      setMessage('Amount must be a whole number in KSh (at least KSh 1).');
-      return;
-    }
-
-    if (!account) {
-      setStatus('error');
-      setMessage('Please select a giving purpose.');
-      return;
-    }
-
-    setStatus('submitting');
-    setMessage('Sending M-Pesa prompt...');
-
-    try {
-      const { data, error } = await supabase.functions.invoke('give-pay', {
-        body: {
-          phone: trimmedPhone,
-          amount: parsedAmount,
-          account,
-        },
-      });
-
-      if (error || !data?.ok || !data?.checkoutId) {
-        const serverMsg = await extractInvokeErrorMessage(error, data);
-        if (isMountedRef.current) {
-          setStatus('error');
-          setMessage(serverMsg);
-        }
-        return;
-      }
-
-      if (isMountedRef.current) {
-        setStatus('pending');
-        setMessage('Check your phone and enter your M-Pesa PIN');
-        startPolling(data.checkoutId);
-      }
-    } catch (err) {
-      if (isMountedRef.current) {
-        setStatus('error');
-        setMessage(err?.message || 'Could not reach payment service.');
-      }
-    }
+    await submitPayment({ phone, amount, account });
   };
 
-  const handleReset = () => {
-    stopPolling();
-    setStatus('idle');
-    setMessage('');
-    setPaymentData(null);
-  };
-
-  const isBusy = status === 'submitting' || status === 'pending';
+  const displayError =
+    status === 'error'
+      ? message
+      : status === 'idle' && purposesError
+        ? purposesError
+        : '';
 
   return (
     <div className={compact ? 'bg-white rounded-xl border border-[#0C2340]/15 overflow-hidden' : 'max-w-lg mx-auto bg-white rounded-2xl border border-[#0C2340]/15 shadow-sm overflow-hidden'}>
-      {IS_SANDBOX && (
+      {isSandbox && (
         <div
           role="status"
           className="bg-amber-100 border-b border-amber-300 px-4 py-2 flex items-center justify-center gap-2 text-xs font-bold tracking-wider uppercase text-amber-950"
@@ -404,7 +196,7 @@ export function GiveForm({
 
           <button
             type="submit"
-            disabled={isBusy || purposesLoading || !supabase}
+            disabled={isBusy || purposesLoading || !isConfigured}
             className="w-full min-h-[46px] px-4 py-2.5 rounded-lg bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isBusy ? (
@@ -452,7 +244,7 @@ export function GiveForm({
             </div>
             <button
               type="button"
-              onClick={handleReset}
+              onClick={reset}
               className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 hover:underline cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -470,7 +262,7 @@ export function GiveForm({
             <p className="text-xs text-rose-900">{message}</p>
             <button
               type="button"
-              onClick={handleReset}
+              onClick={reset}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-800 hover:underline cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -479,10 +271,10 @@ export function GiveForm({
           </div>
         )}
 
-        {status === 'error' && (
+        {displayError && (
           <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-950 flex items-start gap-2.5 text-xs">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-            <span>{message}</span>
+            <span>{displayError}</span>
           </div>
         )}
       </div>

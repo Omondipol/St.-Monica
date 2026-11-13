@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import {
   X,
@@ -7,6 +7,10 @@ import {
   Download,
   ArrowRight,
   ArrowLeft,
+  Smartphone,
+  Loader2,
+  AlertCircle,
+  FlaskConical,
 } from 'lucide-react';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 
@@ -17,7 +21,7 @@ import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_17914464
 import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { getAssetUrl } from '../utils/assetHelper';
 import { generateSongScorePdf } from '../utils/fileDownload';
-import { GiveForm } from './GiveForm';
+import { useSupabaseMpesaPayment } from '../hooks/useSupabaseMpesaPayment';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -34,8 +38,42 @@ export const CartDrawer: React.FC = () => {
 
   // Checkout flow state: 'cart' | 'checkout' | 'confirmed'
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmed'>('cart');
+  const [phone, setPhone] = useState('');
   const [transactionRef, setTransactionRef] = useState('');
   const [hasDownloaded, setHasDownloaded] = useState(false);
+
+  const {
+    purposes,
+    purposesLoading,
+    purposesError,
+    status,
+    message,
+    isBusy,
+    isSandbox,
+    isConfigured,
+    submitPayment,
+    reset,
+    stopPolling,
+  } = useSupabaseMpesaPayment({
+    onSuccess: (payment: any) => {
+      setTransactionRef(payment?.mpesa_receipt || '');
+      setCheckoutStep('confirmed');
+    },
+  });
+
+  useEffect(() => {
+    if (!isCartOpen) {
+      stopPolling();
+    }
+  }, [isCartOpen, stopPolling]);
+
+  const sheetMusicAccount = useMemo(() => {
+    if (purposes.length === 0) return 'CHOIROFFER';
+    const match = purposes.find((p: { code: string; label: string }) =>
+      /sheet|music|noti|score/i.test(`${p.code} ${p.label}`)
+    );
+    return match ? match.code : purposes[0].code;
+  }, [purposes]);
 
   if (!isCartOpen) return null;
 
@@ -52,10 +90,28 @@ export const CartDrawer: React.FC = () => {
   const handleFinishAndReset = () => {
     clearCart();
     setCheckoutStep('cart');
+    setPhone('');
     setTransactionRef('');
     setHasDownloaded(false);
+    reset();
     setIsCartOpen(false);
   };
+
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitPayment({
+      phone,
+      amount: cartTotalKes,
+      account: sheetMusicAccount,
+    });
+  };
+
+  const displayError =
+    status === 'error'
+      ? message
+      : status === 'idle' && purposesError
+        ? purposesError
+        : '';
 
   return (
     <div
@@ -194,7 +250,10 @@ export const CartDrawer: React.FC = () => {
                 </p>
 
                 <button
-                  onClick={() => setCheckoutStep('checkout')}
+                  onClick={() => {
+                    reset();
+                    setCheckoutStep('checkout');
+                  }}
                   className="w-full py-3 px-4 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-[12px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>{lang === 'sw' ? 'Endelea na agizo' : 'Proceed to checkout'}</span>
@@ -205,35 +264,127 @@ export const CartDrawer: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 2: CHECKOUT WITH SUPABASE M-PESA STK PUSH */}
+        {/* STEP 2: BESPOKE CART SHEET-MUSIC CHECKOUT (IN ORIGINAL DRAWER LAYOUT) */}
         {checkoutStep === 'checkout' && (
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 font-source">
-            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#0C2340]/10">
-              <span className="text-slate-600">{lang === 'sw' ? 'Jumla ya agizo:' : 'Order total:'}</span>
-              <span className="tabular-nums font-bold text-[22px] text-[#1058A8] font-eb-garamond">
-                {formatPrice(cartTotalKes)}
-              </span>
+            <div className="p-3.5 rounded-[12px] bg-[#FCFAF7] border border-[#0C2340]/10 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600">
+                  {lang === 'sw' ? `Bidhaa (${cart.length}):` : `Items (${cart.length}):`}
+                </span>
+                <span className="font-semibold text-[#0C2340] truncate max-w-[210px]">
+                  {cart.map((c) => (lang === 'sw' ? c.product.nameSw : c.product.name)).join(', ')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs pt-2 border-t border-[#0C2340]/10">
+                <span className="text-slate-600 font-semibold">{lang === 'sw' ? 'Jumla ya agizo:' : 'Order total:'}</span>
+                <span className="tabular-nums font-bold text-[22px] text-[#1058A8] font-eb-garamond">
+                  {formatPrice(cartTotalKes)}
+                </span>
+              </div>
             </div>
 
-            <GiveForm
-              compact
-              initialAmount={cartTotalKes}
-              lockAmount
-              submitLabel={lang === 'sw' ? `Lipa ${formatPrice(cartTotalKes)} kwa M-Pesa` : `Pay ${formatPrice(cartTotalKes)} with M-Pesa`}
-              onSuccess={(payment: any) => {
-                setTransactionRef(payment?.mpesa_receipt || '');
-                setCheckoutStep('confirmed');
-              }}
-            />
+            {isSandbox && (
+              <div
+                role="status"
+                className="rounded-lg bg-amber-100 border border-amber-300 px-3 py-1.5 flex items-center gap-2 text-[11px] font-bold tracking-wider uppercase text-amber-950"
+              >
+                <FlaskConical className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span>TEST MODE — Sandbox (No real money charged)</span>
+              </div>
+            )}
 
-            <button
-              type="button"
-              onClick={() => setCheckoutStep('cart')}
-              className="w-full py-2.5 px-3 text-xs font-semibold text-[#1058A8] border border-[#1058A8]/30 rounded-[12px] hover:bg-[#1058A8]/5 cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>{lang === 'sw' ? 'Rudi kikapuni' : 'Back to cart'}</span>
-            </button>
+            <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="cart-mpesa-phone"
+                  className="block text-xs font-bold uppercase tracking-wider text-[#0C2340]"
+                >
+                  {lang === 'sw' ? 'Namba ya Simu ya M-Pesa' : 'M-Pesa Phone Number'}
+                </label>
+                <div className="relative">
+                  <Smartphone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="cart-mpesa-phone"
+                    type="tel"
+                    inputMode="numeric"
+                    required
+                    disabled={isBusy}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="07XX XXX XXX"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-[12px] border border-[#0C2340]/20 bg-white text-sm text-[#0C2340] focus:outline-none focus:border-[#1058A8] disabled:opacity-60"
+                  />
+                </div>
+              </div>
+
+              {status === 'pending' && (
+                <div className="p-3.5 rounded-[12px] bg-sky-50 border border-sky-200 text-sky-950 flex items-start gap-2.5 text-xs">
+                  <Loader2 className="w-4 h-4 text-[#1058A8] animate-spin shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold">Check your phone and enter your M-Pesa PIN</p>
+                    <p className="text-sky-900 mt-0.5">
+                      {lang === 'sw'
+                        ? 'Tunasubiri uthibitisho wa M-Pesa...'
+                        : 'Waiting for M-Pesa confirmation...'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {status === 'failed' && (
+                <div className="p-3.5 rounded-[12px] bg-rose-50 border border-rose-200 text-rose-950 space-y-1 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-rose-800">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{lang === 'sw' ? 'Malipo Hayakukamilika' : 'Payment Failed'}</span>
+                  </div>
+                  <p>{message}</p>
+                </div>
+              )}
+
+              {displayError && (
+                <div className="p-3 rounded-[12px] bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2 text-xs">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <span>{displayError}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isBusy || purposesLoading || !isConfigured}
+                className="w-full py-3 px-4 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-[12px] transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isBusy ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>
+                      {status === 'submitting'
+                        ? (lang === 'sw' ? 'Inatuma ombi...' : 'Sending prompt...')
+                        : (lang === 'sw' ? 'Inasubiri PIN...' : 'Waiting for PIN...')}
+                    </span>
+                  </>
+                ) : (
+                  <span>
+                    {lang === 'sw'
+                      ? `Lipa ${formatPrice(cartTotalKes)} kwa M-Pesa`
+                      : `Pay ${formatPrice(cartTotalKes)} with M-Pesa`}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={() => {
+                  reset();
+                  setCheckoutStep('cart');
+                }}
+                className="w-full py-2.5 px-3 text-xs font-semibold text-[#1058A8] border border-[#1058A8]/30 rounded-[12px] hover:bg-[#1058A8]/5 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{lang === 'sw' ? 'Rudi kikapuni' : 'Back to cart'}</span>
+              </button>
+            </form>
 
             <p className="text-[11px] text-slate-500 font-source leading-relaxed pt-2 border-t border-[#0C2340]/10">
               {lang === 'sw'
