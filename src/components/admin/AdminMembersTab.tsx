@@ -96,7 +96,7 @@ export const AdminMembersTab: React.FC<AdminMembersTabProps> = ({ onNotify }) =>
     setFormPhone('');
     setFormEmail('');
     setFormStatus('active');
-    setFormPaymentRef(`MPESA-SMTC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
+    setFormPaymentRef('');
     setIsModalOpen(true);
   };
 
@@ -145,7 +145,7 @@ export const AdminMembersTab: React.FC<AdminMembersTabProps> = ({ onNotify }) =>
         registeredAt: now.toISOString(),
         expiresAt: expiry.toISOString(),
         renewalFeePaid: 500,
-        paymentReference: formPaymentRef.trim() || `MPESA-SMTC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+        paymentReference: formPaymentRef.trim() || undefined
       });
       onNotify(lang === 'sw' ? `Mwimbaji mpya ${formName} ameongezwa!` : `Added new chorister ${formName}!`);
     }
@@ -156,10 +156,10 @@ export const AdminMembersTab: React.FC<AdminMembersTabProps> = ({ onNotify }) =>
   const handleRenew = (m: ChoirMember) => {
     const ref = prompt(
       lang === 'sw' ? `Weka kumbukumbu ya malipo ya M-Pesa kwa ${m.name} (KSh 500):` : `Enter M-Pesa confirmation code for ${m.name} (KSh 500 yearly):`,
-      `MPESA-RNW-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+      ''
     );
     if (ref !== null) {
-      renewMember(m.id, ref);
+      renewMember(m.id, ref.trim() || undefined);
       onNotify(lang === 'sw' ? `Uanachama wa ${m.name} umeongezwa kwa miezi 12!` : `Renewed ${m.name}'s membership for 12 months!`);
     }
   };

@@ -39,7 +39,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP01",
     status: "active"
   },
   {
@@ -51,7 +50,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP02",
     status: "active"
   },
   {
@@ -63,7 +61,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP03",
     status: "active"
   },
   {
@@ -75,7 +72,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP04",
     status: "active"
   },
   {
@@ -87,7 +83,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP05",
     status: "active"
   },
   {
@@ -99,7 +94,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(5),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(5)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP06",
     status: "active"
   },
   {
@@ -111,7 +105,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP07",
     status: "active"
   },
   {
@@ -122,7 +115,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(6),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(6)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP08",
     status: "active"
   },
   {
@@ -134,7 +126,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP09",
     status: "active"
   },
   {
@@ -145,7 +136,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP10",
     status: "active"
   },
   {
@@ -156,7 +146,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP11",
     status: "active"
   },
   {
@@ -167,7 +156,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP12",
     status: "active"
   },
   {
@@ -178,7 +166,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP13",
     status: "active"
   },
   {
@@ -189,7 +176,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(5),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(5)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP14",
     status: "active"
   },
   {
@@ -200,7 +186,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP15",
     status: "active"
   },
   {
@@ -211,7 +196,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP16",
     status: "active"
   },
   {
@@ -222,7 +206,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP17",
     status: "active"
   },
   {
@@ -233,7 +216,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP18",
     status: "active"
   },
   {
@@ -244,7 +226,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP19",
     status: "active"
   },
   {
@@ -255,7 +236,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP20",
     status: "active"
   },
   {
@@ -266,7 +246,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP21",
     status: "active"
   },
   {
@@ -277,7 +256,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-SOP22",
     status: "active"
   },
 
@@ -291,7 +269,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT01",
     status: "active"
   },
   {
@@ -303,7 +280,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT02",
     status: "active"
   },
   {
@@ -315,7 +291,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT03",
     status: "active"
   },
   {
@@ -326,7 +301,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT04",
     status: "active"
   },
   {
@@ -337,7 +311,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT05",
     status: "active"
   },
   {
@@ -349,7 +322,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(5),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(5)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT06",
     status: "active"
   },
   {
@@ -360,7 +332,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT07",
     status: "active"
   },
   {
@@ -371,7 +342,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT08",
     status: "active"
   },
   {
@@ -383,7 +353,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT09",
     status: "active"
   },
   {
@@ -394,7 +363,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT10",
     status: "active"
   },
   {
@@ -405,7 +373,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT11",
     status: "active"
   },
   {
@@ -416,7 +383,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(5),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(5)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT12",
     status: "active"
   },
   {
@@ -427,7 +393,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT13",
     status: "active"
   },
   {
@@ -438,7 +403,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT14",
     status: "active"
   },
   {
@@ -450,7 +414,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT15",
     status: "active"
   },
   {
@@ -461,7 +424,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT16",
     status: "active"
   },
   {
@@ -472,7 +434,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT17",
     status: "active"
   },
   {
@@ -484,7 +445,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-ALT18",
     status: "active"
   },
 
@@ -498,7 +458,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN01",
     status: "active"
   },
   {
@@ -510,7 +469,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN02",
     status: "active"
   },
   {
@@ -522,7 +480,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN03",
     status: "active"
   },
   {
@@ -534,7 +491,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN04",
     status: "active"
   },
   {
@@ -545,7 +501,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN05",
     status: "active"
   },
   {
@@ -556,7 +511,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(5),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(5)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN06",
     status: "active"
   },
   {
@@ -568,7 +522,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-TEN07",
     status: "active"
   },
 
@@ -582,7 +535,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS01",
     status: "active"
   },
   {
@@ -594,7 +546,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS02",
     status: "active"
   },
   {
@@ -606,7 +557,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(1),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(1)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS03",
     status: "active"
   },
   {
@@ -618,7 +568,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS04",
     status: "active"
   },
   {
@@ -630,7 +579,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS05",
     status: "active"
   },
   {
@@ -641,7 +589,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(5),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(5)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS06",
     status: "active"
   },
   {
@@ -652,7 +599,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(3),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(3)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS07",
     status: "active"
   },
   {
@@ -663,7 +609,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(2),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(2)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS08",
     status: "active"
   },
   {
@@ -675,7 +620,6 @@ export const INITIAL_MEMBERS: ChoirMember[] = [
     registeredAt: makeDateMonthsAgo(4),
     expiresAt: makeExpiryFrom(makeDateMonthsAgo(4)),
     renewalFeePaid: 500,
-    paymentReference: "MPESA-SMTC-BAS09",
     status: "active"
   }
 ];

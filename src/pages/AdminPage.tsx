@@ -406,7 +406,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     foundedYear: choirStats?.foundedYear ?? 2012,
     parish: choirStats?.parish ?? "St. Monica's Catholic Church, Nakuru",
     churchAddress: choirStats?.churchAddress ?? "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
-    mpesaTill: choirStats?.mpesaTill ?? "8421092"
+    mpesaTill: choirStats?.mpesaTill ?? ""
   });
 
   const handleSaveStats = (e: React.FormEvent) => {
@@ -906,18 +906,20 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         return;
       }
 
-      // Always write to Supabase 'gallery' database table
-      const { error: dbError } = await supabase
-        .from('gallery')
-        .insert([
-          {
-            title: photoForm.title.trim(),
-            image_url: finalPublicUrl
-          }
-        ]);
+      // Always write to Supabase 'gallery' database table when configured
+      if (supabase) {
+        const { error: dbError } = await supabase
+          .from('gallery')
+          .insert([
+            {
+              title: photoForm.title.trim(),
+              image_url: finalPublicUrl
+            }
+          ]);
 
-      if (dbError) {
-        throw new Error(`Database insert error: ${dbError.message}`);
+        if (dbError) {
+          throw new Error(`Database insert error: ${dbError.message}`);
+        }
       }
 
       // Sync with local context state
@@ -1399,7 +1401,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                           type="text"
                           value={statsForm.mpesaTill}
                           onChange={e => setStatsForm(prev => ({ ...prev, mpesaTill: e.target.value }))}
-                          placeholder="8421092"
+                          placeholder="Paybill / Till number"
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC]"
                         />
                       </div>

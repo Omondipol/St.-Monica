@@ -30,7 +30,6 @@ import {
   AboutPageConfig,
   DEFAULT_ABOUT_CONFIG,
   SupporterTransaction,
-  INITIAL_TRANSACTIONS,
   CoreValueItem,
   DEFAULT_CORE_VALUES,
   ALL_EIGHT_VIRTUES_CATALOG
@@ -55,10 +54,7 @@ import {
   deleteAlbumFromSupabase,
   loadLibrarySongsFromSupabase,
   saveLibrarySongToSupabase,
-  deleteLibrarySongFromSupabase,
-  loadContributionsFromSupabase,
-  saveContributionToSupabase,
-  deleteContributionFromSupabase
+  deleteLibrarySongFromSupabase
 } from '../lib/supabaseChoirData';
 import { getSongYouTubeId, extractYouTubeVideoId } from '../utils/assetHelper';
 
@@ -576,19 +572,6 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
-    // Hydrate contributions & M-Pesa transactions from Supabase
-    loadContributionsFromSupabase().then(remoteTxs => {
-      if (isMounted && remoteTxs && Array.isArray(remoteTxs) && remoteTxs.length > 0) {
-        setTransactions(prev => {
-          const remoteIds = new Set(remoteTxs.map(t => t.id));
-          const localOnly = prev.filter(t => !remoteIds.has(t.id));
-          const merged = [...remoteTxs, ...localOnly];
-          try { localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(merged)); } catch (_) {}
-          return merged;
-        });
-      }
-    });
-
     // Hydrate Our Story & Patron Saint configuration from Supabase
     loadCatalogFromSupabase<AboutPageConfig>('about_config').then(remoteAbout => {
       if (isMounted && remoteAbout) {
@@ -713,26 +696,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
-    // Realtime listener for contributions
-    let contribChannel: any = null;
-    try {
-      contribChannel = supabase
-        .channel('choir-context:contributions')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'contributions' }, () => {
-          loadContributionsFromSupabase().then(latestTxs => {
-            if (latestTxs && latestTxs.length > 0) {
-              setTransactions(latestTxs);
-            }
-          });
-        })
-        .subscribe();
-    } catch (_) {}
-
     return () => {
       isMounted = false;
-      if (contribChannel) {
-        try { supabase.removeChannel(contribChannel); } catch (_) {}
-      }
     };
   }, []);
 
@@ -1362,7 +1327,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       registeredAt: regDate.toISOString(),
       expiresAt: expiryDate.toISOString(),
       renewalFeePaid: 500,
-      paymentReference: data.paymentReference || `MPESA-SMTC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      paymentReference: data.paymentReference || undefined,
       status: 'active'
     };
 
@@ -1388,7 +1353,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             registeredAt: newReg.toISOString(),
             expiresAt: newExpiry.toISOString(),
             renewalFeePaid: 500,
-            paymentReference: paymentRef || `MPESA-RENEW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            paymentReference: paymentRef || undefined,
             status: 'active' as const
           };
           return renewedMem;
@@ -1502,7 +1467,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return INITIAL_TRANSACTIONS;
+    return [];
   });
 
   useEffect(() => {
@@ -1517,21 +1482,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `tx-${Date.now()}`
     };
     setTransactions(prev => [newTx, ...prev]);
-    saveContributionToSupabase({
-      id: newTx.id,
-      supporterName: newTx.donorName,
-      phone: newTx.donorPhone,
-      amount: newTx.amountKes,
-      purpose: newTx.purpose,
-      mpesaReference: newTx.mpesaReference,
-      status: newTx.status === 'verified' || newTx.status === 'completed' ? 'Success' : 'Pending',
-      date: newTx.date
-    });
   };
 
   const deleteTransaction = (id: string) => {
     setTransactions(prev => prev.filter(t => t.id !== id));
-    deleteContributionFromSupabase(id);
   };
 
   // 7b. Maktaba ya Noti (Free Sheet Music Library)
@@ -3221,7 +3175,7 @@ export const useChoir = (): ChoirContextType => {
       addAlbum: () => {},
       updateAlbum: () => {},
       deleteAlbum: () => {},
-      transactions: INITIAL_TRANSACTIONS,
+      transactions: [],
       addTransaction: () => {},
       deleteTransaction: () => {},
       coreValues: DEFAULT_CORE_VALUES,

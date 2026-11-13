@@ -136,138 +136,7 @@ export interface SupporterTransaction {
   category: 'donation' | 'sheet_music' | 'membership' | 'album';
 }
 
-export const INITIAL_TRANSACTIONS: SupporterTransaction[] = [
-  {
-    id: "tx-01",
-    donorName: "Bernard Kiprono",
-    donorPhone: "0722 *** 410",
-    amountKes: 3000,
-    date: "2026-10-19 15:42",
-    purpose: "Choir Sound & Microphones Fund",
-    purposeSw: "Mchango wa Vipaza Sauti vya Kwaya",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH81QW4019",
-    status: "verified",
-    category: "donation"
-  },
-  {
-    id: "tx-02",
-    donorName: "Regina Muthoni",
-    donorPhone: "0714 *** 982",
-    amountKes: 1500,
-    date: "2026-10-18 11:20",
-    purpose: "Gift for Hymn: Machozi ya Imani",
-    purposeSw: "Sadaka ya Wimbo: Machozi ya Imani",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH79LM1842",
-    status: "completed",
-    category: "donation"
-  },
-  {
-    id: "tx-03",
-    donorName: "Fr. Dominic Mwangi",
-    donorPhone: "0720 *** 551",
-    amountKes: 5000,
-    date: "2026-10-16 09:15",
-    purpose: "Parish Choir Patron Pastoral Offering",
-    purposeSw: "Sadaka ya Mlezi wa Kwaya ya Parokia",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH75PL8231",
-    status: "verified",
-    category: "donation"
-  },
-  {
-    id: "tx-04",
-    donorName: "John Bosco Otieno",
-    donorPhone: "0733 *** 619",
-    amountKes: 1000,
-    date: "2026-10-15 17:04",
-    purpose: "Complete SATB Vocal Scores Bundle",
-    purposeSw: "Kifurushi cha Noti za Wimbo (SATB)",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH72KK9024",
-    status: "completed",
-    category: "sheet_music"
-  },
-  {
-    id: "tx-05",
-    donorName: "Teresa Auma",
-    donorPhone: "0798 *** 223",
-    amountKes: 2500,
-    date: "2026-10-12 14:10",
-    purpose: "Choir Robes & Vestments Fund",
-    purposeSw: "Mfuko wa Mavazi ya Kwaya",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH69AA4910",
-    status: "completed",
-    category: "donation"
-  },
-  {
-    id: "tx-06",
-    donorName: "Anthony Wafula",
-    donorPhone: "0701 *** 884",
-    amountKes: 500,
-    date: "2026-10-10 10:30",
-    purpose: "Annual Chorister Membership Registration (Bass)",
-    purposeSw: "Ada ya Uanachama ya Mwaka (Bass)",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH64TY7122",
-    status: "verified",
-    category: "membership"
-  },
-  {
-    id: "tx-07",
-    donorName: "Jacinta Chepkemoi",
-    donorPhone: "0725 *** 314",
-    amountKes: 1200,
-    date: "2026-10-08 16:45",
-    purpose: "Support for Hymn Recording Project",
-    purposeSw: "Ufadhili wa Kurekodi Nyimbo za Kwaya",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH58RT3901",
-    status: "completed",
-    category: "donation"
-  },
-  {
-    id: "tx-08",
-    donorName: "Francis Njoroge",
-    donorPhone: "0711 *** 092",
-    amountKes: 600,
-    date: "2026-10-04 12:18",
-    purpose: "Sheet Music Score: Tutangaze Fumbo La Imani",
-    purposeSw: "Noti za Wimbo: Tutangaze Fumbo La Imani",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH51MB8819",
-    status: "completed",
-    category: "sheet_music"
-  },
-  {
-    id: "tx-09",
-    donorName: "Lucy Wandia",
-    donorPhone: "0728 *** 771",
-    amountKes: 2000,
-    date: "2026-09-28 18:02",
-    purpose: "Thanksgiving Offering - St. Monica Feast",
-    purposeSw: "Sadaka ya Shukrani - Somo Mt. Monika",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH48LL2015",
-    status: "completed",
-    category: "donation"
-  },
-  {
-    id: "tx-10",
-    donorName: "Stephen Omondi",
-    donorPhone: "0705 *** 129",
-    amountKes: 500,
-    date: "2026-09-22 08:50",
-    purpose: "Annual Chorister Membership Registration (Tenor)",
-    purposeSw: "Ada ya Uanachama ya Mwaka (Tenor)",
-    paymentMethod: "mpesa",
-    mpesaReference: "SH42BB1094",
-    status: "verified",
-    category: "membership"
-  }
-];
+export const INITIAL_TRANSACTIONS: SupporterTransaction[] = [];
 
 export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@KwayayaMtakatifuMonicaSection5";
 export const YOUTUBE_CHANNEL_HANDLE = "@KwayayaMtakatifuMonicaSection5";
@@ -284,7 +153,7 @@ export const CHOIR_STATS = {
   albumsReleased: 1,
   sundayMassesPerMonth: 4,
   foundedYear: 2012,
-  mpesaTill: "8421092",
+  mpesaTill: "",
   parish: "St. Monica Catholic Parish, Section 58 Nakuru",
   parishSw: "Parokia ya Mtakatifu Monika, Section 58 Nakuru",
   churchAddress: "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
@@ -1210,7 +1079,7 @@ export const DEFAULT_FOOTER_CONTACT: FooterContactConfig = {
   email: "info@stmonicachoir.org",
   churchAddress: "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
   mapsUrl: "https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru",
-  mpesaTill: "8421092",
+  mpesaTill: "",
   rehearsalsEn: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
   rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"
 };

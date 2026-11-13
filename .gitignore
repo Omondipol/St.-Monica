@@ -7,4 +7,10 @@ coverage/
 *.log
 .env*
 !.env.example
+!server/.env.example
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.db
 .aistudio/

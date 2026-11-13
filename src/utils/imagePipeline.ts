@@ -200,6 +200,7 @@ async function uploadVariantToStorage(
   path: string,
   contentType: string
 ): Promise<string | null> {
+  if (!supabase) return null;
   const buckets = ['photos', 'app-images'];
   for (const bucket of buckets) {
     try {

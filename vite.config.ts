@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import { defineConfig } from 'vite';
 
 export default defineConfig(({ command }) => {
   // In dev server mode, always use '/' so AI Studio proxy and iframe load all assets properly
@@ -16,14 +16,6 @@ export default defineConfig(({ command }) => {
       alias: {
         '@': path.resolve('.'),
       },
-    },
-    define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
-        process.env.VITE_SUPABASE_URL || 'https://pzvpbixdefvztffjyrye.supabase.co'
-      ),
-      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
-        process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_qI6m1zfFhj0-PmK6aVp89w_pDGhrt33'
-      ),
     },
     server: {
       host: '0.0.0.0',

@@ -12,6 +12,7 @@ import { SongCutoffModal } from './components/SongCutoffModal';
 import { SupportChoirModal } from './components/SupportChoirModal';
 import { JoinChoirModal } from './components/JoinChoirModal';
 import { MpesaPaymentModal } from './components/MpesaPaymentModal';
+import { GiveForm } from './components/GiveForm';
 import { YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE, CHOIR_STATS } from './data/choirContent';
 
 // Pages & Subviews
@@ -58,33 +59,36 @@ function SupabasePhotoUploadView({ onNavigate }: { onNavigate: (route: string) =
       const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
 
       let imageUrl = '';
-      const { error: uploadError } = await supabase.storage
-        .from('photos')
-        .upload(uniqueFileName, file, { cacheControl: '3600', upsert: false });
-
-      if (uploadError) {
-        console.warn('Supabase Storage notice:', uploadError.message);
-        // Fallback to data URL so the image still displays and can be recorded in the gallery table
-        const reader = new FileReader();
-        imageUrl = await new Promise((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-      } else {
-        const { data: urlData } = supabase.storage
+      if (supabase) {
+        const { error: uploadError } = await supabase.storage
           .from('photos')
-          .getPublicUrl(uniqueFileName);
-        imageUrl = urlData.publicUrl;
+          .upload(uniqueFileName, file, { cacheControl: '3600', upsert: false });
+
+        if (uploadError) {
+          console.warn('Supabase Storage notice:', uploadError.message);
+          const reader = new FileReader();
+          imageUrl = await new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('photos')
+            .getPublicUrl(uniqueFileName);
+          imageUrl = urlData.publicUrl;
+        }
+
+        setStatus({ message: 'Inahifadhi kumbukumbu kwenye kanzidata...', isError: false });
+
+        // 3. Save into Supabase 'gallery' table
+        const { error: dbError } = await supabase
+          .from('gallery')
+          .insert([{ title: title.trim(), image_url: imageUrl }]);
+
+        if (dbError) throw dbError;
+      } else {
+        throw new Error('Supabase haijaunganishwa (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY).');
       }
-
-      setStatus({ message: 'Inahifadhi kumbukumbu kwenye kanzidata...', isError: false });
-
-      // 3. Save into Supabase 'gallery' table
-      const { error: dbError } = await supabase
-        .from('gallery')
-        .insert([{ title: title.trim(), image_url: imageUrl }]);
-
-      if (dbError) throw dbError;
 
       setTitle('');
       setFile(null);
@@ -251,8 +255,9 @@ function ChoirApp() {
   const isLogoConcepts = ['logo-concepts'].includes(currentRoute);
   const isPrivacy = ['privacy', 'privacy-policy'].includes(currentRoute);
   
-  // Dedicated route for photo uploading
+  // Dedicated route for photo uploading and Paybill giving
   const isUpload = ['upload', 'pakia-picha', 'admin-upload'].includes(currentRoute);
+  const isGive = ['give', 'donate', 'sadaka', 'paybill'].includes(currentRoute);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#0C2340] flex flex-col font-source selection:bg-[#7EC8F0]/40 selection:text-[#0C2340] w-full max-w-full overflow-x-hidden">
@@ -334,6 +339,13 @@ function ChoirApp() {
         {/* Supabase Media Upload Route */}
         {isUpload && (
           <SupabasePhotoUploadView onNavigate={handleNavigate} />
+        )}
+
+        {/* Dedicated M-Pesa Paybill Giving Route */}
+        {isGive && (
+          <div className="py-4">
+            <GiveForm />
+          </div>
         )}
       </main>
 

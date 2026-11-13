@@ -1,4 +1,4 @@
-import { supabase, resolveSupabaseUrl, resolveSupabaseAnonKey } from './supabase';
+import { supabase, resolveSupabaseUrl } from './supabase';
 import { Song, Album, SheetMusicItem, ChoirGroupPhoto } from '../data/choirContent';
 import { ChoirMember } from '../data/membersData';
 import { LibrarySong } from '../data/libraryData';
@@ -12,6 +12,9 @@ export async function uploadJsonToSupabaseStorage(
   fileName: string,
   jsonData: any
 ): Promise<{ url: string; error?: string }> {
+  if (!supabase) {
+    return { url: '', error: 'Supabase is not configured' };
+  }
   try {
     const jsonString = JSON.stringify(jsonData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -44,6 +47,7 @@ export async function uploadJsonToSupabaseStorage(
 export async function fetchJsonFromSupabaseStorage<T>(fileName: string): Promise<T | null> {
   try {
     const baseUrl = resolveSupabaseUrl();
+    if (!baseUrl) return null;
     const publicUrl = `${baseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/data/${fileName}?t=${Date.now()}`;
     const res = await fetch(publicUrl, {
       headers: {
@@ -129,17 +133,19 @@ function mapSongToRow(song: Song): any {
  */
 export async function loadSongsFromSupabase(): Promise<Song[] | null> {
   // 1. Try relational database table 'songs'
-  try {
-    const { data, error } = await supabase
-      .from('songs')
-      .select('*')
-      .order('year', { ascending: false });
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('year', { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
-      return data.map(mapRowToSong);
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return data.map(mapRowToSong);
+      }
+    } catch (e) {
+      // Database table may not exist yet, continue to storage
     }
-  } catch (e) {
-    // Database table may not exist yet, continue to storage
   }
 
   // 2. Try Supabase Storage 'photos/data/songs.json'
@@ -160,16 +166,18 @@ export async function saveSongToSupabase(song: Song, allUpdatedSongs: Song[]): P
   let dbSuccess = false;
 
   // 1. Save to relational table 'songs' if available
-  try {
-    const row = mapSongToRow(song);
-    const { error } = await supabase.from('songs').upsert(row, { onConflict: 'id' });
-    if (!error) {
-      dbSuccess = true;
-    } else {
-      console.warn('[Supabase DB] songs table upsert note:', error.message);
+  if (supabase) {
+    try {
+      const row = mapSongToRow(song);
+      const { error } = await supabase.from('songs').upsert(row, { onConflict: 'id' });
+      if (!error) {
+        dbSuccess = true;
+      } else {
+        console.warn('[Supabase DB] songs table upsert note:', error.message);
+      }
+    } catch (e) {
+      console.warn('[Supabase DB] Error accessing songs table:', e);
     }
-  } catch (e) {
-    console.warn('[Supabase DB] Error accessing songs table:', e);
   }
 
   // 2. Always persist full songs catalog into Supabase Cloud Storage
@@ -187,10 +195,12 @@ export async function saveSongToSupabase(song: Song, allUpdatedSongs: Song[]): P
  */
 export async function deleteSongFromSupabase(songId: string, remainingSongs: Song[]): Promise<boolean> {
   // 1. Delete from database table
-  try {
-    await supabase.from('songs').delete().eq('id', songId);
-  } catch (e) {
-    console.warn('[Supabase DB] delete song notice:', e);
+  if (supabase) {
+    try {
+      await supabase.from('songs').delete().eq('id', songId);
+    } catch (e) {
+      console.warn('[Supabase DB] delete song notice:', e);
+    }
   }
 
   // 2. Update Supabase Storage
@@ -207,6 +217,7 @@ export async function deleteSongFromSupabase(songId: string, remainingSongs: Son
  * Load photos from Supabase 'gallery' table
  */
 export async function loadGalleryPhotosFromSupabase(): Promise<ChoirGroupPhoto[]> {
+  if (!supabase) return [];
   try {
     const { data, error } = await supabase
       .from('gallery')
@@ -239,6 +250,7 @@ export async function loadGalleryPhotosFromSupabase(): Promise<ChoirGroupPhoto[]
  * Delete a photo from Supabase 'gallery' database table and from Supabase storage if it was stored there
  */
 export async function deleteGalleryPhotoFromSupabase(photoId: string, customUrl?: string): Promise<boolean> {
+  if (!supabase) return false;
   let deleted = false;
 
   // 1. Delete by numeric ID if id was formatted like `supabase-photo-${num}`
@@ -338,17 +350,19 @@ function mapMemberToRow(member: ChoirMember): any {
  */
 export async function loadMembersFromSupabase(): Promise<ChoirMember[] | null> {
   // 1. Try relational table 'members'
-  try {
-    const { data, error } = await supabase
-      .from('members')
-      .select('*')
-      .order('name', { ascending: true });
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('members')
+        .select('*')
+        .order('name', { ascending: true });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
-      return data.map(mapRowToMember);
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return data.map(mapRowToMember);
+      }
+    } catch (e) {
+      // Table might not exist yet, proceed to storage
     }
-  } catch (e) {
-    // Table might not exist yet, proceed to storage
   }
 
   // 2. Try Supabase Storage 'data/members.json'
@@ -367,16 +381,18 @@ export async function saveMemberToSupabase(member: ChoirMember, allMembers: Choi
   let dbSuccess = false;
 
   // 1. Upsert into relational 'members' table
-  try {
-    const row = mapMemberToRow(member);
-    const { error } = await supabase.from('members').upsert(row, { onConflict: 'id' });
-    if (!error) {
-      dbSuccess = true;
-    } else {
-      console.warn('[Supabase DB] members table upsert notice:', error.message);
+  if (supabase) {
+    try {
+      const row = mapMemberToRow(member);
+      const { error } = await supabase.from('members').upsert(row, { onConflict: 'id' });
+      if (!error) {
+        dbSuccess = true;
+      } else {
+        console.warn('[Supabase DB] members table upsert notice:', error.message);
+      }
+    } catch (e) {
+      console.warn('[Supabase DB] Error accessing members table:', e);
     }
-  } catch (e) {
-    console.warn('[Supabase DB] Error accessing members table:', e);
   }
 
   // 2. Always persist full members list into Supabase Storage
@@ -394,10 +410,12 @@ export async function saveMemberToSupabase(member: ChoirMember, allMembers: Choi
  */
 export async function deleteMemberFromSupabase(memberId: string, remainingMembers: ChoirMember[]): Promise<boolean> {
   // 1. Delete from database table
-  try {
-    await supabase.from('members').delete().eq('id', memberId);
-  } catch (e) {
-    console.warn('[Supabase DB] delete member notice:', e);
+  if (supabase) {
+    try {
+      await supabase.from('members').delete().eq('id', memberId);
+    } catch (e) {
+      console.warn('[Supabase DB] delete member notice:', e);
+    }
   }
 
   // 2. Update Supabase Storage
@@ -450,17 +468,19 @@ function mapAlbumToRow(album: Album): any {
  * Load albums from Supabase (relational table 'albums' or storage 'data/albums.json')
  */
 export async function loadAlbumsFromSupabase(): Promise<Album[] | null> {
-  try {
-    const { data, error } = await supabase
-      .from('albums')
-      .select('*')
-      .order('release_year', { ascending: false });
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('albums')
+        .select('*')
+        .order('release_year', { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
-      return data.map(mapRowToAlbum);
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return data.map(mapRowToAlbum);
+      }
+    } catch (e) {
+      // Database table may not exist yet, continue to storage
     }
-  } catch (e) {
-    // Database table may not exist yet, continue to storage
   }
 
   return fetchJsonFromSupabaseStorage<Album[]>('albums.json');
@@ -472,16 +492,18 @@ export async function loadAlbumsFromSupabase(): Promise<Album[] | null> {
 export async function saveAlbumToSupabase(album: Album, allAlbums: Album[]): Promise<boolean> {
   let dbSuccess = false;
 
-  try {
-    const row = mapAlbumToRow(album);
-    const { error } = await supabase.from('albums').upsert(row, { onConflict: 'id' });
-    if (!error) {
-      dbSuccess = true;
-    } else {
-      console.warn('[Supabase DB] albums table upsert notice:', error.message);
+  if (supabase) {
+    try {
+      const row = mapAlbumToRow(album);
+      const { error } = await supabase.from('albums').upsert(row, { onConflict: 'id' });
+      if (!error) {
+        dbSuccess = true;
+      } else {
+        console.warn('[Supabase DB] albums table upsert notice:', error.message);
+      }
+    } catch (e) {
+      console.warn('[Supabase DB] Error accessing albums table:', e);
     }
-  } catch (e) {
-    console.warn('[Supabase DB] Error accessing albums table:', e);
   }
 
   try {
@@ -497,10 +519,12 @@ export async function saveAlbumToSupabase(album: Album, allAlbums: Album[]): Pro
  * Delete an album from Supabase (both table 'albums' and storage 'data/albums.json')
  */
 export async function deleteAlbumFromSupabase(albumId: string, remainingAlbums: Album[]): Promise<boolean> {
-  try {
-    await supabase.from('albums').delete().eq('id', albumId);
-  } catch (e) {
-    console.warn('[Supabase DB] delete album notice:', e);
+  if (supabase) {
+    try {
+      await supabase.from('albums').delete().eq('id', albumId);
+    } catch (e) {
+      console.warn('[Supabase DB] delete album notice:', e);
+    }
   }
 
   try {
@@ -581,17 +605,19 @@ function mapLibrarySongToRow(song: LibrarySong): any {
  * Load music library songs from Supabase (first checks table 'library_songs', falls back to storage 'data/library_songs.json')
  */
 export async function loadLibrarySongsFromSupabase(): Promise<LibrarySong[] | null> {
-  try {
-    const { data, error } = await supabase
-      .from('library_songs')
-      .select('*')
-      .order('title', { ascending: true });
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('library_songs')
+        .select('*')
+        .order('title', { ascending: true });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
-      return data.map(mapRowToLibrarySong);
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return data.map(mapRowToLibrarySong);
+      }
+    } catch (e) {
+      // Database table may not exist yet, continue to storage
     }
-  } catch (e) {
-    // Database table may not exist yet, continue to storage
   }
 
   return fetchJsonFromSupabaseStorage<LibrarySong[]>('library_songs.json');
@@ -603,16 +629,18 @@ export async function loadLibrarySongsFromSupabase(): Promise<LibrarySong[] | nu
 export async function saveLibrarySongToSupabase(song: LibrarySong, allSongs: LibrarySong[]): Promise<boolean> {
   let dbSuccess = false;
 
-  try {
-    const row = mapLibrarySongToRow(song);
-    const { error } = await supabase.from('library_songs').upsert(row, { onConflict: 'id' });
-    if (!error) {
-      dbSuccess = true;
-    } else {
-      console.warn('[Supabase DB] library_songs table upsert notice:', error.message);
+  if (supabase) {
+    try {
+      const row = mapLibrarySongToRow(song);
+      const { error } = await supabase.from('library_songs').upsert(row, { onConflict: 'id' });
+      if (!error) {
+        dbSuccess = true;
+      } else {
+        console.warn('[Supabase DB] library_songs table upsert notice:', error.message);
+      }
+    } catch (e) {
+      console.warn('[Supabase DB] Error accessing library_songs table:', e);
     }
-  } catch (e) {
-    console.warn('[Supabase DB] Error accessing library_songs table:', e);
   }
 
   try {
@@ -628,10 +656,12 @@ export async function saveLibrarySongToSupabase(song: LibrarySong, allSongs: Lib
  * Delete a music library score from Supabase (both table 'library_songs' and storage 'data/library_songs.json')
  */
 export async function deleteLibrarySongFromSupabase(songId: string, remainingSongs: LibrarySong[]): Promise<boolean> {
-  try {
-    await supabase.from('library_songs').delete().eq('id', songId);
-  } catch (e) {
-    console.warn('[Supabase DB] delete library_song notice:', e);
+  if (supabase) {
+    try {
+      await supabase.from('library_songs').delete().eq('id', songId);
+    } catch (e) {
+      console.warn('[Supabase DB] delete library_song notice:', e);
+    }
   }
 
   try {
@@ -641,98 +671,6 @@ export async function deleteLibrarySongFromSupabase(songId: string, remainingSon
   }
 
   return true;
-}
-
-/**
- * Contributions & M-Pesa Transactions in Supabase
- */
-export interface SupabaseContributionRow {
-  id: string;
-  checkout_request_id?: string;
-  merchant_request_id?: string;
-  supporter_name: string;
-  phone?: string;
-  amount: number;
-  purpose: string;
-  mpesa_reference?: string;
-  status: string;
-  result_desc?: string;
-  date?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export async function loadContributionsFromSupabase(): Promise<any[]> {
-  try {
-    const { data, error } = await supabase
-      .from('contributions')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.warn('[Supabase DB] contributions query notice:', error.message);
-      return [];
-    }
-
-    if (Array.isArray(data) && data.length > 0) {
-      return data.map((row: any) => ({
-        id: String(row.id),
-        checkoutRequestId: row.checkout_request_id || '',
-        merchantRequestId: row.merchant_request_id || '',
-        supporterName: row.supporter_name || 'Supporter',
-        phone: row.phone || '',
-        amount: Number(row.amount) || 0,
-        purpose: row.purpose || 'Donations',
-        mpesaReference: row.mpesa_reference || '',
-        status: row.status || 'Pending',
-        resultDesc: row.result_desc || '',
-        date: row.date || '',
-        createdAt: row.created_at || new Date().toISOString(),
-        updatedAt: row.updated_at || new Date().toISOString()
-      }));
-    }
-  } catch (err) {
-    console.warn('Failed to load contributions from Supabase:', err);
-  }
-  return [];
-}
-
-export async function saveContributionToSupabase(tx: any): Promise<void> {
-  try {
-    const row = {
-      id: tx.id,
-      checkout_request_id: tx.checkoutRequestId,
-      merchant_request_id: tx.merchantRequestId,
-      supporter_name: tx.supporterName,
-      phone: tx.phone,
-      amount: tx.amount,
-      purpose: tx.purpose,
-      mpesa_reference: tx.mpesaReference,
-      status: tx.status,
-      result_desc: tx.resultDesc,
-      date: tx.date,
-      created_at: tx.createdAt || new Date().toISOString(),
-      updated_at: tx.updatedAt || new Date().toISOString()
-    };
-
-    const { error } = await supabase.from('contributions').upsert(row, { onConflict: 'id' });
-    if (error) {
-      console.warn('[Supabase DB] contribution save notice:', error.message);
-    }
-  } catch (err) {
-    console.warn('Failed to save contribution to Supabase:', err);
-  }
-}
-
-export async function deleteContributionFromSupabase(id: string): Promise<void> {
-  try {
-    const { error } = await supabase.from('contributions').delete().eq('id', id);
-    if (error) {
-      console.warn('[Supabase DB] contribution delete notice:', error.message);
-    }
-  } catch (err) {
-    console.warn('Failed to delete contribution from Supabase:', err);
-  }
 }
 
 /**
@@ -909,38 +847,10 @@ CREATE POLICY "Public update library_songs" ON public.library_songs FOR UPDATE U
 DROP POLICY IF EXISTS "Public delete library_songs" ON public.library_songs;
 CREATE POLICY "Public delete library_songs" ON public.library_songs FOR DELETE USING (true);
 
--- 6. Create table for Contributions & M-Pesa Transactions
-CREATE TABLE IF NOT EXISTS public.contributions (
-  id TEXT PRIMARY KEY,
-  checkout_request_id TEXT,
-  merchant_request_id TEXT,
-  supporter_name TEXT NOT NULL,
-  phone TEXT,
-  amount NUMERIC NOT NULL,
-  purpose TEXT NOT NULL,
-  mpesa_reference TEXT,
-  status TEXT NOT NULL DEFAULT 'Pending',
-  result_desc TEXT,
-  date TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
-ALTER TABLE public.contributions ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public read contributions" ON public.contributions;
-CREATE POLICY "Public read contributions" ON public.contributions FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Public insert contributions" ON public.contributions;
-CREATE POLICY "Public insert contributions" ON public.contributions FOR INSERT WITH CHECK (true);
-DROP POLICY IF EXISTS "Public update contributions" ON public.contributions;
-CREATE POLICY "Public update contributions" ON public.contributions FOR UPDATE USING (true);
-DROP POLICY IF EXISTS "Public delete contributions" ON public.contributions;
-CREATE POLICY "Public delete contributions" ON public.contributions FOR DELETE USING (true);
-
--- 7. Enable Realtime Replication
+-- 6. Enable Realtime Replication
 ALTER PUBLICATION supabase_realtime ADD TABLE public.songs;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.gallery;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.albums;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.library_songs;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.contributions;
 `;

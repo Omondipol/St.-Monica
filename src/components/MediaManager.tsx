@@ -36,6 +36,10 @@ export const MediaManager: React.FC = () => {
 
   // Fetch posts from Supabase (combines gallery table and posts table)
   const loadPosts = async () => {
+    if (!supabase) {
+      setStatus('Supabase not configured');
+      return;
+    }
     setIsLoading(true);
     try {
       // 1. Try 'gallery' table
@@ -93,6 +97,8 @@ export const MediaManager: React.FC = () => {
   useEffect(() => {
     loadPosts();
 
+    if (!supabase) return;
+
     // Subscribe to live database updates on gallery and posts
     const galChannel = supabase
       .channel('public:gallery')
@@ -109,8 +115,8 @@ export const MediaManager: React.FC = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(galChannel);
-      supabase.removeChannel(postChannel);
+      supabase?.removeChannel(galChannel);
+      supabase?.removeChannel(postChannel);
     };
   }, []);
 
@@ -133,15 +139,17 @@ export const MediaManager: React.FC = () => {
       setStatus('Saving to Supabase gallery...');
       
       // Insert into gallery table
-      try {
-        const { data: gData } = await supabase
-          .from('gallery')
-          .insert([{ title: recordTitle, image_url: url }])
-          .select();
-        if (gData && gData[0]) {
-          setActiveId(Number(gData[0].id));
-        }
-      } catch (_) {}
+      if (supabase) {
+        try {
+          const { data: gData } = await supabase
+            .from('gallery')
+            .insert([{ title: recordTitle, image_url: url }])
+            .select();
+          if (gData && gData[0]) {
+            setActiveId(Number(gData[0].id));
+          }
+        } catch (_) {}
+      }
 
       // Also sync into Choir Context so it appears on the website immediately
       addGroupPhoto({
@@ -170,6 +178,7 @@ export const MediaManager: React.FC = () => {
 
     setStatus('Typing...');
     const timer = setTimeout(async () => {
+      if (!supabase) return;
       setStatus('Saving text...');
       try {
         if (activeId) {
@@ -192,41 +201,39 @@ export const MediaManager: React.FC = () => {
 
     setStatus('Deleting from Supabase...');
 
-    // 1. Delete from Supabase 'gallery' database table
-    try {
-      await supabase.from('gallery').delete().eq('id', id);
-    } catch (_) {}
-
-    // 2. Delete from Supabase 'posts' database table
-    try {
-      await supabase.from('posts').delete().eq('id', id);
-    } catch (_) {}
-
-    // 3. Delete from Supabase Storage buckets if URL is available
-    if (targetPost?.image_url) {
+    if (supabase) {
+      // 1. Delete from Supabase 'gallery' database table
       try {
-        await supabase.from('gallery').delete().eq('image_url', targetPost.image_url);
-        await supabase.from('posts').delete().eq('image_url', targetPost.image_url);
-
-        if (targetPost.image_url.includes('/storage/v1/object/public/photos/')) {
-          const parts = targetPost.image_url.split('/storage/v1/object/public/photos/');
-          if (parts[1]) {
-            await supabase.storage.from('photos').remove([decodeURIComponent(parts[1])]);
-          }
-        }
-        if (targetPost.image_url.includes('/storage/v1/object/public/app-images/')) {
-          const parts = targetPost.image_url.split('/storage/v1/object/public/app-images/');
-          if (parts[1]) {
-            await supabase.storage.from('app-images').remove([decodeURIComponent(parts[1])]);
-          }
-        }
+        await supabase.from('gallery').delete().eq('id', id);
       } catch (_) {}
 
-      // 4. Also remove from ChoirContext gallery state so it immediately disappears everywhere
-      deleteGroupPhoto(`supabase-photo-${id}`);
-    } else {
-      deleteGroupPhoto(`supabase-photo-${id}`);
+      // 2. Delete from Supabase 'posts' database table
+      try {
+        await supabase.from('posts').delete().eq('id', id);
+      } catch (_) {}
+
+      // 3. Delete from Supabase Storage buckets if URL is available
+      if (targetPost?.image_url) {
+        try {
+          await supabase.from('gallery').delete().eq('image_url', targetPost.image_url);
+          await supabase.from('posts').delete().eq('image_url', targetPost.image_url);
+
+          if (targetPost.image_url.includes('/storage/v1/object/public/photos/')) {
+            const parts = targetPost.image_url.split('/storage/v1/object/public/photos/');
+            if (parts[1]) {
+              await supabase.storage.from('photos').remove([decodeURIComponent(parts[1])]);
+            }
+          }
+          if (targetPost.image_url.includes('/storage/v1/object/public/app-images/')) {
+            const parts = targetPost.image_url.split('/storage/v1/object/public/app-images/');
+            if (parts[1]) {
+              await supabase.storage.from('app-images').remove([decodeURIComponent(parts[1])]);
+            }
+          }
+        } catch (_) {}
+      }
     }
+    deleteGroupPhoto(`supabase-photo-${id}`);
 
     setStatus('Post permanently deleted from Supabase & site');
     if (activeId === id) setActiveId(null);
@@ -338,8 +345,8 @@ create policy "Public posts delete" on public.posts for delete using (true);`}
           <div className="space-y-1">
             <p className="font-bold text-amber-950">Supabase API Key Configuration:</p>
             <p>
-              Your project URL is configured to <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">https://pzvpbixdefvztffjyrye.supabase.co</code>.
-              To enable live cloud saves and real-time syncing, open <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">.env</code> and replace <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">VITE_SUPABASE_ANON_KEY=your_actual_anon_key_here</code> with your project's actual anon public key from the Supabase Project Dashboard (Project Settings → API).
+              To enable live cloud saves and real-time syncing, set <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">VITE_SUPABASE_URL</code> and{' '}
+              <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">VITE_SUPABASE_ANON_KEY</code> in your <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px]">.env</code> file using values from your Supabase Project Dashboard (Project Settings → API).
             </p>
           </div>
         </div>

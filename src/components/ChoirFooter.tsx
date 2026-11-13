@@ -217,6 +217,17 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
                   {lang === 'sw' ? 'Matukio na Kalenda' : 'Events'}
                 </button>
               </li>
+              <li>
+                <button 
+                  onClick={() => {
+                    onNavigate('give');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
+                  className="min-h-[44px] sm:min-h-0 flex items-center text-slate-300 hover:text-white transition-colors cursor-pointer text-sm"
+                >
+                  {lang === 'sw' ? 'Toa Sadaka (M-Pesa)' : 'Give (M-Pesa)'}
+                </button>
+              </li>
             </ul>
           </div>
 

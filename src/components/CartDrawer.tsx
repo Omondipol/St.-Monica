@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { 
-  X, 
-  Trash2, 
-  Smartphone, 
-  CheckCircle2, 
-  Download, 
+import {
+  X,
+  Trash2,
+  CheckCircle2,
+  Download,
   ArrowRight,
-  AlertCircle
+  ArrowLeft,
 } from 'lucide-react';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 
@@ -18,52 +17,25 @@ import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_17914464
 import sheetMusicHymnalImg from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 import { getAssetUrl } from '../utils/assetHelper';
 import { generateSongScorePdf } from '../utils/fileDownload';
-import { 
-  normalizeMpesaPhone, 
-  initiateStkPush, 
-  pollPaymentStatus, 
-  simulatePaymentCallback 
-} from '../utils/mpesaClient';
+import { GiveForm } from './GiveForm';
 
 export const CartDrawer: React.FC = () => {
-  const { 
-    cart, 
-    removeFromCart, 
-    updateQuantity, 
-    clearCart, 
-    isCartOpen, 
-    setIsCartOpen, 
-    cartTotalKes, 
-    formatPrice, 
-    lang 
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    isCartOpen,
+    setIsCartOpen,
+    cartTotalKes,
+    formatPrice,
+    lang,
   } = useChoir();
 
-  // Checkout flow state: 'cart' | 'checkout' | 'processing_mpesa' | 'confirmed'
-  const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'processing_mpesa' | 'confirmed'>('cart');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [mpesaCountdown, setMpesaCountdown] = useState(3);
+  // Checkout flow state: 'cart' | 'checkout' | 'confirmed'
+  const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmed'>('cart');
   const [transactionRef, setTransactionRef] = useState('');
   const [hasDownloaded, setHasDownloaded] = useState(false);
-  const [copiedField, setCopiedField] = useState<'till' | 'ref' | 'amount' | null>(null);
-  const [checkoutRequestId, setCheckoutRequestId] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentErrorMessage, setPaymentErrorMessage] = useState('');
-  const pollTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  React.useEffect(() => {
-    return () => {
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-    };
-  }, []);
-
-  const handleCopyText = (text: string, field: 'till' | 'ref' | 'amount') => {
-    navigator.clipboard?.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
 
   if (!isCartOpen) return null;
 
@@ -77,121 +49,33 @@ export const CartDrawer: React.FC = () => {
     return getAssetUrl('/assets/choir/choir_02.jpg');
   };
 
-  const handleStartCheckout = () => {
-    setCheckoutStep('checkout');
-  };
-
-  const handleExecutePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const phoneCheck = normalizeMpesaPhone(phoneNumber);
-
-    if (!phoneNumber.trim()) {
-      setPhoneError(lang === 'sw' ? 'Tafadhali weka nambari ya simu ya M-Pesa' : 'Please enter your M-Pesa phone number');
-      return;
-    }
-    if (!phoneCheck.valid) {
-      setPhoneError(lang === 'sw' ? 'Weka nambari sahihi ya Safaricom (mfano: 07XX XXX XXX au 01XX XXX XXX)' : 'Please enter a valid Safaricom number (e.g. 07XX XXX XXX or 01XX XXX XXX)');
-      return;
-    }
-
-    setPhoneError('');
-    setIsSubmitting(true);
-    setPaymentErrorMessage('');
-
-    try {
-      const res = await initiateStkPush({
-        name: customerName.trim() || 'Supporter',
-        phone: phoneCheck.normalized,
-        amount: cartTotalKes,
-        purpose: 'Sheet music'
-      });
-
-      setCheckoutRequestId(res.checkoutRequestId);
-      setCheckoutStep('processing_mpesa');
-      setIsSubmitting(false);
-
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      let count = 0;
-      pollTimerRef.current = setInterval(async () => {
-        count += 1;
-        try {
-          const status = await pollPaymentStatus(res.checkoutRequestId);
-          if (status.status === 'Success') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            setTransactionRef(status.mpesaReference);
-            setCheckoutStep('confirmed');
-          } else if (status.status === 'Cancelled') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            setPaymentErrorMessage(lang === 'sw' ? 'Ombi la malipo limekatishwa kwenye simu.' : 'Payment prompt cancelled on your phone.');
-            setPhoneError(lang === 'sw' ? 'Ombi limekatishwa' : 'Prompt cancelled');
-            setCheckoutStep('checkout');
-          } else if (status.status === 'Failed') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            setPaymentErrorMessage(status.resultDesc || 'Payment failed.');
-            setPhoneError(status.resultDesc || 'Payment failed');
-            setCheckoutStep('checkout');
-          }
-        } catch (e) {}
-
-        if (count >= 25) {
-          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-          setPaymentErrorMessage(lang === 'sw' ? 'Muda umekwisha. Jaribu tena.' : 'Request timed out. Please try again.');
-          setCheckoutStep('checkout');
-        }
-      }, 2000);
-    } catch (err: any) {
-      setIsSubmitting(false);
-      setPhoneError(err.message || 'Could not send M-Pesa prompt.');
-    }
-  };
-
-  const handleSimulateCartOutcome = async (outcome: 'success' | 'cancelled' | 'failed') => {
-    if (!checkoutRequestId) return;
-    try {
-      await simulatePaymentCallback(checkoutRequestId, outcome);
-      const res = await pollPaymentStatus(checkoutRequestId);
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      if (outcome === 'success') {
-        setTransactionRef(res.mpesaReference);
-        setCheckoutStep('confirmed');
-      } else {
-        setPaymentErrorMessage(res.resultDesc || 'Payment cancelled.');
-        setCheckoutStep('checkout');
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleFinishAndReset = () => {
     clearCart();
     setCheckoutStep('cart');
-    setPhoneNumber('');
+    setTransactionRef('');
     setHasDownloaded(false);
     setIsCartOpen(false);
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-hidden bg-[#0C2340]/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200"
       onClick={() => setIsCartOpen(false)}
     >
-      {/* Paper Slip Drawer in warm cream and navy */}
-      <div 
+      <div
         className="w-full max-w-md bg-[#FAF8F5] text-[#0C2340] border-l border-[#0C2340]/15 shadow-2xl flex flex-col h-full animate-in slide-in-from-right duration-300 relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Subtle geometric strip along top edge */}
         <AfricanGeometricBorder />
 
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-[#0C2340]/10 flex items-center justify-between bg-[#FAF8F5]">
           <div className="flex items-center gap-2.5">
             <h3 className="font-eb-garamond text-xl font-bold text-[#0C2340]">
-              {checkoutStep === 'confirmed' 
+              {checkoutStep === 'confirmed'
                 ? (lang === 'sw' ? 'Agizo Limethibitishwa' : 'Order Confirmed')
-                : (checkoutStep === 'checkout' || checkoutStep === 'processing_mpesa')
-                  ? (lang === 'sw' ? 'Agizo Lako' : 'Your Order')
+                : checkoutStep === 'checkout'
+                  ? (lang === 'sw' ? 'Lipa Agizo Lako' : 'Complete Your Order')
                   : (lang === 'sw' ? 'Mfuko wa Manunuzi' : 'Your Shopping Cart')}
             </h3>
           </div>
@@ -216,7 +100,7 @@ export const CartDrawer: React.FC = () => {
                   {lang === 'sw' ? 'Mfuko wako wa manunuzi hauna kitu.' : 'Your cart is currently empty.'}
                 </p>
                 <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-                  {lang === 'sw' 
+                  {lang === 'sw'
                     ? 'Tazama noti za nyimbo zetu katika duka ili kuongeza kwenye agizo lako.'
                     : 'Explore our sheet music scores in the store to add to your order.'}
                 </p>
@@ -224,15 +108,17 @@ export const CartDrawer: React.FC = () => {
             ) : (
               <div className="divide-y divide-[#0C2340]/10 flex-1">
                 {cart.map((item) => {
-                  const isDigital = item.product.downloadable || item.product.type === 'sheet_music' || item.product.type === 'digital_album';
+                  const isDigital =
+                    item.product.downloadable ||
+                    item.product.type === 'sheet_music' ||
+                    item.product.type === 'digital_album';
                   const itemImg = getItemImage(item.product.id, item.product.image);
 
                   return (
                     <div key={item.product.id} className="py-3.5 flex items-start gap-3">
-                      {/* Score Preview Image instead of generic bag icon */}
                       <div className="w-14 h-14 rounded-[12px] bg-[#FCFAF7] border border-[#0C2340]/15 overflow-hidden shrink-0 shadow-2xs">
-                        <img 
-                          src={itemImg} 
+                        <img
+                          src={itemImg}
                           alt={lang === 'sw' ? item.product.nameSw : item.product.name}
                           className="w-full h-full object-cover object-top"
                         />
@@ -242,12 +128,11 @@ export const CartDrawer: React.FC = () => {
                         <h4 className="font-eb-garamond text-[17px] font-bold text-[#0C2340] leading-snug truncate">
                           {lang === 'sw' ? item.product.nameSw : item.product.name}
                         </h4>
-                        
+
                         <span className="tabular-nums text-xs font-semibold text-[#1058A8] block mt-0.5">
                           {formatPrice(item.product.priceKes)}
                         </span>
 
-                        {/* Digital items: Remove quantity buttons, show PDF, instant download */}
                         {isDigital ? (
                           <div className="flex items-center justify-between mt-1 pt-1 border-t border-[#0C2340]/5">
                             <span className="text-[11px] text-slate-500">
@@ -263,7 +148,6 @@ export const CartDrawer: React.FC = () => {
                             </button>
                           </div>
                         ) : (
-                          /* Non-digital items: quantity controls */
                           <div className="flex items-center gap-2 mt-2">
                             <button
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
@@ -294,25 +178,23 @@ export const CartDrawer: React.FC = () => {
               </div>
             )}
 
-            {/* Bottom summary and start checkout */}
             {cart.length > 0 && (
               <div className="pt-4 border-t border-[#0C2340]/10 mt-auto space-y-3">
                 <div className="flex items-center justify-between text-xs text-slate-600">
                   <span>{lang === 'sw' ? 'Jumla ndogo:' : 'Subtotal:'}</span>
-                  <span className="tabular-nums font-bold text-[#0C2340] text-base font-eb-garamond text-[22px]">
+                  <span className="tabular-nums font-bold text-[#0C2340] font-eb-garamond text-[22px]">
                     {formatPrice(cartTotalKes)}
                   </span>
                 </div>
-                
-                {/* One unified sentence from treasurer */}
+
                 <p className="text-[11px] text-slate-600 italic">
-                  {lang === 'sw' 
+                  {lang === 'sw'
                     ? 'Kila mchango unatusaidia kupata noti na kurekodi Misa ya Jumapili.'
                     : 'Every gift helps us buy sheet music and record Sunday Mass.'}
                 </p>
 
                 <button
-                  onClick={handleStartCheckout}
+                  onClick={() => setCheckoutStep('checkout')}
                   className="w-full py-3 px-4 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-[12px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>{lang === 'sw' ? 'Endelea na agizo' : 'Proceed to checkout'}</span>
@@ -323,9 +205,9 @@ export const CartDrawer: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 2: CHECKOUT FORM WITH M-PESA */}
+        {/* STEP 2: CHECKOUT WITH SUPABASE M-PESA STK PUSH */}
         {checkoutStep === 'checkout' && (
-          <form onSubmit={handleExecutePayment} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 font-source">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 font-source">
             <div className="flex items-center justify-between text-xs pb-3 border-b border-[#0C2340]/10">
               <span className="text-slate-600">{lang === 'sw' ? 'Jumla ya agizo:' : 'Order total:'}</span>
               <span className="tabular-nums font-bold text-[22px] text-[#1058A8] font-eb-garamond">
@@ -333,246 +215,35 @@ export const CartDrawer: React.FC = () => {
               </span>
             </div>
 
-            {/* Customer Details */}
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-[#0C2340] block mb-1">
-                  {lang === 'sw' ? 'Jina kamili:' : 'Full name:'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={lang === 'sw' ? 'mfano: Maria Wanjiru' : 'e.g. Mary Wanjiru'}
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs border border-[#0C2340]/20 rounded-[12px] focus:outline-none focus:border-[#1058A8] bg-white text-[#0C2340]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-[#0C2340] block mb-1">
-                  {lang === 'sw' ? 'Barua pepe (kwa ajili ya kiungo cha noti):' : 'Email address (for download links):'}
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="email@example.com"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs border border-[#0C2340]/20 rounded-[12px] focus:outline-none focus:border-[#1058A8] bg-white text-[#0C2340]"
-                />
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="pt-2 border-t border-[#0C2340]/10 space-y-2">
-              <label className="text-xs font-semibold text-[#0C2340] block">
-                {lang === 'sw' ? 'Njia ya malipo:' : 'Payment method:'}
-              </label>
-
-            {/* M-Pesa Payment Details with Copy Buttons */}
-            <div className="p-3.5 rounded-xl bg-[#FCFAF7] border border-[#0C2340]/15 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#1058A8]">
-                  {lang === 'sw' ? 'Maelezo ya Malipo ya M-Pesa' : 'M-Pesa Payment Details'}
-                </span>
-                <span className="text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded">
-                  M-PESA
-                </span>
-              </div>
-
-              <div className="space-y-1.5 text-xs">
-                {/* Paybill Number */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
-                  <div>
-                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Namba ya Paybill:' : 'Paybill Number:'}</span>
-                    <strong className="font-source text-xs sm:text-sm text-[#0C2340] tabular-nums tracking-wide font-bold">
-                      678408
-                    </strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyText('678408', 'till')}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
-                  >
-                    {copiedField === 'till' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
-                  </button>
-                </div>
-
-                {/* Account Reference */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
-                  <div>
-                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Kumbukumbu ya Akaunti:' : 'Account Reference:'}</span>
-                    <strong className="font-source text-xs sm:text-sm text-[#0C2340] tracking-wide font-bold">
-                      3RDMASSCHOIR
-                    </strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyText('3RDMASSCHOIR', 'ref')}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
-                  >
-                    {copiedField === 'ref' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
-                  </button>
-                </div>
-
-                {/* Amount */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-[#0C2340]/10">
-                  <div>
-                    <span className="text-[10px] text-slate-500 block">{lang === 'sw' ? 'Kiasi cha Kulipa:' : 'Amount to Pay:'}</span>
-                    <strong className="font-source text-xs sm:text-sm text-[#1058A8] tabular-nums font-bold">
-                      KES {cartTotalKes}
-                    </strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyText(`KES ${cartTotalKes}`, 'amount')}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
-                  >
-                    {copiedField === 'amount' ? (lang === 'sw' ? 'Imenakiliwa' : 'Copied!') : (lang === 'sw' ? 'Nakili' : 'Copy')}
-                  </button>
-                </div>
-              </div>
-            </div>
-            </div>
-
-            {/* STK Push Option */}
-            <div className="pt-2 border-t border-[#0C2340]/10 space-y-1.5">
-              <label className="block text-xs font-semibold text-[#0C2340]">
-                {lang === 'sw' ? 'Nambari ya simu ya M-Pesa (Kwa ombi la STK Push) *' : 'M-Pesa mobile number (For STK Push prompt) *'}
-              </label>
-              <input
-                type="tel"
-                required
-                inputMode="numeric"
-                placeholder="07XX XXX XXX"
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                  if (phoneError) setPhoneError('');
-                }}
-                className={`w-full px-3.5 py-2.5 text-sm font-semibold border rounded-[12px] bg-white text-[#0C2340] focus:outline-none ${
-                  phoneError ? 'border-[#0C2340]/60 ring-1 ring-[#0C2340]/30' : 'border-[#0C2340]/20 focus:border-[#1058A8]'
-                }`}
-              />
-              {phoneError && (
-                <p className="text-[#0C2340] text-xs flex items-center gap-1 font-semibold pt-0.5">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#1058A8]" />
-                  <span>{phoneError}</span>
-                </p>
-              )}
-              <p className="text-[11px] text-slate-500 leading-relaxed pt-0.5">
-                {lang === 'sw'
-                  ? 'Unaweza kulipa moja kwa moja kupitia Paybill 678408 (Akaunti: 3RDMASSCHOIR), au uweke namba yako kupokea ombi la PIN kwenye simu yako.'
-                  : 'You can pay manually via Paybill 678408 (Acc: 3RDMASSCHOIR), or enter your number to receive an instant PIN prompt on your phone.'}
-              </p>
-            </div>
-
-            {/* Treasurer note */}
-            <p className="text-[11px] text-slate-500 italic text-center px-2 pt-2 border-t border-[#0C2340]/10">
-              {lang === 'sw' 
-                ? 'Kila mchango unatusaidia kupata noti na kurekodi Misa ya Jumapili.'
-                : 'Every gift helps us buy sheet music and record Sunday Mass.'}
-            </p>
-
-            {/* Form Actions */}
-            <div className="pt-2 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setCheckoutStep('cart')}
-                className="w-1/3 py-2.5 px-3 text-xs font-semibold text-[#1058A8] border border-[#1058A8] rounded-[12px] hover:bg-[#1058A8]/5 cursor-pointer text-center transition-colors"
-              >
-                {lang === 'sw' ? 'Rudi' : 'Back'}
-              </button>
-              <button
-                type="submit"
-                className="w-2/3 py-2.5 px-3 text-xs font-bold text-white bg-[#1058A8] hover:bg-[#0E56A6] rounded-[12px] cursor-pointer shadow-xs text-center transition-colors"
-              >
-                {lang === 'sw' ? 'Lipa kwa M-Pesa' : 'Pay with M-Pesa'}
-              </button>
-            </div>
-
-            {/* Privacy Note under form */}
-            <p className="text-[11px] text-slate-500 font-source leading-relaxed pt-2 border-t border-[#0C2340]/10">
-              {lang === 'sw'
-                ? "Tunatumia maelezo yako kwa mawasiliano ya kwaya pekee na yanalindwa chini ya Sheria ya Kulinda Data ya Kenya, 2019. Picha za watoto wachanga na vijana huchapishwa tu kwa idhini ya wazazi."
-                : "We use your details only for choir communication and are protected under Kenya's Data Protection Act, 2019. Photos of minors are published only with parental consent."}
-            </p>
-          </form>
-        )}
-
-        {/* STEP 3: PROCESSING M-PESA STK PUSH */}
-        {checkoutStep === 'processing_mpesa' && (
-          <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-4 font-source">
-            <div className="w-14 h-14 rounded-full border-3 border-[#1058A8] border-t-transparent animate-spin mx-auto" />
-
-            <h4 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
-              {lang === 'sw' ? 'Angalia simu yako na uweke PIN' : 'Check your phone and enter your PIN'}
-            </h4>
-            <p className="text-xs text-slate-600 max-w-xs leading-relaxed">
-              {lang === 'sw'
-                ? `Tafadhali angalia simu yako ${phoneNumber} na uweke PIN yako ya M-Pesa kulipa ${formatPrice(cartTotalKes)} kwa Kwaya ya Mtakatifu Monika.`
-                : `Please check your phone ${phoneNumber} and enter your M-Pesa PIN to complete payment of ${formatPrice(cartTotalKes)} to St. Monica Choir.`}
-            </p>
-
-            {/* Sandbox explanation & simulation controls */}
-            <div className="w-full max-w-xs p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs space-y-2 text-left font-source">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-900 uppercase tracking-wide">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                <span>{lang === 'sw' ? 'Hali ya Majaribio (Sandbox)' : 'Sandbox Testing Mode'}</span>
-              </div>
-              <p className="text-[11px] text-amber-900/80 leading-relaxed">
-                {lang === 'sw'
-                  ? 'Kwenye Safaricom Sandbox, simu halisi hazipokei ujumbe wa PIN. Bofya kitufe cha majaribio hapa chini kuiga malipo:'
-                  : 'Safaricom Sandbox does not send prompts to real phones. Click a simulation button below to test:'}
-              </p>
-              <div className="grid grid-cols-3 gap-1.5 pt-0.5">
-                <button
-                  type="button"
-                  onClick={() => handleSimulateCartOutcome('success')}
-                  className="py-1.5 px-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold cursor-pointer text-center shadow-xs transition-colors"
-                  title="Simulate user entering correct PIN on phone"
-                >
-                  ✓ {lang === 'sw' ? 'Weka PIN' : 'Enter PIN'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSimulateCartOutcome('cancelled')}
-                  className="py-1.5 px-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
-                  title="Simulate user pressing Cancel on phone"
-                >
-                  ✕ {lang === 'sw' ? 'Katisha' : 'Cancel'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSimulateCartOutcome('failed')}
-                  className="py-1.5 px-1 bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 rounded-lg text-[11px] font-semibold cursor-pointer text-center transition-colors"
-                  title="Simulate wrong PIN or timeout"
-                >
-                  ! {lang === 'sw' ? 'Imefeli' : 'Fail'}
-                </button>
-              </div>
-              <p className="text-[10px] text-slate-500 italic pt-1 border-t border-amber-200/60">
-                {lang === 'sw'
-                  ? 'Ili kupokea ombi halisi kwenye simu yako, weka MPESA_ENV=production na vitambulisho vya moja kwa moja vya Paybill 678408.'
-                  : 'To receive a live prompt on your real phone, set MPESA_ENV=production with live Paybill 678408 credentials.'}
-              </p>
-            </div>
+            <GiveForm
+              compact
+              initialAmount={cartTotalKes}
+              lockAmount
+              submitLabel={lang === 'sw' ? `Lipa ${formatPrice(cartTotalKes)} kwa M-Pesa` : `Pay ${formatPrice(cartTotalKes)} with M-Pesa`}
+              onSuccess={(payment: any) => {
+                setTransactionRef(payment?.mpesa_receipt || '');
+                setCheckoutStep('confirmed');
+              }}
+            />
 
             <button
               type="button"
-              onClick={() => {
-                if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-                setCheckoutStep('checkout');
-              }}
-              className="text-xs text-slate-500 hover:text-[#0C2340] underline cursor-pointer pt-2"
+              onClick={() => setCheckoutStep('cart')}
+              className="w-full py-2.5 px-3 text-xs font-semibold text-[#1058A8] border border-[#1058A8]/30 rounded-[12px] hover:bg-[#1058A8]/5 cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
             >
-              Cancel or change details
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>{lang === 'sw' ? 'Rudi kikapuni' : 'Back to cart'}</span>
             </button>
+
+            <p className="text-[11px] text-slate-500 font-source leading-relaxed pt-2 border-t border-[#0C2340]/10">
+              {lang === 'sw'
+                ? 'Tunatumia maelezo yako kwa mawasiliano ya kwaya pekee na yanalindwa chini ya Sheria ya Kulinda Data ya Kenya, 2019.'
+                : "We use your details only for choir communication and are protected under Kenya's Data Protection Act, 2019."}
+            </p>
           </div>
         )}
 
-        {/* STEP 4: ORDER CONFIRMED */}
+        {/* STEP 3: ORDER CONFIRMED AFTER REAL GIVE-STATUS SUCCESS */}
         {checkoutStep === 'confirmed' && (
           <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-4 font-source">
             <div className="w-14 h-14 rounded-full bg-[#1058A8]/10 text-[#1058A8] border border-[#1058A8] flex items-center justify-center">
@@ -586,38 +257,37 @@ export const CartDrawer: React.FC = () => {
               <h4 className="font-eb-garamond text-2xl font-bold text-[#0C2340]">
                 {lang === 'sw' ? 'Malipo yamekamilika' : 'Order complete'}
               </h4>
-              <p className="text-xs text-slate-500">
-                {lang === 'sw' ? 'Kumbukumbu:' : 'Reference:'} <strong className="text-[#0C2340] tabular-nums">{transactionRef}</strong>
-              </p>
+              {transactionRef && (
+                <p className="text-xs text-slate-500">
+                  {lang === 'sw' ? 'Risiti ya M-Pesa:' : 'M-Pesa Receipt:'}{' '}
+                  <strong className="text-[#0C2340] font-mono tabular-nums">{transactionRef}</strong>
+                </p>
+              )}
             </div>
 
             <div className="w-full bg-[#FCFAF7] p-3.5 rounded-[12px] text-left text-xs space-y-2 border border-[#0C2340]/10">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500">{lang === 'sw' ? 'Imetumwa kwa:' : 'Sent to:'}</span>
-                <strong className="text-[#0C2340]">{customerEmail || 'email@example.com'}</strong>
-              </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">{lang === 'sw' ? 'Kiasi kilicholipwa:' : 'Amount paid:'}</span>
                 <strong className="text-[#1058A8] tabular-nums">{formatPrice(cartTotalKes)}</strong>
               </div>
             </div>
 
-            {/* Instant Download Button: Filled Blue Button */}
             <div className="w-full space-y-2 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setHasDownloaded(true);
-                  // Generate valid, printable PDF scores for all digital sheet music items in cart
-                  const digitalItems = cart.filter(item => item.product.downloadable || item.product.type === 'sheet_music');
+                  const digitalItems = cart.filter(
+                    (item) => item.product.downloadable || item.product.type === 'sheet_music'
+                  );
                   if (digitalItems.length > 0) {
-                    digitalItems.forEach(item => {
+                    digitalItems.forEach((item) => {
                       generateSongScorePdf({
                         title: item.product.name,
                         composer: 'St. Monica Catholic Choir',
                         voices: 'SATB',
                         language: 'Kiswahili',
-                        sharingStatus: 'Licensed Score'
+                        sharingStatus: 'Licensed Score',
                       });
                     });
                   } else {
@@ -625,7 +295,7 @@ export const CartDrawer: React.FC = () => {
                       title: 'Noti za Kwaya ya Mtakatifu Monika',
                       composer: 'St. Monica Catholic Choir',
                       voices: 'SATB',
-                      language: 'Kiswahili'
+                      language: 'Kiswahili',
                     });
                   }
                 }}
@@ -637,7 +307,9 @@ export const CartDrawer: React.FC = () => {
 
               {hasDownloaded && (
                 <p className="text-[11px] text-[#1058A8] text-center animate-in fade-in">
-                  {lang === 'sw' ? 'Faili ya noti za PDF inapakuliwa kwenye kifaa chako.' : 'Your PDF sheet music file is downloading to your device.'}
+                  {lang === 'sw'
+                    ? 'Faili ya noti za PDF inapakuliwa kwenye kifaa chako.'
+                    : 'Your PDF sheet music file is downloading to your device.'}
                 </p>
               )}
 

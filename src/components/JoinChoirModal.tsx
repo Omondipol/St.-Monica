@@ -1,91 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { ChoirLogo } from './ChoirLogo';
-import { 
-  X, 
-  CheckCircle2, 
-  CreditCard, 
-  Smartphone, 
-  UserPlus, 
-  ArrowRight, 
+import {
+  X,
+  CheckCircle2,
+  Smartphone,
+  ArrowRight,
   Music,
   Check,
-  Copy,
-  CheckCheck
 } from 'lucide-react';
 import { ChoirMember } from '../data/membersData';
-import { AfricanGeometricBorder } from './AfricanGeometricBorder';
-import { 
-  normalizeMpesaPhone, 
-  initiateStkPush, 
-  pollPaymentStatus, 
-  simulatePaymentCallback 
-} from '../utils/mpesaClient';
+import { GiveForm } from './GiveForm';
 
 interface JoinChoirModalProps {
   onNavigate?: (route: string) => void;
 }
 
 export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) => {
-  const { 
-    lang, 
-    isJoinModalOpen, 
-    closeJoinModal, 
-    preselectedVoice, 
-    registerMember 
+  const {
+    lang,
+    isJoinModalOpen,
+    closeJoinModal,
+    preselectedVoice,
+    registerMember,
   } = useChoir();
 
   const [step, setStep] = useState<'form' | 'checkout' | 'success'>('form');
 
-  // Form State
   const [name, setName] = useState('');
   const [voice, setVoice] = useState<'soprano' | 'alto' | 'tenor' | 'bass'>('soprano');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
-
-  // Checkout State
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa_stk' | 'mpesa_paybill'>('mpesa_stk');
-  const [paybillCode, setPaybillCode] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [stkStatus, setStkStatus] = useState<'idle' | 'prompted' | 'pin' | 'verifying' | 'done' | 'failed'>('idle');
-  const [stkErrorMessage, setStkErrorMessage] = useState('');
-  const [checkoutRequestId, setCheckoutRequestId] = useState('');
   const [registeredMemberData, setRegisteredMemberData] = useState<ChoirMember | null>(null);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-  const pollTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-    };
-  }, []);
-
-  // Sync preselected voice if provided
   useEffect(() => {
     if (preselectedVoice) {
       setVoice(preselectedVoice);
     }
   }, [preselectedVoice, isJoinModalOpen]);
 
-  // Reset when opening
   useEffect(() => {
     if (isJoinModalOpen) {
       setStep('form');
-      setStkStatus('idle');
-      setIsProcessing(false);
-      setPaybillCode('');
       setErrors({});
+      setRegisteredMemberData(null);
     }
   }, [isJoinModalOpen]);
 
   if (!isJoinModalOpen) return null;
-
-  const handleCopy = (text: string, field: string) => {
-    navigator.clipboard?.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
 
   const validateForm = () => {
     const errs: { name?: string; phone?: string } = {};
@@ -106,142 +69,22 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
     setStep('checkout');
   };
 
-  const handleSimulateStkPayment = async () => {
-    const phoneCheck = normalizeMpesaPhone(phone);
-    if (!phoneCheck.valid) {
-      alert(phoneCheck.error || 'Please enter a valid Safaricom phone number');
-      return;
-    }
-
-    setIsProcessing(true);
-    setStkStatus('prompted');
-    setStkErrorMessage('');
-
-    try {
-      const res = await initiateStkPush({
-        name: name.trim(),
-        phone: phoneCheck.normalized,
-        amount: 500,
-        purpose: 'Membership'
-      });
-
-      setCheckoutRequestId(res.checkoutRequestId);
-      setStkStatus('pin');
-
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      let count = 0;
-      pollTimerRef.current = setInterval(async () => {
-        count += 1;
-        try {
-          const status = await pollPaymentStatus(res.checkoutRequestId);
-          if (status.status === 'Success') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            const newMember = registerMember({
-              name,
-              voice,
-              phone: phoneCheck.normalized,
-              email,
-              paymentReference: status.mpesaReference
-            });
-            setRegisteredMemberData(newMember);
-            setIsProcessing(false);
-            setStkStatus('done');
-            setStep('success');
-          } else if (status.status === 'Cancelled') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            setIsProcessing(false);
-            setStkStatus('failed');
-            setStkErrorMessage(lang === 'sw' ? 'Ombi la M-Pesa limekatishwa kwenye simu.' : 'Payment prompt was cancelled on your phone.');
-          } else if (status.status === 'Failed') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            setIsProcessing(false);
-            setStkStatus('failed');
-            setStkErrorMessage(status.resultDesc || (lang === 'sw' ? 'Malipo ya M-Pesa yameshindikana.' : 'Payment failed.'));
-          }
-        } catch (e) {}
-
-        if (count >= 25) {
-          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-          setIsProcessing(false);
-          setStkStatus('failed');
-          setStkErrorMessage(lang === 'sw' ? 'Muda wa ombi umekwisha. Jaribu tena.' : 'Payment request timed out.');
-        }
-      }, 2000);
-    } catch (err: any) {
-      setIsProcessing(false);
-      setStkStatus('failed');
-      setStkErrorMessage(err.message || 'Could not send M-Pesa STK push.');
-    }
-  };
-
-  const handleSimulateMembershipOutcome = async (outcome: 'success' | 'cancelled' | 'failed') => {
-    if (!checkoutRequestId) return;
-    try {
-      await simulatePaymentCallback(checkoutRequestId, outcome);
-      const res = await pollPaymentStatus(checkoutRequestId);
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      if (outcome === 'success') {
-        const newMember = registerMember({
-          name,
-          voice,
-          phone,
-          email,
-          paymentReference: res.mpesaReference
-        });
-        setRegisteredMemberData(newMember);
-        setIsProcessing(false);
-        setStkStatus('done');
-        setStep('success');
-      } else if (outcome === 'cancelled') {
-        setIsProcessing(false);
-        setStkStatus('failed');
-        setStkErrorMessage(lang === 'sw' ? 'Ombi la M-Pesa limekatishwa kwenye simu.' : 'Payment prompt was cancelled on phone.');
-      } else {
-        setIsProcessing(false);
-        setStkStatus('failed');
-        setStkErrorMessage(res.resultDesc || 'Payment failed.');
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleManualPaybillSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = paybillCode.trim() || ('Q' + Math.random().toString(36).substring(2, 8).toUpperCase() + 'M');
-    setIsProcessing(true);
-
-    setTimeout(() => {
-      const newMember = registerMember({
-        name,
-        voice,
-        phone,
-        email,
-        paymentReference: `MPESA-${code.toUpperCase()}`
-      });
-      setRegisteredMemberData(newMember);
-      setIsProcessing(false);
-      setStep('success');
-    }, 1200);
-  };
-
   const voiceLabels = {
     soprano: { title: 'Soprano', sub: lang === 'sw' ? 'Sauti ya Kwanza' : 'First Voice · Melody' },
     alto: { title: 'Alto', sub: lang === 'sw' ? 'Sauti ya Pili' : 'Second Voice · Harmony' },
     tenor: { title: 'Tenor', sub: lang === 'sw' ? 'Sauti ya Tatu' : 'Third Voice · Counterpoint' },
-    bass: { title: 'Bass', sub: lang === 'sw' ? 'Sauti ya Nne (Msingi)' : 'Fourth Voice · Foundation' }
+    bass: { title: 'Bass', sub: lang === 'sw' ? 'Sauti ya Nne (Msingi)' : 'Fourth Voice · Foundation' },
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#0C1420]/80 backdrop-blur-md animate-in fade-in duration-200 select-none overflow-y-auto"
       onClick={closeJoinModal}
     >
-      <div 
+      <div
         className="bg-[#FAF8F5] text-[#0C2340] rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#0C2340]/15 relative my-auto max-h-[92vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
         <button
           onClick={closeJoinModal}
           className="absolute top-5 right-5 text-slate-400 hover:text-[#0C2340] p-1.5 rounded-full cursor-pointer transition-colors bg-white/60 hover:bg-white border border-[#0C2340]/10"
@@ -253,7 +96,6 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
         {/* ================= STEP 1: REGISTRATION FORM ================= */}
         {step === 'form' && (
           <div className="space-y-6 text-left">
-            {/* Header Lockup matching site style */}
             <div className="flex items-center gap-4 pb-4 border-b border-[#0C2340]/10">
               <div className="relative shrink-0 w-13 h-13 rounded-full bg-[#0C2340] border-2 border-[#1058A8]/30 p-1 shadow-md flex items-center justify-center">
                 <ChoirLogo size={44} variant="simplified" className="w-11 h-11" />
@@ -263,7 +105,9 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                   {lang === 'sw' ? 'Usajili wa Mwanakwaya' : 'Chorister Registration'}
                 </span>
                 <h2 className="font-eb-garamond text-2xl sm:text-3xl font-bold text-[#0C2340] leading-tight">
-                  {lang === 'sw' ? 'Jiunge na Kwaya ya Misa ya Tatu ya Mtakatifu Monika' : 'Join St. Monica Third Mass Choir'}
+                  {lang === 'sw'
+                    ? 'Jiunge na Kwaya ya Misa ya Tatu ya Mtakatifu Monika'
+                    : 'Join St. Monica Third Mass Choir'}
                 </h2>
                 <span className="text-xs text-slate-600 font-source block mt-0.5">
                   Section 58 · Catholic Diocese of Nakuru
@@ -271,7 +115,6 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
               </div>
             </div>
 
-            {/* Registration Fee Note Card (Presented transparently upon opening the modal) */}
             <div className="p-4 sm:p-4.5 rounded-2xl bg-[#0C2340] text-white border border-[#1058A8]/40 shadow-md space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#7EC8F0] font-source uppercase tracking-wider">
@@ -290,13 +133,15 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
 
               <div className="flex items-center gap-2 text-[11px] text-sky-200 pt-1">
                 <Check className="w-3.5 h-3.5 text-[#7EC8F0] shrink-0" />
-                <span>{lang === 'sw' ? 'Inalipwa kwa urahisi kupitia M-Pesa katika hatua inayofuata' : 'Payable conveniently via M-Pesa on the checkout step'}</span>
+                <span>
+                  {lang === 'sw'
+                    ? 'Inalipwa kwa urahisi kupitia M-Pesa katika hatua inayofuata'
+                    : 'Payable conveniently via M-Pesa on the checkout step'}
+                </span>
               </div>
             </div>
 
-            {/* Registration Form */}
             <form onSubmit={handleProceedToCheckout} className="space-y-4 font-source">
-              {/* Full Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
                   {lang === 'sw' ? 'Jina Lako Kamili' : 'Your Full Name'} <span className="text-rose-600">*</span>
@@ -305,9 +150,9 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                   type="text"
                   required
                   value={name}
-                  onChange={e => {
+                  onChange={(e) => {
                     setName(e.target.value);
-                    if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+                    if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
                   }}
                   placeholder={lang === 'sw' ? 'Mfano: Mary Wambui au Francis Kariuki' : 'e.g. Mary Wambui or Francis Kariuki'}
                   className={`w-full px-3.5 py-2.5 rounded-[12px] border bg-white text-sm text-[#0C2340] focus:outline-none transition-colors ${
@@ -317,15 +162,18 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 {errors.name && <p className="text-xs text-rose-600 font-semibold">{errors.name}</p>}
               </div>
 
-              {/* Voice Section Selection */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#0C2340] uppercase tracking-wider flex items-center justify-between">
-                  <span>{lang === 'sw' ? 'Chagua Sauti Yako' : 'Select Your Voice Section'} <span className="text-rose-600">*</span></span>
-                  <span className="text-[11px] font-normal text-slate-500 lowercase">{lang === 'sw' ? 'sauti 4 za liturujia' : '4 liturgical voices'}</span>
+                  <span>
+                    {lang === 'sw' ? 'Chagua Sauti Yako' : 'Select Your Voice Section'} <span className="text-rose-600">*</span>
+                  </span>
+                  <span className="text-[11px] font-normal text-slate-500 lowercase">
+                    {lang === 'sw' ? 'sauti 4 za liturujia' : '4 liturgical voices'}
+                  </span>
                 </label>
-                
+
                 <div className="grid grid-cols-2 gap-2.5">
-                  {(['soprano', 'alto', 'tenor', 'bass'] as const).map(vKey => {
+                  {(['soprano', 'alto', 'tenor', 'bass'] as const).map((vKey) => {
                     const isSelected = voice === vKey;
                     const info = voiceLabels[vKey];
                     return (
@@ -354,11 +202,14 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 </div>
               </div>
 
-              {/* Phone Number (M-Pesa registered) */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#0C2340] uppercase tracking-wider flex items-center justify-between">
-                  <span>{lang === 'sw' ? 'Namba ya Simu ya M-Pesa' : 'M-Pesa Mobile Number'} <span className="text-rose-600">*</span></span>
-                  <span className="text-[11px] font-normal text-slate-500">{lang === 'sw' ? 'Kwa ombi la PIN' : 'For fee payment'}</span>
+                  <span>
+                    {lang === 'sw' ? 'Namba ya Simu ya M-Pesa' : 'M-Pesa Mobile Number'} <span className="text-rose-600">*</span>
+                  </span>
+                  <span className="text-[11px] font-normal text-slate-500">
+                    {lang === 'sw' ? 'Kwa mawasiliano' : 'For contact'}
+                  </span>
                 </label>
                 <div className="relative">
                   <Smartphone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -366,9 +217,9 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                     type="tel"
                     required
                     value={phone}
-                    onChange={e => {
+                    onChange={(e) => {
                       setPhone(e.target.value);
-                      if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+                      if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
                     }}
                     placeholder="07XX XXX XXX"
                     className={`w-full pl-10 pr-3.5 py-2.5 rounded-[12px] border bg-white text-sm text-[#0C2340] focus:outline-none transition-colors ${
@@ -379,7 +230,6 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 {errors.phone && <p className="text-xs text-rose-600 font-semibold">{errors.phone}</p>}
               </div>
 
-              {/* Email Address (Optional) */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#0C2340] uppercase tracking-wider block">
                   {lang === 'sw' ? 'Barua Pepe (Si lazima)' : 'Email Address (Optional)'}
@@ -387,13 +237,12 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="chorister@example.com"
                   className="w-full px-3.5 py-2.5 rounded-[12px] border border-[#0C2340]/20 bg-white text-sm text-[#0C2340] focus:outline-none focus:border-[#1058A8]"
                 />
               </div>
 
-              {/* Action Buttons */}
               <div className="pt-2 flex items-center gap-3">
                 <button
                   type="submit"
@@ -412,20 +261,18 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
                 </button>
               </div>
 
-              {/* Privacy Notice */}
               <p className="text-[11px] text-slate-500 font-source leading-relaxed pt-2 border-t border-[#0C2340]/10">
                 {lang === 'sw'
-                  ? "Tunatumia maelezo yako kwa mawasiliano ya kwaya pekee na yanalindwa chini ya Sheria ya Kulinda Data ya Kenya, 2019. Picha za watoto wachanga na vijana huchapishwa tu kwa idhini ya wazazi."
-                  : "We use your details only for choir communication and are protected under Kenya's Data Protection Act, 2019. Photos of minors are published only with parental consent."}
+                  ? 'Tunatumia maelezo yako kwa mawasiliano ya kwaya pekee na yanalindwa chini ya Sheria ya Kulinda Data ya Kenya, 2019.'
+                  : "We use your details only for choir communication and are protected under Kenya's Data Protection Act, 2019."}
               </p>
             </form>
           </div>
         )}
 
-        {/* ================= STEP 2: CHECKOUT & PAYMENT PAGE ================= */}
+        {/* ================= STEP 2: CHECKOUT VIA SUPABASE EDGE FUNCTIONS ================= */}
         {step === 'checkout' && (
           <div className="space-y-5 text-left animate-in fade-in duration-200 font-source">
-            {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#0C2340]/10">
               <div>
                 <span className="text-[11px] font-bold text-[#1058A8] uppercase tracking-wider block">
@@ -438,8 +285,7 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
               <ChoirLogo size={48} variant="simplified" className="w-12 h-12 shrink-0 drop-shadow-sm" />
             </div>
 
-            {/* Registration Summary Ticket */}
-            <div className="p-4 rounded-2xl bg-white border border-[#0C2340]/15 shadow-xs space-y-2.5">
+            <div className="p-4 rounded-2xl bg-white border border-[#0C2340]/15 shadow-xs space-y-2">
               <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
                 <span className="text-slate-500">{lang === 'sw' ? 'Mwombaji / Candidate:' : 'Candidate:'}</span>
                 <span className="font-bold text-[#0C2340]">{name}</span>
@@ -447,12 +293,6 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
               <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
                 <span className="text-slate-500">{lang === 'sw' ? 'Sauti / Voice Section:' : 'Voice Section:'}</span>
                 <span className="font-bold text-[#1058A8] uppercase tracking-wide">{voice} Section</span>
-              </div>
-              <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
-                <span className="text-slate-500">{lang === 'sw' ? 'Huduma / Ministry:' : 'Ministry:'}</span>
-                <span className="font-semibold text-[#1058A8]">
-                  {lang === 'sw' ? 'Misa ya Tatu, Mtakatifu Monika' : 'Sunday 3rd Mass, St. Monica'}
-                </span>
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="font-bold text-sm text-[#0C2340]">
@@ -464,198 +304,26 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
               </div>
             </div>
 
-            {/* Payment Method Selector */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('mpesa_stk')}
-                  className={`flex-1 py-2.5 px-3 rounded-[12px] border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                    paymentMethod === 'mpesa_stk'
-                      ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                      : 'bg-white border-[#0C2340]/15 text-[#0C2340] hover:bg-[#FAF8F5]'
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4" />
-                  <span>M-Pesa STK Push (Express)</span>
-                </button>
+            <GiveForm
+              compact
+              initialAccount="MEMBERSHIP"
+              initialAmount={500}
+              lockAccount
+              lockAmount
+              submitLabel={lang === 'sw' ? 'Lipa Ada ya Usajili (KES 500)' : 'Pay Registration Fee (KES 500)'}
+              onSuccess={(payment: any) => {
+                const newMember = registerMember({
+                  name,
+                  voice,
+                  phone,
+                  email,
+                  paymentReference: payment?.mpesa_receipt || undefined,
+                });
+                setRegisteredMemberData(newMember);
+                setStep('success');
+              }}
+            />
 
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('mpesa_paybill')}
-                  className={`flex-1 py-2.5 px-3 rounded-[12px] border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                    paymentMethod === 'mpesa_paybill'
-                      ? 'bg-[#1058A8] text-white border-[#1058A8] shadow-xs'
-                      : 'bg-white border-[#0C2340]/15 text-[#0C2340] hover:bg-[#FAF8F5]'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>M-Pesa Paybill / Till</span>
-                </button>
-              </div>
-
-              {/* METHOD A: M-PESA STK PUSH */}
-              {paymentMethod === 'mpesa_stk' && (
-                <div className="p-4 rounded-2xl bg-[#FCFAF7] border border-[#0C2340]/15 space-y-3">
-                  <div className="flex items-start gap-2.5">
-                    <Smartphone className="w-5 h-5 text-[#1058A8] shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-xs text-[#0C2340] uppercase tracking-wider">
-                        {lang === 'sw' ? 'Ombi la M-Pesa Kwenye Simu Yako' : 'Instant M-Pesa Phone Prompt'}
-                      </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed mt-0.5">
-                        {lang === 'sw'
-                          ? `Ujumbe wa M-Pesa utatumwa kwenye namba ${phone}. Utatakiwa kuingiza PIN yako ya M-Pesa ili kuidhinisha KES 500.`
-                          : `An instant M-Pesa prompt will appear on ${phone}. Enter your M-Pesa PIN to authorize payment of KES 500.`}
-                      </p>
-                    </div>
-                  </div>
-
-                  {stkStatus === 'idle' && (
-                    <button
-                      type="button"
-                      onClick={handleSimulateStkPayment}
-                      className="w-full py-3 px-4 rounded-[12px] bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span>{lang === 'sw' ? 'Tuma Ombi la M-Pesa (KES 500)' : 'Send M-Pesa Prompt (KES 500)'}</span>
-                    </button>
-                  )}
-
-                  {stkStatus === 'prompted' && (
-                    <div className="p-3 bg-white rounded-xl border border-[#1058A8]/30 text-center space-y-1 animate-pulse">
-                      <span className="text-xs font-bold text-[#0C2340] block">
-                        {lang === 'sw' ? 'Inatuma ombi la M-Pesa kwenye simu...' : 'Sending STK prompt to phone...'}
-                      </span>
-                      <span className="text-[11px] text-slate-500 block tabular-nums">{phone}</span>
-                    </div>
-                  )}
-
-                  {stkStatus === 'pin' && (
-                    <div className="p-3.5 bg-white rounded-xl border-2 border-[#1058A8] text-center space-y-2 shadow-sm">
-                      <span className="text-xs font-bold text-[#1058A8] block flex items-center justify-center gap-1.5">
-                        <Smartphone className="w-4 h-4 animate-bounce" />
-                        {lang === 'sw' ? 'Angalia simu yako na uweke PIN ya M-Pesa' : 'Check your phone and enter your PIN'}
-                      </span>
-                      <span className="text-[11px] text-slate-600 block">St. Monica Choir Membership · KES 500</span>
-
-                      {/* Sandbox test controls */}
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleSimulateMembershipOutcome('success')}
-                          className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-semibold cursor-pointer"
-                        >
-                          ✓ Enter PIN
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSimulateMembershipOutcome('cancelled')}
-                          className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[11px] font-semibold cursor-pointer"
-                        >
-                          ✕ Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSimulateMembershipOutcome('failed')}
-                          className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded text-[11px] font-semibold cursor-pointer"
-                        >
-                          ! Fail
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {stkStatus === 'failed' && (
-                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center space-y-2">
-                      <p className="text-xs text-rose-800 font-semibold">
-                        {stkErrorMessage || 'Payment prompt incomplete or cancelled.'}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setStkStatus('idle')}
-                        className="px-3 py-1 bg-[#1058A8] text-white text-xs font-bold rounded-lg hover:bg-[#0C2340] cursor-pointer"
-                      >
-                        Try Again
-                      </button>
-                    </div>
-                  )}
-
-                  {stkStatus === 'verifying' && (
-                    <div className="p-3 bg-white rounded-xl border border-[#1058A8]/40 text-center space-y-1">
-                      <span className="text-xs font-bold text-[#1058A8] block">
-                        {lang === 'sw' ? 'Inathibitisha malipo na kusajili mwanakwaya...' : 'Verifying payment and registering chorister...'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* METHOD B: PAYBILL / TILL NUMBER */}
-              {paymentMethod === 'mpesa_paybill' && (
-                <form onSubmit={handleManualPaybillSubmit} className="p-4 rounded-2xl bg-[#FCFAF7] border border-[#0C2340]/15 space-y-3 font-source">
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-white border border-[#0C2340]/10 flex items-center justify-between">
-                      <div>
-                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Paybill:</span>
-                        <strong className="font-source text-xs text-[#0C2340] tabular-nums font-bold">678408</strong>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy('678408', 'till')}
-                        className="px-2 py-0.5 text-[10px] rounded bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
-                      >
-                        {copiedField === 'till' ? 'Copied' : 'Copy'}
-                      </button>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-white border border-[#0C2340]/10 flex items-center justify-between">
-                      <div>
-                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Account:</span>
-                        <strong className="font-source text-xs text-[#1058A8] font-bold">SMTC-{voice.toUpperCase()}</strong>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(`SMTC-${voice.toUpperCase()}`, 'acc')}
-                        className="px-2 py-0.5 text-[10px] rounded bg-[#1058A8]/10 text-[#1058A8] hover:bg-[#1058A8] hover:text-white transition-colors cursor-pointer"
-                      >
-                        {copiedField === 'acc' ? 'Copied' : 'Copy'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#0C2340] block">
-                      {lang === 'sw' ? 'Weka Namba ya Muamala wa M-Pesa (Mfano: QK9182JS7X)' : 'Enter M-Pesa Confirmation Code (e.g. QK9182JS7X)'}
-                    </label>
-                    <input
-                      type="text"
-                      value={paybillCode}
-                      onChange={e => setPaybillCode(e.target.value)}
-                      placeholder="QK9182JS7X"
-                      className="w-full px-3.5 py-2.5 rounded-[12px] border border-[#0C2340]/20 bg-white text-sm uppercase font-bold text-[#0C2340] focus:outline-none focus:border-[#1058A8]"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isProcessing}
-                    className="w-full py-3 px-4 rounded-[12px] bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <span>{lang === 'sw' ? 'Inathibitisha...' : 'Verifying Code...'}</span>
-                    ) : (
-                      <>
-                        <Check className="w-4 h-4 text-amber-300" />
-                        <span>{lang === 'sw' ? 'Kamilisha Usajili (KES 500)' : 'Complete Registration (KES 500)'}</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* Back button */}
             <div className="pt-1">
               <button
                 type="button"
@@ -668,10 +336,9 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
           </div>
         )}
 
-        {/* ================= STEP 3: REGISTRATION COMPLETE & CONFIRMATION ================= */}
+        {/* ================= STEP 3: REGISTRATION COMPLETE ================= */}
         {step === 'success' && registeredMemberData && (
           <div className="space-y-6 text-center animate-in zoom-in-95 duration-200 font-source">
-            {/* Success Icon */}
             <div className="flex flex-col items-center justify-center space-y-2 pt-2">
               <div className="w-14 h-14 rounded-full bg-[#EAF4FB] border-2 border-[#1058A8] flex items-center justify-center text-[#1058A8] shadow-md">
                 <CheckCircle2 className="w-8 h-8" />
@@ -686,7 +353,6 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
               </p>
             </div>
 
-            {/* Official Digital Membership Card Preview */}
             <div className="p-5 rounded-2xl bg-[#0C2340] text-white border border-amber-400/30 shadow-xl text-left relative overflow-hidden space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -709,41 +375,36 @@ export const JoinChoirModal: React.FC<JoinChoirModalProps> = ({ onNavigate }) =>
 
               <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/10 text-xs">
                 <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Jina la Mwanakwaya:' : 'Chorister Name:'}</span>
+                  <span className="text-[10px] text-slate-400 block uppercase">
+                    {lang === 'sw' ? 'Jina la Mwanakwaya:' : 'Chorister Name:'}
+                  </span>
                   <span className="font-bold text-white text-sm">{registeredMemberData.name}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Sauti Yako:' : 'Voice Section:'}</span>
-                  <span className="font-bold text-[#7EC8F0] text-sm uppercase tracking-wide">{registeredMemberData.voice}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Parokia:' : 'Parish:'}</span>
-                  <span className="text-xs text-white">St. Monica, Section 58</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">{lang === 'sw' ? 'Utume:' : 'Ministry:'}</span>
-                  <span className="text-xs text-emerald-300">
-                    {lang === 'sw' ? 'Misa ya Tatu (SATB)' : 'Sunday 3rd Mass (SATB)'}
+                  <span className="text-[10px] text-slate-400 block uppercase">
+                    {lang === 'sw' ? 'Sauti Yako:' : 'Voice Section:'}
+                  </span>
+                  <span className="font-bold text-[#7EC8F0] text-sm uppercase tracking-wide">
+                    {registeredMemberData.voice}
                   </span>
                 </div>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-200 leading-snug">
-                {lang === 'sw'
-                  ? '📌 Hongera! Jina lako limeingizwa katika orodha ya waimbaji. Karibu katika utume wa muziki mtakatifu!'
-                  : '📌 Congratulations! Your name is now live in the active voice section roster. Welcome to St. Monica Choir ministry!'}
+                {registeredMemberData.paymentReference && (
+                  <div className="col-span-2">
+                    <span className="text-[10px] text-slate-400 block uppercase">M-Pesa Receipt:</span>
+                    <span className="font-mono text-xs text-emerald-300">
+                      {registeredMemberData.paymentReference}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Next Steps Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   closeJoinModal();
-                  if (onNavigate) {
-                    onNavigate('about-sections');
-                  }
+                  if (onNavigate) onNavigate('about-sections');
                 }}
                 className="w-full sm:flex-1 py-3 px-4 rounded-[12px] bg-[#1058A8] hover:bg-[#0C2340] text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
               >

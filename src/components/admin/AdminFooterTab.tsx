@@ -24,7 +24,7 @@ export const AdminFooterTab: React.FC<AdminFooterTabProps> = ({ onNotify }) => {
     email: footerContact?.email || choirStats?.email || 'info@stmonicachoir.org',
     churchAddress: footerContact?.churchAddress || choirStats?.churchAddress || 'Section 58, Off Kanu Street, Nakuru, Kenya',
     mapsUrl: footerContact?.mapsUrl || choirStats?.mapsUrl || 'https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru',
-    mpesaTill: footerContact?.mpesaTill || choirStats?.mpesaTill || '8421092',
+    mpesaTill: footerContact?.mpesaTill || choirStats?.mpesaTill || '',
     rehearsalsEn: footerContact?.rehearsalsEn || massSchedule?.rehearsals || 'Mondays, Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)',
     rehearsalsSw: footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || 'Jumatatu, Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)'
   });
@@ -101,8 +101,12 @@ export const AdminFooterTab: React.FC<AdminFooterTabProps> = ({ onNotify }) => {
               </div>
               <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                 <span>Phone: <strong className="text-white">{form.phone}</strong></span>
-                <span>·</span>
-                <span>Till: <strong className="text-emerald-400 font-mono font-medium">{form.mpesaTill}</strong></span>
+                {form.mpesaTill && (
+                  <>
+                    <span>·</span>
+                    <span>Till: <strong className="text-emerald-400 font-mono font-medium">{form.mpesaTill}</strong></span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -161,7 +165,7 @@ export const AdminFooterTab: React.FC<AdminFooterTabProps> = ({ onNotify }) => {
                 required
                 value={form.mpesaTill}
                 onChange={e => setForm(prev => ({ ...prev, mpesaTill: e.target.value }))}
-                placeholder="8421092"
+                placeholder="Paybill / Till number"
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-[#1058A8] bg-[#F8FAFC] font-normal text-slate-800"
               />
             </div>

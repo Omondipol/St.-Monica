@@ -73,15 +73,62 @@ To connect your own domain (e.g. `www.stmonicachoirnakuru.org`):
 # Install dependencies
 npm install
 
-# Start local development server (port 3000)
+# Start local development server (port 3000, mounts Vite + Express API)
 npm run dev
+
+# Or run the standalone Daraja backend in server/
+node server/index.js
 
 # Run TypeScript check
 npm run lint
 
+# Run automated M-Pesa STK Push tests
+npm run test:mpesa
+
 # Build production bundle for static hosting
 npm run build
 ```
+
+---
+
+## 💳 M-Pesa STK Push Setup (Safaricom Daraja Sandbox)
+
+### 1. Configure `server/.env`
+```bash
+cp server/.env.example server/.env
+```
+Fill in your Safaricom Daraja Sandbox credentials (`SANDBOX_CONSUMER_KEY`, `SANDBOX_CONSUMER_SECRET`, `SANDBOX_PASSKEY`), generate random values for `CALLBACK_TOKEN` and `ADMIN_TOKEN`, and set `MPESA_ENV=sandbox`.
+
+### 2. Expose Local Callbacks with a Tunnel (`PUBLIC_BASE_URL`)
+Safaricom Daraja sends async STK callbacks to `${PUBLIC_BASE_URL}/api/hooks/stk/${CALLBACK_TOKEN}` and requires a public HTTPS URL.
+
+**Option A: Cloudflare Tunnel (`cloudflared`)**
+```bash
+cloudflared tunnel --url http://localhost:3000
+# Copy the generated https://xxxx.trycloudflare.com URL into server/.env as PUBLIC_BASE_URL
+```
+*(If running `node server/index.js` standalone on port `3001`, point the tunnel to `http://localhost:3001`.)*
+
+**Option B: ngrok**
+```bash
+ngrok http 3000
+# Copy the https://xxxx.ngrok-free.app URL into server/.env as PUBLIC_BASE_URL
+```
+
+Restart the server after updating `PUBLIC_BASE_URL` so outgoing STK Push requests embed the active callback URL.
+
+### 3. Approved Paybill Account Numbers
+- `CHOIROFFER` — Choir Offering
+- `UNIFORM` — Choir Uniforms
+- `CHOIRTRIP` — Choir Trip
+- `INSTRUMENT` — Choir Instruments
+- `MEMBERSHIP` — Choir Membership
+
+### 4. Switching to Live Production Paybill
+Update `server/.env` without changing any code:
+1. Set `MPESA_ENV=production`
+2. Fill in `PROD_CONSUMER_KEY`, `PROD_CONSUMER_SECRET`, `PROD_SHORTCODE`, `PROD_PARTY_B`, `PROD_PASSKEY`, and `PROD_TXN_TYPE=CustomerPayBillOnline`
+3. Set `PUBLIC_BASE_URL` to your production HTTPS domain and restart the server.
 
 ---
 
