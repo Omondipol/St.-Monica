@@ -2217,24 +2217,16 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // 11. Liturgical Season
   const [liturgicalSeason, setLiturgicalSeason] = useState<'ordinary' | 'lent_advent' | 'easter_christmas'>('ordinary');
 
-  // 11. Shopping Cart
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CART);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      // ignore
-    }
-    return [];
-  });
+  // 11. Shopping Cart (always start empty when website loads/restarts)
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+      localStorage.removeItem(STORAGE_KEYS.CART);
     } catch (e) {
       // ignore
     }
-  }, [cart]);
+  }, []);
 
   const addToCart = (product: ProductItem) => {
     setCart(prev => {

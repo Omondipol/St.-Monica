@@ -34,7 +34,7 @@ async function extractInvokeErrorMessage(error, data, functionName = 'give-pay')
     const configIssue = getSupabaseConfigIssue();
     if (configIssue) return configIssue;
     const base = resolveSupabaseUrl();
-    return `Could not reach Edge Function "${functionName}" at ${base}/functions/v1/${functionName}. Confirm the function is deployed on your Supabase project and allows CORS from this origin.`;
+    return `Could not reach Edge Function "${functionName}" at ${base}/functions/v1/${functionName}. Make sure "${functionName}" is deployed on your Supabase project and allows CORS from this origin (a missing/404 Edge Function also fails CORS preflight).`;
   }
 
   return rawMsg || 'Could not initiate M-Pesa payment.';
