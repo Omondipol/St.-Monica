@@ -14,7 +14,11 @@ interface OurStoryViewProps {
 }
 
 export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {} }) => {
-  const { lang, choirStats, aboutPageConfig } = useChoir();
+  const { lang, choirStats, aboutPageConfig, members, activeMembers } = useChoir();
+
+  const realActiveChoristers = (activeMembers && activeMembers.length > 0)
+    ? activeMembers.length
+    : (members && members.length > 0 ? members.length : (choirStats?.membersCount || 56));
 
   const timeline = [
     {
@@ -88,12 +92,12 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
           <p className="text-base text-slate-700 leading-relaxed">
             {lang === 'sw'
               ? (aboutPageConfig?.storyParagraph1Sw || 'Kwaya ya Mtakatifu Monika (Misa ya Tatu · Section 58 · Nakuru) ilizaliwa kutokana na kiu ya waamini walei kutaka kutoa muziki wa kiwango cha juu wa kiliturujia wakati wa Misa ya Jumapili. Tangu mwanzo, kanuni yetu imekuwa nidhamu ya sauti nne (Soprano, Alto, Tenor, Bass), upendo wa kidugu, na usafi wa kiroho.')
-              : (aboutPageConfig?.storyParagraph1En || 'St. Monica Choir (Third Mass · Section 58 · Nakuru) was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass. Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.')}
+              : ((aboutPageConfig?.storyParagraph1En || 'St. Monica Choir (Third Mass · Section 58 · Nakuru) was founded out of a shared desire to provide elevated liturgical singing for Sunday Mass. Since day one, our ethos has remained steadfast: four-part vocal precision (Soprano, Alto, Tenor, Bass), fraternal unity, and reverent devotion before the altar.').replace(/St\.?\s*Monica\s*Third\s*Mass\s*Choir/gi, 'St. Monica Choir (Third Mass · Section 58 · Nakuru)'))}
           </p>
           <p className="text-base text-slate-700 leading-relaxed">
             {lang === 'sw'
               ? (aboutPageConfig?.storyParagraph2Sw || 'Chini ya uongozi thabiti wa walimu wa muziki na kamati ya kwaya, kwaya imekua na kuwa nguzo muhimu katika Jimbo Katoliki la Nakuru, ikihudumu kwenye Misa za upadirisho, vipaimara, harusi takatifu, na mazishi ya kiheshima.')
-              : (aboutPageConfig?.storyParagraph2En || 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.')}
+              : ((aboutPageConfig?.storyParagraph2En || 'Under the guidance of our dedicated music directors and the parish pastoral council, our choir has grown into an anchor ensemble across the Catholic Diocese of Nakuru, ministering at priestly ordinations, confirmations, nuptial weddings, and solemn requiem Masses.').replace(/St\.?\s*Monica\s*Third\s*Mass\s*Choir/gi, 'St. Monica Choir'))}
           </p>
 
           <div className="pt-5 border-t border-[#0C2340]/10">
@@ -109,7 +113,7 @@ export const OurStoryView: React.FC<OurStoryViewProps> = ({ onNavigate = () => {
               <div className="p-5 bg-[#FAF8F5] rounded-2xl border border-[#0C2340]/10 shadow-xs flex flex-col items-center justify-center">
                 <Users className="w-6 h-6 text-[#1058A8] mb-2" />
                 <span className="font-eb-garamond text-3xl sm:text-4xl font-bold text-[#1058A8] block tabular-nums">
-                  {choirStats?.membersCount ?? CHOIR_STATS.membersCount}
+                  {realActiveChoristers}
                 </span>
                 <p className="text-xs sm:text-sm font-bold text-slate-800 font-source mt-1">
                   {lang === 'sw' ? 'Waimbaji wa Kwaya' : 'Active Choristers'}

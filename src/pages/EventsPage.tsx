@@ -1,13 +1,13 @@
 import React from 'react';
 import { useChoir } from '../context/ChoirContext';
-import { INITIAL_EVENTS, EventItem, CHOIR_STATS } from '../data/choirContent';
+import { INITIAL_EVENTS, EventItem } from '../data/choirContent';
 import { RotateCw, ExternalLink, CalendarPlus } from 'lucide-react';
 import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../utils/assetHelper';
 
 export const EventsPage: React.FC = () => {
-  const { lang, eventsList, massesList, currentRehearsalsEn, currentRehearsalsSw } = useChoir();
+  const { lang, eventsList, massesList, currentRehearsalsEn, currentRehearsalsSw, contactMapsUrl } = useChoir();
 
   const allEvents: EventItem[] = eventsList && eventsList.length > 0 ? eventsList : INITIAL_EVENTS;
 
@@ -134,7 +134,11 @@ export const EventsPage: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-3 text-[14px] text-slate-500 font-source pt-1 tabular-nums">
                       <span>{evt.venue}</span>
                       <span>·</span>
-                      <span>{evt.time}</span>
+                      <span>
+                        {evt.id === 'evt-rehearsal'
+                          ? (lang === 'sw' ? currentRehearsalsSw : currentRehearsalsEn)
+                          : evt.time}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -163,7 +167,7 @@ export const EventsPage: React.FC = () => {
             {lang === 'sw' ? 'Ratiba Kamili ya Misa za Jumapili (Parokiani)' : 'Full Sunday Mass Schedule'}
           </h3>
           <a
-            href={CHOIR_STATS.mapsUrl}
+            href={contactMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[14px] font-semibold text-[#1058A8] hover:underline flex items-center gap-1 font-source"

@@ -79,3 +79,106 @@ export const getSongYouTubeId = (
   }
   return fallback;
 };
+
+/**
+ * Returns a YouTube thumbnail URL for a video ID.
+ */
+export const getYouTubeThumbnailUrl = (
+  videoId?: string | null,
+  quality: 'hqdefault' | 'mqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'
+): string => {
+  const cleanId = extractYouTubeVideoId(videoId);
+  if (!cleanId) return '';
+  return `https://i.ytimg.com/vi/${cleanId}/${quality}.jpg`;
+};
+
+/**
+ * Resolves the authoritative preview picture for any recorded song:
+ * - Always matches the song's YouTube video thumbnail when a valid YouTube URL/ID exists
+ * - Falls back to song.thumbnailUrl or the choir's default YouTube thumbnail so no song is ever without a picture
+ */
+export const getSongThumbnailUrl = (
+  song?: { youtubeUrl?: string; youtubeId?: string; thumbnailUrl?: string } | null
+): string => {
+  if (!song) {
+    return getYouTubeThumbnailUrl('syOCKFbVS-8', 'hqdefault');
+  }
+  const explicitYtId =
+    extractYouTubeVideoId(song.youtubeUrl) ||
+    extractYouTubeVideoId(song.youtubeId);
+
+  if (explicitYtId) {
+    return `https://i.ytimg.com/vi/${explicitYtId}/hqdefault.jpg`;
+  }
+
+  if (song.thumbnailUrl && song.thumbnailUrl.trim()) {
+    return getAssetUrl(song.thumbnailUrl.trim());
+  }
+
+  return getYouTubeThumbnailUrl(getSongYouTubeId(song), 'hqdefault');
+};
+
+/**
+ * Multi-stage image error fallback for song thumbnails so a recorded song card never renders broken/empty.
+ */
+export const handleSongThumbnailError = (
+  e: { currentTarget: HTMLImageElement },
+  song?: { youtubeUrl?: string; youtubeId?: string } | null
+): void => {
+  const img = e.currentTarget;
+  const step = Number(img.dataset.thumbStep || '0');
+  const ytId = getSongYouTubeId(song);
+
+  if (step === 0 && ytId) {
+    img.dataset.thumbStep = '1';
+    img.src = `https://i.ytimg.com/vi/${ytId}/mqdefault.jpg`;
+    return;
+  }
+  if (step < 2) {
+    img.dataset.thumbStep = '2';
+    img.src = getAssetUrl('/assets/choir/choir_01.jpg');
+  }
+};
+
+/**
+ * Normalizes a WhatsApp field (which an admin may enter as a phone number OR a wa.me URL)
+ * into a working https://wa.me/... link.
+ */
+export const normalizeWhatsAppUrl = (
+  input?: string | null,
+  fallback = 'https://wa.me/254722845291'
+): string => {
+  if (!input || !input.trim()) return fallback;
+  const trimmed = input.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  let digits = trimmed.replace(/\D/g, '');
+  if (!digits) return fallback;
+  if (digits.startsWith('0') && digits.length >= 10) {
+    digits = `254${digits.slice(1)}`;
+  }
+  return `https://wa.me/${digits}`;
+};
+
+/**
+ * Formats a WhatsApp URL or raw phone number for human display (e.g. +254 722 845 291).
+ */
+export const formatWhatsAppDisplay = (
+  input?: string | null,
+  fallback = '+254 722 845 291'
+): string => {
+  if (!input || !input.trim()) return fallback;
+  const trimmed = input.trim();
+  if (/^https?:\/\//i.test(trimmed)) {
+    const match = trimmed.match(/wa\.me\/(\d+)/i);
+    if (match && match[1]) {
+      const d = match[1];
+      if (d.startsWith('254') && d.length === 12) {
+        return `+${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6, 9)} ${d.slice(9, 12)}`;
+      }
+      return `+${d}`;
+    }
+    return fallback;
+  }
+  return trimmed;
+};
+

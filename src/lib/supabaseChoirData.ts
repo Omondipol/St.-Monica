@@ -2,6 +2,7 @@ import { supabase, resolveSupabaseUrl } from './supabase';
 import { Song, Album, SheetMusicItem, ChoirGroupPhoto } from '../data/choirContent';
 import { ChoirMember } from '../data/membersData';
 import { LibrarySong } from '../data/libraryData';
+import { getSongThumbnailUrl, getSongYouTubeId } from '../utils/assetHelper';
 
 const STORAGE_BUCKET = 'photos';
 
@@ -68,7 +69,9 @@ export async function fetchJsonFromSupabaseStorage<T>(fileName: string): Promise
  * Transform a database row to a frontend Song
  */
 function mapRowToSong(row: any): Song {
-  return {
+  const youtubeUrl = row.youtube_url || '';
+  const youtubeId = row.youtube_id || getSongYouTubeId({ youtubeUrl });
+  const baseSong = {
     id: String(row.id),
     title: row.title || 'Untitled Song',
     titleSwahili: row.title_swahili || row.title || 'Wimbo',
@@ -83,7 +86,8 @@ function mapRowToSong(row: any): Song {
     voicing: row.voicing || 'SATB',
     musicalKey: row.musical_key || 'G Major',
     duration: row.duration || '4:00',
-    youtubeUrl: row.youtube_url || '',
+    youtubeUrl,
+    youtubeId,
     audioPreviewUrl: row.audio_preview_url || 'preview.mp3',
     thumbnailUrl: row.thumbnail_url || undefined,
     sheetMusicAvailable: Boolean(row.sheet_music_available),
@@ -93,6 +97,10 @@ function mapRowToSong(row: any): Song {
     waveformPeaks: Array.isArray(row.waveform_peaks) ? row.waveform_peaks : undefined,
     whyWeSingIt: row.why_we_sing_it || undefined,
     whyWeSingItSw: row.why_we_sing_it_sw || undefined
+  };
+  return {
+    ...baseSong,
+    thumbnailUrl: getSongThumbnailUrl(baseSong)
   };
 }
 
@@ -151,7 +159,11 @@ export async function loadSongsFromSupabase(): Promise<Song[] | null> {
   // 2. Try Supabase Storage 'photos/data/songs.json'
   const storageSongs = await fetchJsonFromSupabaseStorage<Song[]>('songs.json');
   if (Array.isArray(storageSongs) && storageSongs.length > 0) {
-    return storageSongs;
+    return storageSongs.map(s => ({
+      ...s,
+      youtubeId: s.youtubeId || getSongYouTubeId(s),
+      thumbnailUrl: getSongThumbnailUrl(s)
+    }));
   }
 
   return null;
@@ -692,6 +704,134 @@ export async function loadCatalogFromSupabase<T>(name: string): Promise<T | null
   return fetchJsonFromSupabaseStorage<T>(`${name}.json`);
 }
 
+// =========================================================================
+// CONTACT US MESSAGES (Persisted to Supabase Table & Storage JSON)
+// =========================================================================
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  inquiryType: string;
+  message: string;
+  status: 'new' | 'read' | 'replied';
+  createdAt: string;
+}
+
+function mapRowToContactMessage(row: any): ContactMessage {
+  return {
+    id: String(row.id),
+    name: row.name || 'Visitor',
+    phone: row.phone || '',
+    email: row.email || undefined,
+    inquiryType: row.inquiry_type || row.inquiryType || 'General question',
+    message: row.message || '',
+    status: (row.status === 'read' || row.status === 'replied' ? row.status : 'new'),
+    createdAt: row.created_at || row.createdAt || row.date || new Date().toISOString()
+  };
+}
+
+function mapContactMessageToRow(msg: ContactMessage): any {
+  return {
+    id: msg.id,
+    name: msg.name,
+    phone: msg.phone,
+    email: msg.email || null,
+    inquiry_type: msg.inquiryType,
+    message: msg.message,
+    status: msg.status || 'new',
+    created_at: msg.createdAt || new Date().toISOString()
+  };
+}
+
+export async function loadContactMessagesFromSupabase(): Promise<ContactMessage[] | null> {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        return data.map(mapRowToContactMessage);
+      }
+    } catch (_) {
+      // Table may not exist yet, fall back to storage
+    }
+  }
+
+  const storageMessages = await fetchJsonFromSupabaseStorage<any[]>('contact_messages.json');
+  if (Array.isArray(storageMessages)) {
+    return storageMessages.map(m => ({
+      id: String(m.id || `msg-${Date.now()}`),
+      name: String(m.name || 'Visitor'),
+      phone: String(m.phone || ''),
+      email: m.email ? String(m.email) : undefined,
+      inquiryType: String(m.inquiryType || 'General question'),
+      message: String(m.message || ''),
+      status: (m.status === 'read' || m.status === 'replied' ? m.status : 'new') as 'new' | 'read' | 'replied',
+      createdAt: String(m.createdAt || m.date || new Date().toISOString())
+    }));
+  }
+
+  return null;
+}
+
+export async function saveContactMessageToSupabase(
+  msg: ContactMessage,
+  allMessages: ContactMessage[]
+): Promise<boolean> {
+  let dbSuccess = false;
+
+  if (supabase) {
+    try {
+      const row = mapContactMessageToRow(msg);
+      const { error } = await supabase.from('contact_messages').upsert(row, { onConflict: 'id' });
+      if (!error) {
+        dbSuccess = true;
+      } else {
+        console.warn('[Supabase DB] contact_messages upsert notice:', error.message);
+      }
+    } catch (e) {
+      console.warn('[Supabase DB] Error accessing contact_messages table:', e);
+    }
+  }
+
+  try {
+    const storageOk = await saveCatalogToSupabase('contact_messages', allMessages);
+    return dbSuccess || storageOk;
+  } catch (e) {
+    console.warn('[Supabase Storage] contact_messages.json sync notice:', e);
+    return dbSuccess;
+  }
+}
+
+export async function saveContactMessagesCatalogToSupabase(allMessages: ContactMessage[]): Promise<boolean> {
+  return saveCatalogToSupabase('contact_messages', allMessages);
+}
+
+export async function deleteContactMessageFromSupabase(
+  msgId: string,
+  remainingMessages: ContactMessage[]
+): Promise<boolean> {
+  if (supabase) {
+    try {
+      await supabase.from('contact_messages').delete().eq('id', msgId);
+    } catch (e) {
+      console.warn('[Supabase DB] delete contact_message notice:', e);
+    }
+  }
+
+  try {
+    await saveCatalogToSupabase('contact_messages', remainingMessages);
+  } catch (e) {
+    console.warn('[Supabase Storage] update remaining contact_messages notice:', e);
+  }
+
+  return true;
+}
+
 /**
  * SQL script for Supabase SQL Editor to initialize tables with public RLS policies
  */
@@ -847,10 +987,33 @@ CREATE POLICY "Public update library_songs" ON public.library_songs FOR UPDATE U
 DROP POLICY IF EXISTS "Public delete library_songs" ON public.library_songs;
 CREATE POLICY "Public delete library_songs" ON public.library_songs FOR DELETE USING (true);
 
--- 6. Enable Realtime Replication
+-- 6. Create table for Contact Us Messages
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  inquiry_type TEXT DEFAULT 'General question',
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'new',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read contact_messages" ON public.contact_messages;
+CREATE POLICY "Public read contact_messages" ON public.contact_messages FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert contact_messages" ON public.contact_messages;
+CREATE POLICY "Public insert contact_messages" ON public.contact_messages FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update contact_messages" ON public.contact_messages;
+CREATE POLICY "Public update contact_messages" ON public.contact_messages FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public delete contact_messages" ON public.contact_messages;
+CREATE POLICY "Public delete contact_messages" ON public.contact_messages FOR DELETE USING (true);
+
+-- 7. Enable Realtime Replication
 ALTER PUBLICATION supabase_realtime ADD TABLE public.songs;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.gallery;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.albums;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.library_songs;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_messages;
 `;

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { 
-  CHOIR_STATS, 
   YOUTUBE_CHANNEL_URL, 
   YOUTUBE_CHANNEL_HANDLE 
 } from '../data/choirContent';
@@ -11,9 +10,7 @@ import {
   ExternalLink, 
   ChevronDown, 
   ChevronUp, 
-  ArrowUp,
-  Clock,
-  Compass
+  ArrowUp
 } from 'lucide-react';
 
 interface ChoirFooterProps {
@@ -23,12 +20,16 @@ interface ChoirFooterProps {
 export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
   const { 
     lang, 
-    footerContact, 
     choirStats, 
     massesList, 
-    massSchedule,
     currentRehearsalsEn,
-    currentRehearsalsSw
+    currentRehearsalsSw,
+    contactPhone,
+    contactWhatsappUrl,
+    contactWhatsappDisplay,
+    contactEmail,
+    contactAddress,
+    contactMapsUrl
   } = useChoir();
 
   // Collapsible accordion sections for phone screens (closed by default)
@@ -69,7 +70,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
             {/* Green Chat on WhatsApp button */}
             <a
-              href={CHOIR_STATS.whatsappUrl}
+              href={contactWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chat with choir on WhatsApp"
@@ -301,9 +302,9 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
             <div className={`space-y-3 text-sm text-slate-300 ${mobileContactOpen ? 'block pt-2' : 'hidden sm:block'}`}>
               <div>
                 <span className="block text-white font-medium">{choirStats?.parish || "St. Monica's Catholic Church"}</span>
-                <span className="text-slate-300 text-xs block">{footerContact?.churchAddress || choirStats?.churchAddress || CHOIR_STATS.churchAddress}</span>
+                <span className="text-slate-300 text-xs block">{contactAddress}</span>
                 <a 
-                  href={footerContact?.mapsUrl || choirStats?.mapsUrl || CHOIR_STATS.mapsUrl}
+                  href={contactMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-[#7EC8F0] hover:text-white font-semibold transition-colors mt-1"
@@ -316,10 +317,10 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-xs text-slate-400 block">Email Address</span>
                 <a 
-                  href={`mailto:${footerContact?.email || choirStats?.email || CHOIR_STATS.email}`}
+                  href={`mailto:${contactEmail}`}
                   className="text-slate-200 hover:text-white transition-colors text-xs font-medium"
                 >
-                  {footerContact?.email || choirStats?.email || CHOIR_STATS.email}
+                  {contactEmail}
                 </a>
               </div>
 
@@ -327,15 +328,15 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
                 <span className="text-xs text-slate-400 block">Phone & WhatsApp</span>
                 <div className="flex items-center gap-2 pt-0.5">
                   <a 
-                    href={`tel:${(footerContact?.phone || choirStats?.phone || CHOIR_STATS.phone).replace(/\s+/g, '')}`}
+                    href={`tel:${contactPhone.replace(/\s+/g, '')}`}
                     className="text-sky-300 hover:text-white transition-colors text-xs font-semibold"
                     title="Call Parish Office / Choirmaster"
                   >
-                    {footerContact?.phone || choirStats?.phone || CHOIR_STATS.phone}
+                    {contactPhone}
                   </a>
                   <span className="text-slate-500">·</span>
                   <a 
-                    href={footerContact?.whatsapp || choirStats?.whatsappUrl || CHOIR_STATS.whatsappUrl}
+                    href={contactWhatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#25D366] hover:text-emerald-300 transition-colors text-xs font-bold"
@@ -377,11 +378,11 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             {/* Real WhatsApp Icon & Link */}
             <a
-              href={CHOIR_STATS.whatsappUrl}
+              href={contactWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Direct WhatsApp Message"
-              title="Chat with Choir on WhatsApp (+254 722 845 291)"
+              title={`Chat with Choir on WhatsApp (${contactWhatsappDisplay})`}
               className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-[#25D366]/15 hover:bg-[#25D366] border border-emerald-500/30 hover:border-emerald-500 flex items-center justify-center text-[#25D366] hover:text-white transition-all shadow-md group cursor-pointer"
             >
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -391,7 +392,7 @@ export const ChoirFooter: React.FC<ChoirFooterProps> = ({ onNavigate }) => {
 
             {/* Real Google Maps Parish Pin & Link */}
             <a
-              href={CHOIR_STATS.mapsUrl}
+              href={contactMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Google Maps Location"

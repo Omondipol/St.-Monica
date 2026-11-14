@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Song, SheetMusicItem, ChoirLeader, ChoirGroupPhoto, EventItem, CHOIR_STATS, YOUTUBE_CHANNEL_URL, YOUTUBE_CHANNEL_HANDLE } from '../data/choirContent';
 import { 
@@ -51,7 +51,7 @@ import { ChoirLogo } from '../components/ChoirLogo';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { LIBRARY_CATEGORIES, LibrarySong, isSongInCategory } from '../data/libraryData';
 import { ImageUploadField } from '../components/ImageUploadField';
-import { getAssetUrl, extractYouTubeVideoId, getSongYouTubeId } from '../utils/assetHelper';
+import { getAssetUrl, extractYouTubeVideoId, getSongYouTubeId, getSongThumbnailUrl, handleSongThumbnailError } from '../utils/assetHelper';
 import { AdminHomepageTab } from '../components/admin/AdminHomepageTab';
 import { AdminMassesTab } from '../components/admin/AdminMassesTab';
 import { AdminFooterTab } from '../components/admin/AdminFooterTab';
@@ -111,7 +111,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     members,
     albums,
     transactions,
-    coreValues
+    coreValues,
+    contactMessages
   } = useChoir();
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -372,6 +373,25 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     noticeTextSw: siteNotice?.textSw || 'Mazoezi ya kwaya kila Jumatano na Ijumaa Saa 11:30 Jioni.'
   });
 
+  useEffect(() => {
+    setHeroForm(prev => ({
+      ...prev,
+      headlineEn: heroContent?.headlineEn || prev.headlineEn,
+      headlineSw: heroContent?.headlineSw || prev.headlineSw,
+      subheadEn: heroContent?.subheadEn || prev.subheadEn,
+      subheadSw: heroContent?.subheadSw || prev.subheadSw,
+      scriptureEn: heroContent?.scriptureEn || heroContent?.verseEn || prev.scriptureEn,
+      scriptureSw: heroContent?.scriptureSw || heroContent?.verseSw || prev.scriptureSw,
+      scriptureRef: heroContent?.scriptureRef || heroContent?.verseRef || prev.scriptureRef,
+      noticeEnabled: siteNotice?.enabled ?? prev.noticeEnabled,
+      noticeType: (siteNotice?.type || prev.noticeType) as 'info' | 'feast' | 'urgent',
+      noticeBadgeEn: siteNotice?.badgeEn || prev.noticeBadgeEn,
+      noticeBadgeSw: siteNotice?.badgeSw || prev.noticeBadgeSw,
+      noticeTextEn: siteNotice?.textEn || prev.noticeTextEn,
+      noticeTextSw: siteNotice?.textSw || prev.noticeTextSw
+    }));
+  }, [heroContent, siteNotice]);
+
   const handleSaveHeroAndNotice = (e: React.FormEvent) => {
     e.preventDefault();
     updateHeroContent({
@@ -408,6 +428,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     churchAddress: choirStats?.churchAddress ?? "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
     mpesaTill: choirStats?.mpesaTill ?? ""
   });
+
+  useEffect(() => {
+    if (choirStats) {
+      setStatsForm({
+        membersCount: choirStats.membersCount ?? 56,
+        yearsServing: choirStats.yearsServing ?? 14,
+        repertoireCount: choirStats.repertoireCount ?? 12,
+        sundayMassesPerMonth: choirStats.sundayMassesPerMonth ?? 4,
+        foundedYear: choirStats.foundedYear ?? 2012,
+        parish: choirStats.parish ?? "St. Monica's Catholic Church, Nakuru",
+        churchAddress: choirStats.churchAddress ?? "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
+        mpesaTill: choirStats.mpesaTill ?? ""
+      });
+    }
+  }, [choirStats]);
 
   const handleSaveStats = (e: React.FormEvent) => {
     e.preventDefault();
@@ -522,8 +557,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
     year: 2024,
     season: 'Ordinary Time' as Song['season'],
     seasonSwahili: 'Wakati wa Kawaida',
-    partOfMass: 'Communion' as Song['partOfMass'],
-    partOfMassSwahili: 'Wimbo wa Ekaristi',
+    partOfMass: 'Eucharist / Holy Communion' as Song['partOfMass'],
+    partOfMassSwahili: 'Ekaristi / Komunio',
     language: 'Kiswahili',
     voicing: 'SATB Polyphony',
     musicalKey: 'F Major',
@@ -549,8 +584,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       year: 2024,
       season: 'Ordinary Time',
       seasonSwahili: 'Wakati wa Kawaida',
-      partOfMass: 'Entrance',
-      partOfMassSwahili: 'Wimbo wa Kuingia',
+      partOfMass: 'Entrance / Introit',
+      partOfMassSwahili: 'Mwanzo',
       language: 'Kiswahili',
       voicing: 'SATB',
       musicalKey: 'G Major',
@@ -586,7 +621,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       duration: song.duration || '4:15',
       youtubeUrl: song.youtubeUrl || YOUTUBE_CHANNEL_URL,
       audioPreviewUrl: song.audioPreviewUrl || 'preview.mp3',
-      thumbnailUrl: song.thumbnailUrl || '',
+      thumbnailUrl: getSongThumbnailUrl(song),
       sheetMusicAvailable: song.sheetMusicAvailable ?? true,
       scorePriceKes: song.scorePriceKes || 300,
       whyWeSingIt: song.whyWeSingIt || '',
@@ -624,7 +659,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
       youtubeUrl: cleanYtUrl,
       youtubeId: extractedYtId,
       audioPreviewUrl: songForm.audioPreviewUrl.trim() || 'preview.mp3',
-      thumbnailUrl: songForm.thumbnailUrl.trim() || `https://i.ytimg.com/vi/${extractedYtId}/hqdefault.jpg`,
+      thumbnailUrl: getSongThumbnailUrl({
+        youtubeUrl: cleanYtUrl,
+        youtubeId: extractedYtId,
+        thumbnailUrl: songForm.thumbnailUrl.trim()
+      }),
       sheetMusicAvailable: songForm.sheetMusicAvailable,
       scorePriceKes: Number(songForm.scorePriceKes) || 300,
       lyricsSwahili: lyricsSwahili.length ? lyricsSwahili : ['Wimbo wa kwaya ya Mtakatifu Monika SEC 58.'],
@@ -1267,7 +1306,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               { id: 'values', icon: Heart, label: 'Core values', badge: coreValues.length },
               { id: 'members', icon: Users, label: 'Members', badge: members.length },
               { id: 'financials', icon: DollarSign, label: 'Contributions', badge: transactions.length },
-              { id: 'footer', icon: Phone, label: 'Contact details' },
+              {
+                id: 'footer',
+                icon: Phone,
+                label: 'Contact details',
+                badge: contactMessages.filter(m => m.status === 'new').length || undefined
+              },
               { id: 'schedule', icon: Clock, label: 'Mass times' },
               { id: 'events', icon: Calendar, label: 'Parish events', badge: eventsList.length },
               { id: 'backup', icon: Settings, label: 'Backup' },
@@ -1541,7 +1585,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                         return (
                           <tr key={song.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
                             <td className="py-2.5 px-3.5 font-medium">
-                              <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{displayTitle}</div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-14 h-9 rounded-md overflow-hidden shrink-0 border border-[#0C2340]/15 bg-[#0C2340]">
+                                  <img
+                                    src={getSongThumbnailUrl(song)}
+                                    alt={displayTitle}
+                                    onError={(e) => handleSongThumbnailError(e, song)}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="font-bold text-[#0C2340] font-eb-garamond text-sm">{displayTitle}</div>
+                              </div>
                             </td>
                             <td className="py-2.5 px-3.5 text-[#0C2340]/80">
                               {song.composer || 'Traditional'} {song.year ? `(${song.year})` : ''}
@@ -2457,41 +2512,37 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#0C2340] mb-1">Part of Mass</label>
+                  <label className="block font-bold text-[#0C2340] mb-1">Song Category (Music Library)</label>
                   <select
-                    value={songForm.partOfMass}
+                    value={(() => {
+                      const cur = (songForm.partOfMass || '').trim();
+                      const exact = LIBRARY_CATEGORIES.find(c => c.nameEn === cur || c.id === cur || c.legacyIds?.includes(cur.toLowerCase()));
+                      if (exact) return exact.nameEn;
+                      const low = cur.toLowerCase();
+                      if (low.includes('entrance') || low.includes('kuingia')) return 'Entrance / Introit';
+                      if (low.includes('meditation') || low.includes('tafakari')) return 'Teachings / Reflection';
+                      if (low.includes('offertory') || low.includes('sadaka')) return 'Offertory / Presentation of Gifts';
+                      if (low.includes('communion') || low.includes('ekaristi')) return 'Eucharist / Holy Communion';
+                      if (low.includes('praise') || low.includes('thanksgiving')) return 'Thanksgiving';
+                      if (low.includes('recessional') || low.includes('kyrie') || low.includes('gloria') || low.includes('sanctus') || low.includes('agnus')) return 'Mass';
+                      return cur;
+                    })()}
                     onChange={e => {
-                      const p = e.target.value;
-                      const swMap: Record<string, string> = {
-                        'Entrance': 'Wimbo wa Kuingia',
-                        'Kyrie': 'Bwana Utuhurumie',
-                        'Gloria': 'Utukufu kwa Mungu',
-                        'Meditation': 'Tafakari / Zaburi',
-                        'Offertory': 'Sadaka na Matoleo',
-                        'Sanctus': 'Mtakatifu',
-                        'Agnus Dei': 'Mwana Kondoo wa Mungu',
-                        'Communion': 'Komunyo na Ekaristi',
-                        'Thanksgiving': 'Shukrani na Sifa',
-                        'Recessional': 'Wimbo wa Kutoka'
-                      };
+                      const val = e.target.value;
+                      const matchedCat = LIBRARY_CATEGORIES.find(c => c.nameEn === val);
                       setSongForm({
                         ...songForm,
-                        partOfMass: p as any,
-                        partOfMassSwahili: swMap[p] || p
+                        partOfMass: val,
+                        partOfMassSwahili: matchedCat?.nameSw || val
                       });
                     }}
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none bg-white"
                   >
-                    <option value="Entrance">Entrance (Kuingia)</option>
-                    <option value="Kyrie">Kyrie (Bwana Utuhurumie)</option>
-                    <option value="Gloria">Gloria (Utukufu)</option>
-                    <option value="Meditation">Meditation / Psalm (Tafakari)</option>
-                    <option value="Offertory">Offertory (Sadaka / Matoleo)</option>
-                    <option value="Sanctus">Sanctus (Mtakatifu)</option>
-                    <option value="Agnus Dei">Agnus Dei (Mwana Kondoo)</option>
-                    <option value="Communion">Communion (Komunyo / Ekaristi)</option>
-                    <option value="Thanksgiving">Thanksgiving (Shukrani na Sifa)</option>
-                    <option value="Recessional">Recessional (Kutoka)</option>
+                    {LIBRARY_CATEGORIES.map(cat => (
+                      <option key={cat.id} value={cat.nameEn}>
+                        {cat.nameEn}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -2635,7 +2686,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                   <input
                     type="url"
                     value={songForm.youtubeUrl}
-                    onChange={e => setSongForm({ ...songForm, youtubeUrl: e.target.value })}
+                    onChange={e => {
+                      const nextUrl = e.target.value;
+                      const ytId = extractYouTubeVideoId(nextUrl);
+                      setSongForm(prev => ({
+                        ...prev,
+                        youtubeUrl: nextUrl,
+                        thumbnailUrl: ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : prev.thumbnailUrl
+                      }));
+                    }}
                     placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
                     className="w-full p-2.5 border border-[#0C2340]/20 rounded-xl focus:border-[#1058A8] outline-none text-xs"
                   />

@@ -3,7 +3,7 @@ import { useChoir } from '../context/ChoirContext';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
 import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
-import { getAssetUrl } from '../utils/assetHelper';
+import { getSongThumbnailUrl, handleSongThumbnailError } from '../utils/assetHelper';
 import { 
   ExternalLink, 
   Heart, 
@@ -45,10 +45,8 @@ export const SongCutoffModal: React.FC = () => {
 
   const fullYoutubeUrl = currentSong.youtubeUrl || YOUTUBE_CHANNEL_URL;
 
-  // Clean cover photo with no text on it
-  const cleanCoverPhoto = currentSong.id === 'song-nimzima' || currentSong.id === 'song-jumuiya'
-    ? getAssetUrl('/assets/choir/choir_04.jpg')
-    : getAssetUrl('/assets/choir/choir_01.jpg');
+  // Exact YouTube preview picture with reliable fallback
+  const cleanCoverPhoto = getSongThumbnailUrl(currentSong);
 
   // Authentic choir note about the song
   const songChoirNote = lang === 'sw'
@@ -139,6 +137,8 @@ export const SongCutoffModal: React.FC = () => {
             <img
               src={cleanCoverPhoto}
               alt={currentSong.title}
+              onError={(e) => handleSongThumbnailError(e, currentSong)}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover object-center"
             />
           </div>

@@ -23,6 +23,7 @@ import { RealYouTubeIcon } from './RealYouTubeIcon';
 import { AfricanGeometricBorder } from './AfricanGeometricBorder';
 import { ChoirLogo } from './ChoirLogo';
 import { YOUTUBE_CHANNEL_URL } from '../data/choirContent';
+import { getSongThumbnailUrl, handleSongThumbnailError } from '../utils/assetHelper';
 
 export const NowPlayingModal: React.FC = () => {
   const {
@@ -235,8 +236,9 @@ export const NowPlayingModal: React.FC = () => {
                 className="w-full sm:w-[320px] md:w-[350px] aspect-video rounded-2xl overflow-hidden shrink-0 shadow-lg border border-[#0C2340]/15 bg-black relative"
               >
                 <img
-                  src={currentSong.thumbnailUrl}
+                  src={getSongThumbnailUrl(currentSong)}
                   alt={currentSong.title}
+                  onError={(e) => handleSongThumbnailError(e, currentSong)}
                   className="w-full h-full object-cover opacity-60"
                   referrerPolicy="no-referrer"
                 />

@@ -5,9 +5,9 @@ export interface Song {
   album: string;
   composer: string;
   year: number;
-  season: 'Ordinary Time' | 'Advent' | 'Lent' | 'Easter' | 'Marian' | 'Patronal';
+  season: 'Ordinary Time' | 'Advent' | 'Lent' | 'Easter' | 'Marian' | 'Patronal' | string;
   seasonSwahili: string;
-  partOfMass: 'Entrance' | 'Kyrie & Gloria' | 'Offertory' | 'Communion' | 'Meditation' | 'Recessional' | 'Praise';
+  partOfMass: string;
   partOfMassSwahili: string;
   language: string;
   voicing: string;
@@ -1017,7 +1017,7 @@ export const DEFAULT_PARISH_MESSAGE: ParishMessageConfig = {
   churchImg: '/assets/choir/choir_08.jpg',
   churchName: "St. Monica Catholic Church",
   churchSubtitle: "Section 58, Nakuru · Catholic Diocese of Nakuru",
-  mapsUrl: "https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru"
+  mapsUrl: "https://maps.app.goo.gl/qd9c7QUumHUnUGXc6"
 };
 
 export interface ScriptureQuoteConfig {
@@ -1074,11 +1074,11 @@ export interface FooterContactConfig {
 }
 
 export const DEFAULT_FOOTER_CONTACT: FooterContactConfig = {
-  phone: "+254 700 000 000",
-  whatsapp: "https://wa.me/254700000000",
-  email: "info@stmonicachoir.org",
+  phone: "+254 722 845 291",
+  whatsapp: "https://wa.me/254722845291",
+  email: "stmonicachoirsec58@gmail.com",
   churchAddress: "St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya",
-  mapsUrl: "https://maps.google.com/?q=St+Monica+Catholic+Church+Section+58+Nakuru",
+  mapsUrl: "https://maps.app.goo.gl/qd9c7QUumHUnUGXc6",
   mpesaTill: "",
   rehearsalsEn: "Wednesdays & Fridays: 5:30 PM – 7:30 PM (Parish Hall)",
   rehearsalsSw: "Jumatano na Ijumaa: Saa 11:30 Jioni – Saa 1:30 Usiku (Ukumbi wa Parokia)"

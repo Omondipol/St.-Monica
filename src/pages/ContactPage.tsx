@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useChoir } from '../context/ChoirContext';
 import { Send, CheckCircle2, ExternalLink, MessageCircle, MapPin, Navigation, Copy, Check } from 'lucide-react';
-import { CHOIR_STATS } from '../data/choirContent';
 import churchImg from '../assets/images/st_monica_parish_church_nakuru_1791446429035.jpg';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { getAssetUrl } from '../utils/assetHelper';
@@ -12,7 +11,16 @@ export const ContactPage: React.FC = () => {
     currentRehearsalsEn, 
     currentRehearsalsSw, 
     sundayMassesSummaryEn, 
-    sundayMassesSummarySw 
+    sundayMassesSummarySw,
+    submitContactMessage,
+    contactPhone,
+    contactWhatsappUrl,
+    contactWhatsappDisplay,
+    contactEmail,
+    contactAddress,
+    contactMapsUrl,
+    contactMapsDirectionsUrl,
+    contactCoordinates
   } = useChoir();
 
   // Form states
@@ -31,7 +39,7 @@ export const ContactPage: React.FC = () => {
   const [copiedCoord, setCopiedCoord] = useState(false);
 
   const handleCopyCoord = () => {
-    navigator.clipboard?.writeText(CHOIR_STATS.coordinatesDisplay || '-0.284525, 36.094012');
+    navigator.clipboard?.writeText(contactCoordinates || '-0.284525, 36.094012');
     setCopiedCoord(true);
     setTimeout(() => setCopiedCoord(false), 2200);
   };
@@ -41,7 +49,7 @@ export const ContactPage: React.FC = () => {
     return /^(?:\+254|0)[17]\d{8}$/.test(cleaned) || cleaned.length >= 9;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (honeypot) {
@@ -74,31 +82,26 @@ export const ContactPage: React.FC = () => {
     setErrors({});
     setIsSubmitting(true);
 
+    const senderName = name.trim();
     try {
-      const existing = JSON.parse(localStorage.getItem('st_monica_contact_messages_v1') || '[]');
-      const newEntry = {
-        id: `msg-${Date.now()}`,
-        name: name.trim(),
+      await submitContactMessage({
+        name: senderName,
         phone: phone.trim(),
-        email: email.trim(),
+        email: email.trim() || undefined,
         inquiryType,
-        message: message.trim(),
-        date: new Date().toISOString()
-      };
-      localStorage.setItem('st_monica_contact_messages_v1', JSON.stringify([newEntry, ...existing]));
+        message: message.trim()
+      });
     } catch {
-      // ignore
-    }
-
-    setTimeout(() => {
+      // Fallback already persisted to localStorage in ChoirContext
+    } finally {
       setIsSubmitting(false);
-      setSubmittedName(name.trim());
+      setSubmittedName(senderName);
       setSent(true);
       setName('');
       setPhone('');
       setEmail('');
       setMessage('');
-    }, 400);
+    }
   };
 
   return (
@@ -128,7 +131,7 @@ export const ContactPage: React.FC = () => {
           </div>
 
           <a
-            href={CHOIR_STATS.whatsappUrl}
+            href={contactWhatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs sm:text-sm shadow-sm transition-transform active:scale-95 shrink-0"
@@ -170,13 +173,13 @@ export const ContactPage: React.FC = () => {
                 </button>
 
                 <a
-                  href={CHOIR_STATS.whatsappUrl}
+                  href={contactWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-5 py-2.5 text-[14px] font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-[12px] cursor-pointer transition-colors flex items-center gap-2"
                 >
                   <MessageCircle className="w-4 h-4 fill-current" />
-                  <span>WhatsApp: {CHOIR_STATS.whatsapp}</span>
+                  <span>WhatsApp: {contactWhatsappDisplay}</span>
                 </a>
               </div>
             </div>
@@ -331,7 +334,7 @@ export const ContactPage: React.FC = () => {
                   </button>
 
                   <a
-                    href={CHOIR_STATS.whatsappUrl}
+                    href={contactWhatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="min-h-[44px] px-5 py-3 text-[14px] font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-[12px] cursor-pointer flex items-center justify-center gap-2 transition-colors"
@@ -372,10 +375,10 @@ export const ContactPage: React.FC = () => {
                   {lang === 'sw' ? 'Simu' : 'Phone'}
                 </span>
                 <a 
-                  href={`tel:${CHOIR_STATS.phone.replace(/\s+/g, '')}`}
+                  href={`tel:${contactPhone.replace(/\s+/g, '')}`}
                   className="text-[17px] font-semibold text-[#1058A8] hover:underline block mt-0.5 tabular-nums"
                 >
-                  {CHOIR_STATS.phone}
+                  {contactPhone}
                 </a>
               </div>
 
@@ -385,12 +388,12 @@ export const ContactPage: React.FC = () => {
                   {lang === 'sw' ? 'WhatsApp ya kwaya' : 'Choir WhatsApp'}
                 </span>
                 <a 
-                  href={CHOIR_STATS.whatsappUrl}
+                  href={contactWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[17px] font-semibold text-[#1058A8] hover:underline block mt-0.5 tabular-nums"
                 >
-                  {CHOIR_STATS.whatsapp}
+                  {contactWhatsappDisplay}
                 </a>
               </div>
 
@@ -400,10 +403,10 @@ export const ContactPage: React.FC = () => {
                   {lang === 'sw' ? 'Barua pepe' : 'Email'}
                 </span>
                 <a 
-                  href={`mailto:${CHOIR_STATS.email}`}
+                  href={`mailto:${contactEmail}`}
                   className="text-[17px] font-semibold text-[#0C2340] hover:text-[#1058A8] hover:underline block mt-0.5"
                 >
-                  {CHOIR_STATS.email}
+                  {contactEmail}
                 </a>
               </div>
 
@@ -413,7 +416,7 @@ export const ContactPage: React.FC = () => {
                   {lang === 'sw' ? 'Mahali pa kanisa' : 'Church address'}
                 </span>
                 <span className="text-slate-800 font-medium block mt-0.5 leading-relaxed">
-                  St. Monica Catholic Church, Section 58, Off Kanu Street, Nakuru, Kenya
+                  {contactAddress}
                 </span>
               </div>
 
@@ -455,7 +458,7 @@ export const ContactPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <a
-                  href={CHOIR_STATS.mapsDirectionsUrl}
+                  href={contactMapsDirectionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#0C2340]/15 text-[#0C2340] hover:bg-slate-50 transition-colors flex items-center gap-1 font-source"
@@ -465,7 +468,7 @@ export const ContactPage: React.FC = () => {
                   <span>{lang === 'sw' ? 'Maelekezo' : 'Directions'}</span>
                 </a>
                 <a
-                  href={CHOIR_STATS.mapsUrl}
+                  href={contactMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1058A8] text-white hover:bg-[#0C2340] transition-colors flex items-center gap-1 font-source shadow-xs"
@@ -489,7 +492,7 @@ export const ContactPage: React.FC = () => {
                 referrerPolicy="no-referrer-when-downgrade"
               />
               <a
-                href={CHOIR_STATS.mapsUrl}
+                href={contactMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute bottom-3 right-3 bg-white/95 hover:bg-white text-[#0C2340] hover:text-[#1058A8] text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md border border-[#0C2340]/15 flex items-center gap-1.5 transition-all z-10"
@@ -506,7 +509,7 @@ export const ContactPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-slate-800">GPS:</span>
                 <span className="font-mono text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200 text-[11px]">
-                  {CHOIR_STATS.coordinatesDisplay}
+                  {contactCoordinates}
                 </span>
                 <button
                   type="button"
@@ -529,12 +532,12 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <a
-                href={CHOIR_STATS.mapsUrl}
+                href={contactMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#1058A8] hover:text-[#0C2340] font-semibold hover:underline inline-flex items-center gap-1"
               >
-                <span>maps.app.goo.gl/qd9c7QUumHUnUGXc6</span>
+                <span>{contactMapsUrl.replace(/^https?:\/\//, '')}</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>

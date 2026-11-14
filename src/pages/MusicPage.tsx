@@ -21,7 +21,7 @@ import {
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
-import { getAssetUrl } from '../utils/assetHelper';
+import { getAssetUrl, getSongThumbnailUrl, handleSongThumbnailError } from '../utils/assetHelper';
 import { triggerFileDownload, generateSongScorePdf } from '../utils/fileDownload';
 
 import choirBannerImg from '../assets/images/st_monica_choir_cover_1791450290430.jpg';
@@ -31,63 +31,150 @@ import scorePreviewMaisha from '../assets/images/score_preview_maisha_1791446372
 import scorePreviewNimzima from '../assets/images/score_preview_nimzima_1791446398645.jpg';
 import scorePreviewJumuiya from '../assets/images/score_preview_jumuiya_1791446413261.jpg';
 
-interface MassGroup {
-  id: string;
-  nameSw: string;
-  nameEn: string;
-  matchParts: string[];
-}
+import { LIBRARY_CATEGORIES, LibraryCategory } from '../data/libraryData';
 
-const MASS_GROUPS: MassGroup[] = [
-  {
-    id: 'entrance',
-    nameSw: 'Wimbo wa Kuingia',
-    nameEn: 'Entrance',
-    matchParts: ['Entrance', 'Kuingia']
-  },
-  {
-    id: 'kyrie_gloria',
-    nameSw: 'Bwana Utuhurumie na Utukufu',
-    nameEn: 'Kyrie & Gloria',
-    matchParts: ['Kyrie', 'Gloria', 'Utukufu', 'Huruma']
-  },
-  {
-    id: 'meditation',
-    nameSw: 'Tafakari na Zaburi',
-    nameEn: 'Meditation & Psalm',
-    matchParts: ['Meditation', 'Psalm', 'Zaburi', 'Contemplative Prayer']
-  },
-  {
-    id: 'offertory',
-    nameSw: 'Wimbo wa Matoleo na Sadaka',
-    nameEn: 'Offertory',
-    matchParts: ['Offertory', 'Sadaka', 'Matoleo']
-  },
-  {
-    id: 'sanctus_agnus',
-    nameSw: 'Mtakatifu na Mwana Kondoo',
-    nameEn: 'Sanctus & Agnus Dei',
-    matchParts: ['Sanctus', 'Agnus Dei', 'Mtakatifu', 'Mwana Kondoo']
-  },
-  {
-    id: 'communion',
-    nameSw: 'Komunyo na Ekaristi',
-    nameEn: 'Communion',
-    matchParts: ['Communion', 'Ekaristi', 'Komunyo']
-  },
-  {
-    id: 'thanksgiving',
-    nameSw: 'Shukrani na Sifa',
-    nameEn: 'Thanksgiving & Praise',
-    matchParts: ['Thanksgiving', 'Shukrani', 'Praise', 'Sifa']
-  },
-  {
-    id: 'recessional',
-    nameSw: 'Wimbo wa Kutoka',
-    nameEn: 'Recessional',
-    matchParts: ['Recessional', 'Kutoka']
-  }
+// Liturgical ordering of Library Categories for Choir Songs grouping
+const ORDERED_CATEGORY_IDS = [
+  'mwanzo',
+  'maandamano-ya-biblia',
+  'misa',
+  'mafundisho-tafakari',
+  'zaburi',
+  'sadaka-matoleo',
+  'ekaristi-komunio',
+  'shukrani',
+  'majilio',
+  'noeli',
+  'epifania',
+  'kwaresma',
+  'matawi',
+  'juma-kuu',
+  'pasaka',
+  'kupaa-kwa-bwana',
+  'pentekoste',
+  'utatu-mtakatifu',
+  'kristu-mfalme',
+  'moyo-mtakatifu-wa-yesu',
+  'mama-maria',
+  'watakatifu',
+  'mwaka-wa-familia',
+  'mwaka-wa-huruma-ya-mungu',
+  'ndoa',
+  'miito',
+  'ubatizo',
+  'mazishi',
+  'mwaka-mpya',
+  'anthem',
+  'tenzi-za-kiswahili'
 ];
+
+export const ORDERED_MUSIC_CATEGORIES: LibraryCategory[] = [
+  ...ORDERED_CATEGORY_IDS.map(id => LIBRARY_CATEGORIES.find(c => c.id === id)).filter((c): c is LibraryCategory => !!c),
+  ...LIBRARY_CATEGORIES.filter(c => !ORDERED_CATEGORY_IDS.includes(c.id))
+];
+
+export const getSongPrimaryCategoryId = (song: Song): string => {
+  if (!song) return 'mafundisho-tafakari';
+
+  // 1. Explicit categories if attached
+  const explicitCats = (song as any).categories;
+  if (Array.isArray(explicitCats) && explicitCats.length > 0) {
+    const found = LIBRARY_CATEGORIES.find(c => c.id === explicitCats[0] || c.legacyIds?.includes(explicitCats[0]));
+    if (found) return found.id;
+  }
+  const explicitSingle = (song as any).category;
+  if (typeof explicitSingle === 'string' && explicitSingle) {
+    const found = LIBRARY_CATEGORIES.find(c => c.id === explicitSingle || c.legacyIds?.includes(explicitSingle));
+    if (found) return found.id;
+  }
+
+  const part = (song.partOfMass || '').trim().toLowerCase();
+  const partSw = (song.partOfMassSwahili || '').trim().toLowerCase();
+  const season = (song.season || '').trim().toLowerCase();
+  const seasonSw = (song.seasonSwahili || '').trim().toLowerCase();
+  const title = (song.title || '').trim().toLowerCase();
+  const titleSw = (song.titleSwahili || '').trim().toLowerCase();
+
+  // 2. Direct exact match against any Music Library category ID, English name, or Swahili name
+  const directCat = LIBRARY_CATEGORIES.find(c =>
+    c.id === part ||
+    c.nameEn.toLowerCase() === part ||
+    c.nameSw.toLowerCase() === part ||
+    c.nameSw.toLowerCase() === partSw ||
+    c.nameEn.toLowerCase() === season ||
+    c.nameSw.toLowerCase() === seasonSw ||
+    c.legacyIds?.some(lid => lid === part)
+  );
+  if (directCat) return directCat.id;
+
+  // 3. Specific category keyword mapping
+  if (part.includes('biblia') || part.includes('bible') || partSw.includes('biblia') || title.includes('biblia')) {
+    return 'maandamano-ya-biblia';
+  }
+  if (part.includes('entrance') || part.includes('introit') || part.includes('kuingia') || part.includes('mwanzo') || partSw.includes('kuingia') || partSw.includes('mwanzo')) {
+    return 'mwanzo';
+  }
+  if (part.includes('meditation') || part.includes('tafakari') || part.includes('reflection') || part.includes('teaching') || part.includes('mafundisho') || partSw.includes('tafakari')) {
+    return 'mafundisho-tafakari';
+  }
+  if (part.includes('psalm') || part.includes('zaburi') || partSw.includes('zaburi')) {
+    return 'zaburi';
+  }
+  if (part.includes('offertory') || part.includes('matoleo') || part.includes('sadaka') || part.includes('presentation') || partSw.includes('matoleo') || partSw.includes('sadaka')) {
+    return 'sadaka-matoleo';
+  }
+  if (part.includes('communion') || part.includes('eucharist') || part.includes('ekaristi') || part.includes('komunyo') || partSw.includes('ekaristi') || partSw.includes('komunyo')) {
+    return 'ekaristi-komunio';
+  }
+  if (part.includes('thanksgiving') || part.includes('shukrani') || part.includes('praise') || part.includes('sifa') || partSw.includes('shukrani') || partSw.includes('sifa')) {
+    return 'shukrani';
+  }
+  if (part.includes('kyrie') || part.includes('gloria') || part.includes('sanctus') || part.includes('agnus') || part === 'mass' || part.includes('misa') || partSw.includes('misa')) {
+    return 'misa';
+  }
+  if (part.includes('recessional') || part.includes('kutoka') || partSw.includes('kutoka')) {
+    return 'misa';
+  }
+  if (part.includes('family') || part.includes('familia')) return 'mwaka-wa-familia';
+  if (part.includes('mercy') || part.includes('huruma')) return 'mwaka-wa-huruma-ya-mungu';
+  if (part.includes('sacred heart') || part.includes('moyo mtakatifu')) return 'moyo-mtakatifu-wa-yesu';
+  if (part.includes('matrimony') || part.includes('wedding') || part.includes('ndoa')) return 'ndoa';
+  if (part.includes('vocation') || part.includes('miito')) return 'miito';
+  if (part.includes('baptism') || part.includes('ubatizo')) return 'ubatizo';
+  if (part.includes('funeral') || part.includes('requiem') || part.includes('mazishi')) return 'mazishi';
+  if (part.includes('trinity') || part.includes('utatu')) return 'utatu-mtakatifu';
+  if (part.includes('christ the king') || part.includes('kristu mfalme')) return 'kristu-mfalme';
+  if (part.includes('ascension') || part.includes('kupaa')) return 'kupaa-kwa-bwana';
+  if (part.includes('pentecost') || part.includes('pentekoste') || part.includes('holy spirit')) return 'pentekoste';
+  if (part.includes('palm') || part.includes('matawi')) return 'matawi';
+  if (part.includes('holy week') || part.includes('juma kuu')) return 'juma-kuu';
+  if (part.includes('epiphany') || part.includes('epifania')) return 'epifania';
+  if (part.includes('new year') || part.includes('mwaka mpya')) return 'mwaka-mpya';
+  if (part.includes('anthem')) return 'anthem';
+  if (part.includes('tenzi')) return 'tenzi-za-kiswahili';
+
+  // 4. Seasons & Feasts
+  if (part.includes('easter') || season.includes('easter') || season.includes('pasaka') || seasonSw.includes('pasaka') || title.includes('mzima') || titleSw.includes('mzima')) {
+    return 'pasaka';
+  }
+  if (part.includes('lent') || season.includes('lent') || season.includes('kwaresma') || seasonSw.includes('kwaresma')) {
+    return 'kwaresma';
+  }
+  if (part.includes('advent') || season.includes('advent') || season.includes('majilio') || seasonSw.includes('majilio')) {
+    return 'majilio';
+  }
+  if (part.includes('christmas') || season.includes('christmas') || season.includes('noeli') || season.includes('krismasi') || seasonSw.includes('noeli')) {
+    return 'noeli';
+  }
+  if (part.includes('mary') || season.includes('marian') || seasonSw.includes('maria') || title.includes('maria') || titleSw.includes('maria')) {
+    return 'mama-maria';
+  }
+  if (part.includes('saint') || season.includes('patronal') || title.includes('monika') || titleSw.includes('monika')) {
+    return 'watakatifu';
+  }
+
+  return 'mafundisho-tafakari';
+};
 
 interface MusicPageProps {
   onNavigate?: (route: string) => void;
@@ -179,24 +266,14 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
     if (filterSelection === 'all') return true;
 
-    // Mass parts
-    if (filterSelection === 'entrance') return (song.partOfMass || '').toLowerCase().includes('entrance') || (song.partOfMass || '').toLowerCase().includes('kuingia');
-    if (filterSelection === 'kyrie_gloria') return (song.partOfMass || '').toLowerCase().includes('kyrie') || (song.partOfMass || '').toLowerCase().includes('gloria') || (song.partOfMass || '').toLowerCase().includes('utukufu');
-    if (filterSelection === 'meditation') return (song.partOfMass || '').toLowerCase().includes('meditation') || (song.partOfMass || '').toLowerCase().includes('psalm') || (song.partOfMass || '').toLowerCase().includes('zaburi');
-    if (filterSelection === 'offertory') return (song.partOfMass || '').toLowerCase().includes('offertory') || (song.partOfMass || '').toLowerCase().includes('matoleo') || (song.partOfMass || '').toLowerCase().includes('sadaka');
-    if (filterSelection === 'sanctus_agnus') return (song.partOfMass || '').toLowerCase().includes('sanctus') || (song.partOfMass || '').toLowerCase().includes('agnus') || (song.partOfMass || '').toLowerCase().includes('mtakatifu');
-    if (filterSelection === 'communion') return (song.partOfMass || '').toLowerCase().includes('communion') || (song.partOfMass || '').toLowerCase().includes('komunyo') || (song.partOfMass || '').toLowerCase().includes('ekaristi');
-    if (filterSelection === 'thanksgiving') return (song.partOfMass || '').toLowerCase().includes('thanksgiving') || (song.partOfMass || '').toLowerCase().includes('shukrani') || (song.partOfMass || '').toLowerCase().includes('sifa');
-    if (filterSelection === 'recessional') return (song.partOfMass || '').toLowerCase().includes('recessional') || (song.partOfMass || '').toLowerCase().includes('kutoka');
+    const primaryCatId = getSongPrimaryCategoryId(song);
+    if (primaryCatId === filterSelection) return true;
 
-    // Seasons
-    if (filterSelection === 'ordinary') return (song.season || '').toLowerCase().includes('ordinary') || (song.season || '').toLowerCase().includes('kawaida');
-    if (filterSelection === 'advent') return (song.season || '').toLowerCase().includes('advent') || (song.season || '').toLowerCase().includes('majilio');
-    if (filterSelection === 'lent') return (song.season || '').toLowerCase().includes('lent') || (song.season || '').toLowerCase().includes('kwaresima');
-    if (filterSelection === 'easter') return (song.season || '').toLowerCase().includes('easter') || (song.season || '').toLowerCase().includes('pasaka');
-    if (filterSelection === 'christmas') return (song.season || '').toLowerCase().includes('christmas') || (song.season || '').toLowerCase().includes('krismasi');
+    // Check legacy aliases or matching category
+    const selectedCat = LIBRARY_CATEGORIES.find(c => c.id === filterSelection);
+    if (selectedCat?.legacyIds && selectedCat.legacyIds.includes(primaryCatId)) return true;
 
-    return true;
+    return false;
   });
 
   const filteredSheetMusic = sheetMusicList.filter((item) => {
@@ -221,14 +298,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
   };
 
   const getCleanSongCover = (song?: Song) => {
-    if (!song) return getAssetUrl('/assets/choir/choir_01.jpg');
-    if (song.thumbnailUrl && song.thumbnailUrl.trim()) {
-      return getAssetUrl(song.thumbnailUrl);
-    }
-    if (song.id === 'song-nimzima' || song.id === 'song-jumuiya') {
-      return getAssetUrl('/assets/choir/choir_04.jpg');
-    }
-    return getAssetUrl('/assets/choir/choir_01.jpg');
+    return getSongThumbnailUrl(song);
   };
 
   const renderSongRow = (song: Song, songIdx: number) => {
@@ -268,6 +338,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
             <img
               src={getCleanSongCover(song)}
               alt={song.title}
+              onError={(e) => handleSongThumbnailError(e, song)}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
             />
           </div>
@@ -295,7 +367,9 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
 
         {/* Mass placement & duration */}
         <div className="font-source text-xs text-slate-600 shrink-0 hidden md:block whitespace-nowrap">
-          <span>{lang === 'sw' ? (song.partOfMassSwahili || song.partOfMass) : song.partOfMass}</span>
+          <span>
+            {ORDERED_MUSIC_CATEGORIES.find(c => c.id === getSongPrimaryCategoryId(song))?.nameEn || song.partOfMass}
+          </span>
           <span className="mx-1.5 text-slate-400">·</span>
           <span className="tabular-nums font-medium text-[#0C2340]">{song.duration}</span>
         </div>
@@ -508,7 +582,7 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
               </span>
             </div>
             <span className="text-[11px] font-semibold text-[#1058A8] bg-[#1058A8]/10 px-3 py-1 rounded-full font-source">
-              {lang === 'sw' ? songOfTheWeek.partOfMassSwahili : songOfTheWeek.partOfMass}
+              {ORDERED_MUSIC_CATEGORIES.find(c => c.id === getSongPrimaryCategoryId(songOfTheWeek))?.nameEn || songOfTheWeek.partOfMass}
             </span>
           </div>
 
@@ -523,6 +597,8 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
               <img
                 src={getCleanSongCover(songOfTheWeek)}
                 alt={songOfTheWeek.title}
+                onError={(e) => handleSongThumbnailError(e, songOfTheWeek)}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -649,33 +725,30 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
             <select
               value={filterSelection}
               onChange={(e) => setFilterSelection(e.target.value)}
-              className="px-3 py-2 bg-white text-[#0C2340] border border-[#0C2340]/15 rounded-xl text-xs sm:text-sm font-source focus:outline-none focus:border-[#1058A8] cursor-pointer shadow-xs"
+              className="px-3 py-2 bg-white text-[#0C2340] border border-[#0C2340]/15 rounded-xl text-xs sm:text-sm font-source focus:outline-none focus:border-[#1058A8] cursor-pointer shadow-xs max-w-[200px] sm:max-w-xs"
             >
-              <option value="all">{lang === 'sw' ? 'Nyimbo zote' : 'All songs'}</option>
-              <optgroup label={lang === 'sw' ? 'Sehemu ya Misa' : 'Mass parts'}>
-                <option value="entrance">{lang === 'sw' ? 'Wimbo wa Kuingia (Entrance)' : 'Entrance'}</option>
-                <option value="kyrie_gloria">{lang === 'sw' ? 'Huruma na Utukufu (Kyrie / Gloria)' : 'Kyrie & Gloria'}</option>
-                <option value="meditation">{lang === 'sw' ? 'Tafakari / Zaburi (Meditation)' : 'Meditation & Psalm'}</option>
-                <option value="offertory">{lang === 'sw' ? 'Sadaka / Matoleo (Offertory)' : 'Offertory'}</option>
-                <option value="sanctus_agnus">{lang === 'sw' ? 'Mtakatifu na Mwana Kondoo' : 'Sanctus & Agnus Dei'}</option>
-                <option value="communion">{lang === 'sw' ? 'Komunyo / Ekaristi (Communion)' : 'Communion'}</option>
-                <option value="thanksgiving">{lang === 'sw' ? 'Shukrani na Sifa (Thanksgiving)' : 'Thanksgiving & Praise'}</option>
-                <option value="recessional">{lang === 'sw' ? 'Wimbo wa Kutoka (Recessional)' : 'Recessional'}</option>
+              <option value="all">All songs</option>
+              <optgroup label="Mass Parts & Processions">
+                {ORDERED_MUSIC_CATEGORIES.filter(c => [
+                  'mwanzo', 'maandamano-ya-biblia', 'misa', 'mafundisho-tafakari',
+                  'zaburi', 'sadaka-matoleo', 'ekaristi-komunio', 'shukrani'
+                ].includes(c.id)).map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.nameEn}</option>
+                ))}
               </optgroup>
-              <optgroup label={lang === 'sw' ? 'Majira ya Kiliturujia' : 'Liturgical seasons'}>
-                <option value="ordinary">{lang === 'sw' ? 'Wakati wa Kawaida' : 'Ordinary time'}</option>
-                <option value="advent">{lang === 'sw' ? 'Majilio' : 'Advent'}</option>
-                <option value="lent">{lang === 'sw' ? 'Kwaresima' : 'Lent'}</option>
-                <option value="easter">{lang === 'sw' ? 'Pasaka' : 'Easter'}</option>
-                <option value="christmas">{lang === 'sw' ? 'Krismasi' : 'Christmas'}</option>
+              <optgroup label="Liturgical Seasons & Feasts">
+                {ORDERED_MUSIC_CATEGORIES.filter(c => ![
+                  'mwanzo', 'maandamano-ya-biblia', 'misa', 'mafundisho-tafakari',
+                  'zaburi', 'sadaka-matoleo', 'ekaristi-komunio', 'shukrani'
+                ].includes(c.id)).map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.nameEn}</option>
+                ))}
               </optgroup>
             </select>
           </div>
 
           <span className="text-xs text-slate-500 font-source whitespace-nowrap">
-            {lang === 'sw' 
-              ? `${activeTab === 'songs' ? filteredSongs.length : filteredSheetMusic.length} zimepatikana` 
-              : `${activeTab === 'songs' ? filteredSongs.length : filteredSheetMusic.length} found`}
+            {`${activeTab === 'songs' ? filteredSongs.length : filteredSheetMusic.length} found`}
           </span>
         </div>
       </section>
@@ -694,27 +767,27 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
             </div>
           ) : (
             <>
-              {/* Standard Mass Group sections */}
-              {MASS_GROUPS.map((group) => {
+              {/* Groups aligned with Music Library categories; headings in English */}
+              {ORDERED_MUSIC_CATEGORIES.map((cat) => {
                 const groupSongs = filteredSongs.filter((song) =>
-                  group.matchParts.some((p) => (song.partOfMass || '').toLowerCase().includes(p.toLowerCase()))
+                  getSongPrimaryCategoryId(song) === cat.id
                 );
 
                 if (groupSongs.length === 0) return null;
 
                 return (
                   <section 
-                    key={group.id} 
+                    key={cat.id} 
                     className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
                   >
-                    {/* Group Heading: Swahili in serif font, English beneath, thin woven border strip */}
+                    {/* Group Heading: English category heading + song count */}
                     <div className="px-6 pt-5 pb-3 bg-white">
-                      <div className="flex items-baseline justify-between">
+                      <div className="flex items-baseline justify-between gap-4">
                         <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
-                          {group.nameSw}
+                          {cat.nameEn}
                         </h2>
-                        <span className="font-source text-xs text-slate-500">
-                          {group.nameEn}
+                        <span className="font-source text-xs sm:text-sm text-slate-500 font-medium shrink-0">
+                          {groupSongs.length} {groupSongs.length === 1 ? 'song' : 'songs'}
                         </span>
                       </div>
                       {/* Thin woven border strip under each heading */}
@@ -731,11 +804,11 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                 );
               })}
 
-              {/* Unassigned / Custom Category Hymns so no added song is ever omitted */}
+              {/* Fallback for any unassigned song so none is ever omitted */}
               {(() => {
                 const unassignedSongs = filteredSongs.filter((song) =>
-                  !MASS_GROUPS.some((group) =>
-                    group.matchParts.some((p) => (song.partOfMass || '').toLowerCase().includes(p.toLowerCase()))
+                  !ORDERED_MUSIC_CATEGORIES.some((cat) =>
+                    getSongPrimaryCategoryId(song) === cat.id
                   )
                 );
 
@@ -746,12 +819,12 @@ export const MusicPage: React.FC<MusicPageProps> = ({ onNavigate = () => {} }) =
                     className="bg-white/95 border border-[#0C2340]/10 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(12,35,64,0.08)]"
                   >
                     <div className="px-6 pt-5 pb-3 bg-white">
-                      <div className="flex items-baseline justify-between">
+                      <div className="flex items-baseline justify-between gap-4">
                         <h2 className="font-eb-garamond text-xl sm:text-2xl font-bold text-[#0C2340] leading-tight">
-                          {lang === 'sw' ? 'Nyimbo Nyingine Zilizorekodiwa' : 'Other Sacred Hymns & Chants'}
+                          Other Sacred Hymns & Chants
                         </h2>
-                        <span className="font-source text-xs text-slate-500">
-                          {lang === 'sw' ? `${unassignedSongs.length} nyimbo` : `${unassignedSongs.length} songs`}
+                        <span className="font-source text-xs sm:text-sm text-slate-500 shrink-0">
+                          {unassignedSongs.length} {lang === 'sw' ? 'nyimbo' : 'songs'}
                         </span>
                       </div>
                       <div className="mt-2.5 -mx-6">

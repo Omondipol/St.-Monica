@@ -32,8 +32,16 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
     isPlaying,
     currentSong,
     openSupportModal,
-    setIsMenuOpen
+    setIsMenuOpen,
+    members,
+    activeMembers,
+    choirStats,
+    contactWhatsappUrl
   } = useChoir();
+
+  const realActiveCount = (activeMembers && activeMembers.length > 0)
+    ? activeMembers.length
+    : (members && members.length > 0 ? members.length : (choirStats?.membersCount || 56));
 
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [musicDropdownOpen, setMusicDropdownOpen] = useState(false);
@@ -371,7 +379,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
                             {lang === 'sw' ? 'Kwaya ya Mtakatifu Monika' : 'St. Monica Choir'}
                           </strong>
                           <p className="text-[12px] text-white/70 font-source mt-1 leading-snug line-clamp-1 truncate">
-                            {lang === 'sw' ? 'Waimbaji 48 wakihudumu katika Misa.' : '48 choristers singing every Sunday.'}
+                            {lang === 'sw' ? `Waimbaji ${realActiveCount} wakihudumu katika Misa.` : `${realActiveCount} choristers singing every Sunday.`}
                           </p>
                         </div>
                       </div>
@@ -833,7 +841,7 @@ export const ChoirHeader: React.FC<ChoirHeaderProps> = ({ currentRoute, setCurre
 
             {/* Official Green WhatsApp Button */}
             <a
-              href={CHOIR_STATS.whatsappUrl}
+              href={contactWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full min-h-[52px] rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg"

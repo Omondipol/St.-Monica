@@ -1,6 +1,6 @@
 import React from 'react';
 import { Song } from '../data/choirContent';
-import { getAssetUrl } from '../utils/assetHelper';
+import { getSongThumbnailUrl, handleSongThumbnailError } from '../utils/assetHelper';
 
 interface SongCoverArtProps {
   song: Song;
@@ -13,12 +13,8 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
   size = 'thumbnail',
   className = ''
 }) => {
-  // Use custom song thumbnail if provided by admin, or authentic choir photos
-  const cleanPhoto = song.thumbnailUrl || (
-    song.id === 'song-nimzima' || song.id === 'song-jumuiya'
-      ? getAssetUrl('/assets/choir/choir_04.jpg')
-      : getAssetUrl('/assets/choir/choir_01.jpg')
-  );
+  // Always use the song's YouTube preview picture with reliable fallback
+  const cleanPhoto = getSongThumbnailUrl(song);
 
   if (size === 'thumbnail') {
     return (
@@ -29,6 +25,8 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
         <img
           src={cleanPhoto}
           alt={song.title}
+          onError={(e) => handleSongThumbnailError(e, song)}
+          referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center"
         />
         {/* Subtle dark vignette */}
@@ -37,7 +35,7 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
     );
   }
 
-  // Large Hymnal Left Page Cover: pure cropped choir photo with zero burned-in text
+  // Large Hymnal Left Page Cover: pure YouTube/choir photo with zero burned-in text
   return (
     <div 
       className={`relative w-full aspect-square rounded-xl overflow-hidden shadow-md border border-[#0C2340]/15 bg-[#0C2340] select-none ${className}`}
@@ -45,6 +43,8 @@ export const SongCoverArt: React.FC<SongCoverArtProps> = ({
       <img
         src={cleanPhoto}
         alt={song.title}
+        onError={(e) => handleSongThumbnailError(e, song)}
+        referrerPolicy="no-referrer"
         className="w-full h-full object-cover object-center"
       />
     </div>

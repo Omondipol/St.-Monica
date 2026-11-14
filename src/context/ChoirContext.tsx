@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   Song, 
   INITIAL_SONGS_CATALOG, 
@@ -54,9 +54,20 @@ import {
   deleteAlbumFromSupabase,
   loadLibrarySongsFromSupabase,
   saveLibrarySongToSupabase,
-  deleteLibrarySongFromSupabase
+  deleteLibrarySongFromSupabase,
+  ContactMessage,
+  loadContactMessagesFromSupabase,
+  saveContactMessageToSupabase,
+  saveContactMessagesCatalogToSupabase,
+  deleteContactMessageFromSupabase
 } from '../lib/supabaseChoirData';
-import { getSongYouTubeId, extractYouTubeVideoId } from '../utils/assetHelper';
+import {
+  getSongYouTubeId,
+  extractYouTubeVideoId,
+  getSongThumbnailUrl,
+  normalizeWhatsAppUrl,
+  formatWhatsAppDisplay
+} from '../utils/assetHelper';
 
 export interface CartItem {
   product: ProductItem;
@@ -346,6 +357,26 @@ interface ChoirContextType {
   updateCoreValue: (id: string, updated: Partial<CoreValueItem>) => void;
   deleteCoreValue: (id: string) => void;
   resetCoreValues: () => void;
+
+  // Contact Us Submissions & Live Synced Contact Information
+  contactMessages: ContactMessage[];
+  submitContactMessage: (data: {
+    name: string;
+    phone: string;
+    email?: string;
+    inquiryType: string;
+    message: string;
+  }) => Promise<ContactMessage>;
+  updateContactMessageStatus: (id: string, status: 'new' | 'read' | 'replied') => void;
+  deleteContactMessage: (id: string) => void;
+  contactPhone: string;
+  contactWhatsappUrl: string;
+  contactWhatsappDisplay: string;
+  contactEmail: string;
+  contactAddress: string;
+  contactMapsUrl: string;
+  contactMapsDirectionsUrl: string;
+  contactCoordinates: string;
 }
 
 const ChoirContext = createContext<ChoirContextType | undefined>(undefined);
@@ -392,8 +423,18 @@ const STORAGE_KEYS = {
   ALBUMS: 'st_monica_albums_v6',
   TRANSACTIONS: 'st_monica_transactions_v6',
   CORE_VALUES: 'st_monica_core_values_v1',
+  CONTACT_MESSAGES: 'st_monica_contact_messages_v1',
   DELETED_PHOTO_IDS: 'st_monica_deleted_photo_ids_v2',
   DELETED_SONG_IDS: 'st_monica_deleted_song_ids_v2'
+};
+
+const normalizeSongMedia = (song: Song): Song => {
+  const resolvedYtId = getSongYouTubeId(song);
+  return {
+    ...song,
+    youtubeId: resolvedYtId,
+    thumbnailUrl: getSongThumbnailUrl({ ...song, youtubeId: resolvedYtId })
+  };
 };
 
 export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -440,13 +481,13 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const clean = parsed.filter(s => s.id !== 'song-tutangaze' && s.id !== 'song-rejoice' && s.id !== 'song-monica');
-          if (clean.length > 0) return clean;
+          if (clean.length > 0) return clean.map(normalizeSongMedia);
         }
       }
     } catch (e) {
       // ignore
     }
-    return INITIAL_SONGS_CATALOG;
+    return INITIAL_SONGS_CATALOG.map(normalizeSongMedia);
   });
 
   useEffect(() => {
@@ -457,31 +498,37 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [songs]);
 
-  // Sync real-time catalog & photos from Supabase on mount
+  // Sync real-time catalog & photos from Supabase on mount, focus, visibility change, and interval
   useEffect(() => {
     let isMounted = true;
+    let isSyncing = false;
 
-    // Load songs from Supabase
-    loadSongsFromSupabase().then((remoteSongs) => {
-      if (isMounted && remoteSongs && remoteSongs.length > 0) {
-        setSongs(prev => {
-          let deletedSongIds: string[] = [];
-          try {
-            const raw = localStorage.getItem(STORAGE_KEYS.DELETED_SONG_IDS);
-            if (raw) deletedSongIds = JSON.parse(raw);
-          } catch (_) {}
-          const activeRemote = remoteSongs.filter(s => !deletedSongIds.includes(s.id));
-          const remoteIds = new Set(activeRemote.map(s => s.id));
-          const localOnly = prev.filter(s => !remoteIds.has(s.id) && !deletedSongIds.includes(s.id));
-          const initialMissing = INITIAL_SONGS_CATALOG.filter(s => !remoteIds.has(s.id) && !localOnly.some(l => l.id === s.id) && !deletedSongIds.includes(s.id));
-          const merged = [...activeRemote, ...localOnly, ...initialMissing];
-          try {
-            localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(merged));
-          } catch (_) {}
-          return merged;
-        });
-      }
-    });
+    const syncAllFromSupabase = async () => {
+      if (!isMounted || isSyncing) return;
+      isSyncing = true;
+      try {
+        // Load songs from Supabase
+        const remoteSongs = await loadSongsFromSupabase();
+        if (isMounted && remoteSongs && remoteSongs.length > 0) {
+          setSongs(prev => {
+            let deletedSongIds: string[] = [];
+            try {
+              const raw = localStorage.getItem(STORAGE_KEYS.DELETED_SONG_IDS);
+              if (raw) deletedSongIds = JSON.parse(raw);
+            } catch (_) {}
+            const activeRemote = remoteSongs.filter(s => !deletedSongIds.includes(s.id)).map(normalizeSongMedia);
+            const remoteIds = new Set(activeRemote.map(s => s.id));
+            const localOnly = prev.filter(s => !remoteIds.has(s.id) && !deletedSongIds.includes(s.id)).map(normalizeSongMedia);
+            const initialMissing = INITIAL_SONGS_CATALOG.filter(
+              s => !remoteIds.has(s.id) && !localOnly.some(l => l.id === s.id) && !deletedSongIds.includes(s.id)
+            ).map(normalizeSongMedia);
+            const merged = [...activeRemote, ...localOnly, ...initialMissing];
+            try {
+              localStorage.setItem(STORAGE_KEYS.SONGS, JSON.stringify(merged));
+            } catch (_) {}
+            return merged;
+          });
+        }
 
     // Load gallery photos from Supabase 'gallery' table
     loadGalleryPhotosFromSupabase().then((remotePhotos) => {
@@ -696,8 +743,49 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
+    // Hydrate Contact Us Messages from Supabase
+    loadContactMessagesFromSupabase().then(remoteMessages => {
+      if (isMounted && remoteMessages && Array.isArray(remoteMessages) && remoteMessages.length > 0) {
+        setContactMessages(prev => {
+          const remoteIds = new Set(remoteMessages.map(m => m.id));
+          const localOnly = prev.filter(m => !remoteIds.has(m.id));
+          const merged = [...remoteMessages, ...localOnly].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          try { localStorage.setItem(STORAGE_KEYS.CONTACT_MESSAGES, JSON.stringify(merged)); } catch (_) {}
+          return merged;
+        });
+      }
+    });
+      } finally {
+        isSyncing = false;
+      }
+    };
+
+    syncAllFromSupabase();
+
+    const handleVisibilityOrFocus = () => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        syncAllFromSupabase();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', handleVisibilityOrFocus);
+      document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    }
+
+    const intervalId = setInterval(() => {
+      syncAllFromSupabase();
+    }, 60000);
+
     return () => {
       isMounted = false;
+      clearInterval(intervalId);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', handleVisibilityOrFocus);
+        document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      }
     };
   }, []);
 
@@ -1202,31 +1290,221 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [footerContact]);
 
-  const updateFooterContact = (updated: Partial<FooterContactConfig>) => {
+  // Shared helper to synchronize choir rehearsal / practice schedule across all site sections & Supabase
+  const syncPracticeAcrossSite = (rehearsalsEn?: string, rehearsalsSw?: string) => {
+    const cleanEn = rehearsalsEn?.trim();
+    const cleanSw = rehearsalsSw?.trim();
+    if (!cleanEn && !cleanSw) return;
+
     setFooterContact(prev => {
-      const merged = { ...prev, ...updated };
+      const merged = {
+        ...prev,
+        rehearsalsEn: cleanEn || prev.rehearsalsEn,
+        rehearsalsSw: cleanSw || prev.rehearsalsSw
+      };
+      try { localStorage.setItem(STORAGE_KEYS.FOOTER_CONTACT, JSON.stringify(merged)); } catch (_) {}
+      saveCatalogToSupabase('footer_contact', merged).catch(() => {});
+      return merged;
+    });
+
+    setMassSchedule(prev => {
+      const merged = {
+        ...prev,
+        rehearsals: cleanEn || prev.rehearsals,
+        rehearsalsSw: cleanSw || prev.rehearsalsSw
+      };
+      try { localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(merged)); } catch (_) {}
+      saveCatalogToSupabase('mass_schedule', merged).catch(() => {});
+      return merged;
+    });
+
+    setChoirStats(prev => {
+      const merged = {
+        ...prev,
+        rehearsalSchedule: cleanEn || prev.rehearsalSchedule,
+        rehearsalScheduleSw: cleanSw || prev.rehearsalScheduleSw
+      };
+      try { localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(merged)); } catch (_) {}
+      saveCatalogToSupabase('choir_stats', merged).catch(() => {});
+      return merged;
+    });
+
+    setSiteNotice(prev => {
+      const merged = {
+        ...prev,
+        textEn: cleanEn ? `Welcome to St. Monica Choir official website. Choir rehearsals: ${cleanEn}.` : prev.textEn,
+        textSw: cleanSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Mtakatifu Monika · Misa ya Tatu. Mazoezi ya kwaya: ${cleanSw}.` : prev.textSw
+      };
+      try { localStorage.setItem(STORAGE_KEYS.NOTICE, JSON.stringify(merged)); } catch (_) {}
+      saveCatalogToSupabase('site_notice', merged).catch(() => {});
+      return merged;
+    });
+
+    setEventsList(prev => {
+      const updatedEvents = prev.map(evt => {
+        if (evt.id !== 'evt-rehearsal') return evt;
+        return {
+          ...evt,
+          time: cleanEn || evt.time,
+          fullDate: cleanEn && cleanSw ? `${cleanSw} / ${cleanEn}` : evt.fullDate,
+          description: cleanEn
+            ? `Weekly choir practice (${cleanEn}). Vocal warm-ups, tonic sol-fa reading, and SATB preparation.`
+            : evt.description,
+          descriptionSw: cleanSw
+            ? `Mazoezi ya kwaya ya kila wiki (${cleanSw}). Kuimarisha sauti, kusoma noti za solfa, na maandalizi ya Misa.`
+            : evt.descriptionSw
+        };
+      });
+      try { localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(updatedEvents)); } catch (_) {}
+      saveCatalogToSupabase('events', updatedEvents).catch(() => {});
+      return updatedEvents;
+    });
+  };
+
+  const updateFooterContact = (updated: Partial<FooterContactConfig>) => {
+    const normalizedUpdated: Partial<FooterContactConfig> = { ...updated };
+    if (typeof updated.whatsapp === 'string' && updated.whatsapp.trim()) {
+      normalizedUpdated.whatsapp = normalizeWhatsAppUrl(updated.whatsapp);
+    }
+
+    setFooterContact(prev => {
+      const merged = { ...prev, ...normalizedUpdated };
+      try { localStorage.setItem(STORAGE_KEYS.FOOTER_CONTACT, JSON.stringify(merged)); } catch (_) {}
       saveCatalogToSupabase('footer_contact', merged).catch(err => {
         console.warn('Failed to sync footer_contact to Supabase:', err);
       });
       return merged;
     });
-    if (updated.rehearsalsEn || updated.rehearsalsSw) {
-      setMassSchedule(prev => ({
-        ...prev,
-        rehearsals: updated.rehearsalsEn || prev.rehearsals,
-        rehearsalsSw: updated.rehearsalsSw || prev.rehearsalsSw,
-      }));
-      setChoirStats(prev => ({
-        ...prev,
-        rehearsalSchedule: updated.rehearsalsEn || prev.rehearsalSchedule,
-        rehearsalScheduleSw: updated.rehearsalsSw || prev.rehearsalScheduleSw,
-      }));
-      setSiteNotice(prev => ({
-        ...prev,
-        textEn: updated.rehearsalsEn ? `Welcome to St. Monica Choir official website. Choir rehearsals: ${updated.rehearsalsEn}.` : prev.textEn,
-        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Mtakatifu Monika · Misa ya Tatu. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
-      }));
+
+    const hasContactUpdates =
+      normalizedUpdated.phone !== undefined ||
+      normalizedUpdated.whatsapp !== undefined ||
+      normalizedUpdated.email !== undefined ||
+      normalizedUpdated.churchAddress !== undefined ||
+      normalizedUpdated.mapsUrl !== undefined ||
+      normalizedUpdated.mpesaTill !== undefined;
+
+    if (hasContactUpdates) {
+      setChoirStats(prev => {
+        const merged = {
+          ...prev,
+          ...(normalizedUpdated.phone ? { phone: normalizedUpdated.phone } : {}),
+          ...(normalizedUpdated.email ? { email: normalizedUpdated.email } : {}),
+          ...(normalizedUpdated.churchAddress ? { churchAddress: normalizedUpdated.churchAddress } : {}),
+          ...(normalizedUpdated.mapsUrl ? { mapsUrl: normalizedUpdated.mapsUrl } : {}),
+          ...(normalizedUpdated.whatsapp
+            ? {
+                whatsappUrl: normalizedUpdated.whatsapp,
+                whatsapp: formatWhatsAppDisplay(normalizedUpdated.whatsapp, prev.whatsapp)
+              }
+            : {}),
+          ...(normalizedUpdated.mpesaTill !== undefined ? { mpesaTill: normalizedUpdated.mpesaTill } : {})
+        };
+        try { localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(merged)); } catch (_) {}
+        saveCatalogToSupabase('choir_stats', merged).catch(() => {});
+        return merged;
+      });
+
+      if (normalizedUpdated.mapsUrl || normalizedUpdated.churchAddress) {
+        setParishMessage(prev => {
+          const merged = {
+            ...prev,
+            ...(normalizedUpdated.mapsUrl ? { mapsUrl: normalizedUpdated.mapsUrl } : {}),
+            ...(normalizedUpdated.churchAddress ? { churchSubtitle: normalizedUpdated.churchAddress } : {})
+          };
+          try { localStorage.setItem(STORAGE_KEYS.PARISH_MSG, JSON.stringify(merged)); } catch (_) {}
+          saveCatalogToSupabase('parish_message', merged).catch(() => {});
+          return merged;
+        });
+      }
     }
+
+    if (normalizedUpdated.rehearsalsEn || normalizedUpdated.rehearsalsSw) {
+      syncPracticeAcrossSite(normalizedUpdated.rehearsalsEn, normalizedUpdated.rehearsalsSw);
+    }
+  };
+
+  // 7m-bis. Contact Us Visitor Messages (Synced with Supabase & localStorage)
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CONTACT_MESSAGES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((m: any) => ({
+            id: String(m.id || `msg-${Date.now()}`),
+            name: String(m.name || 'Visitor'),
+            phone: String(m.phone || ''),
+            email: m.email ? String(m.email) : undefined,
+            inquiryType: String(m.inquiryType || 'General question'),
+            message: String(m.message || ''),
+            status: (m.status === 'read' || m.status === 'replied' ? m.status : 'new') as 'new' | 'read' | 'replied',
+            createdAt: String(m.createdAt || m.date || new Date().toISOString())
+          }));
+        }
+      }
+    } catch (_) {}
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CONTACT_MESSAGES, JSON.stringify(contactMessages));
+    } catch (_) {}
+  }, [contactMessages]);
+
+  const submitContactMessage = async (data: {
+    name: string;
+    phone: string;
+    email?: string;
+    inquiryType: string;
+    message: string;
+  }): Promise<ContactMessage> => {
+    const newEntry: ContactMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: data.name.trim(),
+      phone: data.phone.trim(),
+      email: data.email?.trim() || undefined,
+      inquiryType: data.inquiryType || 'General question',
+      message: data.message.trim(),
+      status: 'new',
+      createdAt: new Date().toISOString()
+    };
+
+    const nextList = [newEntry, ...contactMessages];
+    setContactMessages(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEYS.CONTACT_MESSAGES, JSON.stringify(nextList));
+    } catch (_) {}
+    await saveContactMessageToSupabase(newEntry, nextList);
+    return newEntry;
+  };
+
+  const updateContactMessageStatus = (id: string, status: 'new' | 'read' | 'replied') => {
+    setContactMessages(prev => {
+      const updated = prev.map(m => (m.id === id ? { ...m, status } : m));
+      const target = updated.find(m => m.id === id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.CONTACT_MESSAGES, JSON.stringify(updated));
+      } catch (_) {}
+      if (target) {
+        saveContactMessageToSupabase(target, updated).catch(() => {});
+      } else {
+        saveContactMessagesCatalogToSupabase(updated).catch(() => {});
+      }
+      return updated;
+    });
+  };
+
+  const deleteContactMessage = (id: string) => {
+    setContactMessages(prev => {
+      const filtered = prev.filter(m => m.id !== id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.CONTACT_MESSAGES, JSON.stringify(filtered));
+      } catch (_) {}
+      deleteContactMessageFromSupabase(id, filtered).catch(() => {});
+      return filtered;
+    });
   };
 
   // 7n. About Page Everything
@@ -1298,6 +1576,67 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Active members: only those whose 12-month registration has not expired
   // (after 12 months, erased/excluded from active list as requested)
   const activeMembers = members.filter(isMemberActive);
+
+  // Synced live contact fields across footerContact, choirStats & parishMessage
+  const contactPhone = (footerContact?.phone || choirStats?.phone || CHOIR_STATS.phone).trim();
+  const contactWhatsappUrl = normalizeWhatsAppUrl(
+    footerContact?.whatsapp || choirStats?.whatsappUrl || CHOIR_STATS.whatsappUrl,
+    CHOIR_STATS.whatsappUrl
+  );
+  const contactWhatsappDisplay = formatWhatsAppDisplay(
+    footerContact?.whatsapp || choirStats?.whatsapp || CHOIR_STATS.whatsapp,
+    contactPhone || CHOIR_STATS.whatsapp
+  );
+  const contactEmail = (footerContact?.email || choirStats?.email || CHOIR_STATS.email).trim();
+  const contactAddress = (footerContact?.churchAddress || choirStats?.churchAddress || CHOIR_STATS.churchAddress).trim();
+  const contactMapsUrl = (footerContact?.mapsUrl || parishMessage?.mapsUrl || choirStats?.mapsUrl || CHOIR_STATS.mapsUrl).trim();
+  const contactMapsDirectionsUrl = (choirStats?.mapsDirectionsUrl || contactMapsUrl || CHOIR_STATS.mapsDirectionsUrl).trim();
+  const contactCoordinates = (choirStats?.coordinatesDisplay || CHOIR_STATS.coordinatesDisplay).trim();
+
+  // Automatically keep choirStats synchronized with active choristers count and live contact/rehearsal info
+  const dynamicActiveMembersCount = activeMembers.length || members.length || INITIAL_MEMBERS.length;
+
+  const synchronizedChoirStats = useMemo(() => ({
+    ...choirStats,
+    membersCount: dynamicActiveMembersCount,
+    phone: contactPhone,
+    whatsapp: contactWhatsappDisplay,
+    whatsappUrl: contactWhatsappUrl,
+    email: contactEmail,
+    churchAddress: contactAddress,
+    mapsUrl: contactMapsUrl,
+    mapsDirectionsUrl: contactMapsDirectionsUrl,
+    coordinatesDisplay: contactCoordinates,
+    rehearsalSchedule: (footerContact?.rehearsalsEn || massSchedule?.rehearsals || choirStats?.rehearsalSchedule || CHOIR_STATS.rehearsalSchedule).trim(),
+    rehearsalScheduleSw: (footerContact?.rehearsalsSw || massSchedule?.rehearsalsSw || choirStats?.rehearsalScheduleSw || CHOIR_STATS.rehearsalScheduleSw).trim()
+  }), [
+    choirStats,
+    dynamicActiveMembersCount,
+    contactPhone,
+    contactWhatsappDisplay,
+    contactWhatsappUrl,
+    contactEmail,
+    contactAddress,
+    contactMapsUrl,
+    contactMapsDirectionsUrl,
+    contactCoordinates,
+    footerContact?.rehearsalsEn,
+    footerContact?.rehearsalsSw,
+    massSchedule?.rehearsals,
+    massSchedule?.rehearsalsSw
+  ]);
+
+  useEffect(() => {
+    setChoirStats(prev => {
+      if (prev.membersCount !== dynamicActiveMembersCount) {
+        const updated = { ...prev, membersCount: dynamicActiveMembersCount };
+        try { localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(updated)); } catch (_) {}
+        saveCatalogToSupabase('choir_stats', updated).catch(() => {});
+        return updated;
+      }
+      return prev;
+    });
+  }, [dynamicActiveMembersCount]);
 
   // Join Us Modal State
   const [isJoinModalOpen, setIsJoinModalOpen] = useState<boolean>(false);
@@ -2353,12 +2692,12 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addSong = (newSong: Omit<Song, 'id'>) => {
     const id = `song-${Date.now()}`;
     const ytId = extractYouTubeVideoId(newSong.youtubeUrl) || newSong.youtubeId || 'syOCKFbVS-8';
-    const song: Song = { 
-      ...newSong, 
+    const song: Song = normalizeSongMedia({
+      ...newSong,
       id,
       youtubeId: ytId,
-      thumbnailUrl: newSong.thumbnailUrl || `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`
-    };
+      thumbnailUrl: getSongThumbnailUrl({ ...newSong, youtubeId: ytId })
+    });
     userHasChosenTrackRef.current = false;
     setSongs(prev => {
       const updated = [song, ...prev];
@@ -2393,14 +2732,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSongs(prev => {
       const updatedList = prev.map(s => {
         if (s.id === id) {
-          const merged = { ...s, ...updated };
+          const merged: Song = { ...s, ...updated };
           if (resolvedYtId) {
             merged.youtubeId = resolvedYtId;
-            if (!updated.thumbnailUrl && resolvedYtId) {
-              merged.thumbnailUrl = `https://i.ytimg.com/vi/${resolvedYtId}/hqdefault.jpg`;
-            }
           }
-          return merged;
+          return normalizeSongMedia(merged);
         }
         return s;
       });
@@ -2415,11 +2751,11 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     if (currentSong.id === id) {
       setCurrentSong(prev => {
-        const merged = { ...prev, ...updated };
+        const merged: Song = { ...prev, ...updated };
         if (resolvedYtId) {
           merged.youtubeId = resolvedYtId;
         }
-        return merged;
+        return normalizeSongMedia(merged);
       });
     }
   };
@@ -2655,45 +2991,69 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Site Configuration & Stats Mutations
   const updateChoirStats = (updated: Partial<typeof CHOIR_STATS>) => {
+    const normalizedUpdates: Partial<typeof CHOIR_STATS> = { ...updated };
+    if (updated.whatsappUrl) {
+      normalizedUpdates.whatsappUrl = normalizeWhatsAppUrl(updated.whatsappUrl);
+      normalizedUpdates.whatsapp = formatWhatsAppDisplay(normalizedUpdates.whatsappUrl, updated.whatsapp);
+    }
+
     setChoirStats(prev => {
-      const merged = { ...prev, ...updated };
+      const merged = { ...prev, ...normalizedUpdates };
+      try { localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(merged)); } catch (_) {}
       saveCatalogToSupabase('choir_stats', merged).catch(err => {
         console.warn('Failed to sync choir_stats to Supabase:', err);
       });
       return merged;
     });
+
+    const hasContactSync =
+      normalizedUpdates.phone !== undefined ||
+      normalizedUpdates.whatsappUrl !== undefined ||
+      normalizedUpdates.email !== undefined ||
+      normalizedUpdates.churchAddress !== undefined ||
+      normalizedUpdates.mapsUrl !== undefined ||
+      normalizedUpdates.mpesaTill !== undefined;
+
+    if (hasContactSync) {
+      setFooterContact(prev => {
+        const merged = {
+          ...prev,
+          ...(normalizedUpdates.phone ? { phone: normalizedUpdates.phone } : {}),
+          ...(normalizedUpdates.whatsappUrl ? { whatsapp: normalizedUpdates.whatsappUrl } : {}),
+          ...(normalizedUpdates.email ? { email: normalizedUpdates.email } : {}),
+          ...(normalizedUpdates.churchAddress ? { churchAddress: normalizedUpdates.churchAddress } : {}),
+          ...(normalizedUpdates.mapsUrl ? { mapsUrl: normalizedUpdates.mapsUrl } : {}),
+          ...(normalizedUpdates.mpesaTill !== undefined ? { mpesaTill: normalizedUpdates.mpesaTill } : {})
+        };
+        try { localStorage.setItem(STORAGE_KEYS.FOOTER_CONTACT, JSON.stringify(merged)); } catch (_) {}
+        saveCatalogToSupabase('footer_contact', merged).catch(() => {});
+        return merged;
+      });
+    }
+
+    if (normalizedUpdates.rehearsalSchedule || normalizedUpdates.rehearsalScheduleSw) {
+      syncPracticeAcrossSite(normalizedUpdates.rehearsalSchedule, normalizedUpdates.rehearsalScheduleSw);
+    }
   };
 
   const updateMassSchedule = (updated: Partial<ChoirContextType['massSchedule']>) => {
     setMassSchedule(prev => {
       const merged = { ...prev, ...updated };
+      try { localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(merged)); } catch (_) {}
       saveCatalogToSupabase('mass_schedule', merged).catch(err => {
         console.warn('Failed to sync mass_schedule to Supabase:', err);
       });
       return merged;
     });
     if (updated.rehearsals || updated.rehearsalsSw) {
-      setFooterContact(prev => ({
-        ...prev,
-        rehearsalsEn: updated.rehearsals || prev.rehearsalsEn,
-        rehearsalsSw: updated.rehearsalsSw || prev.rehearsalsSw,
-      }));
-      setChoirStats(prev => ({
-        ...prev,
-        rehearsalSchedule: updated.rehearsals || prev.rehearsalSchedule,
-        rehearsalScheduleSw: updated.rehearsalsSw || prev.rehearsalScheduleSw,
-      }));
-      setSiteNotice(prev => ({
-        ...prev,
-        textEn: updated.rehearsals ? `Welcome to St. Monica Choir official website. Choir rehearsals: ${updated.rehearsals}.` : prev.textEn,
-        textSw: updated.rehearsalsSw ? `Karibu kwenye tovuti rasmi ya Kwaya ya Mtakatifu Monika · Misa ya Tatu. Mazoezi ya kwaya: ${updated.rehearsalsSw}.` : prev.textSw
-      }));
+      syncPracticeAcrossSite(updated.rehearsals, updated.rehearsalsSw);
     }
   };
 
   const updateSiteNotice = (updated: Partial<ChoirContextType['siteNotice']>) => {
     setSiteNotice(prev => {
       const merged = { ...prev, ...updated };
+      try { localStorage.setItem(STORAGE_KEYS.NOTICE, JSON.stringify(merged)); } catch (_) {}
       saveCatalogToSupabase('site_notice', merged).catch(err => {
         console.warn('Failed to sync site_notice to Supabase:', err);
       });
@@ -2704,6 +3064,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateHeroContent = (updated: Partial<HeroContent>) => {
     setHeroContent(prev => {
       const merged = { ...prev, ...updated };
+      try { localStorage.setItem(STORAGE_KEYS.HERO, JSON.stringify(merged)); } catch (_) {}
       saveCatalogToSupabase('hero_content', merged).catch(err => {
         console.warn('Failed to sync hero_content to Supabase:', err);
       });
@@ -2738,9 +3099,10 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // ignore
     }
     setMembers(INITIAL_MEMBERS);
-    setSongs(INITIAL_SONGS_CATALOG);
+    const normalizedDefaults = INITIAL_SONGS_CATALOG.map(normalizeSongMedia);
+    setSongs(normalizedDefaults);
     userHasChosenTrackRef.current = false;
-    setCurrentSong(INITIAL_SONGS_CATALOG[0]);
+    setCurrentSong(normalizedDefaults[0]);
     setSheetMusicList(INITIAL_SHEET_MUSIC);
     setLeadersList(INITIAL_LEADERS);
     setGroupPhotosList(INITIAL_GROUP_PHOTOS);
@@ -2783,7 +3145,8 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       choirmasterMessage,
       massesList,
       footerContact,
-      aboutPageConfig
+      aboutPageConfig,
+      contactMessages
     };
     return JSON.stringify(backup, null, 2);
   };
@@ -2797,8 +3160,9 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (data.siteNotice) setSiteNotice(data.siteNotice);
       if (data.eventsList && Array.isArray(data.eventsList)) setEventsList(data.eventsList);
       if (data.songs && Array.isArray(data.songs)) {
-        setSongs(data.songs);
-        if (data.songs.length > 0) setCurrentSong(data.songs[0]);
+        const normalizedImported = data.songs.map(normalizeSongMedia);
+        setSongs(normalizedImported);
+        if (normalizedImported.length > 0) setCurrentSong(normalizedImported[0]);
       }
       if (data.sheetMusicList && Array.isArray(data.sheetMusicList)) {
         setSheetMusicList(data.sheetMusicList);
@@ -2943,7 +3307,7 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         productsList,
         eventsList,
         librarySongs,
-        choirStats,
+        choirStats: synchronizedChoirStats,
         massSchedule,
         siteNotice,
         heroContent,
@@ -3052,7 +3416,21 @@ export const ChoirProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addCoreValue,
         updateCoreValue,
         deleteCoreValue,
-        resetCoreValues
+        resetCoreValues,
+
+        // Contact Us Submissions & Live Synced Contact Information
+        contactMessages,
+        submitContactMessage,
+        updateContactMessageStatus,
+        deleteContactMessage,
+        contactPhone,
+        contactWhatsappUrl,
+        contactWhatsappDisplay,
+        contactEmail,
+        contactAddress,
+        contactMapsUrl,
+        contactMapsDirectionsUrl,
+        contactCoordinates
       }}
     >
       {children}
@@ -3249,7 +3627,28 @@ export const useChoir = (): ChoirContextType => {
       addCoreValue: () => {},
       updateCoreValue: () => {},
       deleteCoreValue: () => {},
-      resetCoreValues: () => {}
+      resetCoreValues: () => {},
+      contactMessages: [],
+      submitContactMessage: async (data) => ({
+        id: `msg-${Date.now()}`,
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        inquiryType: data.inquiryType,
+        message: data.message,
+        status: 'new',
+        createdAt: new Date().toISOString()
+      }),
+      updateContactMessageStatus: () => {},
+      deleteContactMessage: () => {},
+      contactPhone: CHOIR_STATS.phone,
+      contactWhatsappUrl: CHOIR_STATS.whatsappUrl,
+      contactWhatsappDisplay: CHOIR_STATS.whatsapp,
+      contactEmail: CHOIR_STATS.email,
+      contactAddress: CHOIR_STATS.churchAddress,
+      contactMapsUrl: CHOIR_STATS.mapsUrl,
+      contactMapsDirectionsUrl: CHOIR_STATS.mapsDirectionsUrl,
+      contactCoordinates: CHOIR_STATS.coordinatesDisplay
     };
   }
   return context;

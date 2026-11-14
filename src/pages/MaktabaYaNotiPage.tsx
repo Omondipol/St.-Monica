@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { AfricanGeometricBorder } from '../components/AfricanGeometricBorder';
 import { MusicNavTabs } from '../components/MusicNavTabs';
-import { CHOIR_STATS } from '../data/choirContent';
 import { triggerFileDownload, generateSongScorePdf } from '../utils/fileDownload';
 import scorePreviewSheet from '../assets/images/sheet_music_hymnal_1791356751097.jpg';
 
@@ -41,7 +40,15 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
   onNavigateMusicPaid,
   onNavigate = () => {}
 }) => {
-  const { lang, librarySongs, incrementDownloadCount, openMpesaModal } = useChoir();
+  const {
+    lang,
+    librarySongs,
+    incrementDownloadCount,
+    openMpesaModal,
+    contactEmail,
+    contactWhatsappUrl,
+    contactWhatsappDisplay
+  } = useChoir();
 
   // Navigation states
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCategoryId || null);
@@ -1409,19 +1416,19 @@ export const MaktabaYaNotiPage: React.FC<MaktabaYaNotiPageProps> = ({
               
               <div className="flex flex-col sm:flex-row gap-2">
                 <a
-                  href={`mailto:${CHOIR_STATS.email}?subject=Maktaba%20ya%20Noti%20-%20Composer%20Request`}
+                  href={`mailto:${contactEmail}?subject=Maktaba%20ya%20Noti%20-%20Composer%20Request`}
                   className="flex-1 p-2.5 rounded-xl bg-white border border-slate-300 hover:border-[#1058A8] text-center font-semibold text-[#0C2340] hover:text-[#1058A8] transition-colors"
                 >
-                  Email: {CHOIR_STATS.email}
+                  Email: {contactEmail}
                 </a>
 
                 <a
-                  href={CHOIR_STATS.whatsappUrl}
+                  href={contactWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 p-2.5 rounded-xl bg-[#1058A8] text-white hover:bg-[#0C2340] text-center font-bold transition-colors"
                 >
-                  WhatsApp: +254 722 845 291
+                  WhatsApp: {contactWhatsappDisplay}
                 </a>
               </div>
             </div>

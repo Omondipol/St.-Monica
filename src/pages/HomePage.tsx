@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { RealYouTubeIcon } from '../components/RealYouTubeIcon';
 import { CoreValuesSection } from '../components/CoreValuesSection';
-import { getAssetUrl } from '../utils/assetHelper';
+import { getAssetUrl, getSongThumbnailUrl, handleSongThumbnailError } from '../utils/assetHelper';
 import { LIBRARY_CATEGORIES } from '../data/libraryData';
 
 import heroSlide1Mass from '../assets/images/hero_slide_1_mass.jpg';
@@ -142,8 +142,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     openJoinModal,
     leadersList,
     currentRehearsalsEn,
-    currentRehearsalsSw
+    currentRehearsalsSw,
+    members,
+    activeMembers,
+    contactAddress,
+    contactMapsUrl,
+    contactMapsDirectionsUrl
   } = useChoir();
+
+  const realActiveCount = (activeMembers && activeMembers.length > 0)
+    ? activeMembers.length
+    : (members && members.length > 0 ? members.length : (choirStats?.membersCount || 56));
 
   // Dynamically link Choirmaster profile from Trainers & Officials
   const choirmasterLeader = leadersList?.find(l => 
@@ -476,8 +485,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       headline: lang === 'sw' ? (s?.headlineSw || 'Sauti Nne, Sala Moja Takatifu Mbele ya Altare.') : (s?.headlineEn || 'Four Voices, One Sacred Harmony Before the Altar.'),
       author: lang === 'sw' ? (s?.attributionSw || 'Kwaya ya Mtakatifu Monika · Misa ya Tatu · Section 58 · Nakuru') : (s?.attributionEn || 'St. Monica Choir · Third Mass · Section 58 · Nakuru'),
       subhead: lang === 'sw'
-        ? (s?.descSw || 'Waimbaji arobaini na nane wanaoongoza sala ya kuimba ya waumini katika Misa ya Parokia ya Jumapili.')
-        : (s?.descEn || "Forty-eight choristers leading the people's sung prayer at the Sunday Parish Mass."),
+        ? (s?.descSw?.replace(/arobaini na nane/gi, `${realActiveCount}`) || `Waimbaji ${realActiveCount} wanaoongoza sala ya kuimba ya waumini katika Misa ya Parokia ya Jumapili.`)
+        : (s?.descEn?.replace(/Forty-eight/gi, `${realActiveCount}`).replace(/48/gi, `${realActiveCount}`) || `${realActiveCount} active choristers leading the people's sung prayer at the Sunday Parish Mass.`),
       type: 'polyphony' as const
     };
   });
@@ -848,11 +857,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       {parishMessage?.churchName || choirStats?.parish || "St. Monica Catholic Church"}
                     </strong>
                     <span className="text-xs text-slate-600 block mt-0.5">
-                      {parishMessage?.churchSubtitle || choirStats?.churchAddress || "Section 58, Nakuru · Catholic Diocese of Nakuru"}
+                      {parishMessage?.churchSubtitle || contactAddress}
                     </span>
                   </div>
                   <a
-                    href={parishMessage?.mapsUrl || choirStats?.mapsUrl || CHOIR_STATS.mapsUrl}
+                    href={parishMessage?.mapsUrl || contactMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Open St. Monica Church map location"
@@ -914,7 +923,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           {/* All Recorded Song Cards: Dynamically renders all songs stored in Supabase & catalog */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {songs.map((song) => {
-              const songThumb = song.thumbnailUrl || '/assets/choir/choir_01.jpg';
+              const songThumb = getSongThumbnailUrl(song);
               const isThisPlaying = currentSong.id === song.id && isPlaying;
               return (
                 <div
@@ -947,13 +956,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     {/* 16:9 Video Thumbnail with Play Badge */}
-                    <div className="relative w-28 sm:w-36 aspect-video rounded-xl overflow-hidden shrink-0 border border-white/15 shadow-sm">
+                    <div className="relative w-28 sm:w-36 aspect-video rounded-xl overflow-hidden shrink-0 border border-white/15 shadow-sm bg-[#0C2340]">
                       <img
                         src={songThumb}
                         alt={song.title}
                         width={320}
                         height={180}
                         loading="lazy"
+                        onError={(e) => handleSongThumbnailError(e, song)}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         referrerPolicy="no-referrer"
                       />
@@ -1337,13 +1347,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <MapPin className="w-4 h-4 text-[#1058A8] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold text-slate-900 block">{choirStats?.parish || "St. Monica's Catholic Church"}</span>
-                    <span className="text-slate-600 block mt-0.5">{choirStats?.churchAddress || CHOIR_STATS.churchAddress}</span>
+                    <span className="text-slate-600 block mt-0.5">{contactAddress}</span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <a
-                    href={choirStats?.mapsUrl || CHOIR_STATS.mapsUrl}
+                    href={contactMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1058A8] hover:underline"
@@ -1353,7 +1363,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   </a>
                   <span className="text-slate-300">·</span>
                   <a
-                    href={choirStats?.mapsDirectionsUrl || CHOIR_STATS.mapsDirectionsUrl}
+                    href={contactMapsDirectionsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-[#1058A8] hover:underline"
